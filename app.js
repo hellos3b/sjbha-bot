@@ -4,7 +4,7 @@ dotenv.config();
 import logger from 'winston'
 import Bot from './bot/Controller'
 import Server from './ui/server'
-import NodeCron from 'node-cron'
+import cron from 'node-cron'
 
 // Configure logger settings
 logger.remove(logger.transports.Console);
