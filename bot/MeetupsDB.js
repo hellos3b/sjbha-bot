@@ -41,5 +41,13 @@ export default {
     archive: function(meetup) {
         this.remove(meetup);
         db.archive.save(meetup);
+    },
+
+    getMeetups() {
+        return db.meetups.find();
+    },
+
+    getArchive() {
+        return db.archive.find();
     }
 }
