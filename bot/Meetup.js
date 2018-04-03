@@ -137,7 +137,7 @@ export default function({
             logger.info("Announcing meetup");
             let response = await bot.sendMessage({
                 to: MEETUP_CHANNEL_ID,
-                message: `\`${meetup_info}\`\n`
+                message: `\`👉 ${meetup_info}\`\n`
                     +    `*Started by <@!${userID}> in <#${sourceChannelID}>* `
             });
             logger.info("ID: ", response.id);
@@ -145,7 +145,7 @@ export default function({
 
             let { id: msg_id } = await bot.sendMessage({
                 to: MEETUP_CHANNEL_ID,
-                message: `Check = Yes \:thinking: = Maybe`
+                message: `Going to **${info}**? \`check = Yes \:thinking: = Maybe\``
             });
 
             rsvp_id = msg_id;
@@ -213,7 +213,7 @@ export default function({
         await bot.editMessage({
             channelID: MEETUP_CHANNEL_ID,
             messageID: info_id,
-            message: `\`${meetup_info} ✅ ${rsvp_list}\`\n`
+            message: `\`✅ ${meetup_info} ${rsvp_list}\`\n`
         });
     }
 
@@ -223,6 +223,12 @@ export default function({
             messageID: info_id,
             message: `\`${meetup_info}\`\n`
                 +    `*Started by <@!${userID}> in <#${sourceChannelID}>* `
+        });
+
+        await bot.editMessage({
+            channelID: MEETUP_CHANNEL_ID,
+            messageID: rsvp_id,
+            message: `Going to **${info}**? \`check = Yes \:thinking: = Maybe\``
         });
     }
 
@@ -236,7 +242,7 @@ export default function({
         await bot.editMessage({
             channelID: MEETUP_CHANNEL_ID,
             messageID: info_id,
-            message: `\`${meetup_info} ❌ canceled\`\n`
+            message: `\`❌ (canceled) ${meetup_info}\`\n`
         });
     }
 
