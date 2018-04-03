@@ -5,6 +5,7 @@
     "main": "app.js",
     "author": "sebby",
     "scripts": {
+        "start": "node -r babel-core/register app.js",
         "dev": "node -r babel-core/register app.js"
     },
     "dependencies": {
