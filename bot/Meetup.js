@@ -116,12 +116,12 @@ export default function({
         }
 
         // Date is not in the past
-        if (moment().diff(date_moment, 'seconds') > 0) {
-            msg =  `Would be a cool meetup if we had a time machine, but we don't. Try choosing a time in the future!`;
-        }
+        // if (moment().tz("America/Los_Angeles").diff(date_moment, 'seconds') > 0) {
+        //     msg =  `Would be a cool meetup if we had a time machine, but we don't. Try choosing a time in the future!`;
+        // }
 
         // Date is not too far into the future
-        if (moment().diff(date_moment, 'days') < -90) {
+        if (moment().tz("America/Los_Angeles").diff(date_moment, 'days') < -90) {
             msg =  `Realistically though, I don't think we're planning out meetups more than 3 months in advance. Thanks for testing out my validations though!`;
         }
 
@@ -256,6 +256,7 @@ export default function({
         return {
             id,
             date, 
+            timestamp: parsed_date,
             info, 
             userID, 
             username,
