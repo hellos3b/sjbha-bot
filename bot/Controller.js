@@ -4,6 +4,7 @@ import Commands from "./Commands"
 import DiscordIOExtend from "./DiscordIO-extend"
 import Query from "./Query"
 import MeetupsDB from './MeetupsDB'
+import Meetup from './Meetup'
 import moment from 'moment'
 
 let bot = null;
