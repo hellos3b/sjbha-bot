@@ -56,11 +56,11 @@ export default {
         const meetups = MeetupsDB.getMeetups();
 
         const old_meetups = meetups.filter(m => {
-            let diff = moment().tz("America/Los_Angeles").diff(m.timezone, 'hours');
+            let diff = moment().utcOffset(-8).diff(m.timezone, 'hours');
             return diff >= 4;
         });
-        
-        if (old_meetups === 0) {
+
+        if (!old_meetups.length) {
             return;
         }
 
