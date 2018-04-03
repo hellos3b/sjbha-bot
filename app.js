@@ -6,6 +6,7 @@ import Bot from './bot/Controller'
 import Server from './ui/server'
 import cron from 'node-cron'
 import DB from './db/MLab'
+import keepalive from './keepalive'
 
 // Configure logger settings
 logger.remove(logger.transports.Console);
