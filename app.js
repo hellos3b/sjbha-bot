@@ -18,7 +18,7 @@ Bot.start();
 // Update finished meetups
 // 4 hours - 0 */4 * * *
 //*/5 * * * *
-cron.schedule('*/5 * * * *', function(){
+cron.schedule('* * * * *', function(){
     Bot.cron();
 });
   
