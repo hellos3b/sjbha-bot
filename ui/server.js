@@ -6,6 +6,10 @@ export default {
     start() {
         const app = express()
 
+        app.get('/', (req, res) => {
+            res.send("Up and running!")
+        })
+
         app.get('/meetups.json', (req, res) => {
             let json = MeetupsDB.getMeetups();
             res.send(json)
