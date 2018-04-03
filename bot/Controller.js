@@ -4,10 +4,12 @@ import Commands from "./Commands"
 import DiscordIOExtend from "./DiscordIO-extend"
 import Query from "./Query"
 
+let bot = null;
+
 export default {
 
     start() {
-        let bot = new Discord.Client({
+        bot = new Discord.Client({
             token: process.env.DISCORD_TOKEN,
             autorun: true
         });
@@ -43,6 +45,10 @@ export default {
         } else {
             logger.debug("Command not found, skipping");
         }
+    },
+
+    cron() {
+        
     }
 
 }

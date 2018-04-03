@@ -8,6 +8,7 @@ import MeetupsDB from './MeetupsDB'
 import logger from 'winston'
 import Query from './Query'
 
+const ADMIN_CHANNEL_ID = "430517752546197509";
 
 export default {
 
@@ -53,6 +54,10 @@ export default {
     },
 
     "!debug": async function({bot, message, channelID, userID}) {
+        if (channelID !== ADMIN_CHANNEL_ID) {
+            return;
+        }
+
         const [cmd, param] = message.split(" ");
 
         if (param.trim() === "mine") {
@@ -71,8 +76,7 @@ export default {
                 to: channelID,
                 message: meetups
             });
-        }
-        if (param.trim() === "reactions") {
+        } else if (param.trim() === "reactions") {
             let meetup_json = MeetupsDB.getLatest();
             let meetup = new Meetup(meetup_json);
             let reactions = await meetup.getReactions(bot);
@@ -80,6 +84,16 @@ export default {
                 to: channelID,
                 message: `Yes: ${reactions.yes.length}, Maybe: ${reactions.maybe.length}`
             });
+        } else if (param.trim() === "meetups") {
+            await bot.sendMessage({
+                to: channelID,
+                message: "https://sjbha-bot.heroku.com/meetups.json"
+            })
+        } else if (param.trim() === "archive") {
+            await bot.sendMessage({
+                to: channelID,
+                message: "https://sjbha-bot.heroku.com/archive.json"
+            })
         }
     },
 
