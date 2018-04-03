@@ -12,6 +12,4 @@ logger.add(logger.transports.Console, {
 });
 logger.level = 'debug';
 
-logger.info("Starting service: "+process.env.service);
 Bot.start();
-Server.start();
