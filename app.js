@@ -5,6 +5,7 @@ import logger from 'winston'
 import Bot from './bot/Controller'
 import Server from './ui/server'
 import cron from 'node-cron'
+import DB from './db/MLab'
 
 // Configure logger settings
 logger.remove(logger.transports.Console);
@@ -14,6 +15,7 @@ logger.add(logger.transports.Console, {
 logger.level = 'debug';
 
 Bot.start();
+DB.connect();
 
 // Update finished meetups
 // 4 hours - 0 */4 * * *

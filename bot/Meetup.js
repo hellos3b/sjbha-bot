@@ -28,8 +28,8 @@ export default function({
     rsvp_id = null
 }) {
     // parse date
-    let parsed_date = Sugar.Date.create(date);
-    let date_moment = new moment(parsed_date);
+    let parsed_date = Sugar.Date.create(date).toISOString();
+    let date_moment = new moment(parsed_date).utcOffset(-8, true);
     let date_str = date_moment.format("dddd M/D @ h:mma");
 
     let meetup_info = `${info} | ${date_str}`;
@@ -256,7 +256,7 @@ export default function({
         return {
             id,
             date, 
-            timestamp: parsed_date,
+            timestamp: date_moment.toISOString(),
             info, 
             userID, 
             username,
@@ -271,7 +271,7 @@ export default function({
         let reactions = await this.getReactions(bot);
         return {
             id,
-            date: parsed_date, 
+            date: date_moment.toISOString(),
             info, 
             userID, 
             username,
