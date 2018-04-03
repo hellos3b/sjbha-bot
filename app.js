@@ -4,6 +4,7 @@ dotenv.config();
 import logger from 'winston'
 import Bot from './bot/Controller'
 import Server from './ui/server'
+import NodeCron from 'node-cron'
 
 // Configure logger settings
 logger.remove(logger.transports.Console);
@@ -13,3 +14,11 @@ logger.add(logger.transports.Console, {
 logger.level = 'debug';
 
 Bot.start();
+
+// Update finished meetups
+// 4 hours - 0 */4 * * *
+//*/5 * * * *
+cron.schedule('*/5 * * * *', function(){
+    Bot.cron();
+});
+  

@@ -87,12 +87,12 @@ export default {
         } else if (param.trim() === "meetups") {
             await bot.sendMessage({
                 to: channelID,
-                message: "https://sjbha-bot.heroku.com/meetups.json"
+                message: "https://sjbha-bot.herokuapp.com/db/meetups.json"
             })
         } else if (param.trim() === "archive") {
             await bot.sendMessage({
                 to: channelID,
-                message: "https://sjbha-bot.heroku.com/archive.json"
+                message: "https://sjbha-bot.herokuapp.com/db/archive.json"
             })
         }
     },

@@ -3,8 +3,10 @@ import logger from 'winston'
 import Commands from "./Commands"
 import DiscordIOExtend from "./DiscordIO-extend"
 import Query from "./Query"
+import MeetupsDB from './MeetupsDB'
 
 let bot = null;
+const ADMIN_CHANNEL_ID = "430517752546197509";
 
 export default {
 
@@ -47,8 +49,32 @@ export default {
         }
     },
 
-    cron() {
+    /*
+    *   mark old meetups as finished automatically
+    */
+    cron: async function() {
+        const meetups = MeetupsDB.getMeetups();
+
+        const old_meetups = meetups.filter(m => {
+            let diff = moment().tz("America/Los_Angeles").diff(m.timezone, 'hours');
+            return diff >= 4;
+        });
         
+        if (old_meetups === 0) {
+            return;
+        }
+
+        for (var i = 0; i < old_meetups.length; i++) {
+            let meetup = new Meetup(meetup_json);
+            let archive = await meetup.toArchiveJSON(bot);
+            await meetup.finish(bot);
+            MeetupsDB.archive(archive);
+        }
+
+        bot.sendMessage({
+            to: ADMIN_CHANNEL_ID,
+            message: "Marked "+old_meetups.length+" meetups as finished"
+        });
     }
 
 }
