@@ -72,7 +72,10 @@ export default {
             let archive = await meetup.toArchiveJSON(bot);
             await meetup.finish(bot);
             MeetupsDB.archive(archive);
-            await bot.log("Archived '"+meetup.info_str()+"'");
+            await bot.sendMessage({
+                to: ADMIN_CHANNEL_ID,
+                message: "`Archived "+meetup.info_str()+"`"
+            });
         }
     }
 
