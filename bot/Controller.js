@@ -4,6 +4,7 @@ import Commands from "./Commands"
 import DiscordIOExtend from "./DiscordIO-extend"
 import Query from "./Query"
 import MeetupsDB from './MeetupsDB'
+import moment from 'moment'
 
 let bot = null;
 const ADMIN_CHANNEL_ID = "430517752546197509";
