@@ -61,7 +61,7 @@ export default {
         const [cmd, param] = message.split(" ");
 
         if (param.trim() === "mine") {
-            let meetups = MeetupsDB.findByUserID(userID);
+            let meetups = await MeetupsDB.findByUserID(userID);
 
             if (meetups.length === 0) {
                 await bot.sendMessage({
@@ -77,7 +77,7 @@ export default {
                 message: meetups
             });
         } else if (param.trim() === "reactions") {
-            let meetup_json = MeetupsDB.getLatest();
+            let meetup_json = await MeetupsDB.getLatest();
             let meetup = new Meetup(meetup_json);
             let reactions = await meetup.getReactions(bot);
             await bot.sendMessage({
@@ -100,7 +100,7 @@ export default {
     "!finish": async function({ bot, message }) {
         const [cmd, id] = message.split(" ").map( m => m.trim() );
 
-        const meetup_json = MeetupsDB.findMeetup(id);
+        const meetup_json = await MeetupsDB.findMeetup(id);
         const meetup = new Meetup(meetup_json);
         let archive = await meetup.toArchiveJSON(bot);
         await meetup.finish(bot);
@@ -110,7 +110,8 @@ export default {
     "!cancel": async function({ bot, message, userID, channelID }) {
         const [cmd, id] = message.split(" ").map( m => m.trim() );
 
-        let meetups = MeetupsDB.findByUserID(userID).map( m => new Meetup(m));
+        let meetups = await MeetupsDB.findByUserID(userID);
+        meetups = meetups.map( m => new Meetup(m));
         let meetup = null;
 
         if (meetups.length === 0) {
@@ -160,7 +161,8 @@ export default {
     "!edit": async function({bot, message, channelID, userID}) {
         let [cmd, param] = message.split(" ").map(m => m.trim());
 
-        let meetups = MeetupsDB.findByUserID(userID).map( m => new Meetup(m));
+        let meetups = await MeetupsDB.findByUserID(userID);
+        meetups = meetups.map( m => new Meetup(m));
         let meetup = null;
 
         if (meetups.length === 0) {
