@@ -55,7 +55,7 @@ export default {
     *   mark old meetups as finished automatically
     */
     cron: async function() {
-        const meetups = MeetupsDB.getMeetups();
+        const meetups = await MeetupsDB.getMeetups();
 
         const old_meetups = meetups.filter(m => {
             let diff = moment().utcOffset(-8).diff(m.timestamp, 'hours');
