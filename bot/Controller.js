@@ -72,13 +72,8 @@ export default {
             let archive = await meetup.toArchiveJSON(bot);
             await meetup.finish(bot);
             MeetupsDB.archive(archive);
+            await bot.log("Archived '"+meetup.info_str()+"'");
         }
-
-        bot.sendMessage({
-            to: ADMIN_CHANNEL_ID,
-            message: "Marked "+old_meetups.length+" meetups as finished:\n"
-                + old_meetups.map( m => "`"+m.info+"`" ).join("\n")
-        });
     }
 
 }

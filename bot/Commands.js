@@ -48,6 +48,8 @@ export default {
             await meetup.confirm(bot);
 
             MeetupsDB.save(meetup);
+
+            bot.log("Created meetup '"+info+"'");
         } catch (e) {
             logger.error(e);
         }
@@ -105,6 +107,7 @@ export default {
         let archive = await meetup.toArchiveJSON(bot);
         await meetup.finish(bot);
         MeetupsDB.archive(archive);
+        await bot.log("Archived '"+meetup.info_str()+"'");
     },
 
     "!cancel": async function({ bot, message, userID, channelID }) {
@@ -145,8 +148,10 @@ export default {
 
         await bot.sendMessage({
             to: channelID,
-            message: "Cancelled `"+meetup.info_str()+"`"
+            message: "Canceled `"+meetup.info_str()+"`"
         });
+
+        await bot.log("Canceled '"+meetup.info_str()+"'");
     },
 
     /*
