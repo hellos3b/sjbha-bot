@@ -60,7 +60,7 @@ export default {
         const old_meetups = meetups.filter(m => {
             let diff = moment().utcOffset(-8).diff(m.timestamp, 'hours');
             logger.info("Date: "+m.date + " diff: " +diff);
-            return diff >= 4;
+            return diff >= 3;
         });
 
         if (!old_meetups.length) {
@@ -76,7 +76,8 @@ export default {
 
         bot.sendMessage({
             to: ADMIN_CHANNEL_ID,
-            message: "Marked "+old_meetups.length+" meetups as finished"
+            message: "Marked "+old_meetups.length+" meetups as finished:\n"
+                + old_meetups.map( m => "`"+m.info+"`" ).join("\n")
         });
     }
 
