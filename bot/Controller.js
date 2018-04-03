@@ -68,7 +68,7 @@ export default {
         }
 
         for (var i = 0; i < old_meetups.length; i++) {
-            let meetup = new Meetup(meetup_json);
+            let meetup = new Meetup(old_meetups[i]);
             let archive = await meetup.toArchiveJSON(bot);
             await meetup.finish(bot);
             MeetupsDB.archive(archive);
