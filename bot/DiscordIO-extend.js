@@ -61,13 +61,6 @@ export default function(bot) {
         logger.debug("bot.getReaction", opt);
         return sendMessage(bot, bot.getReactionOld, opt);
     };
-
-    bot.log = function(msg) {
-        logger.debug("bot.log", msg);
-        return sendMessage(bot, bot.getReactionOld, {
-            to: ADMIN_CHANNEL_ID,
-            message: "`[log] "+msg+"`"
-        });
-    }
+    
     return bot;
 }
