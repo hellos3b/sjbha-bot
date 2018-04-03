@@ -57,7 +57,7 @@ export default {
         const meetups = MeetupsDB.getMeetups();
 
         const old_meetups = meetups.filter(m => {
-            let diff = moment().utcOffset(-8).diff(m.timezone, 'hours');
+            let diff = moment().utcOffset(-8).diff(m.timestamp, 'hours');
             logger.info("Date: "+m.date + " diff: " +m.diff);
             return diff >= 4;
         });
