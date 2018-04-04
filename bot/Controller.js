@@ -8,6 +8,8 @@ import Meetup from './Meetup'
 import moment from 'moment'
 import channels from './channels'
 
+import SwirlCount from './SwirlCount'
+
 let bot = null;
 
 export default {
@@ -31,6 +33,12 @@ export default {
         bot.on('message', (user, userID, channelID, message, evt) => {
             // Our bot needs to know if it will execute a command
             // It will listen for messages that will start with `!`
+
+            // Insert in a swirl count
+            if (message.contains("swirl")) {
+                SwirlCount.add({ user, userID, message });
+            }
+
             if (message.substring(0, 1) == '!') {
                 this.router({ bot, user, userID, channelID, message, evt });
             } else {
