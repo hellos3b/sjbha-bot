@@ -7,15 +7,14 @@ import Meetup from './Meetup'
 import MeetupsDB from './MeetupsDB'
 import logger from 'winston'
 import Query from './Query'
-
-const ADMIN_CHANNEL_ID = "430517752546197509";
+import channels from './channels'
 
 export default {
 
     // !ping
     "!ping"({bot, channelID}) {
         bot.sendMessage({
-            to: MEETUP_CHANNEL_ID,
+            to: channels.MEETUP,
             message: "Pong (:"
         });
     },
@@ -54,7 +53,7 @@ export default {
     },
 
     "!debug": async function({bot, message, channelID, userID}) {
-        if (channelID !== ADMIN_CHANNEL_ID) {
+        if (channelID !== channels.ADMIN) {
             return;
         }
 

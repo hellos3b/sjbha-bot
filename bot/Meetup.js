@@ -7,8 +7,7 @@ import logger from 'winston'
 import GUID from "../utils/GUID"
 
 import Query from "./Query"
-
-const MEETUP_CHANNEL_ID = "430517711563653122";
+import channels from "./channels"
 
 const States = {
     STARTED: 0,
@@ -136,7 +135,7 @@ export default function({
         return new Promise( async function(resolve, reject) {
             logger.info("Announcing meetup");
             let response = await bot.sendMessage({
-                to: MEETUP_CHANNEL_ID,
+                to: channels.MEETUP,
                 message: `\`👉 ${meetup_info}\`\n`
                     +    `*Started by <@!${userID}> in <#${sourceChannelID}>* `
             });
@@ -144,20 +143,20 @@ export default function({
             info_id = response.id;
 
             let { id: msg_id } = await bot.sendMessage({
-                to: MEETUP_CHANNEL_ID,
+                to: channels.MEETUP,
                 message: `Going to **${info}**? \`check = Yes \:thinking: = Maybe\``
             });
 
             rsvp_id = msg_id;
 
             await bot.addReaction({
-                channelID: MEETUP_CHANNEL_ID,
+                channelID: channels.MEETUP,
                 messageID: msg_id,
                 reaction: "☑"
             });
                 
             await bot.addReaction({
-                channelID: MEETUP_CHANNEL_ID,
+                channelID: channels.MEETUP,
                 messageID: msg_id,
                 reaction: "🤔"
             });
@@ -171,7 +170,7 @@ export default function({
             logger.info("Confirming meetup");
             await bot.sendMessage({
                 to: sourceChannelID,
-                message: `Meetup added: \`${meetup_info}\` Find it in <#${MEETUP_CHANNEL_ID}>!`
+                message: `Meetup added: \`${meetup_info}\` Find it in <#${channels.MEETUP}>!`
             });
 
             resolve();
@@ -180,13 +179,13 @@ export default function({
 
     this.getReactions = async function(bot) {
         let maybe = await bot.getReaction({
-            channelID: MEETUP_CHANNEL_ID,
+            channelID: channels.MEETUP,
             messageID: rsvp_id,
             reaction: "🤔"
         });
 
         let yes = await bot.getReaction({
-            channelID: MEETUP_CHANNEL_ID,
+            channelID: channels.MEETUP,
             messageID: rsvp_id,
             reaction: "☑"
         });
@@ -204,14 +203,14 @@ export default function({
     this.finish = async function(bot) {
         state = States.FINISHED;
         await bot.deleteMessage({
-            channelID: MEETUP_CHANNEL_ID,
+            channelID: channels.MEETUP,
             messageID: rsvp_id
         });
 
         let rsvp_list = `(y: ${reactions.yes.length} m: ${reactions.maybe.length})`;
         
         await bot.editMessage({
-            channelID: MEETUP_CHANNEL_ID,
+            channelID: channels.MEETUP,
             messageID: info_id,
             message: `\`✅ ${meetup_info} ${rsvp_list}\`\n`
         });
@@ -219,14 +218,14 @@ export default function({
 
     this.editInfo = async function(bot) {
         await bot.editMessage({
-            channelID: MEETUP_CHANNEL_ID,
+            channelID: channels.MEETUP,
             messageID: info_id,
             message: `\`${meetup_info}\`\n`
                 +    `*Started by <@!${userID}> in <#${sourceChannelID}>* `
         });
 
         await bot.editMessage({
-            channelID: MEETUP_CHANNEL_ID,
+            channelID: channels.MEETUP,
             messageID: rsvp_id,
             message: `Going to **${info}**? \`check = Yes \:thinking: = Maybe\``
         });
@@ -235,12 +234,12 @@ export default function({
     this.cancel = async function(bot) {
         state = States.CANCELLED;
         await bot.deleteMessage({
-            channelID: MEETUP_CHANNEL_ID,
+            channelID: channels.MEETUP,
             messageID: rsvp_id
         });
 
         await bot.editMessage({
-            channelID: MEETUP_CHANNEL_ID,
+            channelID: channels.MEETUP,
             messageID: info_id,
             message: `\`❌ (canceled) ${meetup_info}\`\n`
         });

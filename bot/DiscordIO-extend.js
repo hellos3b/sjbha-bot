@@ -3,8 +3,6 @@
 */
 import logger from 'winston'
 
-const ADMIN_CHANNEL_ID = "430517752546197509";
-
 function sendMessageDelayed(bot, callback, options, timeout=0, resolve, reject) {
     setTimeout( function() {
         callback.call(bot, options, async function(err, data) {
@@ -61,6 +59,6 @@ export default function(bot) {
         logger.debug("bot.getReaction", opt);
         return sendMessage(bot, bot.getReactionOld, opt);
     };
-    
+
     return bot;
 }
