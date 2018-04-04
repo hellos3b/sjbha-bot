@@ -115,12 +115,12 @@ export default function({
         }
 
         // Date is not in the past
-        // if (moment().utcOffset(-8).diff(date_moment, 'seconds') > 0) {
-        //     msg =  `Would be a cool meetup if we had a time machine, but we don't. Try choosing a time in the future!`;
-        // }
+        if (moment().utcOffset(-8).diff(date_moment.getISOString(), 'seconds') > 0) {
+            msg =  `Would be a cool meetup if we had a time machine, but we don't. Try choosing a time in the future!`;
+        }
 
         // Date is not too far into the future
-        if (moment().utcOffset(-8).diff(date_moment, 'days') < -90) {
+        if (moment().utcOffset(-8).diff(date_moment.getISOString(), 'days') < -90) {
             msg =  `Realistically though, I don't think we're planning out meetups more than 3 months in advance. Thanks for testing out my validations though!`;
         }
 
