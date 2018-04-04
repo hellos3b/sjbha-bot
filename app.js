@@ -15,13 +15,13 @@ logger.add(logger.transports.Console, {
 });
 logger.level = 'debug';
 
-Bot.start();
+// Bot.start();
 DB.connect();
 
 // Update finished meetups
 // 4 hours - 0 */4 * * *
 //*/5 * * * *
 cron.schedule('0 */2 * * *', function(){
-    Bot.cron();
+    // Bot.cron();
 });
   
