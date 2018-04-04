@@ -6,9 +6,9 @@ import Query from "./Query"
 import MeetupsDB from './MeetupsDB'
 import Meetup from './Meetup'
 import moment from 'moment'
+import channels from './channels'
 
 let bot = null;
-const ADMIN_CHANNEL_ID = "430517752546197509";
 
 export default {
 
@@ -73,7 +73,7 @@ export default {
             await meetup.finish(bot);
             MeetupsDB.archive(archive);
             await bot.sendMessage({
-                to: ADMIN_CHANNEL_ID,
+                to: channels.ADMIN,
                 message: "`Archived "+meetup.info_str()+"`"
             });
         }
