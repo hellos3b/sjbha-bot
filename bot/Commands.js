@@ -127,6 +127,8 @@ export default {
                 to: channelID,
                 message: "https://sjbha-bot.herokuapp.com/db/archive.json"
             })
+        } else if (param.trim() === "count") {
+            
         }
     },
 
