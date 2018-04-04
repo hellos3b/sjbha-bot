@@ -7,7 +7,7 @@ import logger from 'winston'
 import GUID from "../utils/GUID"
 
 import Query from "./Query"
-import channels from "./channels.json"
+import channels from "./channels"
 
 const States = {
     STARTED: 0,
