@@ -20,6 +20,7 @@ app.get('/', (req, res) => {
 })
 
 app.get('/db/meetups.json', (req,res) => {
+    logger.info("get /db/meetups.json")
     MeetupModel.find()
         .exec( (err, meetups) => {
             res.send(meetups);
@@ -27,6 +28,15 @@ app.get('/db/meetups.json', (req,res) => {
 })
 
 app.get('/db/archive.json', (req,res) => {
+    logger.info("get /db/archive.json")
+    ArchiveMeetupModel.find()
+        .exec( (err, meetups) => {
+            res.send(meetups);
+        })
+})
+
+app.get('/db/swirls.json', (req,res) => {
+    logger.info("get /db/swirls.json")
     ArchiveMeetupModel.find()
         .exec( (err, meetups) => {
             res.send(meetups);
