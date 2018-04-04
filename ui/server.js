@@ -2,6 +2,7 @@ import express from 'express'
 import bodyParser from 'body-parser';
 import MeetupModel from '../db/models/MeetupModel';
 import ArchiveMeetupModel from '../db/models/ArchiveMeetupModel';
+import SwirlCountModel from '../db/models/SwirlCount';
 
 import logger from 'winston'
 
@@ -37,9 +38,9 @@ app.get('/db/archive.json', (req,res) => {
 
 app.get('/db/swirls.json', (req,res) => {
     logger.info("get /db/swirls.json")
-    ArchiveMeetupModel.find()
-        .exec( (err, meetups) => {
-            res.send(meetups);
+    SwirlCountModel.find()
+        .exec( (err, swirlCount) => {
+            res.send(swirlCount);
         })
 })
 
