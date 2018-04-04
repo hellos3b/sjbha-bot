@@ -3,7 +3,11 @@ import mongoose from 'mongoose';
 const swirlSchema = mongoose.Schema({
     userID: String,
     user: String,
-    message: String
+    message: String,
+    timestamp: { 
+        type : Date, 
+        default: Date.now 
+    }
 }, { collection: 'swirlCount' });
 
 
