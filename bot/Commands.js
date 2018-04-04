@@ -74,7 +74,7 @@ export default {
 
             await bot.sendMessage({
                 to: channelID,
-                message: meetups
+                message: "```"+meetups+"```"
             });
         }
     },
