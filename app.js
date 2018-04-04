@@ -21,7 +21,7 @@ DB.connect();
 // Update finished meetups
 // 4 hours - 0 */4 * * *
 //*/5 * * * *
-cron.schedule('0 */4 * * *', function(){
+cron.schedule('0 */2 * * *', function(){
     Bot.cron();
 });
   

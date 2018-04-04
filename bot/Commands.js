@@ -52,6 +52,33 @@ export default {
         }
     },
 
+    "!admin": async function({bot, message, channelID, userID}) {
+        if (channelID !== channels.ADMIN) {
+            return;
+        }
+        const [cmd, cmd2] = message.split(" ");
+        const param = cmd2.trim();
+
+        if (param === "list") {
+            let meetups = await MeetupsDB.getMeetups();
+            if (meetups.length === 0) {
+                await bot.sendMessage({
+                    to: channelID,
+                    message: "No active meetups."
+                });
+                return;
+            }
+
+            meetups = meetups.map( m => `${m.id}: ${m.info}`)
+                .join("\n");
+
+            await bot.sendMessage({
+                to: channelID,
+                message: meetups
+            });
+        }
+    },
+
     "!debug": async function({bot, message, channelID, userID}) {
         if (channelID !== channels.ADMIN) {
             return;
