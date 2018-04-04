@@ -7,9 +7,7 @@ import Meetup from './Meetup'
 import MeetupsDB from './MeetupsDB'
 import logger from 'winston'
 import Query from './Query'
-import channels from './channels.json'
-
-console.log("channels", channels);
+import channels from './channels'
 
 export default {
 
