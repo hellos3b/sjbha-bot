@@ -35,7 +35,7 @@ export default {
             // It will listen for messages that will start with `!`
 
             // Insert in a swirl count
-            if (message.indexOf("swirl") !== -1) {
+            if (message.toLowerCase().indexOf("swirl") !== -1) {
                 SwirlCount.add({ user, userID, message });
             }
 
