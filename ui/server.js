@@ -40,7 +40,15 @@ app.get('/db/swirls.json', (req,res) => {
     logger.info("get /db/swirls.json")
     SwirlCountModel.find()
         .exec( (err, swirlCount) => {
-            res.send(swirlCount);
+            let json = swirlCount.reduce( (result, item) => {
+                if (!result[item.user]) {
+                    result[item.user] = { userID: item.userID, swirls: 0, mentions: [] }
+                }
+                result[item.user].mentions.push({ msg: item.message, timestamp: item.timestamp });
+                result[item.user].swirls = result[item.user].mentions.length;
+                return result;
+            }, {});
+            res.send(json);
         })
 })
 
