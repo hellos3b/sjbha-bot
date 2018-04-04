@@ -55,7 +55,7 @@ export default {
     "!swirls": async function({bot, channelID}) {
         await bot.sendMessage({
             to: channelID,
-            message: "\:swirls:\:swirls:\:swirls:\:swirls: \:laughing:\:rofl:  DID SOMEBODY SAY SWIRLS?! \:rofl:\:laughing:  \:swirls:\:swirls:\:swirls:\:swirls: "
+            message: "<:swirls:430968917540995072><:swirls:430968917540995072><:swirls:430968917540995072><:swirls:430968917540995072>\:laughing:\:rofl:  DID SOMEBODY SAY SWIRLS?! \:rofl:\:laughing:<:swirls:430968917540995072><:swirls:430968917540995072><:swirls:430968917540995072><:swirls:430968917540995072>"
         })
     },
 
