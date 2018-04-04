@@ -12,9 +12,15 @@ export default {
 
     // Start a meetup
     add: function({user, userID, message}) {
+
+        // Ignore if it's this bot
+        if (userID === "430522654466768907") {
+            return;
+        }
+
         let swirlCount = new SwirlCountModel({
-            user: user,
-            userID: userID,
+            user,
+            userID,
             message
         });
 

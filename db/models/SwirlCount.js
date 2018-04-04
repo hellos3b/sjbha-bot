@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 const swirlSchema = mongoose.Schema({
-    userId: String,
+    userID: String,
     user: String,
     message: String
 }, { collection: 'swirlCount' });
