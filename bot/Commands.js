@@ -52,6 +52,13 @@ export default {
         }
     },
 
+    "!swirls": async function({bot, channelID}) {
+        await bot.sendMessage({
+            to: channelID,
+            message: ":swirls: :swirls: :swirls: :swirls: !! DID SOMEBODY SAY SWIRLS !! :swirls: :swirls: :swirls: :swirls: "
+        })
+    },
+
     "!admin": async function({bot, message, channelID, userID}) {
         if (channelID !== channels.ADMIN) {
             return;
