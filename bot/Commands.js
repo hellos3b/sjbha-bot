@@ -63,7 +63,7 @@ export default {
         if (channelID !== channels.ADMIN) {
             return;
         }
-        const [cmd, cmd2] = message.split(" ");
+        const [cmd, cmd2, data] = message.split(" ");
         const param = cmd2.trim();
 
         if (param === "help") {
@@ -88,6 +88,21 @@ export default {
             await bot.sendMessage({
                 to: channelID,
                 message: "```"+meetups+"```"
+            });
+        } else if (param === "remind") {
+            let meetupId = data;
+            let meetup = await MeetupsDB.findMeetup(meetupId);
+
+            if (!meetup) {
+                await bot.sendMessage({
+                    to: channelID,
+                    message: `Can't find meetup with id \`${meetupId}\``
+                });
+                return;
+            }
+            await bot.sendMessage({
+                to: channelID,
+                message: "```"+meetup+"```"
             });
         }
     },
