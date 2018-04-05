@@ -38,18 +38,41 @@ app.get('/db/archive.json', (req,res) => {
 
 app.get('/db/swirls.json', (req,res) => {
     logger.info("get /db/swirls.json")
-    SwirlCountModel.find()
-        .exec( (err, swirlCount) => {
-            let json = swirlCount.reduce( (result, item) => {
-                if (!result[item.user]) {
-                    result[item.user] = { userID: item.userID, swirls: 0, mentions: [] }
-                }
-                result[item.user].mentions.push({ msg: item.message, timestamp: item.timestamp });
-                result[item.user].swirls = result[item.user].mentions.length;
-                return result;
-            }, {});
-            res.send(json);
-        })
+
+    let format = req.query.f;
+
+    if (!format) {
+        SwirlCountModel.find()
+            .exec( (err, swirlCount) => {
+                let json = swirlCount.reduce( (result, item) => {
+                    if (!result[item.user]) {
+                        result[item.user] = { userID: item.userID, swirls: 0, mentions: [] }
+                    }
+                    result[item.user].mentions.push({ msg: item.message, timestamp: item.timestamp });
+                    result[item.user].swirls = result[item.user].mentions.length;
+                    return result;
+                }, {});
+                res.send(json);
+            })
+    } else if (format === "leaderboard") {
+        SwirlCountModel.find()
+            .exec( (err, swirlCount) => {
+                let json = swirlCount.reduce( (result, item) => {
+                    if (!result[item.user]) {
+                        result[item.user] = { userID: item.userID, swirls: 0, mentions: [] }
+                    }
+                    result[item.user].mentions.push({ msg: item.message, timestamp: item.timestamp });
+                    result[item.user].swirls = result[item.user].mentions.length;
+                    return result;
+                }, {});
+
+                let result = Object.entries(json).map( ([key, obj]) => {
+                    return { user: key, userID: obj.userID, mentions: obj.swirls };
+                }).sort( (a,b) => b.mentions - a.mentions );
+
+                res.send(result);
+            })
+    }
 })
 
 app.listen(port, () => logger.info(`Listening on port ${port}!`))
