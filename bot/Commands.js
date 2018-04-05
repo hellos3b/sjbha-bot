@@ -66,7 +66,14 @@ export default {
         const [cmd, cmd2] = message.split(" ");
         const param = cmd2.trim();
 
-        if (param === "list") {
+        if (param === "help") {
+            await bot.sendMessage({
+                to: channelID,
+                message: "```" +
+                    + "!admin list\n    List current active meetups along with their IDs" +
+                    "\n```"
+            });
+        } else if (param === "list") {
             let meetups = await MeetupsDB.getMeetups();
             if (meetups.length === 0) {
                 await bot.sendMessage({
@@ -126,6 +133,11 @@ export default {
             await bot.sendMessage({
                 to: channelID,
                 message: "https://sjbha-bot.herokuapp.com/db/archive.json"
+            })
+        } else if (param.trim() === "leaderboard") {
+            await bot.sendMessage({
+                to: channelID,
+                message: "https://sjbha-bot.herokuapp.com/db/swirls.json?f=leaderboard"
             })
         } else if (param.trim() === "count") {
             
