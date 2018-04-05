@@ -70,8 +70,7 @@ export default {
             await bot.sendMessage({
                 to: channelID,
                 message: "```" +
-                    + "!admin list\n    List current active meetups along with their IDs" +
-                    "\n```"
+                    "!admin list\n    List current active meetups along with their IDs```"
             });
         } else if (param === "list") {
             let meetups = await MeetupsDB.getMeetups();
