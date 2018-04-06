@@ -1,13 +1,12 @@
 import Table from 'ascii-table'
 import Bomb from './Bomb';
 
-export default function(ownerID) {
+export default function(ownerID, buyin) {
 
     let players = [];
     let player_results = [];
     let pot = 0;
-    let buyin = 20;
-    let passCost = 5;
+    let passCost = Math.floor(buyin/4);
 
     // game stuff
     let state = "JOIN";
@@ -117,7 +116,7 @@ export default function(ownerID) {
             }
         } else {
             let currentPlayer = this.currentTurn();
-            let percent = Math.floor(bomb.clickCount()/6*1000)/10;
+            let percent = Math.floor( (bomb.clickCount() + 1)/6*1000)/10;
             msg += `| PASS COST: ${passCost} | POT: ${pot}\n`;
             msg += `Current Turn: ${currentPlayer.name}\n`;
             msg += `The bomb has been clicked ${bomb.clickCount()} times (${percent}% chance to explode this turn)\n`;
