@@ -1,3 +1,5 @@
+import logger from 'winston'
+
 export default function({ 
     user="",     // Name of the user
     userID,     // The User's discord ID
