@@ -79,14 +79,18 @@ export default {
     [commands.NewGame.trigger]({user, userID, message}) {
         let msg = "";
         let [cmd, buyin] = message.split(" ");
-        buyin = parseInt(buyin) || 20;
+        if (!buyin) {
+            buyin = 20;
+        } else {
+            buyin = parseInt(buyin);
+        }
         let player = PlayersDB.findOrCreate(user, userID);
 
         if (isNaN(buyin)) {
             return `That is not a valid amount for the buyin`;
         }
 
-        if (amount < 5) {
+        if (buyin < 5) {
             return `Buyin needs to be at least 5 coins`;
         }
 
