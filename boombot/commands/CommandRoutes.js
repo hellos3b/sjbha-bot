@@ -76,7 +76,7 @@ export default {
     },
 
     // initiating a new game
-    [commands.NewGame.trigger]({user, userID}) {
+    [commands.NewGame.trigger]({user, userID, message}) {
         let msg = "";
         let [cmd, buyin] = message.split(" ");
         buyin = buyin || 20;
