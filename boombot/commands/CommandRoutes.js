@@ -79,13 +79,21 @@ export default {
     [commands.NewGame.trigger]({user, userID, message}) {
         let msg = "";
         let [cmd, buyin] = message.split(" ");
-        buyin = buyin || 20;
+        buyin = parseInt(buyin) || 20;
+        let player = PlayersDB.findOrCreate(user, userID);
+
+        if (isNaN(buyin)) {
+            return `That is not a valid amount for the buyin`;
+        }
+
+        if (amount < 5) {
+            return `Buyin needs to be at least 5 coins`;
+        }
 
         if (GameController.exists) {
             return `Can't start a new game because there's already one active!`;
         }
 
-        let player = PlayersDB.findOrCreate(user, userID);
         if (player.getBank() < buyin) {
             msg += `Woops, you don't have enough coins to start that game! You have ${player.getBank()} but the buyin is ${buyin}\n`;
             msg += `You can use \`!loan\` to take out a loan`;
