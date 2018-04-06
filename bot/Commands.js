@@ -103,8 +103,7 @@ export default {
             }
             let meetup_time = new moment(meetup.timestamp);
             await bot.sendMessage({
-                // to: meetup.sourceChannelID,
-                to: channelID,
+                to: meetup.sourceChannelID,
                 message: `Reminder! There's the meetup \`${meetup.info}\` ${meetup_time.fromNow()}!`
             });
         }
