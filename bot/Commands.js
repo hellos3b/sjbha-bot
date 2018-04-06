@@ -106,6 +106,29 @@ export default {
                 to: meetup.sourceChannelID,
                 message: `Reminder! There's the meetup \`${meetup.info}\` ${meetup_time.fromNow()}!`
             });
+        } else if (param === "clean") {
+            const meetups = await MeetupsDB.getMeetups();
+
+            const old_meetups = meetups.filter(m => {
+                let diff = moment().utcOffset(-8).diff(m.timestamp, 'hours');
+                logger.info("Date: "+m.date + " diff: " +diff);
+                return diff >= 2;
+            });
+    
+            if (!old_meetups.length) {
+                return;
+            }
+    
+            for (var i = 0; i < old_meetups.length; i++) {
+                let meetup = new Meetup(old_meetups[i]);
+                let archive = await meetup.toArchiveJSON(bot);
+                await meetup.finish(bot);
+                MeetupsDB.archive(archive);
+                await bot.sendMessage({
+                    to: channels.ADMIN,
+                    message: "`Archived "+meetup.info_str()+"`"
+                });
+            }
         }
     },
 
