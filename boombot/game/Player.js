@@ -1,7 +1,7 @@
 export default function({ 
     user="",     // Name of the user
     userID,     // The User's discord ID
-    bank=20,    // Total number of coins
+    bank=40,    // Total number of coins
     debt=0,     // How much debt player has accumulated from loans
     games=0     // How many games the player has played in
 }) {
