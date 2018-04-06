@@ -78,7 +78,8 @@ export default {
     // initiating a new game
     [commands.NewGame.trigger]({user, userID}) {
         let msg = "";
-        let buyin = 20;
+        let [cmd, buyin] = message.split(" ");
+        let buyin = buyin || 20;
 
         if (GameController.exists) {
             return `Can't start a new game because there's already one active!`;
@@ -86,12 +87,12 @@ export default {
 
         let player = PlayersDB.findOrCreate(user, userID);
         if (player.getBank() < buyin) {
-            msg += `Woops, you don't have enough coins to start a game! You have ${player.getBank()} but the buyin is ${buyin}\n`;
-            msg += `You can use \`!loan {amount}\` to take out a loan`;
+            msg += `Woops, you don't have enough coins to start that game! You have ${player.getBank()} but the buyin is ${buyin}\n`;
+            msg += `You can use \`!loan\` to take out a loan`;
             return msg;
         }
 
-        GameController.Start(userID);
+        GameController.Start(userID, buyin);
         let game = GameController.Game;
 
         game.addPlayer(player);
@@ -123,7 +124,7 @@ export default {
         let buyin = game.getBuyin();
         if (player.getBank() < buyin) {
             msg += `Woops, you don't have enough coins to join a game! You have **${player.getBank()}** coins but the buyin is ${buyin}\n`;
-            msg += `You can use \`!loan {amount}\` to take out a loan`;
+            msg += `You can use \`!loan\` to take out a loan`;
             return msg;
         }
 
@@ -278,19 +279,26 @@ export default {
     [commands.Loan.trigger]({user, userID, message}) {
         let [cmd, amountStr] = message.split(" ");
         let player = PlayersDB.findOrCreate(user, userID);
-        let amount = parseInt(amountStr);
+        let amount = 40;
 
-        if (isNaN(amount)) {
-            return `That is not a valid amount`;
-        }
+        let bank = player.getBank();
 
-        if (amount <= 0) {
-            return `Please enter amount that's greater than 0`;
+        if (bank >= 20) {
+            return `You don't need a loan, you have enough coins to play a game`;
         }
+        // let amount = parseInt(amountStr);
 
-        if (amount > 1000) {
-            return `The largest amount we can offer is 1,000`;
-        }
+        // if (isNaN(amount)) {
+        //     return `That is not a valid amount`;
+        // }
+
+        // if (amount <= 0) {
+        //     return `Please enter amount that's greater than 0`;
+        // }
+
+        // if (amount > 1000) {
+        //     return `The largest amount we can offer is 1,000`;
+        // }
 
         amount = Math.floor(amount);
         let interest = Math.floor(amount * LOAN_INTEREST);
@@ -299,7 +307,7 @@ export default {
         player.addDebt(amount + interest);
         PlayersDB.save(player);
 
-        return `You now have ${player.getBank()} coins available, and are ${player.getDebt()} coins in debt`;
+        return `You now have ${player.getBank()} coins available (and are ${player.getDebt()} coins in debt)`;
     },
 
     [commands.Pay.trigger]({user, userID, message}) {

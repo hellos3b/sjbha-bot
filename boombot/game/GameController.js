@@ -20,9 +20,9 @@ export default {
         return _game.isActive();
     },
 
-    Start(userID) {
+    Start(userID, buyin) {
         if (!_game) {
-            _game = new Game(userID);
+            _game = new Game(userID, buyin);
         }
     },
 
