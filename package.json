@@ -13,6 +13,8 @@
         "babel-cli": "^6.26.0",
         "babel-preset-node6": "^11.0.0",
         "body-parser": "^1.18.2",
+        "chrono": "^1.0.5",
+        "chrono-node": "^1.3.5",
         "discord.io": "github:woor/discord.io#gateway_v6",
         "diskdb": "^0.1.17",
         "dotenv": "^5.0.1",
