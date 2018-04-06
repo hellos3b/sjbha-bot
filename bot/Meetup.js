@@ -1,4 +1,4 @@
-import Sugar from 'sugar-date'
+import chrono from 'chrono-node'
 import moment from 'moment'
 
 import MeetupsDB from './MeetupsDB'
@@ -15,8 +15,6 @@ const States = {
     CANCELLED: 2
 };
 
-console.log("meetup", channels.MEETUPS);
-
 export default function({ 
     id = GUID(), 
     date, 
@@ -29,7 +27,7 @@ export default function({
     rsvp_id = null
 }) {
     // parse date
-    let parsed_date = Sugar.Date.create(date).toISOString();
+    let parsed_date = chrono.parseDate(str);
     let date_moment = new moment(parsed_date).utcOffset(-8, true);
     let date_str = date_moment.format("dddd M/D @ h:mma");
 
@@ -38,7 +36,7 @@ export default function({
     let reactions = { yes: [], maybe: [] };
 
     this.parseDate = function() {
-        parsed_date = Sugar.Date.create(date);
+        parsed_date = chrono.parseDate(date);
         date_moment = new moment(parsed_date);
         date_str = date_moment.format("dddd M/D @ h:mma");
     }
