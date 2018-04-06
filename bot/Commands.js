@@ -8,6 +8,7 @@ import MeetupsDB from './MeetupsDB'
 import logger from 'winston'
 import Query from './Query'
 import channels from './channels'
+import moment from 'moment'
 
 export default {
 
