@@ -27,7 +27,7 @@ export default function({
     rsvp_id = null
 }) {
     // parse date
-    let parsed_date = chrono.parseDate(str);
+    let parsed_date = chrono.parseDate(date);
     let date_moment = new moment(parsed_date).utcOffset(-8, true);
     let date_str = date_moment.format("dddd M/D @ h:mma");
 
