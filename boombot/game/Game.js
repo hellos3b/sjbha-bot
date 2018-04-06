@@ -120,7 +120,7 @@ export default function(ownerID) {
             let percent = Math.floor(bomb.clickCount()/6*1000)/10;
             msg += `| PASS COST: ${passCost} | POT: ${pot}\n`;
             msg += `Current Turn: ${currentPlayer.name}\n`;
-            msg += `The bomb has been clicked ${bomb.clickCount()} times (${percent}% chance to blow)\n`;
+            msg += `The bomb has been clicked ${bomb.clickCount()} times (${percent}% chance to explode this turn)\n`;
             gameTable.setHeading('turn', 'player', 'coins');
 
             for (var i = 0; i < players.length; i++) {
