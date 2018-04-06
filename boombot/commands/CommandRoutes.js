@@ -25,6 +25,10 @@ export default {
         return "```\n"+helpTable.toString()+"```"
     },
 
+    [commands.Rules.trigger]() {
+        return "Read rules here: https://gist.github.com/hellos3b/90894df06856ea26607571d5ead0cb0b";
+    },
+
     // start a game
     [commands.Start.trigger]({user, userID}) {
         if (!GameController.exists) {
