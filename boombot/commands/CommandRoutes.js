@@ -2,6 +2,7 @@ import commands from './commands'
 import Table from 'ascii-table'
 import GameController from '../game/GameController'
 import PlayersDB from '../db/PlayersDB'
+import logger from 'winston'
 
 const LEADERBOARD_COUNT = 10;
 const LOAN_INTEREST = 0.1;
