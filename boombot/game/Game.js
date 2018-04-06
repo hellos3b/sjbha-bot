@@ -116,7 +116,7 @@ export default function(ownerID, buyin) {
             }
         } else {
             let currentPlayer = this.currentTurn();
-            let percent = Math.floor( (bomb.clickCount() + 1)/6*1000)/10;
+            let percent = Math.floor( (1/ (6-bomb.clickCount()) )*1000)/10;
             msg += `| PASS COST: ${passCost} | POT: ${pot}\n`;
             msg += `Current Turn: ${currentPlayer.name}\n`;
             msg += `The bomb has been clicked ${bomb.clickCount()} times (${percent}% chance to explode this turn)\n`;
