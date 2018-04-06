@@ -7,6 +7,7 @@ import MeetupsDB from './MeetupsDB'
 import Meetup from './Meetup'
 import moment from 'moment'
 import channels from './channels'
+import BoombotRouter from '../boombot/router'
 
 import SwirlCount from './SwirlCount'
 
@@ -40,7 +41,12 @@ export default {
             }
 
             if (message.substring(0, 1) == '!') {
-                this.router({ bot, user, userID, channelID, message, evt });
+                let context = { bot, user, userID, channelID, message, evt };
+                if (channelID === channels.BOOMBOT) {
+                    BoombotRouter.router(context)
+                } else {
+                    this.router(context);
+                }
             } else {
                 Query.check(message, {userID, channelID});
             }
