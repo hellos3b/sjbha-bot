@@ -79,7 +79,7 @@ export default {
     [commands.NewGame.trigger]({user, userID}) {
         let msg = "";
         let [cmd, buyin] = message.split(" ");
-        let buyin = buyin || 20;
+        buyin = buyin || 20;
 
         if (GameController.exists) {
             return `Can't start a new game because there's already one active!`;
