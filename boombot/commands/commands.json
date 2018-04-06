@@ -1,0 +1,68 @@
+{
+
+    "Help": {
+        "trigger": "!help",
+        "description": "Show this help"
+    },
+
+    "Ping": {
+        "trigger": "!ping",
+        "description": "Replies with a pong, just to test the bot is working"
+    },
+
+    "Rules": {
+        "trigger": "!rules",
+        "description": "Show the rules of the game"
+    },
+
+    "Leaderboard": {
+        "trigger": "!leaderboard",
+        "description": "Show who's in the lead with total amount of boom coins"
+    },
+
+    "NewGame": {
+        "trigger": "!new",
+        "description": "Initiate a new game"
+    },
+
+    "Start": {
+        "trigger": "!start",
+        "description": "Start a game of Click Click Boom. Use !start {amount} to raise the stakes | Example: !start 50"
+    },
+
+    "Join": {
+        "trigger": "!join",
+        "description": "Join a game"
+    },
+
+    "Click": {
+        "trigger": "!click",
+        "description": "When it's your turn, click the bomb"
+    },
+
+    "Pass": {
+        "trigger": "!pass",
+        "description": "When it's your turn, pass the bomb at the cost of the pass"
+    },
+
+    "Loan": {
+        "trigger": "!loan",
+        "description": "If you run out of coins, you can call for a loan with !loan {amount}"
+    },
+
+    "Pay": {
+        "trigger": "!pay",
+        "description": "Use !pay {amount} to pay back a portion of your debt"
+    },
+
+    "Stats": {
+        "trigger": "!stats",
+        "description": "See stats for yourself. use !info {person} to see stats for another player"
+    },
+
+    "Current": {
+        "trigger": "!current",
+        "description": "Get the current status of the game"
+    }
+
+}
