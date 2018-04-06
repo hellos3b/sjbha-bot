@@ -100,9 +100,11 @@ export default {
                 });
                 return;
             }
+            let meetup_time = new isMoment(meetup.timestamp);
             await bot.sendMessage({
+                // to: meetup.sourceChannelID,
                 to: channelID,
-                message: "```"+meetup+"```"
+                message: `Reminder! There's the meetup \`${meetup.info}\` ${meetup_time.fromNow()}!`
             });
         }
     },
