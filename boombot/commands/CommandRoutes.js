@@ -257,7 +257,9 @@ export default {
         let [cmd, mention] = message.split(" ");
         let targetId = userID;
         if (mention) {
-            targetId = mention.replace("<@","").replace(">","");
+            targetId = mention.replace("<@!","")
+                .replace("<@","")
+                .replace(">","");
         }
 
         let msg = "";
