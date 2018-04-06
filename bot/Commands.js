@@ -100,7 +100,7 @@ export default {
                 });
                 return;
             }
-            let meetup_time = new isMoment(meetup.timestamp);
+            let meetup_time = new moment(meetup.timestamp);
             await bot.sendMessage({
                 // to: meetup.sourceChannelID,
                 to: channelID,
