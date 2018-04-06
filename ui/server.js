@@ -5,6 +5,7 @@ import ArchiveMeetupModel from '../db/models/ArchiveMeetupModel';
 import SwirlCountModel from '../db/models/SwirlCount';
 
 import logger from 'winston'
+import PlayersDB from '../boombot/db/PlayersDB'
 
 const app = express()
 
@@ -73,6 +74,11 @@ app.get('/db/swirls.json', (req,res) => {
                 res.send(result);
             })
     }
+})
+
+app.get('/db/players.json', (req, res) => {
+    let players = PlayersDB.getAll();
+    res.send(players);
 })
 
 app.listen(port, () => logger.info(`Listening on port ${port}!`))

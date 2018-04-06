@@ -17,6 +17,7 @@ export default {
     },
 
     findPlayer(userID) {
+        logger.debug("Finding player with user with ID: "+targetId);
         return player_db.find( p => p.userID === userID);
     },
 
