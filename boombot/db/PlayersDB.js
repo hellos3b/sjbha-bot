@@ -73,7 +73,7 @@ export default {
         let json = player.toJSON();
         return new Promise((resolve, reject) => {
             PlayerModel.findOneAndUpdate({
-                id: json.userID
+                userID: json.userID
             }, json, {upsert:true}, function(err, doc){
                 if (err) logger.error(err);
                 else logger.info(`Saved Player - '${json.user}'`);
