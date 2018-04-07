@@ -26,7 +26,11 @@ export default {
                         reject(err);   
                     }
                     logger.debug("player",player);
-                    resolve(new Player(player));
+                    if (!player) {
+                        resolve(null);
+                    } else {
+                        resolve(new Player(player));
+                    }
                 });
         });
     },
