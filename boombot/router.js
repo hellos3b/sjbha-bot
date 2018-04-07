@@ -5,13 +5,13 @@ import channels from "../bot/channels"
 
 export default {
 
-    router(context) {
+    router: async function(context) {
         logger.info(`<${context.user}> ${context.message}`);
 
         const [cmd] = context.message.split(" ");
     
         if (Routes[cmd]) {
-            const msg = Routes[cmd](context);
+            const msg = await Routes[cmd](context);
             context.bot.sendMessage({
                 to: context.channelID,
                 message: msg
