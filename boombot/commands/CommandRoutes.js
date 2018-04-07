@@ -10,12 +10,12 @@ const LOAN_INTEREST = 0.1;
 export default {
 
     // !ping
-    [commands.Ping.trigger]() {
+    [commands.Ping.trigger]: async function() {
         return "Pong!";
     },
 
     // !help
-    [commands.Help.trigger]() {
+    [commands.Help.trigger]: async function() {
         var helpTable = new Table()
         helpTable.removeBorder()
 
