@@ -26,12 +26,12 @@ export default {
         return "```\n"+helpTable.toString()+"```"
     },
 
-    [commands.Rules.trigger]() {
+    [commands.Rules.trigger]: async function() {
         return "Read rules here: https://gist.github.com/hellos3b/90894df06856ea26607571d5ead0cb0b";
     },
 
     // start a game
-    [commands.Start.trigger]({user, userID}) {
+    [commands.Start.trigger]: async function({user, userID}) {
         if (!GameController.exists) {
             return `Can't start a game that doesn't exist! Use \`!new\` to start a new game`;
         }
@@ -58,8 +58,8 @@ export default {
     },
 
      // start a game
-     [commands.Leaderboard.trigger]({user, userID}) {
-        let leaderboard = PlayersDB.fetchLeaderboard().slice(0, LEADERBOARD_COUNT);
+     [commands.Leaderboard.trigger]: async function({user, userID}) {
+        let leaderboard = await PlayersDB.fetchLeaderboard().slice(0, LEADERBOARD_COUNT);
 
         var table = new Table("Leaderboard");
         table.setHeading(" ", "name", "net worth", "games");
@@ -77,7 +77,7 @@ export default {
     },
 
     // initiating a new game
-    [commands.NewGame.trigger]({user, userID, message}) {
+    [commands.NewGame.trigger]: async function({user, userID, message}) {
         let msg = "";
         let [cmd, buyin] = message.split(" ");
         if (!buyin) {
@@ -85,7 +85,7 @@ export default {
         } else {
             buyin = parseInt(buyin);
         }
-        let player = PlayersDB.findOrCreate(user, userID);
+        let player = await PlayersDB.findOrCreate(user, userID);
 
         if (isNaN(buyin)) {
             return `That is not a valid amount for the buyin`;
@@ -116,7 +116,7 @@ export default {
     },
 
     // Joining a game
-    [commands.Join.trigger]({user, userID}) {
+    [commands.Join.trigger]: async function({user, userID}) {
         let msg = "";
         if (!GameController.exists) {
             return `There is no active game you can join! Try starting a new one with \`!new\`?`;
@@ -128,7 +128,7 @@ export default {
             return `Too late to join :( Try !join -ing on the next one!`;
         }
 
-        let player = PlayersDB.findOrCreate(user, userID);
+        let player = await PlayersDB.findOrCreate(user, userID);
 
         if (game.hasPlayer(player)) {
             return `Oops! You're already set to play in this game!`
@@ -148,7 +148,7 @@ export default {
     },
 
     // Joining a game
-    [commands.Current.trigger]({user, userID}) {
+    [commands.Current.trigger]: async function({user, userID}) {
         if (!GameController.exists) {
             return `There is no active game going on.\nUse \`!new\` to initiate a game!`;
         }
@@ -159,7 +159,7 @@ export default {
     },
 
     // click the bomb
-    [commands.Click.trigger]({user, userID}) {
+    [commands.Click.trigger]: async function({user, userID}) {
         let msg = "";
         if (!GameController.active) {
             return `There is no active game going.`;
@@ -184,7 +184,7 @@ export default {
             coins = game.getCoins(userID);
 
             player.addBank(coins);
-            PlayersDB.save(player);
+            await PlayersDB.save(player);
 
             game.removePlayer(userID);
             let sharedAmount = game.distributePot();
@@ -207,7 +207,7 @@ export default {
             let finalPlayer = game.lastPlayer();
             let coins = game.getCoins(finalPlayer.userID);
             finalPlayer.addBank(coins);
-            PlayersDB.save(finalPlayer);
+            await PlayersDB.save(finalPlayer);
             game.addPlayerResult(finalPlayer);
             msg += `**${finalPlayer.name}** has won the game!\n`;
             msg += game.endGameString();
@@ -220,7 +220,7 @@ export default {
         return msg;
     },
 
-    [commands.Pass.trigger]({user, userID}) {
+    [commands.Pass.trigger]: async function({user, userID}) {
         let msg = "";
         if (!GameController.active) {
             return `There is no active game going. Try starting one with \`!new\``;
@@ -252,7 +252,7 @@ export default {
     },
 
     // initiating a new game
-    [commands.Stats.trigger]({user, userID, message}) {
+    [commands.Stats.trigger]: async function({user, userID, message}) {
 
         let [cmd, mention] = message.split(" ");
         let targetId = userID;
@@ -263,14 +263,14 @@ export default {
         }
 
         let msg = "";
-        let player = PlayersDB.findPlayer(targetId);
+        let player = await PlayersDB.findPlayer(targetId);
 
         if (!player) {
             return `Sorry, I couldn't find any info for that person. They may have not played a game yet.`;
         }
 
         let json = player.toJSON();
-        let leaderboard = PlayersDB.fetchLeaderboard();
+        let leaderboard = await PlayersDB.fetchLeaderboard();
         let rank = 0;
         for (var i = 0; i < leaderboard.length; i++) {
             if (leaderboard[i].userID === player.userID) {
@@ -291,9 +291,9 @@ export default {
         return "```\n"+table.toString()+"```";
     },
 
-    [commands.Loan.trigger]({user, userID, message}) {
+    [commands.Loan.trigger]: async function({user, userID, message}) {
         let [cmd, amountStr] = message.split(" ");
-        let player = PlayersDB.findOrCreate(user, userID);
+        let player = await PlayersDB.findOrCreate(user, userID);
         let amount = 40;
 
         let bank = player.getBank();
@@ -320,14 +320,14 @@ export default {
 
         player.addBank(amount);
         player.addDebt(amount + interest);
-        PlayersDB.save(player);
+        await PlayersDB.save(player);
 
         return `You now have ${player.getBank()} coins available (and are ${player.getDebt()} coins in debt)`;
     },
 
-    [commands.Pay.trigger]({user, userID, message}) {
+    [commands.Pay.trigger]: async function({user, userID, message}) {
         let [cmd, amountStr] = message.split(" ");
-        let player = PlayersDB.findOrCreate(user, userID);
+        let player = await PlayersDB.findOrCreate(user, userID);
         let amount = parseInt(amountStr);
 
         if (isNaN(amount)) {
@@ -346,7 +346,7 @@ export default {
 
         player.removeBank(amount);
         player.removeDebt(amount);
-        PlayersDB.save(player);
+        await PlayersDB.save(player);
 
         return `You now have ${player.getBank()} coins available, and are ${player.getDebt()} coins in debt`;
     }
