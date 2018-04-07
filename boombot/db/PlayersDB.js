@@ -10,9 +10,11 @@ export default {
             return player;
         }
 
+        logger.debug("Creating new player "+user);
         player = new Player({ user, userID });
         await this.save(player);
         
+        logger.debug("Player created!");
         return player;
     },
 
@@ -57,8 +59,10 @@ export default {
 
     save(player) {
         if (typeof player === 'array') {
+            logger.debug("Saving multiple players");
             return this.savePlayers(player);
         } else {
+            logger.debug("Saving one player");
             return this.savePlayers([player]);
         }
     },
@@ -71,12 +75,18 @@ export default {
 
     savePlayer(player) {
         let json = player.toJSON();
+
         return new Promise((resolve, reject) => {
             PlayerModel.findOneAndUpdate({
                 userID: json.userID
             }, json, {upsert:true}, function(err, doc){
-                if (err) logger.error(err);
-                else logger.info(`Saved Player - '${json.user}'`);
+                if (err) {
+                    logger.error(err);
+                    reject(err);
+                } else {
+                    logger.info(`Saved Player - '${json.user}'`);
+                    resolve();
+                }
             });
         })
     }
