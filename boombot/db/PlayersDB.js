@@ -52,6 +52,7 @@ export default {
 
     fetchLeaderboard: async function() {
         let players = await this.getAll();
+        console.log(players);
         let leaderboard = players.slice()
             .sort( (a, b) => b.netWorth() - a.netWorth() );
         return leaderboard;
