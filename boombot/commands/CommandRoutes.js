@@ -19,6 +19,7 @@ export default {
         var helpTable = new Table()
         helpTable.removeBorder()
 
+        logger.debug("Generating table");
         for (var k in commands) {
             helpTable.addRow(commands[k].trigger, commands[k].description);
         }
@@ -59,7 +60,8 @@ export default {
 
      // start a game
      [commands.Leaderboard.trigger]: async function({user, userID}) {
-        let leaderboard = await PlayersDB.fetchLeaderboard().slice(0, LEADERBOARD_COUNT);
+        let leaderboard = await PlayersDB.fetchLeaderboard();
+        leaderboard = leaderboard.slice(0, LEADERBOARD_COUNT);
 
         var table = new Table("Leaderboard");
         table.setHeading(" ", "name", "net worth", "games");
