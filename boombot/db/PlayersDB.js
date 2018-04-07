@@ -2,8 +2,6 @@ import Player from "../game/Player"
 import PlayerModel from "./PlayerModel"
 import logger from 'winston'
 
-let player_db = [];
-
 export default {
 
     findOrCreate: async function(user, userID) {
@@ -21,12 +19,13 @@ export default {
     findPlayer(userID) {
         logger.debug("Finding player with user with ID: "+userID);
         return new Promise( (resolve, reject) => {
-            PlayerModel.findOne({ userID : userID })
+            PlayerModel.findOne({ userID: userID })
                 .exec( (err, player) => {
                     if (err) {
                         logger.error(err);
                         reject(err);   
                     }
+                    logger.debug("player",player);
                     resolve(new Player(player));
                 });
         });
