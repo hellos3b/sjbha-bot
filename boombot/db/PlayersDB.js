@@ -1,33 +1,52 @@
 import Player from "../game/Player"
+import PlayerModel from "./PlayerModel"
 import logger from 'winston'
 
 let player_db = [];
 
 export default {
 
-    findOrCreate(user, userID) {
-        let player = this.findPlayer(userID);
+    findOrCreate: async function(user, userID) {
+        let player = await this.findPlayer(userID);
         if (player) {
             return player;
         }
 
         player = new Player({ user, userID });
-        player_db.push(player);
+        await this.save(player);
         
         return player;
     },
 
     findPlayer(userID) {
         logger.debug("Finding player with user with ID: "+userID);
-        return player_db.find( p => p.userID === userID);
+        return new Promise( (resolve, reject) => {
+            PlayerModel.findOne({ userID : userID })
+                .exec( (err, player) => {
+                    if (err) {
+                        logger.error(err);
+                        reject(err);   
+                    }
+                    resolve(new Player(player));
+                });
+        });
     },
 
     getAll() {
-        return player_db;
+        return new Promise((resolve, reject) => {
+            PlayerModel.find()
+                .exec( (err, players) => {
+                    if (err) {
+                        logger.error(err);
+                        reject(err);
+                    } 
+                    resolve( players.map( p => new Player(p) ) );
+                });
+        });
     },
 
-    fetchLeaderboard() {
-        let players = this.getAll();
+    fetchLeaderboard: async function() {
+        let players = await this.getAll();
         let leaderboard = players.slice()
             .sort( (a, b) => b.netWorth() - a.netWorth() );
         return leaderboard;
@@ -35,17 +54,28 @@ export default {
 
     save(player) {
         if (typeof player === 'array') {
-            this.savePlayers(player);
+            return this.savePlayers(player);
         } else {
-            this.savePlayers([player]);
+            return this.savePlayers([player]);
         }
     },
 
     savePlayers(playerList) {
-        player_db = player_db.map(p => {
-            let item2 = playerList.find(p2 => p2.userID === p.userID);
-            return item2 ? item2 : p;
-        });
+        return Promise.all(
+            playerList.map( p => this.savePlayer(p))
+        );
+    },
+
+    savePlayer(player) {
+        let json = player.toJSON();
+        return new Promise((resolve, reject) => {
+            PlayerModel.findOneAndUpdate({
+                id: json.userID
+            }, json, {upsert:true}, function(err, doc){
+                if (err) logger.error(err);
+                else logger.info(`Saved Player - '${json.user}'`);
+            });
+        })
     }
 
 }
