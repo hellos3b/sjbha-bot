@@ -13,6 +13,7 @@ function sendMessageDelayed(bot, callback, options, timeout=0, resolve, reject) 
                     logger.debug("!! Rate limited, retrying after "+retry_after);
                     return sendMessageDelayed(bot, callback, options, retry_after+100, resolve);
                 } else {
+                    logger.error(err.message);
                     logger.error(err);
                     reject(err);
                 }
