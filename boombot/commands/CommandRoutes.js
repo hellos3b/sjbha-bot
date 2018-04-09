@@ -142,13 +142,14 @@ export default {
         leaderboard = leaderboard.slice(0, LEADERBOARD_COUNT);
 
         var table = new Table("Leaderboard");
-        table.setHeading(" ", "name", "net worth", "games");
+        table.setHeading(" ", "name", "net worth", "bank", "games");
 
         for (var i = 0; i < leaderboard.length; i++) {
             table.addRow(
                 i+1, 
                 leaderboard[i].name, 
                 leaderboard[i].netWorth(),
+                leaderboard[i].getBank(),
                 leaderboard[i].getGames()
             );
         }
