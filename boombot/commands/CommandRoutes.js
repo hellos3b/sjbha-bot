@@ -224,7 +224,7 @@ export default {
         }
 
         if (game.playerCount === PLAYER_MAX_COUNT) {
-            return `Max amount of players have joined`;
+            return `Max amount of players have joined. Leader should !start when they're ready`;
         }
 
         let buyin = game.getBuyin();
@@ -235,7 +235,7 @@ export default {
         }
 
         game.addPlayer(player);
-        msg = `There are now ${game.playerCount()} players waiting to play. Use \`!join\` to get in on the game, or \`!start\` to start the game!`
+        msg = `There are now ${game.playerCount()}/${PLAYER_MAX_COUNT} players ready to play. Use \`!join\` to get in on the game, or leader can \`!start\` to start the game!`
 
         return msg;
     },
@@ -314,15 +314,17 @@ export default {
             Timeout.start(async function() {
                 logger.debug("Explode player timeout");
                 let t_msg = "";
-                let coinsLost = game.removeCoinsFrom(userID, game.getBuyin() );
+                let currentTurn = game.currentTurn();
+                let turnID = currentTurn.userID;
+                let coinsLost = game.removeCoinsFrom(turnID, game.getBuyin() );
                 game.addPot(coinsLost);
     
-                coins = game.getCoins(userID);
+                coins = game.getCoins(turnID);
     
                 player.addBank(coins);
                 await PlayersDB.save(player);
     
-                game.removePlayer(userID);
+                game.removePlayer(turnID);
                 let sharedAmount = game.distributePot();
     
                 game.resetRound();
