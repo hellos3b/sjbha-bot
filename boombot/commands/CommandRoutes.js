@@ -3,15 +3,22 @@ import Table from 'ascii-table'
 import GameController from '../game/GameController'
 import PlayersDB from '../db/PlayersDB'
 import logger from 'winston'
+import Timeout from './Timeout'
 
 const LEADERBOARD_COUNT = 10;
 const LOAN_INTEREST = 0.1;
 
+const START_TIMEOUT = 1 * 15 * 1000; // 5 minutes
+const TURN_TIMEOUT = 1 * 15 * 1000; // 5 minutes
+
 export default {
 
     // !ping
-    [commands.Ping.trigger]: async function() {
-        return "Pong!";
+    [commands.Ping.trigger]: async function({ bot, channelID}) {
+        bot.sendMessage({
+            to: channelID,
+            message: "Pong!"
+        });
     },
 
     // !help
@@ -24,11 +31,36 @@ export default {
             helpTable.addRow(commands[k].trigger, commands[k].description);
         }
 
-        return "```\n"+helpTable.toString()+"```"
+        bot.sendMessage({
+            to: channelID,
+            message: "```\n"+helpTable.toString()+"```"
+        });
     },
 
     [commands.Rules.trigger]: async function() {
-        return "Read rules here: https://gist.github.com/hellos3b/90894df06856ea26607571d5ead0cb0b";
+        bot.sendMessage({
+            to: channelID,
+            message: "Read rules here: https://gist.github.com/hellos3b/90894df06856ea26607571d5ead0cb0b";
+        });
+    },
+
+    [commands.Cancel.trigger]: async function({user, userID}) {
+        if (!GameController.exists) {
+            return `No active game to cancel`;
+        }
+
+        let game = GameController.Game;
+        if (game.isActive()) {
+            return `It's too late to cancel the game`
+        }
+
+        if (!game.isOwner(userID)) {
+            return `Only the person who initiated the game can cancel it`;
+        }
+
+        GameController.End();
+
+        return "Cancelled the new game. Use `!new` to start a new game";
     },
 
     // start a game
@@ -55,6 +87,15 @@ export default {
         let currentTurn = game.currentTurn();
         let msg = game.toString()+"\n";
         msg += game.turnMention();
+
+        Timeout.start( () => {
+            GameController.End();
+            bot.sendMessage({
+                to: channelID,
+                msg: "Cancelling game request, took too long for players to join"
+            })
+        }, START_TIMEOUT);
+
         return msg;
     },
 
@@ -176,10 +217,11 @@ export default {
             coins = 0,
             pot = game.getPot();
 
+
         // Click the bomb!
         let bomb = game.click();
 
-        if (bomb.isExploded()) {
+        const explodePlayer = function() {
             let coinsLost = game.removeCoinsFrom(userID, game.getBuyin() );
             game.addPot(coinsLost);
 
@@ -192,6 +234,22 @@ export default {
             let sharedAmount = game.distributePot();
 
             game.resetRound();
+        }
+
+        const finishGame = function() {
+            let finalPlayer = game.lastPlayer();
+            let coins = game.getCoins(finalPlayer.userID);
+            finalPlayer.addBank(coins);
+            await PlayersDB.save(finalPlayer);
+            game.addPlayerResult(finalPlayer);
+            msg += `**${finalPlayer.name}** has won the game!\n`;
+            msg += game.endGameString();
+            GameController.End();
+            return msg;
+        }
+
+        if (bomb.isExploded()) {
+            explodePlayer();
 
             msg += `🔥🔥BOOOOOOM🔥🔥 goodbye **${player.name}**! `; 
             msg += `You are leaving the table with **${coins}** coins\n`;
@@ -217,6 +275,33 @@ export default {
         } else {
             msg += game.toString();
             msg += game.turnMention();
+
+            // turn timer
+            Timeout.start( () => {
+                let t_msg = "";
+                explodePlayer();
+                t_msg += `🔥🔥BOOOOOOM🔥🔥 **${player.name}** blew up from taking too long\n`; 
+                t_msg += `**${sharedAmount}** coins were split between the remaining players\n`;
+    
+                if (game.isOver()) {
+                    let finalPlayer = game.lastPlayer();
+                    let coins = game.getCoins(finalPlayer.userID);
+                    finalPlayer.addBank(coins);
+                    await PlayersDB.save(finalPlayer);
+                    game.addPlayerResult(finalPlayer);
+                    t_msg += `**${finalPlayer.name}** has won the game!\n`;
+                    t_msg += game.endGameString();
+                    GameController.End();
+                } else {
+                    t_msg += game.toString();
+                    t_msg += game.turnMention();
+                }
+    
+                bot.sendMessage({
+                    to: channelID,
+                    message: t_msg
+                })
+            }, TURN_TIMEOUT);
         }
         
         return msg;
