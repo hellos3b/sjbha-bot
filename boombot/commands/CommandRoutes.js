@@ -221,7 +221,7 @@ export default {
         // Click the bomb!
         let bomb = game.click();
 
-        const explodePlayer = function() {
+        const explodePlayer =  async function() {
             let coinsLost = game.removeCoinsFrom(userID, game.getBuyin() );
             game.addPot(coinsLost);
 
@@ -236,20 +236,8 @@ export default {
             game.resetRound();
         }
 
-        const finishGame = function() {
-            let finalPlayer = game.lastPlayer();
-            let coins = game.getCoins(finalPlayer.userID);
-            finalPlayer.addBank(coins);
-            await PlayersDB.save(finalPlayer);
-            game.addPlayerResult(finalPlayer);
-            msg += `**${finalPlayer.name}** has won the game!\n`;
-            msg += game.endGameString();
-            GameController.End();
-            return msg;
-        }
-
         if (bomb.isExploded()) {
-            explodePlayer();
+            await explodePlayer();
 
             msg += `🔥🔥BOOOOOOM🔥🔥 goodbye **${player.name}**! `; 
             msg += `You are leaving the table with **${coins}** coins\n`;
