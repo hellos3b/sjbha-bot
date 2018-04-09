@@ -12,10 +12,10 @@ export default {
     
         if (Routes[cmd]) {
             const msg = await Routes[cmd](context);
-            context.bot.sendMessage({
-                to: context.channelID,
-                message: msg
-            });
+            // context.bot.sendMessage({
+            //     to: context.channelID,
+            //     message: msg
+            // });
         }
     }
 

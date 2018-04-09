@@ -25,6 +25,11 @@
         "description": "Initiate a new game"
     },
 
+    "Cancel": {
+        "trigger": "!cancel",
+        "description": "Cancels a !new game initiate"
+    },
+
     "Start": {
         "trigger": "!start",
         "description": "Start a game of Click Click Boom. Use !start {amount} to raise the stakes | Example: !start 50"
