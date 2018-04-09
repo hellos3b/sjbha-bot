@@ -277,7 +277,7 @@ export default {
             msg += game.turnMention();
 
             // turn timer
-            Timeout.start( () => {
+            Timeout.start(async function() {
                 let t_msg = "";
                 explodePlayer();
                 t_msg += `🔥🔥BOOOOOOM🔥🔥 **${player.name}** blew up from taking too long\n`; 
