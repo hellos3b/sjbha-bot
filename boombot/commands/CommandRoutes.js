@@ -8,8 +8,10 @@ import Timeout from './Timeout'
 const LEADERBOARD_COUNT = 10;
 const LOAN_INTEREST = 0.1;
 
-const START_TIMEOUT = 1 * 15 * 1000; // 5 minutes
-const TURN_TIMEOUT = 1 * 15 * 1000; // 5 minutes
+const START_TIMEOUT = 20 * 60 * 1000; // 5 minutes
+const TURN_TIMEOUT = 1 * 5 * 1000; // 5 minutes
+
+const PLAYER_MAX_COUNT = 8;
 
 export default {
 
@@ -64,7 +66,7 @@ export default {
     },
 
     // start a game
-    [commands.Start.trigger]: async function({user, userID}) {
+    [commands.Start.trigger]: async function({bot, channelID, user, userID}) {
         if (!GameController.exists) {
             return `Can't start a game that doesn't exist! Use \`!new\` to start a new game`;
         }
@@ -88,13 +90,48 @@ export default {
         let msg = game.toString()+"\n";
         msg += game.turnMention();
 
-        Timeout.start( () => {
-            GameController.End();
-            bot.sendMessage({
+        let coins = 0;
+        Timeout.start(async function() {
+            logger.debug("Explode player timeout");
+            let currentTurn = game.currentTurn();
+            let turnID = currentTurn.userID;
+            let t_msg = "";
+            let coinsLost = game.removeCoinsFrom(turnID, game.getBuyin() );
+            let player = game.getPlayer(turnID);
+            game.addPot(coinsLost);
+
+            coins = game.getCoins(turnID);
+
+            player.addBank(coins);
+            await PlayersDB.save(player);
+
+            game.removePlayer(turnID);
+            let sharedAmount = game.distributePot();
+
+            game.resetRound();
+            
+            t_msg += `🔥🔥BOOOOOOM🔥🔥 **${player.name}** blew up from taking too long\n`; 
+            t_msg += `**${sharedAmount}** coins were split between the remaining players\n`;
+
+            if (game.isOver()) {
+                let finalPlayer = game.lastPlayer();
+                let coins = game.getCoins(finalPlayer.userID);
+                finalPlayer.addBank(coins);
+                await PlayersDB.save(finalPlayer);
+                game.addPlayerResult(finalPlayer);
+                t_msg += `**${finalPlayer.name}** has won the game!\n`;
+                t_msg += game.endGameString();
+                GameController.End();
+            } else {
+                t_msg += game.toString();
+                t_msg += game.turnMention();
+            }
+
+            await bot.sendMessage({
                 to: channelID,
-                msg: "Cancelling game request, took too long for players to join"
+                message: t_msg
             })
-        }, START_TIMEOUT);
+        }, TURN_TIMEOUT);
 
         return msg;
     },
@@ -120,7 +157,7 @@ export default {
     },
 
     // initiating a new game
-    [commands.NewGame.trigger]: async function({user, userID, message}) {
+    [commands.NewGame.trigger]: async function({bot, channelID, user, userID, message}) {
         let msg = "";
         let [cmd, buyin] = message.split(" ");
         if (!buyin) {
@@ -153,6 +190,15 @@ export default {
 
         game.addPlayer(player);
 
+        Timeout.start(async function() {
+            logger.debug("New game timeout");
+            GameController.End();
+            bot.sendMessage({
+                to: channelID,
+                message: "Cancelling game request, took too long for players to join"
+            })
+        }, START_TIMEOUT);
+
         msg = `Starting new game! Type \`!join\` to get in on the game!`
 
         return msg;
@@ -175,6 +221,10 @@ export default {
 
         if (game.hasPlayer(player)) {
             return `Oops! You're already set to play in this game!`
+        }
+
+        if (game.playerCount === PLAYER_MAX_COUNT) {
+            return `Max amount of players have joined`;
         }
 
         let buyin = game.getBuyin();
@@ -202,7 +252,7 @@ export default {
     },
 
     // click the bomb
-    [commands.Click.trigger]: async function({user, userID}) {
+    [commands.Click.trigger]: async function({bot, channelID, user, userID}) {
         let msg = "";
         if (!GameController.active) {
             return `There is no active game going.`;
@@ -221,7 +271,7 @@ export default {
         // Click the bomb!
         let bomb = game.click();
 
-        const explodePlayer =  async function() {
+        if (bomb.isExploded()) {
             let coinsLost = game.removeCoinsFrom(userID, game.getBuyin() );
             game.addPot(coinsLost);
 
@@ -234,10 +284,6 @@ export default {
             let sharedAmount = game.distributePot();
 
             game.resetRound();
-        }
-
-        if (bomb.isExploded()) {
-            await explodePlayer();
 
             msg += `🔥🔥BOOOOOOM🔥🔥 goodbye **${player.name}**! `; 
             msg += `You are leaving the table with **${coins}** coins\n`;
@@ -266,8 +312,21 @@ export default {
 
             // turn timer
             Timeout.start(async function() {
+                logger.debug("Explode player timeout");
                 let t_msg = "";
-                explodePlayer();
+                let coinsLost = game.removeCoinsFrom(userID, game.getBuyin() );
+                game.addPot(coinsLost);
+    
+                coins = game.getCoins(userID);
+    
+                player.addBank(coins);
+                await PlayersDB.save(player);
+    
+                game.removePlayer(userID);
+                let sharedAmount = game.distributePot();
+    
+                game.resetRound();
+
                 t_msg += `🔥🔥BOOOOOOM🔥🔥 **${player.name}** blew up from taking too long\n`; 
                 t_msg += `**${sharedAmount}** coins were split between the remaining players\n`;
     
@@ -285,7 +344,7 @@ export default {
                     t_msg += game.turnMention();
                 }
     
-                bot.sendMessage({
+                await bot.sendMessage({
                     to: channelID,
                     message: t_msg
                 })
@@ -295,7 +354,7 @@ export default {
         return msg;
     },
 
-    [commands.Pass.trigger]: async function({user, userID}) {
+    [commands.Pass.trigger]: async function({bot, channelID, user, userID}) {
         let msg = "";
         if (!GameController.active) {
             return `There is no active game going. Try starting one with \`!new\``;
@@ -322,6 +381,49 @@ export default {
 
         msg += game.toString();
         msg += game.turnMention();
+
+        Timeout.start(async function() {
+            logger.debug("Explode player timeout");
+            let currentTurn = game.currentTurn();
+            let turnID = currentTurn.userID;
+            let t_msg = "";
+            let coinsLost = game.removeCoinsFrom(turnID, game.getBuyin() );
+            let player = game.getPlayer(turnID);
+            game.addPot(coinsLost);
+
+            let coins = 0;
+            coins = game.getCoins(turnID);
+
+            player.addBank(coins);
+            await PlayersDB.save(player);
+
+            game.removePlayer(turnID);
+            let sharedAmount = game.distributePot();
+
+            game.resetRound();
+            
+            t_msg += `🔥🔥BOOOOOOM🔥🔥 **${player.name}** blew up from taking too long\n`; 
+            t_msg += `**${sharedAmount}** coins were split between the remaining players\n`;
+
+            if (game.isOver()) {
+                let finalPlayer = game.lastPlayer();
+                let coins = game.getCoins(finalPlayer.userID);
+                finalPlayer.addBank(coins);
+                await PlayersDB.save(finalPlayer);
+                game.addPlayerResult(finalPlayer);
+                t_msg += `**${finalPlayer.name}** has won the game!\n`;
+                t_msg += game.endGameString();
+                GameController.End();
+            } else {
+                t_msg += game.toString();
+                t_msg += game.turnMention();
+            }
+
+            await bot.sendMessage({
+                to: channelID,
+                message: t_msg
+            })
+        }, TURN_TIMEOUT);
         
         return msg;
     },
