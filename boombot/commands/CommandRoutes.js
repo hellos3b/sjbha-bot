@@ -9,7 +9,7 @@ const LEADERBOARD_COUNT = 10;
 const LOAN_INTEREST = 0.1;
 
 const START_TIMEOUT = 20 * 60 * 1000; // 5 minutes
-const TURN_TIMEOUT = 1 * 5 * 1000; // 5 minutes
+const TURN_TIMEOUT = 10 * 60 * 1000; // 5 minutes
 
 const PLAYER_MAX_COUNT = 8;
 
