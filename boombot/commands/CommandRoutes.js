@@ -40,7 +40,7 @@ export default {
     [commands.Rules.trigger]: async function() {
         bot.sendMessage({
             to: channelID,
-            message: "Read rules here: https://gist.github.com/hellos3b/90894df06856ea26607571d5ead0cb0b";
+            message: "Read rules here: https://gist.github.com/hellos3b/90894df06856ea26607571d5ead0cb0b"
         });
     },
 
