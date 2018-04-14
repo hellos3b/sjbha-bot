@@ -60,6 +60,17 @@ export default {
         })
     },
 
+    "!wheres": async function({bot, channelID, message}) {
+        let [cmd, param] = message.split(" ");
+
+        if (param.toLowerCase() === "james") {
+            await bot.sendMessage({
+                to: channelID,
+                message: "<@!115794072735580162>!"
+            })
+        }
+    },
+
     "!admin": async function({bot, message, channelID, userID}) {
         if (channelID !== channels.ADMIN) {
             return;
