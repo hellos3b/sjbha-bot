@@ -5,7 +5,8 @@ export default function({
     userID,     // The User's discord ID
     bank=40,    // Total number of coins
     debt=0,     // How much debt player has accumulated from loans
-    games=0     // How many games the player has played in
+    games=0,     // How many games the player has played in
+    survives=0
 }) {
 
     if (userID === null) {
@@ -23,6 +24,10 @@ export default function({
 
     this.addBank = function(amt) {
         bank += amt;
+    }
+
+    this.addSurvive = function() {
+        survives++;
     }
 
     this.removeBank = function(amt) {
@@ -55,7 +60,7 @@ export default function({
 
     this.toJSON = function() {
         return {
-            user, userID, bank, debt, games
+            user, userID, bank, debt, games, survives
         };
     };
 }

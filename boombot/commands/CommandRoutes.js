@@ -306,6 +306,7 @@ export default {
             let finalPlayer = game.lastPlayer();
             let coins = game.getCoins(finalPlayer.userID);
             finalPlayer.addBank(coins);
+            finalPlayer.addSurvive();
             await PlayersDB.save(finalPlayer);
             game.addPlayerResult(finalPlayer);
             msg += `**${finalPlayer.name}** has won the game!\n`;
@@ -341,6 +342,7 @@ export default {
                     let finalPlayer = game.lastPlayer();
                     let coins = game.getCoins(finalPlayer.userID);
                     finalPlayer.addBank(coins);
+                    finalPlayer.addSurvive();
                     await PlayersDB.save(finalPlayer);
                     game.addPlayerResult(finalPlayer);
                     t_msg += `**${finalPlayer.name}** has won the game!\n`;
@@ -417,6 +419,7 @@ export default {
                 let finalPlayer = game.lastPlayer();
                 let coins = game.getCoins(finalPlayer.userID);
                 finalPlayer.addBank(coins);
+                finalPlayer.addSurvive();
                 await PlayersDB.save(finalPlayer);
                 game.addPlayerResult(finalPlayer);
                 t_msg += `**${finalPlayer.name}** has won the game!\n`;
@@ -468,6 +471,7 @@ export default {
         // table.removeBorder();
 
         table.addRow("Games Played", json.games);
+        table.addRow("Survives", json.survives);
         table.addRow("Net Worth", player.netWorth());
         table.addRow("Rank", rank);
         table.addRow("Bank", json.bank);
