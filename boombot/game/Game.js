@@ -10,6 +10,7 @@ export default function(ownerID, buyin) {
 
     let maxPlayers = 0;
     let lossRisk = 1;
+    let lossCoins = 0;
 
     // game stuff
     let state = "JOIN";
@@ -20,6 +21,7 @@ export default function(ownerID, buyin) {
 
     this.updateLossRisk = function() {
         lossRisk = players.length / maxPlayers;    
+        lossCoins = Math.floor(buyin * lossRisk);
     };
 
     this.addPlayer = function(player) {
@@ -117,7 +119,7 @@ export default function(ownerID, buyin) {
     this.toString = function() {
         let msg = "";
         let risk = Math.floor(lossRisk * 100);
-        msg += `RISK: ${risk}%  `;
+        msg += `RISK: ${lossCoins}  `;
         
         let gameTable = new Table();
         if (state === "JOIN") {
@@ -194,7 +196,7 @@ export default function(ownerID, buyin) {
         let coins = playerBank[userID];
 
         if (!amt) {
-            amt = Math.floor(coins * lossRisk);
+            amt = lossCoins;
         }
 
         if (coins < amt) {
