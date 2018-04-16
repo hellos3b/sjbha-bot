@@ -30,6 +30,10 @@ export default function({
         survives++;
     }
 
+    this.getSurvives = function() {
+        return survives;
+    }
+
     this.removeBank = function(amt) {
         bank -= amt;
     }
