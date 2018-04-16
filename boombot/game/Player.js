@@ -34,6 +34,10 @@ export default function({
         return survives;
     }
 
+    this.getSurvivePercentage = function() {
+        return (Math.floor( (survives / games) * 10000) / 100) + "%";
+    }
+
     this.removeBank = function(amt) {
         bank -= amt;
     }
