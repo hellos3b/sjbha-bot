@@ -8,12 +8,19 @@ export default function(ownerID, buyin) {
     let pot = 0;
     let passCost = Math.floor(buyin/4);
 
+    let maxPlayers = 0;
+    let lossRisk = 1;
+
     // game stuff
     let state = "JOIN";
     let turn = -1;
     let playerBank = {};
     let bomb = new Bomb();
     let round = 1;
+
+    this.updateLossRisk = function() {
+        lossRisk = players.length / maxPlayers;    
+    };
 
     this.addPlayer = function(player) {
         players.push(player);
@@ -48,6 +55,9 @@ export default function(ownerID, buyin) {
         this.resetTurn();
         state = "ACTIVE";
         bomb.reset();
+
+        maxPlayers = players.length;
+        this.updateLossRisk();
 
         for (var i = 0; i < players.length; i++) {
             players[i].removeBank(buyin);
@@ -106,7 +116,8 @@ export default function(ownerID, buyin) {
 
     this.toString = function() {
         let msg = "";
-        msg += `BUYIN: ${buyin}  `;
+        let risk = Math.floor(lossRisk * 100);
+        msg += `RISK: ${risk}%  `;
         
         let gameTable = new Table();
         if (state === "JOIN") {
@@ -182,6 +193,10 @@ export default function(ownerID, buyin) {
     this.removeCoinsFrom = function(userID, amt) {
         let coins = playerBank[userID];
 
+        if (!amt) {
+            amt = coins * lossRisk;
+        }
+
         if (coins < amt) {
             playerBank[userID] = 0;
             return coins;
@@ -199,6 +214,7 @@ export default function(ownerID, buyin) {
         this.resetPot();
         bomb.reset();
         this.resetTurn();
+        this.updateLossRisk();
         round++;
     }
 

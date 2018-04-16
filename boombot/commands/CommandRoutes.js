@@ -69,6 +69,7 @@ export default {
 
     // start a game
     [commands.Start.trigger]: async function({bot, channelID, user, userID}) {
+        Timeout.clear();
         if (!GameController.exists) {
             return `Can't start a game that doesn't exist! Use \`!new\` to start a new game`;
         }
@@ -98,7 +99,7 @@ export default {
             let currentTurn = game.currentTurn();
             let turnID = currentTurn.userID;
             let t_msg = "";
-            let coinsLost = game.removeCoinsFrom(turnID, game.getBuyin() );
+            let coinsLost = game.removeCoinsFrom(turnID);
             let player = game.getPlayer(turnID);
             game.addPot(coinsLost);
 
@@ -276,7 +277,7 @@ export default {
         let bomb = game.click();
 
         if (bomb.isExploded()) {
-            let coinsLost = game.removeCoinsFrom(userID, game.getBuyin() );
+            let coinsLost = game.removeCoinsFrom(userID);
             game.addPot(coinsLost);
 
             coins = game.getCoins(userID);
@@ -320,7 +321,7 @@ export default {
                 let t_msg = "";
                 let currentTurn = game.currentTurn();
                 let turnID = currentTurn.userID;
-                let coinsLost = game.removeCoinsFrom(turnID, game.getBuyin() );
+                let coinsLost = game.removeCoinsFrom(turnID);
                 game.addPot(coinsLost);
     
                 coins = game.getCoins(turnID);
@@ -394,7 +395,7 @@ export default {
             let currentTurn = game.currentTurn();
             let turnID = currentTurn.userID;
             let t_msg = "";
-            let coinsLost = game.removeCoinsFrom(turnID, game.getBuyin() );
+            let coinsLost = game.removeCoinsFrom(turnID);
             let player = game.getPlayer(turnID);
             game.addPot(coinsLost);
 
