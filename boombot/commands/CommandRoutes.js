@@ -154,7 +154,7 @@ export default {
                 leaderboard[i].netWorth(),
                 leaderboard[i].getBank(),
                 leaderboard[i].getGames(),
-                leaderboard[i].getSurvives()
+                leaderboard[i].getSurvivePercentage()
             );
         }
         
@@ -470,9 +470,11 @@ export default {
 
         let table = new Table(player.name);
         // table.removeBorder();
+        let survive_percent = Math.floor(json.survives / json.games * 10000) / 100;
 
         table.addRow("Games Played", json.games);
         table.addRow("Survives", json.survives);
+        table.addRow("Survive %", survive_percent+"%");
         table.addRow("Net Worth", player.netWorth());
         table.addRow("Rank", rank);
         table.addRow("Bank", json.bank);
