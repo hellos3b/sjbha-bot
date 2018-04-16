@@ -8,8 +8,10 @@ import Timeout from './Timeout'
 const LEADERBOARD_COUNT = 10;
 const LOAN_INTEREST = 0.1;
 
-const START_TIMEOUT = 20 * 60 * 1000; // 5 minutes
-const TURN_TIMEOUT = 10 * 60 * 1000; // 5 minutes
+const _minutes = 60 * 1000;
+const _hours = 60 * 60 * 1000;
+const START_TIMEOUT = 6 * _hours; // 6 hours
+const TURN_TIMEOUT = 3 * _hours;
 
 const PLAYER_MAX_COUNT = 8;
 
@@ -200,7 +202,7 @@ export default {
             })
         }, START_TIMEOUT);
 
-        msg = `Starting new game! Type \`!join\` to get in on the game!`
+        msg = `Starting new game! **Buyin: ${buyin}** Type \`!join\` to get in on the game!`
 
         return msg;
     },
@@ -254,6 +256,7 @@ export default {
 
     // click the bomb
     [commands.Click.trigger]: async function({bot, channelID, user, userID}) {
+        Timeout.clear();
         let msg = "";
         if (!GameController.active) {
             return `There is no active game going.`;
@@ -358,6 +361,7 @@ export default {
     },
 
     [commands.Pass.trigger]: async function({bot, channelID, user, userID}) {
+        Timeout.clear();
         let msg = "";
         if (!GameController.active) {
             return `There is no active game going. Try starting one with \`!new\``;
