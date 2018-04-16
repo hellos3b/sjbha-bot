@@ -145,7 +145,7 @@ export default {
         leaderboard = leaderboard.slice(0, LEADERBOARD_COUNT);
 
         var table = new Table("Leaderboard");
-        table.setHeading(" ", "name", "net worth", "bank", "games");
+        table.setHeading(" ", "name", "net worth", "bank", "games", "survives");
 
         for (var i = 0; i < leaderboard.length; i++) {
             table.addRow(
@@ -153,7 +153,8 @@ export default {
                 leaderboard[i].name, 
                 leaderboard[i].netWorth(),
                 leaderboard[i].getBank(),
-                leaderboard[i].getGames()
+                leaderboard[i].getGames(),
+                leaderboard[i].getSurvives()
             );
         }
         
