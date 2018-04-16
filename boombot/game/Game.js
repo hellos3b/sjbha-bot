@@ -194,7 +194,7 @@ export default function(ownerID, buyin) {
         let coins = playerBank[userID];
 
         if (!amt) {
-            amt = coins * lossRisk;
+            amt = Math.floor(coins * lossRisk);
         }
 
         if (coins < amt) {
