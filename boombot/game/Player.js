@@ -35,6 +35,9 @@ export default function({
     }
 
     this.getSurvivePercentage = function() {
+        if (games === 0) {
+            return "0%"
+        }
         return (Math.floor( (survives / games) * 10000) / 100) + "%";
     }
 
