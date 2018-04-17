@@ -155,7 +155,7 @@ export default {
                 leaderboard[i].netWorth(),
                 leaderboard[i].getBank(),
                 leaderboard[i].getGames(),
-                leaderboard[i].getSurvivePercentage()
+                leaderboard[i].getSurvives()
             );
         }
         
