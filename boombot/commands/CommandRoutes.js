@@ -12,6 +12,7 @@ const _minutes = 60 * 1000;
 const _hours = 60 * 60 * 1000;
 const START_TIMEOUT = 6 * _hours; // 6 hours
 const TURN_TIMEOUT = 3 * _hours;
+const PAY_MATCH_PERCENT = 0.15;
 
 const PLAYER_MAX_COUNT = 8;
 
@@ -535,12 +536,12 @@ export default {
             return `You don't have enough in your bank to pay that much`;
         }
 
-        amount = Math.floor(amount);
+        let pay_bonus = Math.floor( amount * PAY_MATCH_PERCENT );
 
         player.removeBank(amount);
-        player.removeDebt(amount);
+        player.removeDebt(amount + pay_bonus);
         await PlayersDB.save(player);
 
-        return `You now have ${player.getBank()} coins available, and are ${player.getDebt()} coins in debt`;
+        return `Thanks for paying debt! As a token of appreciation, the house removed an extra ${pay_bonus} coins from your debt.\nYou now have ${player.getBank()} coins available, and are ${player.getDebt()} coins in debt`;
     }
 };

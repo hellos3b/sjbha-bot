@@ -63,6 +63,9 @@ export default function({
 
     this.removeDebt = function(amount) {
         debt -= amount;
+        if (debt < 0) {
+            debt = 0;
+        }
     }
 
     this.getDebt = function() {
