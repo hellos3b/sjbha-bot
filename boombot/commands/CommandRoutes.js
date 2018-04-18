@@ -537,6 +537,7 @@ export default {
         }
 
         let pay_bonus = Math.floor( amount * PAY_MATCH_PERCENT );
+        amount = Math.floor(amount);
 
         player.removeBank(amount);
         player.removeDebt(amount + pay_bonus);
