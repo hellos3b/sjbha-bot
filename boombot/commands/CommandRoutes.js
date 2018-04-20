@@ -5,7 +5,7 @@ import PlayersDB from '../db/PlayersDB'
 import logger from 'winston'
 import Timeout from './Timeout'
 
-const LEADERBOARD_COUNT = 10;
+const LEADERBOARD_COUNT = 20;
 const LOAN_INTEREST = 0.1;
 
 const _minutes = 60 * 1000;
