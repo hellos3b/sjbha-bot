@@ -1,4 +1,5 @@
 import logger from 'winston'
+import router from '../router'
 
 export default function({ 
     user="",     // Name of the user
@@ -8,6 +9,9 @@ export default function({
     games=0,     // How many games the player has played in
     survives=0
 }) {
+    let isBot = false;
+    let bot_delay = 7000;
+    let botAI = {};
 
     if (userID === null) {
         throw "userID is required a field";
@@ -17,6 +21,40 @@ export default function({
     this.name = user;
     this.mention = "<@!" + userID + ">";
 
+    this.setBot = function(AI) {
+        isBot = true;
+        botAI = AI;
+        this.mention = user;
+    }
+
+    this.yourTurn = function({game, bot, channelID}) {
+        if (!isBot) {
+            return;
+        }
+        setTimeout(() => this.botTurn({game, bot, channelID}), bot_delay);
+    }
+
+    this.botTurn = async function({game, bot, channelID}) {
+        let command = "!click";
+        let coins = game.getCoins(userID);
+        if (coins >= game.getPassCost()) {
+            console.log("Checking turn");
+            command = botAI.turn(game, this);
+        } else {
+            console.log("Not enough coins!");
+        }
+
+        let context = {
+            bot, channelID, user, userID,
+            message: command
+        };
+        await bot.sendMessage({
+            to: channelID,
+            message: "> " + user + " " + command
+        })
+
+        router.router(context);
+    }
 
     this.netWorth = function() {
         return bank - debt;

@@ -103,6 +103,21 @@ export default function(ownerID, buyin) {
         return players[turn];
     }
 
+    this.lowestCoins = function() {
+        let coins = Number.POSITIVE_INFINITY;
+        let userid = [];
+        for (var i = 0; i < players.length; i++) {
+            let c = this.getCoins(players[i].userID);
+            if (c < coins) {
+                userid = [players[i].userID];
+                coins = c;
+            } else if (c === coins) {
+                userid.push(players[i].userID);
+            }
+        }
+        return userid;
+    }
+
     this.getCoins = function(userID) {
         return playerBank[userID];
     }
@@ -113,6 +128,10 @@ export default function(ownerID, buyin) {
 
     this.isCurrentTurn = function(userID) {
         return this.currentTurn().userID === userID;
+    }
+
+    this.getPlayers = function() {
+        return players;
     }
 
     this.toString = function() {
@@ -145,6 +164,10 @@ export default function(ownerID, buyin) {
         return "```\n"+msg+"```";
     }
 
+    this.getRound = function() {
+        return round;
+    };
+
     this.endGameString = function() {
         let gameTable = new Table("Results");
         let winner = this.lastPlayer();
@@ -172,6 +195,10 @@ export default function(ownerID, buyin) {
     this.click = function(userID) {
         let exploded = bomb.click();
         return bomb;
+    }
+
+    this.clickCount = function() {
+        return bomb.clickCount();
     }
 
     this.getPot = function() {

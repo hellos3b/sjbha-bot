@@ -5,6 +5,8 @@ import PlayersDB from '../db/PlayersDB'
 import logger from 'winston'
 import Timeout from './Timeout'
 
+import Bots from '../game/bots'
+
 const LEADERBOARD_COUNT = 20;
 const LOAN_INTEREST = 0.1;
 
@@ -88,9 +90,24 @@ export default {
             return `Only the person who initiated the game can start it`;
         }
 
+        if (game.getBuyin() === 20 && game.playerCount() >= 3) {
+            let ai = (Math.random() < 0.5) ? Bots.smarty : Bots.smarty;
+            let bot1 = await PlayersDB.findOrCreate(ai.user, ai.userID);
+            bot1.setBot(ai);
+            game.addPlayer(bot1);
+
+            await bot.sendMessage({
+                to: channelID,
+                message: ai.user + " has also joined!"
+            });
+        }
+        
         game.Start();
 
         let currentTurn = game.currentTurn();
+        let ctp = game.getPlayer(currentTurn.userID);
+        ctp.yourTurn({game, bot, channelID, user, userID});
+
         let msg = game.toString()+"\n";
         msg += game.turnMention();
 
@@ -319,6 +336,11 @@ export default {
             msg += game.toString();
             msg += game.turnMention();
 
+            let currentTurn = game.currentTurn();
+            let ctp = game.getPlayer(currentTurn.userID);
+            ctp.yourTurn({game, bot, channelID, user, userID});
+
+
             // turn timer
             Timeout.start(async function() {
                 logger.debug("Explode player timeout");
@@ -394,6 +416,10 @@ export default {
 
         msg += game.toString();
         msg += game.turnMention();
+
+        let currentTurn = game.currentTurn();
+        let ctp = game.getPlayer(currentTurn.userID);
+        ctp.yourTurn({game, bot, channelID, user, userID});
 
         Timeout.start(async function() {
             logger.debug("Explode player timeout");
