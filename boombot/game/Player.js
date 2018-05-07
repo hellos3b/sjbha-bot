@@ -27,6 +27,10 @@ export default function({
         this.mention = user;
     }
 
+    this.isABot = function() {
+        return isBot;
+    }
+
     this.yourTurn = function({game, bot, channelID}) {
         if (!isBot) {
             return;
@@ -38,10 +42,10 @@ export default function({
         let command = "!click";
         let coins = game.getCoins(userID);
         if (coins >= game.getPassCost()) {
-            console.log("Checking turn");
+            console.log("[bot] Checking turn");
             command = botAI.turn(game, this);
         } else {
-            console.log("Not enough coins!");
+            console.log("[bot] Not enough coins!");
         }
 
         let context = {
