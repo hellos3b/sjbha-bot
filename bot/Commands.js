@@ -60,6 +60,20 @@ export default {
         })
     },
 
+    "!scooter": async function({bot, channelID}) {
+        await bot.sendMessage({
+            to: channelID,
+            message: "<:coolscooter:443185468348170240><:coolscooter:443185468348170240>😎😎SCOOTER GANG SCOOTER GANG SCOOTER GANG😎😎<:coolscooter:443185468348170240><:coolscooter:443185468348170240>"
+        })
+    },
+
+    "!scooters": async function({bot, channelID}) {
+        await bot.sendMessage({
+            to: channelID,
+            message: "<:coolscooter:443185468348170240><:coolscooter:443185468348170240>😎😎SCOOTER GANG SCOOTER GANG SCOOTER GANG😎😎<:coolscooter:443185468348170240><:coolscooter:443185468348170240>"
+        })
+    },
+
     "!wheres": async function({bot, channelID, message}) {
         let [cmd, param] = message.split(" ");
 
