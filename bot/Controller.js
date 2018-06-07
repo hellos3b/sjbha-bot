@@ -8,6 +8,7 @@ import Meetup from './Meetup'
 import moment from 'moment'
 import channels from './channels'
 import BoombotRouter from '../boombot/router'
+import BoombotWeeklyController from '../boombot/commands/WeeklyController'
 
 import SwirlCount from './SwirlCount'
 
@@ -91,6 +92,10 @@ export default {
                 message: "`Archived "+meetup.info_str()+"`"
             });
         }
+    },
+
+    weeklyCron: async function() {
+        BoombotWeeklyController.EndWeek(bot);
     }
 
 }
