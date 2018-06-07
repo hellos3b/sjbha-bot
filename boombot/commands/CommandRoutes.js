@@ -520,13 +520,15 @@ export default {
         // table.removeBorder();
         let survive_percent = Math.floor(json.survives / json.games * 10000) / 100;
 
+        table.addRow("Bank", json.bank);
+        table.addRow("Rank", rank);
         table.addRow("Games Played", json.games);
         table.addRow("Survives", json.survives);
         table.addRow("Survive %", survive_percent+"%");
-        table.addRow("Net Worth", player.netWorth());
-        table.addRow("Rank", rank);
-        table.addRow("Bank", json.bank);
-        table.addRow("Debt", json.debt);
+        // table.addRow("Net Worth", player.netWorth());
+        // table.addRow("Rank", rank);
+        // table.addRow("Bank", json.bank);
+        // table.addRow("Debt", json.debt);
 
         return "```\n"+table.toString()+"```";
     },
