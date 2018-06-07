@@ -104,6 +104,11 @@ export default {
 
         for (var i = 0; i < leaderboard.length; i++) {
             let profit = leaderboard[i].profit;
+            if (profit > 0) {
+                profit = "+"+profit;
+            } else {
+                profit = profit.toString();
+            }
             table.addRow(
                 i+1, 
                 leaderboard[i].user, 
