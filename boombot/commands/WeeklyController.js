@@ -25,7 +25,7 @@ export default {
         let player = await WeeklyDB.findOrCreate(playerResult.name, playerResult.userID);
         console.log("--> Player ", player);
         player.profit += playerResult.profit;
-        player.lottery = playerResult.lotto + 1;
+        player.lottery = playerResult.lotto;
         await WeeklyDB.savePlayer(player);
     },
 
