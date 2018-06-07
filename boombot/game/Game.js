@@ -95,7 +95,7 @@ export default function(ownerID, buyin) {
             name: player.name,
             userID: player.userID,
             round,
-            lotto: 0,
+            lotto: 1,
             profit: playerBank[player.userID] - buyin
         };
         if (round === 1) {
@@ -103,7 +103,11 @@ export default function(ownerID, buyin) {
         }
         console.log("BOMB CLICK COUNT---" + bomb.clickCount());
         if (bomb.clickCount() === 0) {
-            result.lotto += 2;
+            result.lotto += 4;
+        }
+        // If last player, no lottery for u
+        if (players.length === 1) {
+            result.lotto = 0;
         }
         player_results.push(result);
     }
