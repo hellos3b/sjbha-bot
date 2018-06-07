@@ -180,13 +180,13 @@ export default function(ownerID, buyin) {
     this.endGameString = function() {
         let gameTable = new Table("Results");
         let winner = this.lastPlayer();
-        gameTable.setHeading("name", "profit", "round end");
+        gameTable.setHeading("name", "profit", "round end", "tickets");
         let results = player_results.slice().sort( (a,b) => b.profit - a.profit);
 
         for (var i = 0; i < results.length; i++) {
             let round = (results[i].userID === winner.userID) ? "⭐" : results[i].round.toString();
             let profit = (results[i].profit > 0) ? "+"+results[i].profit : results[i].profit.toString();
-            gameTable.addRow(results[i].name, profit, round);
+            gameTable.addRow(results[i].name, profit, round, results[i].lotto + 1);
         }
 
         return "```\n"+gameTable.toString()+"```";
