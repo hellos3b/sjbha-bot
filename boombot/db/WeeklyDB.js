@@ -10,7 +10,7 @@ export default {
         }
 
         logger.debug("Creating new player "+user);
-        player = { user, userID };
+        player = { user, userID, profit: 0, lottery: 0 };
         await this.save(player);
         
         logger.debug("Player created!");
@@ -18,9 +18,9 @@ export default {
     },
 
     findPlayer(userID) {
-        logger.debug("Finding player with user with ID: "+userID);
+        logger.debug("Finding weekly player with user with ID: "+userID);
         return new Promise( (resolve, reject) => {
-            PlayerModel.findOne({ userID: userID })
+            WeeklyModel.findOne({ userID: userID })
                 .exec( (err, player) => {
                     if (err) {
                         logger.error(err);
@@ -38,13 +38,13 @@ export default {
 
     getAll() {
         return new Promise((resolve, reject) => {
-            PlayerModel.find()
+            WeeklyModel.find()
                 .exec( (err, players) => {
                     if (err) {
                         logger.error(err);
                         reject(err);
                     } 
-                    resolve( players.map( p => new Player(p) ) );
+                    resolve( players );
                 });
         });
     },
@@ -52,7 +52,7 @@ export default {
     fetchLeaderboard: async function() {
         let players = await this.getAll();
         let leaderboard = players.slice()
-            .sort( (a, b) => b.netWorth() - a.netWorth() );
+            .sort( (a, b) => b.profit - a.profit );
         return leaderboard;
     },
 
@@ -73,10 +73,10 @@ export default {
     },
 
     savePlayer(player) {
-        let json = player.toJSON();
+        let json = player;
 
         return new Promise((resolve, reject) => {
-            PlayerModel.findOneAndUpdate({
+            WeeklyModel.findOneAndUpdate({
                 userID: json.userID
             }, json, {upsert:true}, function(err, doc){
                 if (err) {
@@ -88,6 +88,17 @@ export default {
                 }
             });
         })
+    },
+
+    clearBoard() {
+        console.log("Remove all weekly models");
+        WeeklyModel.remove({}, function(err) {
+            if (err) {
+                console.log(err)
+            } else {
+                console.log("Supposedly removed all");
+            }
+        });
     }
 
 }

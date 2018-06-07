@@ -2,8 +2,10 @@ import commands from './commands'
 import Table from 'ascii-table'
 import GameController from '../game/GameController'
 import PlayersDB from '../db/PlayersDB'
+import WeeklyDB from '../db/WeeklyDB'
 import logger from 'winston'
 import Timeout from './Timeout'
+import WeeklyController from './WeeklyController'
 
 import Bots from '../game/bots'
 
@@ -142,6 +144,7 @@ export default {
                 game.addPlayerResult(finalPlayer);
                 t_msg += `**${finalPlayer.name}** has won the game!\n`;
                 t_msg += game.endGameString();
+                WeeklyController.SaveResults( game.getResults() );
                 GameController.End();
             } else {
                 t_msg += game.toString();
@@ -156,10 +159,17 @@ export default {
 
         return msg;
     },
-    
 
      // start a game
-     [commands.Leaderboard.trigger]: async function({user, userID}) {
+     [commands.Leaderboard.trigger]: async function({user, userID, message}) {
+        let [cmd, type] = message.split(" ");
+
+        // Week parameter
+        if (type === "week" || type === "weekly") {
+            let result = await this["!weekly"]({user, userID});
+            return result;
+        }
+
         let leaderboard = await PlayersDB.fetchLeaderboard();
         leaderboard = leaderboard.slice(0, LEADERBOARD_COUNT);
 
@@ -178,6 +188,12 @@ export default {
         }
         
         return "```\n"+table.toString()+"```";
+    },
+
+    [commands.Weekly.trigger]: async function({user, userID}) {
+        let leaderboard = await WeeklyController.Leaderboard();
+        
+        return "```\n"+leaderboard+"```";
     },
 
     // initiating a new game
@@ -331,6 +347,7 @@ export default {
             game.addPlayerResult(finalPlayer);
             msg += `**${finalPlayer.name}** has won the game!\n`;
             msg += game.endGameString();
+            WeeklyController.SaveResults( game.getResults() );
             GameController.End();
         } else {
             msg += game.toString();
@@ -372,6 +389,7 @@ export default {
                     game.addPlayerResult(finalPlayer);
                     t_msg += `**${finalPlayer.name}** has won the game!\n`;
                     t_msg += game.endGameString();
+                    WeeklyController.SaveResults( game.getResults() );
                     GameController.End();
                 } else {
                     t_msg += game.toString();
@@ -453,6 +471,7 @@ export default {
                 game.addPlayerResult(finalPlayer);
                 t_msg += `**${finalPlayer.name}** has won the game!\n`;
                 t_msg += game.endGameString();
+                WeeklyController.SaveResults( game.getResults() );
                 GameController.End();
             } else {
                 t_msg += game.toString();

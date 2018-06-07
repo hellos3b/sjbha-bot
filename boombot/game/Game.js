@@ -16,6 +16,7 @@ export default function(ownerID, buyin) {
     let state = "JOIN";
     let turn = -1;
     let playerBank = {};
+    let playerLotto = {};
     let bomb = new Bomb();
     let round = 1;
 
@@ -94,8 +95,16 @@ export default function(ownerID, buyin) {
             name: player.name,
             userID: player.userID,
             round,
+            lotto: 0,
             profit: playerBank[player.userID] - buyin
         };
+        if (round === 1) {
+            result.lotto++;
+        }
+        console.log("BOMB CLICK COUNT---" + bomb.clickCount());
+        if (bomb.clickCount() === 0) {
+            result.lotto += 2;
+        }
         player_results.push(result);
     }
 
@@ -181,6 +190,10 @@ export default function(ownerID, buyin) {
         }
 
         return "```\n"+gameTable.toString()+"```";
+    }
+
+    this.getResults = function() {
+        return player_results.slice();
     }
 
     this.Bomb = function() {

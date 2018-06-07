@@ -68,6 +68,11 @@
     "Current": {
         "trigger": "!current",
         "description": "Get the current status of the game"
+    },
+
+    "Weekly": {
+        "trigger": "!weekly",
+        "description": "View current weekly leaderboard"
     }
 
 }
