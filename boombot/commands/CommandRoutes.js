@@ -174,13 +174,14 @@ export default {
         leaderboard = leaderboard.slice(0, LEADERBOARD_COUNT);
 
         var table = new Table("Leaderboard");
-        table.setHeading(" ", "name", "net worth", "bank", "games", "survives");
+        // table.setHeading(" ", "name", "net worth", "bank", "games", "survives");
+        table.setHeading(" ", "name", "bank", "games", "survives");
 
         for (var i = 0; i < leaderboard.length; i++) {
             table.addRow(
                 i+1, 
                 leaderboard[i].name, 
-                leaderboard[i].netWorth(),
+                // leaderboard[i].netWorth(),
                 leaderboard[i].getBank(),
                 leaderboard[i].getGames(),
                 leaderboard[i].getSurvives()
@@ -554,11 +555,11 @@ export default {
         //     return `The largest amount we can offer is 1,000`;
         // }
 
-        amount = Math.floor(amount);
-        let interest = Math.floor(amount * LOAN_INTEREST);
+        // amount = Math.floor(amount);
+        // let interest = Math.floor(amount * LOAN_INTEREST);
 
-        player.addBank(amount);
-        player.addDebt(amount + interest);
+        player.setBank(amount);
+        // player.addDebt(amount + interest);
         await PlayersDB.save(player);
 
         return `You now have ${player.getBank()} coins available (and are ${player.getDebt()} coins in debt)`;

@@ -99,6 +99,10 @@ export default function({
         return bank;
     }
 
+    this.setBank = function(amt) {
+        bank = amt;
+    }
+
     this.addDebt = function(amount) {
         debt += amount;
     }
