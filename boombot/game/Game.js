@@ -190,7 +190,7 @@ export default function(ownerID, buyin) {
         for (var i = 0; i < results.length; i++) {
             let round = (results[i].userID === winner.userID) ? " " : results[i].round.toString();
             let profit = (results[i].profit > 0) ? "+"+results[i].profit : results[i].profit.toString();
-            gameTable.addRow(results[i].name, profit, round, results[i].lotto + 1);
+            gameTable.addRow(results[i].name, profit, round, results[i].lotto);
         }
 
         return "```\n"+gameTable.toString()+"```";
