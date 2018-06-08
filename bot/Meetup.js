@@ -21,7 +21,8 @@ let type_icons = {
     "alcohol": "https://imgur.com/wwDUMWP.png",
     "drinking": "https://imgur.com/wwDUMWP.png",
     "drinks": "https://imgur.com/wwDUMWP.png",
-    "event": "https://imgur.com/eHxA5dN.png"
+    "event": "https://imgur.com/eHxA5dN.png",
+    "active": "https://imgur.com/4HqAGBd.png"
 };
 
 export default function({ 
