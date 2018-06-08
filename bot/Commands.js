@@ -10,6 +10,29 @@ import Query from './Query'
 import channels from './channels'
 import moment from 'moment'
 
+async function parseMeetupStr({bot, channelID, msg}) {
+    let possibleOptions = new Set(["url", "type", "description", "location"]);
+
+    const [date, info, ...opt] = msg.split("|").map( s => s.trim() );
+
+    let options = { date, info };
+    for (var i = 0; i < opt.length; i++) {
+        let [name, ...value] = opt[i].split(":").map(s => s.trim());
+        name = name.toLowerCase();
+        value = value.join(":");
+        if (!possibleOptions.has(name)) {
+            await bot.sendMessage({
+                to: channelID,
+                message: "Option `"+name+"` is not a valid option"
+            });
+        } else {
+            options[name] = value;
+        }
+    }
+
+    return options;
+}
+
 export default {
 
     // !ping
@@ -23,12 +46,14 @@ export default {
     // Start a meetup
     "!meetup": async function({bot, user, channelID, userID, message}) {
         const msg = message.replace("!meetup", "");
-        const [date, info] = msg.split("|").map( s => s.trim() );
+        let options = await parseMeetupStr({ bot, channelID, msg });
+        console.log("options", options);
 
         try {
             const meetup = new Meetup({
-                date,
-                info,
+                date: options.date,
+                info: options.info,
+                options,
                 userID,
                 username: user,
                 sourceChannelID: channelID
@@ -305,36 +330,37 @@ export default {
         if (!param) {
             await bot.sendMessage({
                 to: channelID,
-                message: `Ok, editing \`${meetup.info_str()}\` - What do you want to change it to?\nUse format: \`date | info\``
+                message: `Ok, editing \`${meetup.info_str()}\` - What do you want to change it to?\nYou can copy and paste this:\n\`${meetup.getMeetupString()}\``
             });
             let edit = await Query.wait({userID, channelID});
             if (!edit) {
                 return;
             }
 
-            let [date, info] = edit.split("|").map(e => e.trim());
-            meetup.update(date, info);
-        } else if (param === "date") {
-            await bot.sendMessage({
-                to: channelID,
-                message: `Ok, editing \`${meetup.info_str()}\` - What do you want to change the date to?`
-            });
-            let new_date = await Query.wait({userID, channelID});
-            if (!new_date) {
-                return;
-            }
-            meetup.update(new_date, meetup.info_str());
-        } else if (param === "info") {
-            await bot.sendMessage({
-                to: channelID,
-                message: `Ok, editing \`${meetup.info_str()}\` - What do you want to change the info to?`
-            });
-            let new_info = await Query.wait({userID, channelID});
-            if (!new_info) {
-                return;
-            }
-            meetup.update(meetup.date(), new_info);
-        }
+            let options = await parseMeetupStr({bot, channelID, msg: edit});
+            meetup.update(options.date, options.info, options);
+        } 
+        // else if (param === "date") {
+        //     await bot.sendMessage({
+        //         to: channelID,
+        //         message: `Ok, editing \`${meetup.info_str()}\` - What do you want to change the date to?`
+        //     });
+        //     let new_date = await Query.wait({userID, channelID});
+        //     if (!new_date) {
+        //         return;
+        //     }
+        //     meetup.update(new_date, meetup.info_str());
+        // } else if (param === "info") {
+        //     await bot.sendMessage({
+        //         to: channelID,
+        //         message: `Ok, editing \`${meetup.info_str()}\` - What do you want to change the info to?`
+        //     });
+        //     let new_info = await Query.wait({userID, channelID});
+        //     if (!new_info) {
+        //         return;
+        //     }
+        //     meetup.update(meetup.date(), new_info);
+        // }
 
         let error = await meetup.validate(bot, false);
         if (error) {
@@ -357,20 +383,29 @@ export default {
     "!help": async function({ bot, message, userID, channelID }) {
         await bot.sendMessage({
             to: channelID,
-            message: "```"+
-                "Creating a meetup: \n"+
-                "   !meetup month/time hour:min | meetup_info\n\n"+
-                "   Examples:\n"+
-                "       !meetup 4/3 5:00pm | Bowling in Sunnyvale\n" + 
-                "       !meetup Friday 6:00pm | Free comedy @ Hapas\n\n" +
-                "Canceling a meetup: \n"+
-                "   !cancel\n\n"+
-                "Editing a meetup: \n"+
-                "   !edit\n"+
-                "   !edit date\n"+
-                "   !edit info\n\n"+
-                "Marking a meetup as Done: \n"+
-                "   The bot will auto mark any meetup 4 hours after the date/time```"
+            message:
+                "1. **Creating a meetup (BASIC):** \n"+
+                "```!meetup month/time hour:min | meetup_info```\n\n"+
+                "*Examples:*\n"+
+                "   ```!meetup 4/3 5:00pm | Bowling in Sunnyvale\n" + 
+                "!meetup Friday 6:00pm | Free comedy @ Hapas```\n\n" +
+                "2. **Advanced Options:** \n" +
+                "You can add advanced options by adding more | (pipes) and setting the option using `like:this`\n\n" +
+                "*Example:*\n" +
+                "   ```!meetup Friday 6pm | Free comedy @ Hapas | description: Meet early for beers```\n" +
+                "The options you can set:\n" +
+                "```" +
+                "   description: Add additional information to the meetup\n" +
+                "   location: An address to meet at\n" +
+                "   url: A url for more information\n" +
+                "   type: Changes the icon for the meetup\n" +
+                "       (accepted types: event, drinks, food)```\n" +
+                "*Example*:\n" +
+                "   ```!meetup tomorrow 12pm | Hike up a mountain | description: meet at parking lot B, we're doing route A->B | url: http://somemap.com```\n\n" +
+                "3. **Canceling a meetup:** \n"+
+                "   ```!cancel```\n\n"+
+                "4. **Editing a meetup:** \n"+
+                "   ```!edit```"
         });
     },
 
