@@ -9,6 +9,7 @@ import moment from 'moment'
 import channels from './channels'
 import BoombotRouter from '../boombot/router'
 import BoombotWeeklyController from '../boombot/commands/WeeklyController'
+import AdminRouter from './AdminCommands'
 
 import SwirlCount from './SwirlCount'
 
@@ -38,13 +39,17 @@ export default {
 
             // Insert in a swirl count
             if (message.toLowerCase().indexOf("swirl") !== -1) {
-                SwirlCount.add({ user, userID, message });
+                // SwirlCount.add({ user, userID, message });
             }
 
             if (message.substring(0, 1) == '!') {
                 let context = { bot, user, userID, channelID, message, evt };
+                const [cmd] = context.message.split(" ");
+
                 if (channelID === channels.BOOMBOT) {
                     BoombotRouter.router(context)
+                } else if (channelID === channels.ADMIN && AdminRouter[cmd]) {
+                    AdminRouter[cmd](context);
                 } else {
                     this.router(context);
                 }

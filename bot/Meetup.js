@@ -15,10 +15,20 @@ const States = {
     CANCELLED: 2
 };
 
+let type_icons = {
+    "notype": "https://imgur.com/VXuD9Rb.png",
+    "food": "https://imgur.com/TsecfdH.png",
+    "alcohol": "https://imgur.com/wwDUMWP.png",
+    "drinking": "https://imgur.com/wwDUMWP.png",
+    "drinks": "https://imgur.com/wwDUMWP.png",
+    "event": "https://imgur.com/eHxA5dN.png"
+};
+
 export default function({ 
     id = GUID(), 
     date, 
     info, 
+    options={},
     userID, 
     username,
     sourceChannelID,
@@ -30,6 +40,8 @@ export default function({
     let parsed_date = chrono.parseDate(date);
     let date_moment = new moment(parsed_date).utcOffset(-8, true);
     let date_str = date_moment.format("dddd M/D @ h:mma");
+    let date_date = date_moment.format("dddd M/D");
+    let date_time = date_moment.format("h:mma");
 
     let meetup_info = `${info} | ${date_str}`;
 
@@ -39,6 +51,8 @@ export default function({
         parsed_date = chrono.parseDate(date);
         date_moment = new moment(parsed_date);
         date_str = date_moment.format("dddd M/D @ h:mma");
+        date_date = date_moment.format("dddd M/D");
+        date_time = date_moment.format("h:mma");
     }
 
     this.updateInfo = function() {
@@ -132,19 +146,23 @@ export default function({
     }
 
     this.announce = function(bot) {
+        let embed = this.embed();
+
         return new Promise( async function(resolve, reject) {
             logger.info("Announcing meetup");
+            logger.debug(embed);
             let response = await bot.sendMessage({
                 to: channels.MEETUPS,
-                message: `\`👉 ${meetup_info}\`\n`
-                    +    `*Started by <@!${userID}> in <#${sourceChannelID}>* `
+                embed: embed
+                // message: `\`👉 ${meetup_info}\`\n`
+                //     +    `*Started by <@!${userID}> in <#${sourceChannelID}>* `
             });
             logger.info("ID: ", response.id);
             info_id = response.id;
 
             let { id: msg_id } = await bot.sendMessage({
                 to: channels.MEETUPS,
-                message: `Going to **${info}**? \`check = Yes \:thinking: = Maybe\``
+                message: `RSVP for **${info}**`
             });
 
             rsvp_id = msg_id;
@@ -164,6 +182,68 @@ export default function({
             resolve();
         });
     }
+
+    this.embed = function() {
+        
+        let fields = [
+            {
+              "name": "Date",
+              "value": date_date,
+              "inline": true
+            },
+            {
+              "name": "Time",
+              "value": date_time,
+              "inline": true
+            }
+        ];
+
+        if (options.location) {
+            let url = options.location.replace(/ /g, "+");
+            fields.push({
+                name: "Location",
+                value: options.location
+            });
+        }
+
+        if (options.url) {
+            fields.push({
+                name: "URL",
+                value: `[${options.url}](${options.url})`
+            });
+        }
+
+        let icon_url = type_icons.notype;
+        if (options.type) {
+            if (type_icons[options.type]) {
+                icon_url = type_icons[options.type];
+            }
+        }
+
+        fields.push({
+            name: "Channel",
+            value: `<#${sourceChannelID}>`
+        });
+
+        let embed = {
+            "color": 123456,
+            "author": {
+                "name": info,
+                "icon_url": icon_url
+            },
+            "footer": {
+                "text": `Started by @${username}`,
+                "icon_url": "https://cdn.discordapp.com/embed/avatars/0.png"
+            },
+            fields
+        };
+
+        if (options.description) {
+            embed.description = options.description;
+        }
+
+        return embed;
+    };
 
     this.confirm = async function(bot) {
         return new Promise(async function(resolve) {
@@ -217,18 +297,31 @@ export default function({
     }
 
     this.editInfo = async function(bot) {
+        let embed = this.embed();
         await bot.editMessage({
             channelID: channels.MEETUPS,
             messageID: info_id,
-            message: `\`${meetup_info}\`\n`
-                +    `*Started by <@!${userID}> in <#${sourceChannelID}>* `
+            embed: embed
+            // message: `\`${meetup_info}\`\n`
+            //     +    `*Started by <@!${userID}> in <#${sourceChannelID}>* `
         });
 
         await bot.editMessage({
             channelID: channels.MEETUPS,
             messageID: rsvp_id,
-            message: `Going to **${info}**? \`check = Yes \:thinking: = Maybe\``
+            message: `RSVP for **${info}**`
         });
+    }
+
+    this.getMeetupString = function() {
+        let str = date + " | " + info;
+        let option_str = Object.entries(options)
+            .filter( ([k,v]) => k !== "info" && k !== "date" )
+            .map( ([k,v]) => k+":"+v).join(" | ");
+        if (option_str) {
+            str += " | " + option_str;
+        }
+        return str;
     }
 
     this.cancel = async function(bot) {
@@ -245,9 +338,10 @@ export default function({
         });
     }
 
-    this.update = function(new_date, new_info) {
+    this.update = function(new_date, new_info, new_options) {
         date = new_date;
         info = new_info;
+        options = new_options;
         this.parseDate();
         this.updateInfo();
     }
@@ -263,6 +357,7 @@ export default function({
             date, 
             timestamp: date_moment.toISOString(),
             info, 
+            options,
             userID, 
             username,
             sourceChannelID, 
@@ -278,6 +373,7 @@ export default function({
             id,
             date: date_moment.toISOString(),
             info, 
+            options,
             userID, 
             username,
             sourceChannelID, 

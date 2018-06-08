@@ -6,6 +6,7 @@ const meetupSchema = mongoose.Schema({
     timestamp: String,
     info: String, 
     userID: String, 
+    options: Object,
     username: String,
     sourceChannelID: String, 
     state: String, 

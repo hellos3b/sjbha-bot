@@ -12,7 +12,8 @@ function Query(question, { userID, channelID }) {
     this.channelID = channelID;
 }
 
-const QUERY_TIMEOUT = 30000;
+// 5 minutes
+const QUERY_TIMEOUT = 5 * 60 * 1000;
 
 export default {
 
