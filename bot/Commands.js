@@ -399,9 +399,9 @@ export default {
                 "   location: An address to meet at\n" +
                 "   url: A url for more information\n" +
                 "   type: Changes the icon for the meetup\n" +
-                "       (accepted types: event, drinks, food)```\n" +
+                "       (accepted types: event, drinks, food, active)```\n" +
                 "*Example*:\n" +
-                "   ```!meetup tomorrow 12pm | Hike up a mountain | description: meet at parking lot B, we're doing route A->B | url: http://somemap.com```\n\n" +
+                "   ```!meetup tomorrow 12pm | Hike up a mountain | description: meet at parking lot B, we're doing route A->B | url: http://somemap.com | type: active```\n\n" +
                 "3. **Canceling a meetup:** \n"+
                 "   ```!cancel```\n\n"+
                 "4. **Editing a meetup:** \n"+
