@@ -243,6 +243,12 @@ export default function({
             embed.description = options.description;
         }
 
+        if (options.image) {
+            embed.thumbnail = {
+                url: options.image
+            };
+        }
+
         return embed;
     };
 

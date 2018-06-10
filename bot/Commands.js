@@ -11,7 +11,7 @@ import channels from './channels'
 import moment from 'moment'
 
 async function parseMeetupStr({bot, channelID, msg}) {
-    let possibleOptions = new Set(["url", "type", "description", "location"]);
+    let possibleOptions = new Set(["url", "type", "description", "location", "image"]);
 
     const [date, info, ...opt] = msg.split("|").map( s => s.trim() );
 
@@ -398,6 +398,7 @@ export default {
                 "   description: Add additional information to the meetup\n" +
                 "   location: An address to meet at\n" +
                 "   url: A url for more information\n" +
+                "   image: add a thumbnail for the meetup\n" +
                 "   type: Changes the icon for the meetup\n" +
                 "       (accepted types: event, drinks, food, active)```\n" +
                 "*Example*:\n" +
