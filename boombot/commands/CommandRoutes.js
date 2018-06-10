@@ -6,6 +6,7 @@ import WeeklyDB from '../db/WeeklyDB'
 import logger from 'winston'
 import Timeout from './Timeout'
 import WeeklyController from './WeeklyController'
+import Embeds from '../game/Embeds'
 
 import Bots from '../game/bots'
 
@@ -246,7 +247,7 @@ export default {
     },
 
     // Joining a game
-    [commands.Join.trigger]: async function({user, userID}) {
+    [commands.Join.trigger]: async function({bot, channelID, user, userID}) {
         let msg = "";
         if (!GameController.exists) {
             return `There is no active game you can join! Try starting a new one with \`!new\`?`;
@@ -276,6 +277,12 @@ export default {
         }
 
         game.addPlayer(player);
+        let embed = Embeds.Join({name: player.name});
+
+        await bot.sendMessage({
+            to: channelID,
+            embed
+        });
         msg = `There are now ${game.playerCount()}/${PLAYER_MAX_COUNT} players ready to play. Use \`!join\` to get in on the game, or leader can \`!start\` to start the game!`
 
         return msg;
@@ -327,16 +334,32 @@ export default {
 
             game.resetRound();
 
-            msg += `🔥🔥BOOOOOOM🔥🔥 goodbye **${player.name}**! `; 
-            msg += `You are leaving the table with **${coins}** coins\n`;
-            msg += `**${sharedAmount}** coins were split between the remaining players\n`;
+            let profit = coins - game.getBuyin();
+            let embed = Embeds.Explode({
+                name: player.name,
+                coinsLeft: coins,
+                coinsShared: sharedAmount,
+                profit: profit
+            });
+
+            await bot.sendMessage({
+                to: channelID,
+                embed
+            });
+
         } else {
             game.addCoins(userID, pot);
             game.resetPot();
             game.nextTurn();
 
-            msg += `*CLICK* **${player.name}** is safe!\n`;
-            msg += (pot > 0) ? `They stole **${pot}** coins from the pot\n` : "";
+            let embed = Embeds.Click({
+                name: player.name,
+                potStolen: pot
+            });
+            await bot.sendMessage({
+                to: channelID,
+                embed
+            });
         }
 
         if (game.isOver()) {
@@ -431,9 +454,21 @@ export default {
         game.addPot(passCost);
         game.nextTurn();
 
-        msg += `**${player.name}** pays **${passCost}** coins to pass the bomb.\n`;
+        let embed = Embeds.Pass({
+            name: player.name,
+            passCost: passCost
+        });
 
-        msg += game.toString();
+        await bot.sendMessage({
+            to: channelID,
+            embed
+        });
+
+        await bot.sendMessage({
+            to: channelID,
+            embed: game.embed()
+        });
+
         msg += game.turnMention();
 
         let currentTurn = game.currentTurn();
@@ -489,7 +524,7 @@ export default {
     },
 
     // initiating a new game
-    [commands.Stats.trigger]: async function({user, userID, message}) {
+    [commands.Stats.trigger]: async function({channelID, bot, user, userID, message}) {
 
         let [cmd, mention] = message.split(" ");
         let targetId = userID;
@@ -520,17 +555,19 @@ export default {
         // table.removeBorder();
         let survive_percent = Math.floor(json.survives / json.games * 10000) / 100;
 
-        table.addRow("Bank", json.bank);
-        table.addRow("Rank", rank);
-        table.addRow("Games Played", json.games);
-        table.addRow("Survives", json.survives);
-        table.addRow("Survive %", survive_percent+"%");
-        // table.addRow("Net Worth", player.netWorth());
-        // table.addRow("Rank", rank);
-        // table.addRow("Bank", json.bank);
-        // table.addRow("Debt", json.debt);
+        let embed = Embeds.Stats({
+            name: player.name,
+            rank,
+            bank: json.bank,
+            games: json.games,
+            gamesWon: json.survives,
+            survivalpercent: survive_percent+"%"
+        });
 
-        return "```\n"+table.toString()+"```";
+        await bot.sendMessage({
+            to: channelID,
+            embed
+        });
     },
 
     [commands.Loan.trigger]: async function({user, userID, message}) {

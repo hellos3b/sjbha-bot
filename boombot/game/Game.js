@@ -1,5 +1,6 @@
 import Table from 'ascii-table'
 import Bomb from './Bomb';
+import Embeds from './Embeds';
 
 export default function(ownerID, buyin) {
 
@@ -175,6 +176,20 @@ export default function(ownerID, buyin) {
 
         msg += gameTable.toString();
         return "```\n"+msg+"```";
+    }
+
+    this.embed = function() {
+        let risk = Math.floor(lossRisk * 100);
+        let currentPlayer = this.currentTurn();
+        let percent = Math.floor( (1/ (6-bomb.clickCount()) )*1000)/10;
+        return Embeds.BombStatus({
+            clicks: bomb.clickCount(),
+            explodePercent: percent +"%",
+            pot,
+            risk,
+            passCost,
+            currentTurn: currentPlayer.name
+        });
     }
 
     this.getRound = function() {
