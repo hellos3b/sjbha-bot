@@ -4,7 +4,7 @@ import Table from 'ascii-table'
 let players = {};
 
 let amounts = {
-    first: 60,
+    first: 80,
     second: 40,
     lotto: 60,
     loser: 20
@@ -44,7 +44,9 @@ export default {
         console.log(results);
 
         // Save results [-- Disabled for first week]
-        // await this.SaveResultsDB(results);
+        await this.SaveResultsDB(results);
+
+        let congrats = `Congrats to <@!${results.first.userID}>, <@!${results.seconds.userID}>, <@!${results.lotto.userID}>`;
 
         // Send results
         var table = new Table("Weekly Results");
@@ -52,15 +54,18 @@ export default {
         table.addRow("2nd Place Winner", results.second.user, `+${amounts.second} coins`);
         if (results.loser) {
             table.addRow("Pity Coins", results.loser.user, `+${amounts.loser} coins`);
+            congrats += `, <@!${results.loser.userID}> for winning the weekly coins`;
         }
         table.addRow("Lottery Winner", results.lotto.user, `+${amounts.lotto} coins`)
+
 
         let leaderboard = await this.Leaderboard();
         await bot.sendMessage({
             to: "432766496700235776",
             message: "End of Weekly Challenge!\n" +
                 "```"+leaderboard+"```\n" +
-                "```"+table.toString()+"```"
+                "```"+table.toString()+"```\n" +
+                congrats
         });
 
         // Clear DB
