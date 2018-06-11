@@ -4,9 +4,9 @@ export default {
         return {
               "description":  `The bomb has been clicked **${clicks}** times (${explodePercent} chance to explode)`,
               "color": 15959851,
-              "thumbnail": {
-                "url": "https://imgur.com/SBuEiNS.png"
-              },
+            //   "thumbnail": {
+            //     "url": "https://imgur.com/SBuEiNS.png"
+            //   },
               "fields": [
                 {
                   "name": "Pot",
@@ -35,7 +35,7 @@ export default {
         let embed = {
                 "color": 6482025,
                 "author": {
-                "name": "s3b clicks the bomb and is safe!",
+                "name": `${name} clicks the bomb and is safe!`,
                 "icon_url": "https://imgur.com/Kif592I.png"
                 }
             };
@@ -123,6 +123,36 @@ export default {
                 "icon_url": "https://cdn.discordapp.com/embed/avatars/0.png"
             }
         }
+    },
+
+    Weekly({first, second, lotto, loser, firstcoins, secondcoins, lottocoins, losercoins}) {
+        return {
+              "title": "Weekly Challenge Results",
+              "description": "The weekly challenge is over, time for a reset - These are the people that have won fresh coins!",
+              "color": 8580042,
+              "timestamp": "2018-06-11T01:15:02.444Z",
+              "thumbnail": {
+                "url": "https://imgur.com/q90ytxR.png"
+              },
+              "fields": [
+                {
+                  "name": `1st Place (+${firstcoins})` ,
+                  "value": first
+                },
+                {
+                  "name": `2nd Place (+${secondcoins})`,
+                  "value": second
+                },
+                {
+                  "name": `Pity Prize (+${losercoins})`,
+                  "value": loser
+                },
+                {
+                  "name": `Lotto Winner (+${lottocoins})`,
+                  "value": lotto
+                }
+              ]
+          };
     }
 
 }

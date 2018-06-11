@@ -148,7 +148,7 @@ export default function(ownerID, buyin) {
         return players;
     }
 
-    this.toString = function() {
+    this.toString = function(hideCosts) {
         let msg = "";
         let risk = Math.floor(lossRisk * 100);
         msg += `RISK: ${risk}%  `;
@@ -162,9 +162,12 @@ export default function(ownerID, buyin) {
         } else {
             let currentPlayer = this.currentTurn();
             let percent = Math.floor( (1/ (6-bomb.clickCount()) )*1000)/10;
-            msg += `| PASS COST: ${passCost} | POT: ${pot}\n`;
-            msg += `Current Turn: ${currentPlayer.name}\n`;
-            msg += `The bomb has been clicked ${bomb.clickCount()} times (${percent}% chance to explode this turn)\n`;
+
+            if (!hideCosts) {
+                msg += `| PASS COST: ${passCost} | POT: ${pot}\n`;
+                msg += `Current Turn: ${currentPlayer.name}\n`;
+                msg += `The bomb has been clicked ${bomb.clickCount()} times (${percent}% chance to explode this turn)\n`;
+            }
             gameTable.setHeading('turn', 'player', 'coins');
 
             for (var i = 0; i < players.length; i++) {

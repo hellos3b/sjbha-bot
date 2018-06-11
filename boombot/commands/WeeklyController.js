@@ -1,6 +1,8 @@
 import WeeklyDB from '../db/WeeklyDB'
 import PlayersDB from '../db/PlayersDB'
 import Table from 'ascii-table'
+import Embeds from '../game/Embeds'
+
 let players = {};
 
 let amounts = {
@@ -48,24 +50,36 @@ export default {
 
         let congrats = `Congrats to <@!${results.first.userID}>, <@!${results.seconds.userID}>, <@!${results.lotto.userID}>`;
 
+        let embed = Embeds.Weekly({
+            first: results.first.user,
+            firstcoins: amounts.first,
+            seconds: results.second.user,
+            secondcoins: amounts.second,
+            loser: results.loser.user,
+            losercoins: amounts.loser,
+            lotto: results.lotto.user,
+            lottocoins: amounts.lotto
+        });
+
+        await bot.sendMessage({
+            to: "432766496700235776",
+            embed
+        });
         // Send results
-        var table = new Table("Weekly Results");
-        table.addRow("1st Place Winner", results.first.user, `+${amounts.first} coins`);
-        table.addRow("2nd Place Winner", results.second.user, `+${amounts.second} coins`);
-        if (results.loser) {
-            table.addRow("Pity Coins", results.loser.user, `+${amounts.loser} coins`);
-            congrats += `, <@!${results.loser.userID}> for winning the weekly coins`;
-        }
-        table.addRow("Lottery Winner", results.lotto.user, `+${amounts.lotto} coins`)
+        // var table = new Table("Weekly Results");
+        // table.addRow("1st Place Winner", results.first.user, `+${amounts.first} coins`);
+        // table.addRow("2nd Place Winner", results.second.user, `+${amounts.second} coins`);
+        // if (results.loser) {
+        //     table.addRow("Pity Coins", results.loser.user, `+${amounts.loser} coins`);
+        //     congrats += `, <@!${results.loser.userID}> for winning the weekly coins`;
+        // }
+        // table.addRow("Lottery Winner", results.lotto.user, `+${amounts.lotto} coins`)
 
 
         let leaderboard = await this.Leaderboard();
         await bot.sendMessage({
             to: "432766496700235776",
-            message: "End of Weekly Challenge!\n" +
-                "```"+leaderboard+"```\n" +
-                "```"+table.toString()+"```\n" +
-                congrats
+            message: "```"+leaderboard+"```\n" + congrats
         });
 
         // Clear DB

@@ -360,6 +360,11 @@ export default {
                 to: channelID,
                 embed
             });
+
+            await bot.sendMessage({
+                to: channelID,
+                embed: game.embed()
+            });
         }
 
         if (game.isOver()) {
@@ -374,7 +379,7 @@ export default {
             WeeklyController.SaveResults( game.getResults() );
             GameController.End();
         } else {
-            msg += game.toString();
+            msg += game.toString(true);
             msg += game.turnMention();
 
             let currentTurn = game.currentTurn();
@@ -469,6 +474,7 @@ export default {
             embed: game.embed()
         });
 
+        msg += game.toString(true);
         msg += game.turnMention();
 
         let currentTurn = game.currentTurn();
