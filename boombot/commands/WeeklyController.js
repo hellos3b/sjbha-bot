@@ -48,7 +48,7 @@ export default {
         // Save results [-- Disabled for first week]
         await this.SaveResultsDB(results);
 
-        let congrats = `Congrats to <@!${results.first.userID}>, <@!${results.seconds.userID}>, <@!${results.lotto.userID}>`;
+        let congrats = `Congrats to <@!${results.first.userID}>, <@!${results.second.userID}>, <@!${results.lotto.userID}>`;
 
         let embed = Embeds.Weekly({
             first: results.first.user,
