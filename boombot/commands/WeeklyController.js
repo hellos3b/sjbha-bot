@@ -53,7 +53,7 @@ export default {
         let embed = Embeds.Weekly({
             first: results.first.user,
             firstcoins: amounts.first,
-            seconds: results.second.user,
+            second: results.second.user,
             secondcoins: amounts.second,
             loser: results.loser.user,
             losercoins: amounts.loser,
