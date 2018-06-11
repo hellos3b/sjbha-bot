@@ -16,7 +16,7 @@ const LOAN_INTEREST = 0.1;
 const _minutes = 60 * 1000;
 const _hours = 60 * 60 * 1000;
 const START_TIMEOUT = 3 * _hours; // 6 hours
-const TURN_TIMEOUT = 20 * _minutes;
+const TURN_TIMEOUT = 30 * _minutes;
 const PAY_MATCH_PERCENT = 0.25;
 
 const PLAYER_MAX_COUNT = 8;
@@ -423,6 +423,9 @@ export default {
                 } else {
                     t_msg += game.toString();
                     t_msg += game.turnMention();
+
+                    let ctp = game.getPlayer(currentTurn.userID);
+                    ctp.yourTurn({game, bot, channelID, user, userID});
                 }
     
                 await bot.sendMessage({
@@ -518,6 +521,9 @@ export default {
             } else {
                 t_msg += game.toString();
                 t_msg += game.turnMention();
+
+                let ctp = game.getPlayer(currentTurn.userID);
+                ctp.yourTurn({game, bot, channelID, user, userID});
             }
 
             await bot.sendMessage({
