@@ -25,6 +25,6 @@ cron.schedule('0 */2 * * *', function(){
     Bot.cron();
 });
 
-cron.schedule('22 0 * * 1', function(){
+cron.schedule('28 0 * * 1', function(){
     Bot.weeklyCron();
 });
