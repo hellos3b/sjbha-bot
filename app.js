@@ -24,4 +24,7 @@ DB.connect();
 cron.schedule('0 */2 * * *', function(){
     Bot.cron();
 });
-  
+
+cron.schedule('15 0 * * 1', function(){
+    Bot.weeklyCron();
+});
