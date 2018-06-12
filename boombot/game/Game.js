@@ -208,12 +208,12 @@ export default function(ownerID, buyin) {
         let currentPlayer = this.currentTurn();
         let percent = Math.floor( (1/ (6-bomb.clickCount()) )*1000)/10;
 
-        let msg = "";
+        let msg = "```";
         if (bonus) {
             msg += "💰💰💰 BONUS ROUND 💰💰💰\n";
         }
-        msg += `COIN RISK: ${risk}%\n | PASS COST: ${passCost} | POT: ${pot}\n`;
-        msg += `The bomb has been clicked ${bomb.clickCount()} times\n(${percent}% chance to explode this turn)\n`;
+        msg += `COIN RISK: ${risk}% | PASS COST: ${passCost} | POT: ${pot}\n` + "```"; 
+        msg += `The bomb has been clicked ${bomb.clickCount()} times (${percent}% chance to explode this turn)\n`;
         return msg;
     }
 

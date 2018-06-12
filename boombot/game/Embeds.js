@@ -41,9 +41,9 @@ export default {
             };
 
         if (potStolen > 0) {
-            embed.description = `Stole ${potStolen} coins from the pot\n` + "```" + gameString + "```";
+            embed.description = `Stole ${potStolen} coins from the pot\n` + gameString;
         } else {
-            embed.description = "```" + gameString + "```";
+            embed.description = gameString;
         }
 
         return embed;
@@ -56,7 +56,7 @@ export default {
               "name": `${name} pays ${passCost} to pass the bomb`,
               "icon_url": "https://imgur.com/JMBi3mS.png"
             },
-            "description": "```" + gameString + "```"
+            "description": gameString
         };
     },
 
@@ -67,8 +67,7 @@ export default {
             "name": `RIP ${name}`,
             "icon_url": "https://imgur.com/JOJtmjB.png"
             },
-            "description": `🔥🔥🔥🔥🔥🔥🔥\nLeaving the table with ${coinsLeft} coins\nProfit: ${profit}, Coins Split: ${coinsShared}\n\n` + 
-                "```" + gameString + "```"
+            "description": `🔥🔥🔥🔥🔥🔥🔥\nLeaving the table with ${coinsLeft} coins\nProfit: ${profit}, Coins Split: ${coinsShared}\n\n` + gameString
         };
     },
 
