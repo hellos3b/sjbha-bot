@@ -2,6 +2,9 @@ import Table from 'ascii-table'
 import Bomb from './Bomb';
 import Embeds from './Embeds';
 
+let BONUS_CHANCE = 6;
+let BONUS_AMT = 2;
+
 export default function(ownerID, buyin) {
 
     let players = [];
@@ -12,6 +15,8 @@ export default function(ownerID, buyin) {
     let maxPlayers = 0;
     let lossRisk = 1;
     let lossCoins = 0;
+
+    let bonus = false;
 
     // game stuff
     let state = "JOIN";
@@ -54,10 +59,18 @@ export default function(ownerID, buyin) {
         return players.length === 1;
     }
 
+    this.isBonus = function() {
+        return bonus;
+    }
+
     this.Start = function() {
         this.resetTurn();
         state = "ACTIVE";
         bomb.reset();
+
+        // create money round
+        let rng = Math.floor( Math.random() * BONUS_CHANCE );
+        bonus = (rng === 3);
 
         maxPlayers = players.length;
         this.updateLossRisk();
@@ -65,6 +78,11 @@ export default function(ownerID, buyin) {
         for (var i = 0; i < players.length; i++) {
             players[i].removeBank(buyin);
             players[i].addGame();
+
+            if (bonus) {
+                playerBank[players[i].userID] = buyin*2;
+                passCost = Math.floor(buyin/2);
+            }
         }
     }
 
@@ -151,7 +169,6 @@ export default function(ownerID, buyin) {
     this.toString = function(hideCosts) {
         let msg = "";
         let risk = Math.floor(lossRisk * 100);
-        msg += `RISK: ${risk}%  `;
         
         let gameTable = new Table();
         if (state === "JOIN") {
@@ -164,6 +181,11 @@ export default function(ownerID, buyin) {
             let percent = Math.floor( (1/ (6-bomb.clickCount()) )*1000)/10;
 
             if (!hideCosts) {
+
+                if (bonus) {
+                    msg += "💰💰💰 BONUS ROUND 💰💰💰\n";
+                }
+                msg += `RISK: ${risk}%  `;
                 msg += `| PASS COST: ${passCost} | POT: ${pot}\n`;
                 msg += `Current Turn: ${currentPlayer.name}\n`;
                 msg += `The bomb has been clicked ${bomb.clickCount()} times (${percent}% chance to explode this turn)\n`;
@@ -179,6 +201,20 @@ export default function(ownerID, buyin) {
 
         msg += gameTable.toString();
         return "```\n"+msg+"```";
+    }
+
+    this.description = function() {
+        let risk = Math.floor(lossRisk * 100);
+        let currentPlayer = this.currentTurn();
+        let percent = Math.floor( (1/ (6-bomb.clickCount()) )*1000)/10;
+
+        let msg = "";
+        if (bonus) {
+            msg += "💰💰💰 BONUS ROUND 💰💰💰\n";
+        }
+        msg += `COIN RISK: ${risk}%\n | PASS COST: ${passCost} | POT: ${pot}\n`;
+        msg += `The bomb has been clicked ${bomb.clickCount()} times\n(${percent}% chance to explode this turn)\n`;
+        return msg;
     }
 
     this.embed = function() {
