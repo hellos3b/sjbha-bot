@@ -31,53 +31,44 @@ export default {
         }
     },
 
-    Click({name, potStolen}) {
+    Click({name, potStolen, gameString}) {
         let embed = {
                 "color": 6482025,
                 "author": {
-                "name": `${name} clicks the bomb and is safe!`,
+                "name": `${name} clicks`,
                 "icon_url": "https://imgur.com/Kif592I.png"
                 }
             };
 
         if (potStolen > 0) {
-            embed.description = `Stole ${potStolen} coins from the pot`;
+            embed.description = `Stole ${potStolen} coins from the pot\n` + "```" + gameString + "```";
+        } else {
+            embed.description = "```" + gameString + "```";
         }
 
         return embed;
     },
 
-    Pass({name, passCost}) {
+    Pass({name, passCost, gameString}) {
         return {
             "color": 9101277,
             "author": {
               "name": `${name} pays ${passCost} to pass the bomb`,
               "icon_url": "https://imgur.com/JMBi3mS.png"
-            }
+            },
+            "description": "```" + gameString + "```"
         };
     },
 
-    Explode({name, coinsLeft, profit, coinsShared}) {
+    Explode({name, coinsLeft, profit, coinsShared, gameString}) {
         return {
             "color": 16646144,
             "author": {
-            "name": `${name} clicks the bomb and BOOOOOM`,
+            "name": `RIP ${name}`,
             "icon_url": "https://imgur.com/JOJtmjB.png"
             },
-            "description": `Leaving the table with ${coinsLeft} coins`,
-            "thumbnail": {
-              "url": "https://imgur.com/BplW4bI.png"
-            },
-            "fields": [
-              {
-                "name": "Profit",
-                "value": profit.toString()
-              },
-              {
-                "name": "Coins Split",
-                "value": coinsShared.toString()
-              }
-            ]
+            "description": `🔥🔥🔥🔥🔥🔥🔥\nLeaving the table with ${coinsLeft} coins\nProfit: ${profit}, Coins Split: ${coinsShared}\n\n` + 
+                "```" + gameString + "```"
         };
     },
 
@@ -130,7 +121,6 @@ export default {
               "title": "Weekly Challenge Results",
               "description": "The weekly challenge is over, time for a reset - These are the people that have won fresh coins!",
               "color": 8580042,
-              "timestamp": "2018-06-11T01:15:02.444Z",
               "thumbnail": {
                 "url": "https://imgur.com/q90ytxR.png"
               },

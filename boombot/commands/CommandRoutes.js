@@ -335,11 +335,13 @@ export default {
             game.resetRound();
 
             let profit = coins - game.getBuyin();
+            let gameString = game.description();
             let embed = Embeds.Explode({
                 name: player.name,
                 coinsLeft: coins,
                 coinsShared: sharedAmount,
-                profit: profit
+                profit: profit,
+                gameString
             });
 
             await bot.sendMessage({
@@ -352,18 +354,18 @@ export default {
             game.resetPot();
             game.nextTurn();
 
+
+            let gameString = game.description();
+
             let embed = Embeds.Click({
                 name: player.name,
-                potStolen: pot
-            });
-            await bot.sendMessage({
-                to: channelID,
-                embed
+                potStolen: pot,
+                gameString
             });
 
             await bot.sendMessage({
                 to: channelID,
-                embed: game.embed()
+                embed
             });
         }
 
@@ -462,19 +464,18 @@ export default {
         game.addPot(passCost);
         game.nextTurn();
 
+
+        let gameString = game.description();
+
         let embed = Embeds.Pass({
             name: player.name,
-            passCost: passCost
+            passCost: passCost,
+            gameString
         });
 
         await bot.sendMessage({
             to: channelID,
             embed
-        });
-
-        await bot.sendMessage({
-            to: channelID,
-            embed: game.embed()
         });
 
         msg += game.toString(true);
