@@ -426,6 +426,7 @@ export default {
                     t_msg += game.toString();
                     t_msg += game.turnMention();
 
+                    currentTurn = game.currentTurn();
                     let ctp = game.getPlayer(currentTurn.userID);
                     ctp.yourTurn({game, bot, channelID, user, userID});
                 }
