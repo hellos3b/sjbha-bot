@@ -285,6 +285,58 @@ export default {
         });
     },
 
+    "!mention": async function({bot, message, channelID, userID}) {
+        let [cmd, param] = message.split(" ").map(m => m.trim());
+
+        let meetups = await MeetupsDB.getMeetups();
+        meetups = meetups.map( m => new Meetup(m));
+        let meetup = null;
+
+        if (meetups.length === 0) {
+            await bot.sendMessage({
+                to: channelID,
+                message: "There are no active meetups"
+            });
+            return;
+        }
+
+        let meetup_list = meetups.map( (m, i) => i + ": " + m.info() ).join("\n");
+        await bot.sendMessage({
+            to: channelID,
+            message: "Which meetup do you want to mention?\n```"+meetup_list+"```"
+        });
+        let index = await Query.wait({userID, channelID});
+        if (index === null) {
+            return;
+        }
+        if (index < 0 || index >= meetups.length) {
+            await bot.sendMessage({
+                to: channelID,
+                message: "That wasn't one of the choices"
+            });
+            return;
+        }
+        meetup = meetups[index];
+
+        let reactions = await meetup.getReactions(bot);
+        let yes_mentions = reactions.yes.map( u => `<@!${u.id}>`).join(" ");
+        let maybe_mentions = reactions.maybe.map( u => `<@!${u.id}>`).join(" ");
+        let mentions = "";
+
+        if (param === "yes") {
+            mentions = yes_mentions;
+        } else if (param === "maybe") {
+            mentions = maybe_mentions;
+        } else {
+            mentions = yes_mentions + " " + maybe_mentions;
+        }
+
+        await bot.sendMessage({
+            to: channelID,
+            message: mentions
+        });
+    },
+
     /*
         !edit date 4/3 8:00pm
         > edits most recent ones date
