@@ -9,6 +9,7 @@ import logger from 'winston'
 import Query from './Query'
 import channels from './channels'
 import moment from 'moment'
+import Poll from './Poll'
 
 async function parseMeetupStr({bot, channelID, msg}) {
     let possibleOptions = new Set(["url", "type", "description", "location", "image"]);
@@ -430,6 +431,36 @@ export default {
             to: channelID,
             message: `You got it! Updated to \`${meetup.info()}\``
         })
+    },
+
+    "!poll": async function({bot, message, channelID}) {
+        let [cmd, ...msg] = message.split(" ");
+
+        let [title, ...options] = msg.join(" ").split("|").map( n => n.trim() );
+
+        let error = null;
+        if (options.length < 2) {
+            error = "You need at least two options to start a poll!";
+        }
+
+        if (options.length > 4) {
+            error = "Sorry, only 4 options max allowed for a poll";
+        }
+
+        if (error) {
+            await bot.sendMessage({
+                to: channelID,
+                message: error
+            });
+            return;
+        }
+
+        Poll({
+            bot,
+            channelID,
+            title,
+            options
+        });
     },
 
     "!help": async function({ bot, message, userID, channelID }) {
