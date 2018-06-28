@@ -200,10 +200,11 @@ export default function({
         ];
 
         if (options.location) {
-            let url = options.location.replace(/ /g, "+");
+            let addy = encodeURIComponent(options.location);
+            let url = "https://www.google.com/maps/search/?api=1&query=" + addy;
             fields.push({
                 name: "Location",
-                value: options.location
+                value: `[${options.location}](${url})`
             });
         }
 
