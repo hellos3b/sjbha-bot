@@ -355,9 +355,12 @@ export default function({
     }
 
     this.id = () => id;
+    this.info_id = () => info_id;
     this.info = () => meetup_info;
     this.info_str = () => info;
     this.date = () => date;
+    this.date_str = () => date_str;
+    this.date_moment = () => date_moment;
 
     this.toJSON = function() {
         return {
