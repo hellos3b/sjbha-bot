@@ -463,6 +463,28 @@ export default {
         });
     },
 
+    "!meetups": async function ({bot, message, userID, channelID }) {
+        let meetups = await MeetupsDB.getMeetups(userID);
+        meetups = meetups.map( m => new Meetup(m))
+            .sort( (a, b) => {
+                if (a.date_moment().toISOString() < b.date_moment().toISOString())
+                    return -1;
+                if (a.date_moment().toISOString() > b.date_moment().toISOString())
+                    return 1;
+                return 0;
+            });
+
+        let desc = "```md\n" + meetups.map( m => {
+            let url = `https://discordapp.com/channels/358442034790400000/430878436027006978?jump=${m.info_id()}`;
+            return `# ${m.info_str()}\n[${m.date_moment().fromNow()}](${m.date_moment().format("M/D @ h:mma")})`
+        }).join("\n\n") + "```";
+
+        await bot.sendMessage({
+            to: channelID,
+            message: desc
+        });
+    },
+
     "!help": async function({ bot, message, userID, channelID }) {
         await bot.sendMessage({
             to: channelID,
