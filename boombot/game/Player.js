@@ -7,7 +7,12 @@ export default function({
     bank=40,    // Total number of coins
     debt=0,     // How much debt player has accumulated from loans
     games=0,     // How many games the player has played in
-    survives=0
+    survives=0,
+    active=false,
+    season_games=0,
+    season_survives=0,
+    trophies=[],
+    history=[]
 }) {
     let isBot = false;
     let bot_delay = 7000;
@@ -29,6 +34,10 @@ export default function({
 
     this.isABot = function() {
         return isBot;
+    }
+
+    this.isActive = function() {
+        return active;
     }
 
     this.yourTurn = function({game, bot, channelID}) {
@@ -70,10 +79,19 @@ export default function({
 
     this.addSurvive = function() {
         survives++;
+        season_survives++;
     }
 
     this.getSurvives = function() {
         return survives;
+    }
+
+    this.getSeasonSurvives = function() {
+        return season_survives;
+    }
+
+    this.getSeasonGames = function() {
+        return season_games;
     }
 
     this.getSurvivePercentage = function() {
@@ -89,6 +107,7 @@ export default function({
 
     this.addGame = function() {
         games++;
+        season_games++;
     }
 
     this.getGames = function() {
@@ -118,9 +137,31 @@ export default function({
         return debt;
     }
 
+    this.addTrophy = function(name, type) {
+        console.log("trophies", trophies);
+        trophies.push({name, type});
+    };
+
+    this.seasonReset = function(seasonName, rank, playerCount) {
+        let hist = {
+            season: seasonName,
+            bank, 
+            games,
+            survives,
+            rank,
+            playerCount
+        };
+        history.push(hist);
+        bank = 40;
+        season_games = 0;
+        season_survives = 0;
+    }
+
     this.toJSON = function() {
         return {
-            user, userID, bank, debt, games, survives
+            user, userID, bank, debt, games, survives,
+            season_games, season_survives, trophies, history,
+            active: true
         };
     };
 }

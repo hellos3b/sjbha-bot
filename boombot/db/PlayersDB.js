@@ -53,6 +53,7 @@ export default {
     fetchLeaderboard: async function() {
         let players = await this.getAll();
         let leaderboard = players.slice()
+            .filter( p => p.isActive())
             .sort( (a, b) => b.netWorth() - a.netWorth() );
         return leaderboard;
     },
@@ -74,7 +75,10 @@ export default {
     },
 
     savePlayer(player) {
-        let json = player.toJSON();
+        let json = player;
+        if (player.toJSON) {
+            json = player.toJSON();
+        }
 
         return new Promise((resolve, reject) => {
             PlayerModel.findOneAndUpdate({

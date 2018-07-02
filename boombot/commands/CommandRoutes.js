@@ -10,7 +10,7 @@ import Embeds from '../game/Embeds'
 
 import Bots from '../game/bots'
 
-const LEADERBOARD_COUNT = 20;
+const LEADERBOARD_COUNT = 40;
 const LOAN_INTEREST = 0.1;
 
 const _minutes = 60 * 1000;
@@ -174,6 +174,10 @@ export default {
         let leaderboard = await PlayersDB.fetchLeaderboard();
         leaderboard = leaderboard.slice(0, LEADERBOARD_COUNT);
 
+        if (!leaderboard.length) {
+            return "Nobody has played a game yet this season!";
+        }
+
         var table = new Table("Leaderboard");
         // table.setHeading(" ", "name", "net worth", "bank", "games", "survives");
         table.setHeading(" ", "name", "bank", "games", "survives");
@@ -184,8 +188,8 @@ export default {
                 leaderboard[i].name, 
                 // leaderboard[i].netWorth(),
                 leaderboard[i].getBank(),
-                leaderboard[i].getGames(),
-                leaderboard[i].getSurvives()
+                leaderboard[i].getSeasonGames(),
+                leaderboard[i].getSeasonSurvives()
             );
         }
         
@@ -557,7 +561,7 @@ export default {
 
         let json = player.toJSON();
         let leaderboard = await PlayersDB.fetchLeaderboard();
-        let rank = 0;
+        let rank = -1;
         for (var i = 0; i < leaderboard.length; i++) {
             if (leaderboard[i].userID === player.userID) {
                 rank = i + 1;
@@ -565,23 +569,77 @@ export default {
             }
         }
 
-        let table = new Table(player.name);
+        // let table = new Table(player.name);
         // table.removeBorder();
-        let survive_percent = Math.floor(json.survives / json.games * 10000) / 100;
 
-        let embed = Embeds.Stats({
-            name: player.name,
-            rank,
-            bank: json.bank,
-            games: json.games,
-            gamesWon: json.survives,
-            survivalpercent: survive_percent+"%"
-        });
+
+        // table.setHeading(" ", "name", "net worth", "bank", "games", "survives");
+
+        // Basic stats
+        // var table = new Table(player.name);
+        // table.removeBorder();
+        // table.setHeading("rank", "bank");
+        // table.addRow((rank >= 0) ? rank : "Unranked", json.bank );
+
+        let survive_percent = (json.games === 0) ? "0" : Math.floor(json.survives / json.games * 10000) / 100;
+        let season_survive_percent = (json.season_games === 0) ? "0" : Math.floor(json.season_survives / json.season_games * 10000) / 100;
+
+        let rank_str = (rank >= 0) ? rank : "#unranked";
+        let trophies = "";
+        if (!json.trophies.length) {
+            trophies = "# no trophies";
+        } else {
+            // TODO Fill
+            let emojies = {
+                "champion": "🏆",
+                "second": "🏅",
+                "third": "👏"
+            };
+
+            trophies = json.trophies.map( t => {
+                return emojies[t.type] + " " + t.name
+            }).join("\n");
+        }
+        msg = "```py";
+        msg += `
+@ ${player.name}
+Rank ${rank_str}
+Bank ${json.bank}
+
+@ current season
+Games ${json.season_games}
+Games Won ${json.season_survives}
+Survive% ${season_survive_percent}%
+
+@ all time
+Games ${json.games}
+Survives ${json.survives}
+Survive% ${survive_percent}%
+
+@ trophies
+${trophies}`;
+
+        msg += "```";
+    
 
         await bot.sendMessage({
             to: channelID,
-            embed
+            message: msg
         });
+
+        // let embed = Embeds.Stats({
+        //     name: player.name,
+        //     rank,
+        //     bank: json.bank,
+        //     games: json.games,
+        //     gamesWon: json.survives,
+        //     survivalpercent: survive_percent+"%"
+        // });
+
+        // await bot.sendMessage({
+        //     to: channelID,
+        //     embed
+        // });
     },
 
     [commands.Loan.trigger]: async function({user, userID, message}) {

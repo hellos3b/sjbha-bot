@@ -2,7 +2,7 @@ import Table from 'ascii-table'
 import Bomb from './Bomb';
 import Embeds from './Embeds';
 
-let BONUS_CHANCE = 6;
+let BONUS_CHANCE = 5;
 let BONUS_AMT = 2;
 
 export default function(ownerID, buyin) {
@@ -69,8 +69,10 @@ export default function(ownerID, buyin) {
         bomb.reset();
 
         // create money round
-        let rng = Math.floor( Math.random() * BONUS_CHANCE );
-        bonus = (rng === 3);
+        if (buyin === 20) {
+            let rng = Math.floor( Math.random() * BONUS_CHANCE );
+            bonus = (rng === 3);
+        }
 
         maxPlayers = players.length;
         this.updateLossRisk();
