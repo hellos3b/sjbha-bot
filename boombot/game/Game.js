@@ -174,7 +174,7 @@ export default function(ownerID, buyin) {
         
         let gameTable = new Table();
         if (state === "JOIN") {
-            msg += `\nWaiting for more players!\nCurrent List:\n`;
+            msg += `\nWaiting for more players!\nBuyin: ${buyin}\nCurrent List:\n`;
             for (var i = 0; i < players.length; i++) {
                 gameTable.addRow(players[i].name);
             }
