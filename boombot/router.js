@@ -10,6 +10,12 @@ export default {
 
         const [cmd] = context.message.split(" ");
     
+        await context.bot.sendMessage({
+            to: context.channelID,
+            message: "Hold on, boombot in AFK mode as season 1 starts"
+        });
+        return;
+        
         if (Routes[cmd]) {
             const msg = await Routes[cmd](context);
             logger.debug("Got message - ", msg);
