@@ -245,7 +245,7 @@ export default {
             })
         }, START_TIMEOUT);
 
-        msg = `Starting new game! **Buyin: ${buyin}** Type \`!join\` to get in on the game!`
+        msg = "```py\n" + `@ Starting new game!\nBuyin: ${buyin}`+"```" + `Type \`!join\` to get in on the game!`
 
         return msg;
     },
@@ -287,7 +287,7 @@ export default {
             to: channelID,
             embed
         });
-        msg = `There are now ${game.playerCount()}/${PLAYER_MAX_COUNT} players ready to play. Use \`!join\` to get in on the game, or leader can \`!start\` to start the game!`
+        msg = "```py\n" + `@ There are now ${game.playerCount()}/${PLAYER_MAX_COUNT} players ready to play!\nBuyin ${buyin} `+ "```" + `Use \`!join\` to get in on the game, or leader can \`!start\` to start the game!`
 
         return msg;
     },
