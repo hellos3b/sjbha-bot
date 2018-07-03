@@ -314,7 +314,7 @@ export default {
             return `You can't leave if you started -- You can \`!cancel\` the game if you want to quit`;
         }
 
-        game.removePlayer(player);
+        game.removePlayerFromStart(player);
 
         msg += "You have left the table";
         msg = "```py\n" + `@ There are now ${game.playerCount()}/${PLAYER_MAX_COUNT} players ready to play!\nBuyin ${buyin} `+ "```" + `Use \`!join\` to get in on the game, or leader can \`!start\` to start the game!`
