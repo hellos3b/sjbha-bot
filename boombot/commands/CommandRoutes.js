@@ -292,6 +292,36 @@ export default {
         return msg;
     },
 
+    [commands.Leave.trigger]: async function({bot, channelID, user, userID}) {
+        let msg = "";
+        if (!GameController.exists) {
+            return `There isn't a game going on`;
+        }
+
+        let game = GameController.Game;
+
+        if (game.isActive()) {
+            return `Too late to leave, you're stuck now *good luck*`;
+        }
+
+        let player = await PlayersDB.findOrCreate(user, userID);
+
+        if (!game.hasPlayer(player)) {
+            return `You haven't joined the game yet`
+        }
+
+        if (game.isOwner(userID)) {
+            return `You can't leave if you started -- You can \`!cancel\` the game if you want to quit`;
+        }
+
+        game.removePlayer(player);
+
+        msg += "You have left the table";
+        msg = "```py\n" + `@ There are now ${game.playerCount()}/${PLAYER_MAX_COUNT} players ready to play!\nBuyin ${buyin} `+ "```" + `Use \`!join\` to get in on the game, or leader can \`!start\` to start the game!`
+
+        return msg;
+    },
+
     // Joining a game
     [commands.Current.trigger]: async function({user, userID}) {
         if (!GameController.exists) {

@@ -65,6 +65,11 @@
         "description": "See stats for yourself. use !info {person} to see stats for another player"
     },
 
+    "Leave": {
+        "trigger": "!leave",
+        "description": "Leave a game you have !joined"
+    },
+
     "Current": {
         "trigger": "!current",
         "description": "Get the current status of the game"
