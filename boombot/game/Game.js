@@ -30,9 +30,9 @@ export default function(ownerID, buyin) {
         lossRisk = players.length / maxPlayers;    
     };
 
-    this.removePlayerFromStart = function(player) {
+    this.removePlayerFromStart = function(playerRemove) {
         for (var i = players.length -1; i >= 0; i--) {
-            if (players[i].userID === player.userID) {
+            if (players[i].userID === playerRemove.userID) {
                 let player = players[i];
 
                 players.splice(i, 1);
