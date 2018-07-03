@@ -32,7 +32,7 @@ export default function(ownerID, buyin) {
 
     this.removePlayerFromStart = function(player) {
         for (var i = players.length -1; i >= 0; i--) {
-            if (players[i].userID === userID) {
+            if (players[i].userID === player.userID) {
                 let player = players[i];
 
                 players.splice(i, 1);
