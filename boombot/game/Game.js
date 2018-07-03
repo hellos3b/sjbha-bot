@@ -30,6 +30,18 @@ export default function(ownerID, buyin) {
         lossRisk = players.length / maxPlayers;    
     };
 
+    this.removePlayerFromStart = function(player) {
+        for (var i = players.length -1; i >= 0; i--) {
+            if (players[i].userID === userID) {
+                let player = players[i];
+
+                players.splice(i, 1);
+                delete playerBank[player.userID];
+                return;
+            }
+        }
+    }
+
     this.addPlayer = function(player) {
         players.push(player);
         playerBank[player.userID] = buyin;
@@ -185,7 +197,7 @@ export default function(ownerID, buyin) {
             if (!hideCosts) {
 
                 if (bonus) {
-                    msg += "💰💰💰 BONUS ROUND 💰💰💰\n";
+                    msg += "@ 💰💰💰 BONUS ROUND 💰💰💰\n";
                 }
                 msg += `RISK: ${risk}%  `;
                 msg += `| PASS COST: ${passCost} | POT: ${pot}\n`;
@@ -210,9 +222,9 @@ export default function(ownerID, buyin) {
         let currentPlayer = this.currentTurn();
         let percent = Math.floor( (1/ (6-bomb.clickCount()) )*1000)/10;
 
-        let msg = "```";
+        let msg = "```py";
         if (bonus) {
-            msg += "💰💰💰 BONUS ROUND 💰💰💰\n";
+            msg += "@ 💰💰💰 BONUS ROUND 💰💰💰\n";
         }
         msg += `COIN RISK: ${risk}% | PASS COST: ${passCost} | POT: ${pot}\n` + "```"; 
         msg += `The bomb has been clicked ${bomb.clickCount()} times (${percent}% chance to explode this turn)\n`;
@@ -249,7 +261,7 @@ export default function(ownerID, buyin) {
             gameTable.addRow(results[i].name, profit, round, results[i].lotto);
         }
 
-        return "```\n"+gameTable.toString()+"```";
+        return "```py\n"+gameTable.toString()+"```";
     }
 
     this.getResults = function() {
