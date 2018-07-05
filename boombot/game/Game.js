@@ -222,7 +222,7 @@ export default function(ownerID, buyin) {
         let currentPlayer = this.currentTurn();
         let percent = Math.floor( (1/ (6-bomb.clickCount()) )*1000)/10;
 
-        let msg = "```py";
+        let msg = "```py\n";
         if (bonus) {
             msg += "@ 💰💰💰 BONUS ROUND 💰💰💰\n";
         }

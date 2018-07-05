@@ -10,6 +10,7 @@ import Query from './Query'
 import channels from './channels'
 import moment from 'moment'
 import Poll from './Poll'
+import MeetupsPlaintext from './MeetupsPlaintext'
 
 async function parseMeetupStr({bot, channelID, msg}) {
     let possibleOptions = new Set(["url", "type", "description", "location", "image"]);
@@ -74,6 +75,7 @@ export default {
             await meetup.confirm(bot);
 
             MeetupsDB.save(meetup);
+            MeetupsPlaintext.update({bot});
         } catch (e) {
             logger.error(e);
         }
@@ -284,6 +286,8 @@ export default {
             to: channelID,
             message: "Canceled `"+meetup.info_str()+"`"
         });
+
+        MeetupsPlaintext.update({bot});
     },
 
     "!mention": async function({bot, message, channelID, userID}) {
@@ -431,6 +435,8 @@ export default {
             to: channelID,
             message: `You got it! Updated to \`${meetup.info()}\``
         })
+
+        MeetupsPlaintext.update({bot});
     },
 
     "!poll": async function({bot, message, channelID}) {
@@ -464,6 +470,8 @@ export default {
     },
 
     "!meetups": async function ({bot, message, userID, channelID }) {
+        const [cmd, option] = message.split(" ");
+
         let meetups = await MeetupsDB.getMeetups(userID);
         meetups = meetups.map( m => new Meetup(m))
             .sort( (a, b) => {
@@ -474,14 +482,66 @@ export default {
                 return 0;
             });
 
-        let desc = "```md\n" + meetups.map( m => {
-            let url = `https://discordapp.com/channels/358442034790400000/430878436027006978?jump=${m.info_id()}`;
-            return `# ${m.info_str()}\n[${m.date_moment().fromNow()}](${m.date_moment().format("M/D @ h:mma")})`
-        }).join("\n\n") + "```";
+        var REFERENCE = moment(); // fixed just for testing, use moment();
+        var TODAY = REFERENCE.clone().startOf('day');
+        var TOMORROW = REFERENCE.clone().add(1, 'days').startOf('day');
+        var A_WEEK = REFERENCE.clone().add(8, 'days').startOf('day');
+
+        function isToday(momentDate) {
+            return momentDate.isSame(TODAY, 'd');
+        }
+        function isTomorrow(momentDate) {
+            return momentDate.isSame(TOMORROW, 'd');
+        }
+        function isWithinAWeek(momentDate) {
+            return momentDate.isBefore(A_WEEK);
+        }
+
+        if (option === "today") {
+            meetups = meetups.filter( m => isToday(m.date_moment()) );
+
+            if (!meetups.length) {
+                await bot.sendMessage({
+                    to: channelID,
+                    message: "There are no scheduled meetups for today!"
+                });
+                return;
+            }
+        }
+        if (option === "week") {
+            meetups = meetups.filter( m => isWithinAWeek(m.date_moment()) );
+            if (!meetups.length) {
+                await bot.sendMessage({
+                    to: channelID,
+                    message: "There are no scheduled meetups for this week!"
+                });
+                return;
+            }
+        }
+
+        if (!meetups.length) {
+            await bot.sendMessage({
+                to: channelID,
+                message: "There are no scheduled meetups coming up"
+            });
+            return;
+        }
+        
+        let fields = [];
+
+        for (var i = 0; i < meetups.length; i++) {
+            let m = meetups[i];
+            let title = m.info_str();
+            let fromNow = m.date_moment().fromNow();
+            let date = m.date_moment().format("MMMM D @ h:mma");
+            let str = `\`\`\`py\n@ ${title}\n# ${fromNow} - ${date}\`\`\``;
+            fields.push(str);
+        }
+        let msg = fields.join("\n");
 
         await bot.sendMessage({
             to: channelID,
-            message: desc
+            message: msg
         });
     },
 
