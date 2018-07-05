@@ -7,7 +7,7 @@ import logger from 'winston'
 import Query from './Query'
 import channels from './channels'
 import moment from 'moment'
-
+import MeetupsPlaintext from './MeetupsPlaintext'
 
 export default {
 
@@ -109,5 +109,5 @@ export default {
             "embed": embed
         });
     }
-
+    
 };

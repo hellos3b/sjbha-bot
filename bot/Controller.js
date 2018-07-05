@@ -10,6 +10,7 @@ import channels from './channels'
 import BoombotRouter from '../boombot/router'
 import BoombotWeeklyController from '../boombot/commands/WeeklyController'
 import AdminRouter from './AdminCommands'
+import MeetupsPlaintext from './MeetupsPlaintext'
 
 import SwirlCount from './SwirlCount'
 
@@ -97,6 +98,10 @@ export default {
                 message: "`Archived "+meetup.info_str()+"`"
             });
         }
+    },
+
+    hourlyCron: async function() {
+        MeetupsPlaintext.update({bot});
     },
 
     weeklyCron: async function() {

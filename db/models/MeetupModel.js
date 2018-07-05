@@ -14,5 +14,4 @@ const meetupSchema = mongoose.Schema({
     rsvp_id: String
 }, { collection: 'meetups' });
 
-
 export default mongoose.model('Meetup', meetupSchema);

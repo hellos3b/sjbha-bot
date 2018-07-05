@@ -316,6 +316,7 @@ export default {
 
         game.removePlayerFromStart(player);
 
+        let buyin = game.getBuyin();
         msg += "You have left the table";
         msg = "```py\n" + `@ There are now ${game.playerCount()}/${PLAYER_MAX_COUNT} players ready to play!\nBuyin ${buyin} `+ "```" + `Use \`!join\` to get in on the game, or leader can \`!start\` to start the game!`
 

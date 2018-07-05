@@ -28,3 +28,7 @@ cron.schedule('0 */2 * * *', function(){
 cron.schedule('28 0 * * 1', function(){
     Bot.weeklyCron();
 });
+
+cron.schedule('0 * * * *', function() {
+    Bot.hourlyCron();
+})
