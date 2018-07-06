@@ -202,6 +202,10 @@ export default {
         return "```\n"+leaderboard+"```";
     },
 
+    "!n": async function(opt) {
+        return this[commands.NewGame.trigger](opt);
+    },
+
     // initiating a new game
     [commands.NewGame.trigger]: async function({bot, channelID, user, userID, message}) {
         let msg = "";
@@ -248,6 +252,10 @@ export default {
         msg = "```py\n" + `@ Starting new game!\nBuyin: ${buyin}`+"```" + `Type \`!join\` to get in on the game!`
 
         return msg;
+    },
+
+    "!j": async function(opt) {
+        return this[commands.Join.trigger](opt);
     },
 
     // Joining a game
@@ -332,6 +340,10 @@ export default {
         let game = GameController.Game;
 
         return game.toString();
+    },
+
+    "!c": async function(opt) {
+        return this[commands.Click.trigger](opt);
     },
 
     // click the bomb
@@ -476,6 +488,10 @@ export default {
         return msg;
     },
 
+    "!p": async function(opt) {
+        return this[commands.Pass.trigger](opt);
+    },
+
     [commands.Pass.trigger]: async function({bot, channelID, user, userID}) {
         Timeout.clear();
         let msg = "";
@@ -570,6 +586,10 @@ export default {
         }, TURN_TIMEOUT);
         
         return msg;
+    },
+
+    "!s": async function(opt) {
+        return this[commands.Stats.trigger](opt);
     },
 
     // initiating a new game
