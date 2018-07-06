@@ -654,7 +654,7 @@ export default {
         msg = "```py";
         msg += `
 @ ${player.name}
-Rank ${rank_str}
+Rank ${rank_str}/${leaderboard.length}
 Bank ${json.bank}
 
 @ current season
