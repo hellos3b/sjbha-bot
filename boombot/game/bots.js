@@ -18,13 +18,7 @@ export default {
             let passRisk = 0;
             let pot = game.getPot();
             let players = game.getPlayers();
-            let lowest = game.lowestCoins().userID === player.userID;
-            let isLowest = false;
-            if (lowest.length === 1) {
-                if (lowest[0] === player.userID) {
-                    isLowest = true;
-                }
-            }
+            let isLowest = game.lowestCoins().has(player.userID);
 
             let clicks = game.clickCount();
             console.log("ROUND: ", clicks);
@@ -81,7 +75,7 @@ export default {
 
                     if (isLowest) {
                         console.log("[bot] Lowest coins, killing myself");
-                        passRisk = 0;
+                        passRisk = -100;
                     }
                     break;
             }
