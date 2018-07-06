@@ -151,14 +151,14 @@ export default function(ownerID, buyin) {
 
     this.lowestCoins = function() {
         let coins = Number.POSITIVE_INFINITY;
-        let userid = [];
+        let userid = new Set([]);
         for (var i = 0; i < players.length; i++) {
             let c = this.getCoins(players[i].userID);
             if (c < coins) {
-                userid = [players[i].userID];
+                userid = new Set([players[i].userID]);
                 coins = c;
             } else if (c === coins) {
-                userid.push(players[i].userID);
+                userid.add(players[i].userID);
             }
         }
         return userid;
