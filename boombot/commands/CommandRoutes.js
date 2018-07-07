@@ -693,6 +693,85 @@ ${trophies}`;
         // });
     },
 
+    [commands.History.trigger]: async function({channelID, bot, user, userID, message}) {
+
+        let [cmd, mention] = message.split(" ");
+        let targetId = userID;
+        if (mention) {
+            targetId = mention.replace("<@!","")
+                .replace("<@","")
+                .replace(">","");
+        }
+
+        let msg = "";
+        let player = await PlayersDB.findPlayer(targetId);
+
+        if (!player) {
+            return `Sorry, I couldn't find any info for that person. They may have not played a game yet.`;
+        }
+
+        let json = player.toJSON();
+        let leaderboard = await PlayersDB.fetchLeaderboard();
+        
+
+        msg = "```py\n";
+        msg += `# ${player.name}\n\n`;
+
+        let history = json.history;
+        if (!history.length) {
+            msg += "Player did not play in any previous seasons!```";
+            await bot.sendMessage({
+                to: channelID,
+                message: msg
+            });
+            return;
+        }
+
+        for (var i = 0; i < history.length; i++) {
+            let h = history[i];
+            let rank_str = (h.rank >= 0) ? h.rank : "unranked";
+
+            let emojies = {
+                "champion": "🏆",
+                "second": "🏅",
+                "third": "👏"
+            };
+
+            let trophy = "";
+            if (h.rank === 1) {
+                trophy = `${emojies.champion} Champion`;
+            } else if (h.rank === 2) {
+                trophy = `${emojies.second} 2nd Place`;
+            } else if (h.rank === 3) {
+                trophy = `${emojies.third} 3rd Place`;
+            }
+
+            let survive_percent = (json.games === 0) ? "0" : Math.floor(h.survives / h.games * 10000) / 100;
+            msg += `@ ${h.season}\n`;
+
+            if (trophy) {
+                msg += `${trophy}\n`;
+            }
+
+msg += `Rank ${rank_str}/${h.playerCount}
+Bank ${h.bank}
+Games Played ${h.games}
+Survives ${h.survives}
+Survive % ${survive_percent}%
+
+`
+        }
+
+        msg += "```";
+    
+
+        await bot.sendMessage({
+            to: channelID,
+            message: msg
+        });
+
+    },
+
     [commands.Loan.trigger]: async function({user, userID, message}) {
         let [cmd, amountStr] = message.split(" ");
         let player = await PlayersDB.findOrCreate(user, userID);
