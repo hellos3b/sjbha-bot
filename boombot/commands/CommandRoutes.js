@@ -719,7 +719,7 @@ ${trophies}`;
 
         let history = json.history;
         if (!history.length) {
-            msg += "Player did not play in any previous seasons!```";
+            msg += "# Player did not play in any previous seasons!```";
             await bot.sendMessage({
                 to: channelID,
                 message: msg
