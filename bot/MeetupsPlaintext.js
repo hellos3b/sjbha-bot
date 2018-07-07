@@ -34,11 +34,15 @@ export default {
         var TOMORROW = REFERENCE.clone().add(1, 'days').startOf('day');
         var A_WEEK = REFERENCE.clone().add(8, 'days').startOf('day');
 
+        function isSameDayAndMonth(m1, m2){
+            return m1.date() === m2.date() && m1.month() === m2.month()
+        }
+
         function isToday(momentDate) {
-            return momentDate.isSame(TODAY, 'd');
+            return isSameDayAndMonth(momentDate, TODAY);
         }
         function isTomorrow(momentDate) {
-            return momentDate.isSame(TOMORROW, 'd');
+            return isSameDayAndMonth(momentDate, TOMORROW);
         }
         function isWithinAWeek(momentDate) {
             return momentDate.isBefore(A_WEEK);
@@ -47,10 +51,13 @@ export default {
         for (var i = 0; i < meetups.length; i++) {
             let m = meetups[i].date_moment();
             if (isToday(m)) {
+                console.log("Is today!");
                 groups["Today"].push(meetups[i]);
             } else if (isTomorrow(m)) {
+                console.log("Is tomorrow!");
                 groups["Tomorrow"].push(meetups[i]);
             } else if (isWithinAWeek(m)) {
+                console.log("Is Within a week!");
                 groups["This Week"].push(meetups[i]);
             } else {
                 groups["Over A Week"].push(meetups[i]);

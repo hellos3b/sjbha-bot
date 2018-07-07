@@ -108,6 +108,14 @@ export default {
             to: channelID,
             "embed": embed
         });
+    },
+
+    "!plaintext": async function({bot, channelID}) {
+        MeetupsPlaintext.update({bot});
+        await bot.sendMessage({
+            to: channelID,
+            message: "Updated plaintext channel"
+        })
     }
-    
+
 };

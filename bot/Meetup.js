@@ -266,6 +266,8 @@ export default function({
     }
 
     this.getReactions = async function(bot) {
+        console.log("Getting reactions for " + info);
+        console.log("RSVPID", rsvp_id);
         let maybe = await bot.getReaction({
             channelID: channels.MEETUPS,
             messageID: rsvp_id,
