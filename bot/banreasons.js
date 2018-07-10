@@ -37,7 +37,8 @@ const list = [
     "Inviting people to eat leftover Lasagna but not actually having any",
     "Giving your SO a potato as a gift (rule 10 don't be shitty)",
     "Didn't come through",
-    "Ghosting Stacy"
+    "Ghosting Stacy",
+    "Oops wrong person"
 ];
 
 export default {
