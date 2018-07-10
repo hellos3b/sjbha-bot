@@ -38,7 +38,8 @@ const list = [
     "Giving your SO a potato as a gift (rule 10 don't be shitty)",
     "Didn't come through",
     "Ghosting Stacy",
-    "Oops wrong person"
+    "Oops wrong person",
+    "Posting old memes (please keep up)"
 ];
 
 export default {
