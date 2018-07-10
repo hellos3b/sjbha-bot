@@ -229,14 +229,32 @@ export default {
                 message: `You are on team ${team.team}`
             });
         }
-        // bot.addToRole({serverID: SERVER_ID, userID: userID, roleID: roleLagadinhos}, function(err, response) {
-        //     if (err){
-        //         logger.error(err);
-        //     }else{
-        //         logger.info(response);
-        //     }
-        // });
     
+    },
+
+    "!teams": async function({bot, message, channelID, userID, user}) {
+        let [cmd, option] = message.split(" ");
+        let teams = await TeamDB.getAll();
+
+        let green = teams.filter( t => t.team === "Green Mafia");
+        let pink = teams.filter( t => t.team === "Pink Bombers");
+
+        let greenList = green.map( n=> n.user).join("\n");
+        let pinkList = pink.map( n => n.user).join("\n");
+
+        await bot.sendMessage({
+            to: channelID,
+            message: `\`\`\`md\n
+Team Pink Bombers
+---------------
+${pinkList}
+
+Team Green Mafia
+-------------
+${greenList}
+\`\`\`
+`
+        })
     },
 
     "!debug": async function({bot, message, channelID, userID}) {
