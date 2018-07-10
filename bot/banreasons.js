@@ -39,7 +39,8 @@ const list = [
     "Didn't come through",
     "Ghosting Stacy",
     "Oops wrong person",
-    "Posting an old meme (please keep up)"
+    "Posting an old meme (please keep up)",
+    "Agreeing with Milo"
 ];
 
 export default {
