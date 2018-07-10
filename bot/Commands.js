@@ -12,6 +12,16 @@ import moment from 'moment'
 import Poll from './Poll'
 import MeetupsPlaintext from './MeetupsPlaintext'
 import BanReasons from './banreasons'
+import TeamDB from './teams/TeamDB'
+
+const SERVER_ID = "358442034790400000";
+const TEAMS = [{
+    name: "Pink Bombers",
+    id: "466368518049497088"
+}, {
+    name: "Green Mafia",
+    id: "466368570532560897"
+}];
 
 async function parseMeetupStr({bot, channelID, msg}) {
     let possibleOptions = new Set(["url", "type", "description", "location", "image"]);
@@ -193,6 +203,40 @@ export default {
                 });
             }
         }
+    },
+
+    "!team": async function({bot, message, channelID, userID, user}) {
+        let [cmd, option] = message.split(" ");
+
+        let team = await TeamDB.findUser(userID);
+
+        if (!team) {
+            let rng = Math.floor(Math.random()*2);
+            let t = TEAMS[rng];
+            await TeamDB.saveUser({
+                userID,
+                user,
+                team: t.name
+            });
+            await bot.addToRole({serverID: SERVER_ID, userID, roleID: t.id});
+            await bot.sendMessage({
+                to: channelID,
+                message: `Congratulations, you have been recruited to team **${t.name}**!`
+            });
+        } else {
+            await bot.sendMessage({
+                to: channelID,
+                message: `You are on team ${team.team}`
+            });
+        }
+        // bot.addToRole({serverID: SERVER_ID, userID: userID, roleID: roleLagadinhos}, function(err, response) {
+        //     if (err){
+        //         logger.error(err);
+        //     }else{
+        //         logger.info(response);
+        //     }
+        // });
+    
     },
 
     "!debug": async function({bot, message, channelID, userID}) {
