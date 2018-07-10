@@ -61,5 +61,11 @@ export default function(bot) {
         return sendMessage(bot, bot.getReactionOld, opt);
     };
 
+    bot.addToRoleOld = bot.addToRole;
+    bot.addToRole = function(opt) {
+        logger.debug("bot.addToRole", opt);
+        return sendMessage(bot, bot.addToRoleOld, opt);
+    };
+
     return bot;
 }
