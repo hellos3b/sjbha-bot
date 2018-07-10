@@ -11,6 +11,7 @@ import channels from './channels'
 import moment from 'moment'
 import Poll from './Poll'
 import MeetupsPlaintext from './MeetupsPlaintext'
+import BanReasons from './banreasons'
 
 async function parseMeetupStr({bot, channelID, msg}) {
     let possibleOptions = new Set(["url", "type", "description", "location", "image"]);
@@ -79,6 +80,15 @@ export default {
         } catch (e) {
             logger.error(e);
         }
+    },
+
+    "!ban": async function({bot, message, channelID}) {
+        let [cmd, name] = message.split(" ");
+        let reason = BanReasons.getReason();
+        await bot.sendMessage({
+            to: channelID,
+            message: `${name} has been banned from the server; Reason: *${reason}*`
+        });
     },
 
     "!swirls": async function({bot, channelID}) {
