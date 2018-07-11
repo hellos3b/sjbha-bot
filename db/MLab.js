@@ -1,5 +1,7 @@
 import mongoose from 'mongoose';
 
+import TeamTest from '../bot/teams/Points'
+
 let db;
 
 export default {
@@ -9,6 +11,8 @@ export default {
         db.on('error', console.error.bind(console, 'connection error:'));
         db.once('open', function() {
             console.log("Connected to MongoDB");
+
+            TeamTest.getPoints();
         });
     },
 

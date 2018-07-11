@@ -13,6 +13,7 @@ import Poll from './Poll'
 import MeetupsPlaintext from './MeetupsPlaintext'
 import BanReasons from './banreasons'
 import TeamDB from './teams/TeamDB'
+import Points from './teams/Points'
 
 const SERVER_ID = "358442034790400000";
 const TEAMS = [{
@@ -242,14 +243,16 @@ export default {
         let greenList = green.map( n=> n.user).join("\n");
         let pinkList = pink.map( n => n.user).join("\n");
 
+        let points = await Points.getPoints();
+
         await bot.sendMessage({
             to: channelID,
             message: `\`\`\`md\n
-Team Pink Bombers
+Team Pink Bombers [${points["Pink Bombers"]}]
 ---------------
 ${pinkList}
 
-Team Green Mafia
+Team Green Mafia [${points["Green Mafia"]}]
 -------------
 ${greenList}
 \`\`\`
