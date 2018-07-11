@@ -13,7 +13,7 @@ export default {
 
         archive = archive.filter( arc => {
             let d = new Date(arc.date);
-            return x > d;
+            return x < d;
         }).map( a => {
             let yes = a.reactions.yes.map( n => n.id);
             let maybe = a.reactions.maybe.map( n => n.id);
@@ -32,18 +32,23 @@ export default {
         };
 
         for (var i = 0; i < people.length; i++) {
+            let p = 0;
             let id = people[i].userID;
             let team = people[i].team;
-            console.log(`Looking at id ${people[i].user}, team: ${team}`);
             for (var j = 0; j < archive.length; j++) {
                 if (archive[j].sets.yes.has(id)) {
+                    p += 2;
                     Teams[team] += 2;
                 }
                 if (archive[j].sets.maybe.has(id)) {
                     Teams[team] += 1;
+                    p += 1;
                 }
             }
+            console.log(`${people[i].user}: ${p}`);
         }
+
+        console.log(Teams);
 
         return Teams;
     }
