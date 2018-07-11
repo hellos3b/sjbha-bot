@@ -608,7 +608,7 @@ ${greenList}
             let m = meetups[i];
             let title = m.info_str();
             let fromNow = m.date_moment().fromNow();
-            let date = m.date_moment().format("MMMM D @ h:mma");
+            let date = m.date_moment().format("dddd, MMMM D @ h:mma");
             let str = `\`\`\`py\n@ ${title}\n# ${fromNow} - ${date}\`\`\``;
             fields.push(str);
         }

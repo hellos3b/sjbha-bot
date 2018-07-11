@@ -83,7 +83,7 @@ export default {
                     let url = `https://discordapp.com/channels/358442034790400000/430878436027006978/${m.info_id()}`;
                     let title = m.info_str();
                     let fromNow = m.date_moment().fromNow();
-                    let date = m.date_moment().format("MMMM D @ h:mma");
+                    let date = m.date_moment().format("dddd, MMMM D @ h:mma");
                     let str = `\`\`\`py\n@ ${title}\n# ${fromNow} - ${date}\n(Y: ${reactions.yes.length})(M: ${reactions.maybe.length})\`\`\`<${url}>\n`;
                     fields.push(str);
                 }
