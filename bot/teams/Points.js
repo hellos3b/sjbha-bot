@@ -33,19 +33,23 @@ export default {
 
         for (var i = 0; i < people.length; i++) {
             let p = 0;
+            let y = 0;
+            let m = 0;
             let id = people[i].userID;
             let team = people[i].team;
             for (var j = 0; j < archive.length; j++) {
                 if (archive[j].sets.yes.has(id)) {
-                    p += 2;
-                    Teams[team] += 2;
+                    p += 3;
+                    Teams[team] += 3;
+                    y++;
                 }
                 if (archive[j].sets.maybe.has(id)) {
-                    Teams[team] += 1;
-                    p += 1;
+                    Teams[team] += 2;
+                    p += 2;
+                    m++;
                 }
             }
-            console.log(`${people[i].user}: ${p}`);
+            console.log(`${people[i].user}: ${p}.${y}.${m}`);
         }
 
         console.log(Teams);
