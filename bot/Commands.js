@@ -624,29 +624,17 @@ ${greenList}
         await bot.sendMessage({
             to: channelID,
             message:
-                "1. **Creating a meetup (BASIC):** \n"+
-                "```!meetup month/time hour:min | meetup_info```\n\n"+
-                "*Examples:*\n"+
-                "   ```!meetup 4/3 5:00pm | Bowling in Sunnyvale\n" + 
-                "!meetup Friday 6:00pm | Free comedy @ Hapas```\n\n" +
-                "2. **Advanced Options:** \n" +
-                "You can add advanced options by adding more | (pipes) and setting the option using `like:this`\n\n" +
-                "*Example:*\n" +
-                "   ```!meetup Friday 6pm | Free comedy @ Hapas | description: Meet early for beers```\n" +
-                "The options you can set:\n" +
-                "```" +
-                "   description: Add additional information to the meetup\n" +
-                "   location: An address to meet at\n" +
-                "   url: A url for more information\n" +
-                "   image: add a thumbnail for the meetup\n" +
-                "   type: Changes the icon for the meetup\n" +
-                "       (accepted types: event, drinks, food, active)```\n" +
-                "*Example*:\n" +
-                "   ```!meetup tomorrow 12pm | Hike up a mountain | description: meet at parking lot B, we're doing route A->B | url: http://somemap.com | type: active```\n\n" +
-                "3. **Canceling a meetup:** \n"+
-                "   ```!cancel```\n\n"+
-                "4. **Editing a meetup:** \n"+
-                "   ```!edit```"
+                "To create a meetup, copy paste this template; only the time and event name is required:\n\n"+
+                "```!meetup 12/20 6:00pm\n" + 
+                "| (event-name-here) \n" + 
+                "| description:\n" +
+                "| location:\n" + 
+                "| url:\n" +
+                "| image:\n" +
+                "| type: (event, drinks, food, or active)```\n" +
+                "`!cancel` to cancel a meetup and `!edit` to edit\n\n" + 
+                "To create a poll:\n" +
+                "`!poll Question? | option 1 | option 2 | option 3 | option 4`"
         });
     },
 

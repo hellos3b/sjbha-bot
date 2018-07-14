@@ -1,6 +1,9 @@
 import TeamDB from './TeamDB'
 import MeetupsDB from '../MeetupsDB'
 
+const YES_POINTS = 3;
+const MAYBE_POINTS = 1;
+
 export default {
 
     getPoints: async function() {
@@ -39,13 +42,13 @@ export default {
             let team = people[i].team;
             for (var j = 0; j < archive.length; j++) {
                 if (archive[j].sets.yes.has(id)) {
-                    p += 3;
-                    Teams[team] += 3;
+                    p += YES_POINTS;
+                    Teams[team] += YES_POINTS;
                     y++;
                 }
                 if (archive[j].sets.maybe.has(id)) {
-                    Teams[team] += 2;
-                    p += 2;
+                    Teams[team] += MAYBE_POINTS;
+                    p += MAYBE_POINTS;
                     m++;
                 }
             }
