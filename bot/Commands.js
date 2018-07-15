@@ -94,7 +94,7 @@ export default {
         }
     },
 
-    "!ban": async function({bot, message, channelID, user}) {
+    "!ban": async function({bot, message, channelID, user, userID}) {
         let [cmd, name] = message.split(" ");
         let reason = BanReasons.getReason();
 
