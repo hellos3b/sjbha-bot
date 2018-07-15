@@ -261,15 +261,17 @@ export default {
             let review = tldrs.map( td => {
                 let m = new moment(td.timestamp);
                 let date = m.format('ddd M/D h:mm a');
-                return `\`${date} - ${td.message}\``;
+                return `\`${date} - [${td.from}] - ${td.message}\``;
             }).join("\n");
+
             await bot.sendMessage({
                 to: channelID,
-                message: `Review of what's going on:\n${review}`
+                message: `Catch up on what's going on!\n${review}`
             });
         } else {
             await TLDRDB.saveTLDR({
-                message: msg
+                message: msg,
+                from: user
             });
             await bot.sendMessage({
                 to: channelID,
