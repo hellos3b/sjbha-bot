@@ -12,6 +12,7 @@ import moment from 'moment'
 import Poll from './Poll'
 import MeetupsPlaintext from './MeetupsPlaintext'
 import BanReasons from './banreasons'
+import TLDRDB from '../db/models/TLDRdb'
 import TeamDB from './teams/TeamDB'
 import Points from './teams/Points'
 
@@ -243,7 +244,50 @@ export default {
     
     },
 
+    "!tldr": async function({bot, message, channelID, userID, user}) {
+        let [cmd, ...msg] = message.split(" ");
+        msg = msg.join(" ");
+
+        if (!msg) {
+            if (channelID !== channels.GENERAL2) {
+                await bot.sendMessage({
+                    to: channelID,
+                    message: `You can only get the TLDR list in the general 2 channel`
+                });
+                return;
+            }
+
+            let tldrs = await TLDRDB.getRecent();
+            let review = tldrs.map( td => {
+                let m = new moment(td.timestamp);
+                let date = m.format('ddd M/D h:mm a');
+                return `\`${date} - ${td.message}\``;
+            }).join("\n");
+            await bot.sendMessage({
+                to: channelID,
+                message: `Review of what's going on:\n${review}`
+            });
+        } else {
+            await TLDRDB.saveTLDR({
+                message: msg
+            });
+            await bot.sendMessage({
+                to: channelID,
+                message: `Saved, thanks!`
+            });
+            return;
+        }
+    },
+
     "!teams": async function({bot, message, channelID, userID, user}) {
+        if (channelID !== channels.GENERAL2) {
+            await bot.sendMessage({
+                to: channelID,
+                message: `Please keep team discussion in the general-2 channel!`
+            });
+            return;
+        }
+
         let [cmd, option] = message.split(" ");
         let teams = await TeamDB.getAll();
 
