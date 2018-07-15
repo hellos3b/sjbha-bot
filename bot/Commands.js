@@ -93,9 +93,19 @@ export default {
         }
     },
 
-    "!ban": async function({bot, message, channelID}) {
+    "!ban": async function({bot, message, channelID, user}) {
         let [cmd, name] = message.split(" ");
         let reason = BanReasons.getReason();
+
+        let rng = Math.floor(Math.random()*6);
+        if (rng === 3) {
+            await bot.sendMessage({
+                to: channelID,
+                message: `<@!${userID}> has been banned from the server; Reason: *ABUSING THE BAN COMMAND UR NOT AN ADMIN*`
+            });
+
+            return;
+        }
         await bot.sendMessage({
             to: channelID,
             message: `${name} has been banned from the server; Reason: *${reason}*`
