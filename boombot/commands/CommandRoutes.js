@@ -647,9 +647,16 @@ export default {
                 "third": "👏"
             };
 
-            trophies = json.trophies.map( t => {
-                return emojies[t.type] + " " + t.name
-            }).join("\n");
+            let wins = json.trophies.filter( t => t.type !== "weekly" );
+            let weekly = json.trophies.filter( t => t.type === "weekly" );
+
+            trophies = wins.map( t => {
+                    return emojies[t.type] + " " + t.name
+                }).join("\n");
+                
+            if (weekly.length) {
+                trophies += `${weekly.length}x Weekly Winner`;
+            }
         }
         msg = "```py";
         msg += `
