@@ -245,7 +245,7 @@ export default {
     },
 
     "!strava": async function({bot, message, channelID, userID, user}) {
-        if (channelID !== channels.ADMIN) {
+        if (channelID !== channels.ADMIN || channelID !== channels.RUN) {
             await bot.sendMessage({
                 to: channelID,
                 message: "This command only works in the 5K channel"
@@ -258,6 +258,11 @@ export default {
         await bot.sendMessage({
             to: userID,
             message: `Hello! To auth the discord bot to post your strava times, just click on this link and accept the authorization\n${url}`
+        });
+
+        await bot.sendMessage({
+            to: channelID,
+            message: "DM'd you your authorization link!"
         });
     },
 
