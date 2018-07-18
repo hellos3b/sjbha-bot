@@ -245,7 +245,7 @@ export default {
     },
 
     "!strava": async function({bot, message, channelID, userID, user}) {
-        if (channelID !== channels.ADMIN || channelID !== channels.RUN) {
+        if (channelID !== channels.ADMIN && channelID !== channels.RUN) {
             await bot.sendMessage({
                 to: channelID,
                 message: "This command only works in the 5K channel"
