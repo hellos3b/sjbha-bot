@@ -56,7 +56,7 @@ function getUserInfo(owner_id) {
 
 function getActivityData(activity_id, access_token) {
     let url = `https://www.strava.com/api/v3/activities/${activity_id}`;
-    console.log("getting activity data", url);
+    
     return Axios.get(url, {
         headers: {
             "Authorization": `Bearer ${access_token}`
