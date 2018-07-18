@@ -244,6 +244,23 @@ export default {
     
     },
 
+    "!strava": async function({bot, message, channelID, userID, user}) {
+        if (channelID !== channels.ADMIN) {
+            await bot.sendMessage({
+                to: channelID,
+                message: "This command only works in the 5K channel"
+            });
+            return;
+        }
+
+        let url = `https://sjbha-bot.herokuapp.com/api/strava/auth?user=${user}&userID=${userID}`;
+
+        await bot.sendMessage({
+            to: userID,
+            message: `Hello! To auth the discord bot to post your strava times, just click on this link and accept the authorization\n${url}`
+        });
+    },
+
     "!tldr": async function({bot, message, channelID, userID, user}) {
         let [cmd, ...msg] = message.split(" ");
         msg = msg.join(" ");
