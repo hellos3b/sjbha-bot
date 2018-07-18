@@ -15,6 +15,8 @@ import BanReasons from './banreasons'
 import TLDRDB from '../db/models/TLDRdb'
 import TeamDB from './teams/TeamDB'
 import Points from './teams/Points'
+import Strava from '../ui/Strava'
+import Table from 'ascii-table'
 
 const SERVER_ID = "358442034790400000";
 const TEAMS = [{
@@ -245,6 +247,7 @@ export default {
     },
 
     "!strava": async function({bot, message, channelID, userID, user}) {
+        let [cmd, ...options] = message.split(" ");
         if (channelID !== channels.ADMIN && channelID !== channels.RUN) {
             await bot.sendMessage({
                 to: channelID,
@@ -253,17 +256,82 @@ export default {
             return;
         }
 
-        let url = `https://sjbha-bot.herokuapp.com/api/strava/auth?user=${user}&userID=${userID}`;
+        if (!options.length) {
+            await bot.sendMessage({
+                to:channelID,
+                message: "```md\n"+
+                    "< !strava auth > Authenticate the bot to your strava account\n"+
+                    "< !strava runs @user > View strava stats\n" +
+                    "< !strava leaders > View who ran the most in the last 4 weeks\n" +
+                    "```"
+            });
+            return;
+        }
 
-        await bot.sendMessage({
-            to: userID,
-            message: `Hello! To auth the discord bot to post your strava times, just click on this link and accept the authorization\n${url}`
-        });
+        let [opt, param] = options;
 
-        await bot.sendMessage({
-            to: channelID,
-            message: "DM'd you your authorization link!"
-        });
+        if (opt === "auth") {
+            let url = `https://sjbha-bot.herokuapp.com/api/strava/auth?user=${user}&userID=${userID}`;
+
+            await bot.sendMessage({
+                to: userID,
+                message: `Hello! To auth the discord bot to post your strava times, just click on this link and accept the authorization\n${url}`
+            });
+
+            await bot.sendMessage({
+                to: channelID,
+                message: "DM'd you your authorization link!"
+            });
+        } else if (opt === "stats") {
+            let targetId = userID;
+            if (param) {
+                targetId = param.replace("<@!","")
+                    .replace("<@","")
+                    .replace(">","");
+            }
+            let stats = await Strava.getStats(targetId);
+
+            if (!stats) {
+                await bot.sendMessage({
+                    to: channelID,
+                    message: "This person has not authenticated with Strava!"
+                });
+                return;
+            }
+            console.log("stats", stats);
+            let runs = stats.recent_run_totals;
+            let distance = Strava.getMiles(runs.distance);
+            let time = Strava.hhmmss(runs.moving_time);
+
+            await bot.sendMessage({
+                to: channelID,
+                message: `${stats.username} has run ${runs.count} times in the last four weeks; ${distance} mi ${time} time`
+            });
+        } else if (opt === "leaders") {
+            let leaderboard = await Strava.getLeaderboard();
+            var table = new Table("Past 4 Week Leaders");
+            table.removeBorder();
+            // table.setHeading(" ", "name", "net worth", "bank", "games", "survives");
+
+            for (var i = 0; i < leaderboard.length; i++) {
+                let runs = leaderboard[i].count;
+                let distance = Strava.getMiles(leaderboard[i].distance);
+                let time = Strava.hhmmss(leaderboard[i].moving_time); 
+
+                table.addRow(
+                    `${i+1}.`, 
+                    leaderboard[i].user, 
+                    `${time}`,
+                    `${distance} mi`,
+                    "[" + runs + " runs]"
+                );
+            }
+
+            await bot.sendMessage({
+                to: channelID,
+                message: "```\n" + table.toString() + "```"
+            });
+        }
     },
 
     "!tldr": async function({bot, message, channelID, userID, user}) {
