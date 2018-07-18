@@ -39,7 +39,7 @@ function saveOwnerID(userID, code) {
     });
 }
 
-function getUserInfo(owner_id) {
+function getUserInfoFromStrava(owner_id) {
     console.log("getUserInfo", owner_id);
     return new Promise((resolve, reject) => {
         StravaModel.findOne({ stravaID: owner_id })
@@ -54,9 +54,23 @@ function getUserInfo(owner_id) {
     })
 }
 
+function getUserInfoFromDiscord(userID) {
+    return new Promise((resolve, reject) => {
+        StravaModel.findOne({ userID: userID })
+            .exec( (err, user) => {
+                if (err) {
+                    console.error("couldn't find user", owner_id);
+                    reject(err);
+                }
+                console.log("result", user);
+                resolve(user);
+            });
+    })
+}
+
 function getActivityData(activity_id, access_token) {
     let url = `https://www.strava.com/api/v3/activities/${activity_id}`;
-    
+
     return Axios.get(url, {
         headers: {
             "Authorization": `Bearer ${access_token}`
@@ -86,9 +100,36 @@ function hhmmss(secs) {
   return result;
 }
 
+function getAllUsers() {
+    return new Promise((resolve, reject) => {
+        StravaModel.find()
+            .exec( (err, users) => {
+                if (err) {
+                    console.error("couldn't find user", owner_id);
+                    reject(err);
+                }
+                resolve(users);
+            });
+    })
+}
+
+function getAthleteStats(owner_id, access_token, user) {
+    let url = `https://www.strava.com/api/v3/athletes/${owner_id}/stats`;
+
+    return Axios.get(url, {
+        headers: {
+            "Authorization": `Bearer ${access_token}`
+        }
+    }).then( res => {
+        let data = res.data;
+        data.username = user;
+        return data; 
+    });;
+}
+
 async function notifyCreate(owner_id, activity_id) {
     console.log("notifyCreate", owner_id, activity_id);
-    let user = await getUserInfo(owner_id);
+    let user = await getUserInfoFromStrava(owner_id);
     let activity = await getActivityData(activity_id, user.accessToken);
 
     console.log("GOT ACTIVITY!", activity.data);
@@ -121,7 +162,13 @@ async function sendUpdate(data) {
     });
 }
 
+function getBatchStats(users) {
+    let promises = users.map( n => getAthleteStats(n.stravaID, n.accessToken, n.user));
+    return Promise.all(promises);
+}
+
 export default {
+
     init(app) {
         // Used for the redirect, needs ?user=&userID from discord
         app.get('/api/strava/auth', function(req, res) {
@@ -171,5 +218,45 @@ export default {
             saveOwnerID(userID, code);
             res.send("Alright, you're strava is now hooked to the discord bot! 👍<p>The bot will ping the 5k channel when you record a run");
         });
+    },
+
+    getMiles: function(x) {
+        return getMiles(x);
+    },
+
+    hhmmss: function(sec) {
+        return hhmmss(sec);
+    },
+
+    getStats: async function(userID) {
+        let user = await getUserInfoFromDiscord(userID);
+
+        if (!user) {
+            return null;
+        }
+
+        let data = await getAthleteStats(user.stravaID, user.accessToken, user.user);
+        data.username = user.user;
+        return data;
+    },
+
+    getLeaderboard: async function() {
+        let users = await getAllUsers();
+        let stats = await getBatchStats(users);
+        let leaderboard = stats.map( s => {
+                let json = s.recent_run_totals;
+                json.user = s.username;
+                return json;
+            }).sort( (a, b) => {
+                if (a.moving_time > b.moving_time) {
+                    return -1;
+                } else if (a.moving_time < b.moving_time) {
+                    return 1;
+                } else {
+                    return 0;
+                }
+            });
+        console.log("leaderboard", leaderboard);
+        return leaderboard;
     }
 }
