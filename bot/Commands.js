@@ -307,6 +307,7 @@ export default {
                 to: channelID,
                 message: `${stats.username} has run ${runs.count} times in the last four weeks; ${distance} mi ${time} time`
             });
+            
         } else if (opt === "leaders") {
             let leaderboard = await Strava.getLeaderboard();
             var table = new Table("Past 4 Week Leaders");
