@@ -48,7 +48,7 @@ export default {
                 const [cmd] = context.message.split(" ");
 
                 if (channelID === channels.BOOMBOT) {
-                    BoombotRouter.router(context)
+                    // BoombotRouter.router(context)
                 } else if (channelID === channels.ADMIN && AdminRouter[cmd]) {
                     AdminRouter[cmd](context);
                 } else {
@@ -106,6 +106,10 @@ export default {
 
     weeklyCron: async function() {
         BoombotWeeklyController.EndWeek(bot);
+    },
+
+    sendMessage: function(opt) {
+        return bot.sendMessage(opt);
     }
 
 }

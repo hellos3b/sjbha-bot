@@ -6,6 +6,7 @@ import SwirlCountModel from '../db/models/SwirlCount';
 
 import logger from 'winston'
 import PlayersDB from '../boombot/db/PlayersDB'
+import Strava from './Strava'
 
 const app = express()
 
@@ -80,5 +81,7 @@ app.get('/db/players.json', (req, res) => {
     let players = PlayersDB.getAll();
     res.send(players);
 })
+
+Strava.init(app);
 
 app.listen(port, () => logger.info(`Listening on port ${port}!`))
