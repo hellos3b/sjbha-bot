@@ -261,8 +261,10 @@ export default {
                 to:channelID,
                 message: "```md\n"+
                     "< !strava auth > Authenticate the bot to your strava account\n"+
-                    "< !strava runs @user > View strava stats\n" +
+                    "< !strava stats @user > View strava stats\n" +
                     "< !strava leaders > View who ran the most in the last 4 weeks\n" +
+                    "< !strava calendar > View your 4 weeks calendar\n" +
+                    "< !strava avg > View your 4 weeks average stats\n" +
                     "```"
             });
             return;
@@ -301,7 +303,7 @@ export default {
             console.log("stats", stats);
             let runs = stats.recent_run_totals;
             let distance = Strava.getMiles(runs.distance);
-            let time = Strava.hhmmss(runs.moving_time);
+            let time = Strava.hhmmss(runs.moving_time, true);
 
             await bot.sendMessage({
                 to: channelID,
@@ -317,7 +319,7 @@ export default {
             for (var i = 0; i < leaderboard.length; i++) {
                 let runs = leaderboard[i].count;
                 let distance = Strava.getMiles(leaderboard[i].distance);
-                let time = Strava.hhmmss(leaderboard[i].moving_time); 
+                let time = Strava.hhmmss(leaderboard[i].moving_time, true); 
 
                 table.addRow(
                     `${i+1}.`, 
@@ -331,6 +333,49 @@ export default {
             await bot.sendMessage({
                 to: channelID,
                 message: "```\n" + table.toString() + "```"
+            });
+        } else if (opt === "calendar") {
+            let targetId = userID;
+            if (param) {
+                targetId = param.replace("<@!","")
+                    .replace("<@","")
+                    .replace(">","");
+            }
+
+            let calendar = await Strava.getCalendar(targetId);
+
+            if (!calendar) {
+                await bot.sendMessage({
+                    to: channelID,
+                    message: "This person has not authenticated with Strava!"
+                });
+                return;
+            }
+
+            await bot.sendMessage({
+                to: channelID,
+                message: "```\n" + calendar + "```"
+            });
+        } else if (opt === "avg") {
+            let targetId = userID;
+            if (param) {
+                targetId = param.replace("<@!","")
+                    .replace("<@","")
+                    .replace(">","");
+            }
+            let avg = await Strava.getAverage(targetId);
+
+            if (!avg) {
+                await bot.sendMessage({
+                    to: channelID,
+                    message: "This person has not authenticated with Strava!"
+                });
+                return;
+            }
+
+            await bot.sendMessage({
+                to: channelID,
+                message: `**${avg.name}** last four weeks average: ${avg.total} runs,  ${avg.distance} mi, ${avg.pace}/mi pace`
             });
         }
     },
