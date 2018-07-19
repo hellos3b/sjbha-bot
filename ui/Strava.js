@@ -3,6 +3,7 @@ import Axios from 'axios'
 import moment from 'moment'
 import channels from "../bot/channels"
 import Bot from "../bot/Controller"
+import { start } from 'repl';
 
 // For authenticating
 let STRAVA_TOKEN_URL = 'https://www.strava.com/oauth/token';
@@ -87,7 +88,12 @@ function getMiles(i) {
 function pad(num) {
     return ("0"+num).slice(-2);
 }
-function hhmmss(secs) {
+
+function dateString(date) {
+    return date.getMonth() + "-" + date.getDate();
+}
+
+function hhmmss(secs, leadingZero) {
   var minutes = Math.floor(secs / 60);
   secs = secs%60;
   var hours = Math.floor(minutes/60)
@@ -95,6 +101,11 @@ function hhmmss(secs) {
   let result = "";
   if (hours > 0) {
       result += hours+":";
+  }
+  if (leadingZero) {
+      if (minutes < 10) {
+          minutes = "0"+minutes;
+      }
   }
   result += `${minutes}:${pad(secs)}`;
   return result;
@@ -125,6 +136,21 @@ function getAthleteStats(owner_id, access_token, user) {
         data.username = user;
         return data; 
     });;
+}
+
+function getAthleteActivities(owner_id, access_token, start_date) {
+    let epoch = start_date.getTime() / 1000;
+    let url = `https://www.strava.com/api/v3/athlete/activities?after=${epoch}&page=1`;
+
+    return Axios.get(url, {
+        headers: {
+            "Authorization": `Bearer ${access_token}`
+        }
+    }).then( res => res.data );
+}
+
+function getPace(distance, moving_time) {
+
 }
 
 async function notifyCreate(owner_id, activity_id) {
@@ -224,8 +250,8 @@ export default {
         return getMiles(x);
     },
 
-    hhmmss: function(sec) {
-        return hhmmss(sec);
+    hhmmss: function(sec, leadingZero) {
+        return hhmmss(sec, leadingZero);
     },
 
     getStats: async function(userID) {
@@ -258,5 +284,79 @@ export default {
             });
         console.log("leaderboard", leaderboard);
         return leaderboard;
+    },
+
+    getCalendar: async function(userID) {
+        let user = await getUserInfoFromDiscord(userID);
+
+        if (!user) {
+            return null;
+        }
+
+        let start_date = new Date();
+        start_date.setDate(start_date.getDate() - 28);
+        start_date.setDate(start_date.getDate() - start_date.getDay());
+
+        let data = await getAthleteActivities(user.stravaID, user.accessToken, start_date);
+
+        // Convert into a hashmap of datestring
+        let dates = data.map(n => {
+            let date = new Date(n.start_date);
+            return dateString(date);
+        }).reduce( (res, obj) => {
+            res[obj] = true;
+            return res;
+        }, {})
+
+        let cal = `S  M  T  W  T  F  S`;
+        let today = dateString(new Date());
+        let c = dateString(start_date);
+        while (c != today) {
+            if (start_date.getDay() === 0) {
+                cal += "\n";
+            }
+            if (dates[c]) {
+                cal += "✓  ";
+            } else {
+                cal += "-  ";
+            }
+            start_date.setDate(start_date.getDate() + 1);
+            c = dateString(start_date);
+        }
+
+        return cal;
+    },
+
+    getAverage: async function(userID) {
+        let user = await getUserInfoFromDiscord(userID);
+        console.log("user", user);
+        if (!user) {
+            return null;
+        }
+
+        let start_date = new Date();
+        start_date.setDate(start_date.getDate() - 28);
+
+        let data = await getAthleteActivities(user.stravaID, user.accessToken, start_date);
+
+        let dist_total = 0;
+        let pace_total = 0;
+        for (var i = 0; i < data.length; i++) {
+            let distance = getMiles(data[i].distance);
+            let seconds_pace = Math.round(data[i].moving_time / distance);
+            dist_total += distance;
+            pace_total += seconds_pace;
+        }
+
+        let dist_avg = dist_total / data.length;
+        dist_avg = Math.floor(dist_avg * 100) / 100;
+        let pace_avg = Math.round(pace_total / data.length);
+
+        return {
+            total: data.length,
+            name: user.user,
+            distance: dist_avg,
+            pace: hhmmss(pace_avg)
+        };
     }
 }
