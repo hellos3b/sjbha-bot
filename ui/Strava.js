@@ -309,16 +309,24 @@ export default {
         }, {})
 
         let cal = `S  M  T  W  T  F  S`;
+        let tomorrow = new Date();
         let today = dateString(new Date());
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        let t = dateString(tomorrow);
         let c = dateString(start_date);
-        while (c != today) {
+
+        while (c != t) {
             if (start_date.getDay() === 0) {
                 cal += "\n";
             }
             if (dates[c]) {
                 cal += "✓  ";
             } else {
-                cal += "-  ";
+                if (c === today) {
+                    cal += "o  ";
+                } else {
+                    cal += "-  ";
+                }
             }
             start_date.setDate(start_date.getDate() + 1);
             c = dateString(start_date);
