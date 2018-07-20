@@ -34,7 +34,7 @@ export default {
         });
     
         // Captures all messages
-        bot.on('message', (user, userID, channelID, message, evt) => {
+        bot.on('message', async function(user, userID, channelID, message, evt) {
             // Our bot needs to know if it will execute a command
             // It will listen for messages that will start with `!`
 
@@ -48,7 +48,7 @@ export default {
                 const [cmd] = context.message.split(" ");
 
                 if (channelID === channels.BOOMBOT) {
-                    BoombotRouter.router(context)
+                    // BoombotRouter.router(context)
                 } else if (channelID === channels.ADMIN && AdminRouter[cmd]) {
                     AdminRouter[cmd](context);
                 } else {
@@ -57,16 +57,24 @@ export default {
             } else {
                 Query.check(message, {userID, channelID});
             }
-        });        
+        }.bind(this));        
     },
 
-    router(context) {
+    router: async function(context) {
         logger.info(`<${context.user}> ${context.message}`);
 
         const [cmd] = context.message.split(" ");
     
         if (cmd in Commands) {
-            Commands[cmd](context);
+            try {
+                await Commands[cmd](context);
+            } catch (err) {
+                console.log("ERROR");
+                await bot.sendMessage({
+                    to: context.channelID,
+                    message: "```diff\n- "+err+"```"
+                })
+            }
         } else {
             logger.debug("Command not found, skipping");
         }
