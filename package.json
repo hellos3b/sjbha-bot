@@ -20,6 +20,7 @@
         "diskdb": "^0.1.17",
         "dotenv": "^5.0.1",
         "express": "^4.16.3",
+        "image-downloader": "^3.4.1",
         "moment": "^2.22.0",
         "mongoose": "^5.0.12",
         "node-cron": "^1.2.1",
