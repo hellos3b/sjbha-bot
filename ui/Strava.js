@@ -124,7 +124,7 @@ function getAllUsers() {
                     console.error("couldn't find user", owner_id);
                     reject(err);
                 }
-                resolve(users.filter( n => n.accessToken));git
+                resolve(users.filter( n => n.accessToken))
             });
     })
 }
