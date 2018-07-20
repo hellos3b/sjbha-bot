@@ -62,8 +62,13 @@ function getUserInfoFromDiscord(userID) {
                 if (err) {
                     console.error("couldn't find user", owner_id);
                     reject(err);
+                    return;
                 }
                 console.log("result", user);
+                if (!user.accessToken) {
+                    reject("No token");
+                    return;
+                }
                 resolve(user);
             });
     })
@@ -119,7 +124,7 @@ function getAllUsers() {
                     console.error("couldn't find user", owner_id);
                     reject(err);
                 }
-                resolve(users);
+                resolve(users.filter( n => n.accessToken));git
             });
     })
 }
