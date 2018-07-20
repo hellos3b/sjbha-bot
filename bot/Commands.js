@@ -420,7 +420,7 @@ export default {
         msg = msg.join(" ");
 
         if (!msg) {
-            if (channelID !== channels.GENERAL2) {
+            if (channelID !== channels.GENERAL2 && channelID !== channels.ADMIN) {
                 await bot.sendMessage({
                     to: channelID,
                     message: `You can only get the TLDR list in the general 2 channel`
