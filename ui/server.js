@@ -7,6 +7,9 @@ import SwirlCountModel from '../db/models/SwirlCount';
 import logger from 'winston'
 import PlayersDB from '../boombot/db/PlayersDB'
 import Strava from './Strava'
+import bots from '../boombot/game/bots'
+import channels from "../bot/channels"
+import Bot from "../bot/Controller"
 
 const app = express()
 
@@ -81,6 +84,24 @@ app.get('/db/players.json', (req, res) => {
     let players = PlayersDB.getAll();
     res.send(players);
 })
+
+app.post('/api/reddithook', function(req, res) {
+    console.log("Reddit webhook fired", req.body);
+    let body = req.body;
+    await Bot.sendMessage({
+        to: channels.GENERAL2,
+        embed: {
+            "author": {
+                "name": body.title,
+                "url": body.url,
+                "icon_url": "https://i.redd.it/rzj02scnpta11.png"
+            },
+            "color": 16729344
+        }
+    });
+
+    res.send("ok");
+});
 
 Strava.init(app);
 
