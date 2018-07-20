@@ -57,7 +57,7 @@ export default {
     "!ping"({bot, channelID}) {
         bot.sendMessage({
             to: channelID,
-            message: "Pong (:"
+            message: "👋"
         });
     },
 
