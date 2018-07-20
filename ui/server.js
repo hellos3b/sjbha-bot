@@ -88,7 +88,7 @@ app.get('/db/players.json', (req, res) => {
 app.post('/api/reddithook', function(req, res) {
     console.log("Reddit webhook fired", req.body);
     let body = req.body;
-    await Bot.sendMessage({
+    Bot.sendMessage({
         to: channels.GENERAL2,
         embed: {
             "author": {
