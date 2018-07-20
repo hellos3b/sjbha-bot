@@ -98,14 +98,19 @@ export default {
     },
 
     "!chart": async function({bot, message, channelID, user, userID}) {
-        let [cmd, stock] = message.split(" ");
+        let [cmd, stock, optstyle] = message.split(" ");
 
         if (channelID !== channels.ADMIN && channelID !== channels.STOCKS) {
             return;
         }
 
+        let style = "c";
+        if (optstyle === "line") {
+            style = "l"
+        }
+
         let options = {
-            url: `https://finviz.com/chart.ashx?t=${stock}&ty=c&ta=0&p=d&s=l`,
+            url: `https://finviz.com/chart.ashx?t=${stock}&ty=${style}&ta=0&p=d&s=l`,
             dest: `${__dirname}/charts/chart.png`
         }
 
