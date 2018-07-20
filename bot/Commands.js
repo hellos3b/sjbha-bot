@@ -136,17 +136,18 @@ export default {
         let reason = BanReasons.getReason();
 
         let rng = Math.floor(Math.random()*6);
-        if (rng === 3) {
-            await bot.sendMessage({
-                to: channelID,
-                message: `<@!${userID}> has been banned from the server; Reason: *ABUSING THE BAN COMMAND UR NOT AN ADMIN*`
-            });
+        let message = `${name} has been banned from the server; Reason: *${reason}*`;
 
-            return;
+        if (rng === 3) {
+            message = `<@!${userID}> has been banned from the server; Reason: *ABUSING THE BAN COMMAND UR NOT AN ADMIN*`
+        }
+        
+        if (!name) {
+            message = `<@!${userID}> has been banned from the server; Reason: *Doesn't know how to use the ban command properly*`
         }
         await bot.sendMessage({
             to: channelID,
-            message: `${name} has been banned from the server; Reason: *${reason}*`
+            message
         });
     },
 
