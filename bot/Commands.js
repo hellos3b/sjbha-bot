@@ -17,6 +17,7 @@ import TeamDB from './teams/TeamDB'
 import Points from './teams/Points'
 import Strava from '../ui/Strava'
 import Table from 'ascii-table'
+import download from 'image-downloader'
 
 const SERVER_ID = "358442034790400000";
 const TEAMS = [{
@@ -93,6 +94,35 @@ export default {
             MeetupsPlaintext.update({bot});
         } catch (e) {
             logger.error(e);
+        }
+    },
+
+    "!chart": async function({bot, message, channelID, user, userID}) {
+        let [cmd, stock] = message.split(" ");
+
+        if (channelID !== channels.ADMIN && channelID !== channels.STOCKS) {
+            return;
+        }
+
+        let options = {
+            url: `https://finviz.com/chart.ashx?t=${stock}&ty=c&ta=0&p=d&s=l`,
+            dest: `${__dirname}/charts/chart.png`
+        }
+
+        bot.simulateTyping({ channelID })
+        console.log("url", options.url);
+        try {
+            const { filename, image } = await download.image(options)
+            await bot.uploadFile({
+                to: channelID,
+                file: options.dest
+            })
+        } catch(err) {
+            console.error(err)
+            await bot.sendMessage({
+                to: channelID,
+                message: "Something went wrong trying to get the chart"
+            });
         }
     },
 
