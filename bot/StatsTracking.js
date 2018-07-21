@@ -8,9 +8,10 @@ export default {
     getTime() {
         let m = moment()
         m.set({
-
-
-        })
+            'hours': m.get('hours'),
+            'minutes': 0,
+            'seconds': 0
+        });
         return m;
     },
 
