@@ -43,7 +43,10 @@ export default {
                 stat = doc;
                 stat.count += stats.count;
             } else {
-                stat = new StatsModel(stats);
+                stat = new StatsModel({
+                    count: stats.count,
+                    timestamp: stats.timestamp.toISOString()
+                });
             }
         
             stat.save((saveErr, savedStat) => {
