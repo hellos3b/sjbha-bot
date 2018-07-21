@@ -49,7 +49,16 @@ export default {
                         logger.error(err);
                         reject(err);
                     } 
-                    resolve( players );
+                    let result = players.sort( (a, b) => {
+                        if (a.user > b.user) { 
+                            return 1; 
+                        } else if (a.user < b.user) { 
+                            return -1; 
+                        } else { 
+                            return 0; 
+                        }
+                    })
+                    resolve( result );
                 });
         });
     },
