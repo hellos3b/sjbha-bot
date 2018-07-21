@@ -50,9 +50,9 @@ export default {
                         reject(err);
                     } 
                     let result = players.sort( (a, b) => {
-                        if (a.user > b.user) { 
+                        if (a.user.toLowerCase() > b.user.toLowerCase()) { 
                             return 1; 
-                        } else if (a.user < b.user) { 
+                        } else if (a.user.toLowerCase() < b.user.toLowerCase()) { 
                             return -1; 
                         } else { 
                             return 0; 
