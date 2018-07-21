@@ -29,8 +29,10 @@ export default {
 
     increment() {
         if (this.compareTime(this.getTime(), stats.timestamp)) {
+            console.log("increment");
             stats.count++;
         } else {
+            console.log("increment mismatch, saving", stats)
             this.save()
             this.start()
             stats.count++;
@@ -38,21 +40,24 @@ export default {
     },
 
     save() {
+        console.log("Saving stats", stats);
         StatsModel.findOne({ timestamp: stats.timestamp.toISOString() }, (err, doc) => {
             let stat = null;
             if (doc) {
                 stat = doc;
                 stat.count += stats.count;
+                console.log("document exists", stat);
             } else {
                 stat = new StatsModel({
                     count: stats.count,
                     timestamp: stats.timestamp.toISOString()
                 });
+                console.log("new statsModel:", stat);
             }
         
             stat.save((saveErr, savedStat) => {
                 if (saveErr) throw saveErr;
-                console.log(savedStat);
+                console.log("saved stat", savedStat);
             });
         });
     }
