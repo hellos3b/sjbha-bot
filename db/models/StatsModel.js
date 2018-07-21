@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 const statsModel = mongoose.Schema({
-    count: String,
+    count: Number,
     timestamp: Date
 });
 
