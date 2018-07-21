@@ -523,22 +523,25 @@ export default {
         let pink = teams.filter( t => t.team === "Pink Bombers" || t.oldTeam === "Pink Bombers");
         let black = teams.filter( t => t.team === "Resistance");
 
+        let g_resist = green.filter( n => n.resist ).length;
+        let p_resist = pink.filter( n => n.resist ).length;
         let greenList = green.map( n=> {
             if (n.oldTeam) {
-                return "  " + new Array(n.user.length + 1).join( "~" );
+                return null;
             }
             let resist = n.resist ? "x " : "  ";
             return resist + n.user;
-        }).join("\n");
+        }).filter( n => !!n).join("\n");
         let pinkList = pink.map(n=> {
             if (n.oldTeam) {
-                return "  " + new Array(n.user.length + 1).join( "~" );
+                return null;
             }
             let resist = n.resist ? "x " : "  ";
             return resist + n.user;
-        }).join("\n");
+        }).filter( n => !!n).join("\n");
         let resistList = black.map(n=> {
-            return "  " + n.user;
+            let symbol = n.oldTeam[0];
+            return symbol + " " + n.user;
         }).join("\n");
 
         let points = await Points.getPoints();
@@ -546,11 +549,11 @@ export default {
         await bot.sendMessage({
             to: channelID,
             message: `\`\`\`md\n
-Team Pink Bombers [${points["Pink Bombers"]}]
+Team Pink Bombers [${points["Pink Bombers"]}] [-${p_resist}]
 ---------------
 ${pinkList}
 
-Team Green Mafia [${points["Green Mafia"]}]
+Team Green Mafia [${points["Green Mafia"]}] [-${g_resist}]
 -------------
 ${greenList}
 
