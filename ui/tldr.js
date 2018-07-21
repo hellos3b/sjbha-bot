@@ -33,8 +33,6 @@ function parseData(data) {
         });
     }
 
-    console.log(groups)
-
     data.tldrs = groups;
 
     return data;
