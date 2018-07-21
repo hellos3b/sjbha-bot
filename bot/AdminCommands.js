@@ -144,11 +144,17 @@ export default {
         })
     },
 
-    "!stats": async function({bot, channelID}) {
+    "!stats": async function({bot, channelID, message}) {
+        let [cmd, option] = message.split(" ");
         let stats = await Stats.getHistory();
         let msg = stats.map( n => {
             let m = moment(n.timestamp);
-            return `[${m.format("ddd MM/DD hh:mm a")}] ${n.count}`;
+            let display = n.count;
+            if (option === "chart") {
+                let x = Math.floor( n.count / 50 );
+                display = new Array(x + 1).join( "X" );
+            }
+            return `[${m.format("ddd MM/DD hh:mm a")}] ${display}`;
         }).join("\n");
         await bot.sendMessage({
             to: channelID,
