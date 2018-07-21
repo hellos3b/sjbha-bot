@@ -36,5 +36,5 @@ cron.schedule('0 * * * *', function() {
 
 // When shutting down
 process.on('SIGTERM', function () {
-   Bot.storeStats();
+   Bot.shutdown();
 });
