@@ -26,6 +26,9 @@ const TEAMS = [{
 }, {
     name: "Green Mafia",
     id: "466368570532560897"
+}, {
+    name: "Resistance",
+    id: "470114559911526402"
 }];
 
 async function parseMeetupStr({bot, channelID, msg}) {
@@ -282,6 +285,56 @@ export default {
     
     },
 
+    "!resist": async function({bot, message, channelID, userID, user}) {
+        let team = await TeamDB.findUser(userID);
+        console.log(`${user} is trying to resist`);
+
+        if (!team) {
+            console.log("[Resist] Not assigned to anything");
+            await bot.sendMessage({
+                to: channelID,
+                message: `You have to have joined a team in order to resist`
+            });
+        } else if (team.team === "Resistance") {
+            console.log("[Resist] Already on resistance");
+            await bot.sendMessage({
+                to: channelID,
+                message: `You're already a part of the Resistance!`
+            });
+        } else if (team.resist) {
+            console.log("[Resist] Already failed to resist");
+            await bot.sendMessage({
+                to: channelID,
+                message: `You've already failed to resist, *traitor*`
+            });
+        } else {
+            let resist = Math.random() < 0.5;
+            let msg = "";
+
+            let i = (team.team === "Pink Bombers") ? 0 : 1;
+            let Resistance = TEAMS[2];
+            if (resist) {
+                console.log("[Resist] Joined team Resistance");
+                await bot.removeFromRole({serverID: SERVER_ID, userID, roleID: TEAMS[i].id})
+                await bot.addToRole({serverID: SERVER_ID, userID, roleID: Resistance.id});
+                team.team = "Resistance";
+                team.resist = true;
+                msg = "💀 Welcome to the Resistance"
+            } else {
+                console.log("[Resist] Denied to Resistance");
+                team.resist = true;
+                msg = "🚫 The Resistance does not welcome you"
+            }
+
+            await TeamDB.saveUser(team);
+
+            await bot.sendMessage({
+                to: channelID,
+                message: msg
+            });
+        }
+    },
+
     "!strava": async function({bot, message, channelID, userID, user}) {
         let [cmd, ...options] = message.split(" ");
         if (channelID !== channels.ADMIN && channelID !== channels.RUN) {
@@ -454,7 +507,7 @@ export default {
     },
 
     "!teams": async function({bot, message, channelID, userID, user}) {
-        if (channelID !== channels.GENERAL2) {
+        if (channelID !== channels.GENERAL2 && channelID !== channels.ADMIN) {
             await bot.sendMessage({
                 to: channelID,
                 message: `Please keep team discussion in the general-2 channel!`
@@ -467,9 +520,19 @@ export default {
 
         let green = teams.filter( t => t.team === "Green Mafia");
         let pink = teams.filter( t => t.team === "Pink Bombers");
+        let black = teams.filter( t => t.team === "Resistance");
 
-        let greenList = green.map( n=> n.user).join("\n");
-        let pinkList = pink.map( n => n.user).join("\n");
+        let greenList = green.map( n=> {
+            let resist = n.resist ? "x " : "  ";
+            return resist + n.user;
+        }).join("\n");
+        let pinkList = pink.map(n=> {
+            let resist = n.resist ? "x " : "  ";
+            return resist + n.user;
+        }).join("\n");
+        let resistList = black.map(n=> {
+            return "  " + n.user;
+        }).join("\n");
 
         let points = await Points.getPoints();
 
@@ -483,6 +546,10 @@ ${pinkList}
 Team Green Mafia [${points["Green Mafia"]}]
 -------------
 ${greenList}
+
+Resistance [${points["Resistance"]}]
+-------------
+${resistList}
 \`\`\`
 `
         })

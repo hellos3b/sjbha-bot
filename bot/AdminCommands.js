@@ -142,6 +142,10 @@ export default {
     "!statsave": async function({bot, channelID}) {
         Stats.save();
         Stats.start();
+        await bot.sendMessage({
+            to: channelID,
+            message: "Stats saved!"
+        });
     }
 
 
