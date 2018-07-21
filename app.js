@@ -16,7 +16,7 @@ logger.add(logger.transports.Console, {
 logger.level = 'debug';
 
 DB.connect();
-Bot.start();
+// Bot.start();
 
 // Update finished meetups
 // 4 hours - 0 */4 * * *
