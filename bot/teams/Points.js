@@ -6,6 +6,53 @@ const MAYBE_POINTS = 1;
 
 export default {
 
+    getPointsForOne: async function(user) {
+        let person = await TeamDB.findUserByName(user);
+
+        if (!person) {
+            return null;
+        }
+
+        let archive = await MeetupsDB.getArchive();
+
+        let x = new Date("6/1/2018");
+
+        archive = archive.filter( arc => {
+            let d = new Date(arc.date);
+            return x < d;
+        }).map( a => {
+            let yes = a.reactions.yes.map( n => n.id);
+            let maybe = a.reactions.maybe.map( n => n.id);
+            a.sets = {
+                yes: new Set(yes),
+                maybe: new Set(maybe)
+            }
+            return a;
+        });
+
+        let p = 0;
+        let y = 0;
+        let m = 0;
+
+        let id = person.userID;
+        for (var j = 0; j < archive.length; j++) {
+            if (archive[j].sets.yes.has(id)) {
+                p += YES_POINTS;
+                y++;
+            }
+            if (archive[j].sets.maybe.has(id)) {
+                p += MAYBE_POINTS;
+                m++;
+            }
+        }
+
+        return {
+            total: p,  
+            yes: y,
+            maybe: m
+        };
+    },
+
     getPoints: async function() {
         let people = await TeamDB.getAll();
         let archive = await MeetupsDB.getArchive();
