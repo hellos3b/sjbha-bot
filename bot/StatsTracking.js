@@ -23,6 +23,18 @@ export default {
         };
     },
 
+    getStats() {
+        return stats;
+    },
+
+    getHistory() {
+        return new Promise((resolve, reject) => {
+            StatsModel.find().exec( (err, models) => {
+                resolve(models)
+            });
+        })
+    },
+
     compareTime(a, b) {
         return a.format("MM/DD/YY hh:mm") === b.format("MM/DD/YY hh:mm")
     },

@@ -8,6 +8,7 @@ import Query from './Query'
 import channels from './channels'
 import moment from 'moment'
 import MeetupsPlaintext from './MeetupsPlaintext'
+import Stats from './StatsTracking'
 
 export default {
 
@@ -116,6 +117,26 @@ export default {
             to: channelID,
             message: "Updated plaintext channel"
         })
+    },
+
+    "!stat": async function({bot, channelID}) {
+        let stats = await Stats.getStats();
+        await bot.sendMessage({
+            to: channelID,
+            message: `\`\`\`${stats.timestamp.toISOString()} count: ${stats.count}\`\`\``
+        })
+    },
+
+    "!stats": async function({bot, channelID}) {
+        let stats = await Stats.getHistory();
+        let msg = stats.map( n => {
+            return `${n.timestamp} count ${n.count}`;
+        }).join("\n");
+        await bot.sendMessage({
+            to: channelID,
+            message: "```" + msg + "```"
+        })
     }
+
 
 };
