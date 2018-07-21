@@ -130,12 +130,18 @@ export default {
     "!stats": async function({bot, channelID}) {
         let stats = await Stats.getHistory();
         let msg = stats.map( n => {
-            return `${n.timestamp} count ${n.count}`;
+            let m = moment(n.timestamp);
+            return `[${m.format("ddd MM/DD hh:mm a")}] ${n.count}`;
         }).join("\n");
         await bot.sendMessage({
             to: channelID,
             message: "```" + msg + "```"
         })
+    },
+
+    "!statsave": async function({bot, channelID}) {
+        Stats.save();
+        Stats.start();
     }
 
 

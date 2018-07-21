@@ -10,7 +10,8 @@ export default {
         m.set({
             'hours': m.get('hours'),
             'minutes': 0,
-            'seconds': 0
+            'seconds': 0,
+            'millisecond': 0
         });
         return m;
     },
@@ -29,7 +30,7 @@ export default {
 
     getHistory() {
         return new Promise((resolve, reject) => {
-            StatsModel.find().exec( (err, models) => {
+            StatsModel.find().limit(24).exec( (err, models) => {
                 resolve(models)
             });
         })
@@ -41,10 +42,8 @@ export default {
 
     increment() {
         if (this.compareTime(this.getTime(), stats.timestamp)) {
-            console.log("increment");
             stats.count++;
         } else {
-            console.log("increment mismatch, saving", stats)
             this.save()
             this.start()
             stats.count++;
@@ -53,16 +52,18 @@ export default {
 
     save() {
         console.log("Saving stats", stats);
-        StatsModel.findOne({ timestamp: stats.timestamp.toISOString() }, (err, doc) => {
+        let count = stats.count;
+        let timestamp = stats.timestamp;
+        StatsModel.findOne({ timestamp: timestamp.toISOString() }, (err, doc) => {
             let stat = null;
             if (doc) {
                 stat = doc;
-                stat.count += stats.count;
+                stat.count += count;
                 console.log("document exists", stat);
             } else {
                 stat = new StatsModel({
-                    count: stats.count,
-                    timestamp: stats.timestamp.toISOString()
+                    count: count,
+                    timestamp: timestamp.toISOString()
                 });
                 console.log("new statsModel:", stat);
             }
