@@ -33,3 +33,8 @@ cron.schedule('28 0 * * 1', function(){
 cron.schedule('0 * * * *', function() {
     Bot.hourlyCron();
 })
+
+// When shutting down
+process.on('SIGTERM', function () {
+   Bot.storeStats();
+});

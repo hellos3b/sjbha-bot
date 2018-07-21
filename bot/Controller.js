@@ -13,6 +13,7 @@ import AdminRouter from './AdminCommands'
 import MeetupsPlaintext from './MeetupsPlaintext'
 
 import SwirlCount from './SwirlCount'
+import Stats from './StatsTracking'
 
 let bot = null;
 
@@ -31,6 +32,7 @@ export default {
         bot.on('ready', evt => {
             logger.info('Connected!');
             logger.info(`Logged in as: ${bot.username} [${bot.id}]`);
+            Stats.start()
         });
     
         // Captures all messages
@@ -110,6 +112,8 @@ export default {
 
     hourlyCron: async function() {
         MeetupsPlaintext.update({bot});
+        Stats.save()
+        Stats.start()
     },
 
     weeklyCron: async function() {
@@ -118,6 +122,14 @@ export default {
 
     sendMessage: function(opt) {
         return bot.sendMessage(opt);
+    },
+
+    shutdown: function() {
+        Stats.save()
+        bot.sendMessage({
+            to: channels.ADMIN,
+            message: "```SIGTERM shutdown```"
+        });
     }
 
 }
