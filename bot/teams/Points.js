@@ -31,7 +31,8 @@ export default {
 
         let Teams = {
             "Pink Bombers": 0,
-            "Green Mafia": 0
+            "Green Mafia": 0,
+            "Resistance": 0
         };
 
         for (var i = 0; i < people.length; i++) {

@@ -67,6 +67,12 @@ export default function(bot) {
         return sendMessage(bot, bot.addToRoleOld, opt);
     };
 
+    bot.removeFromRoleOld = bot.removeFromRole;
+    bot.removeFromRole = function(opt) {
+        logger.debug("bot.removeFromRole", opt);
+        return sendMessage(bot, bot.removeFromRoleOld, opt);
+    };
+
     bot.uploadFileOld = bot.uploadFile;
     bot.uploadFile = function(opt) {
         logger.debug("bot.addToRole", opt);

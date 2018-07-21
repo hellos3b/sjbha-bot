@@ -37,14 +37,14 @@ export default {
 
     saveUser(json) {
         return new Promise((resolve, reject) => {
-            TeamSchema.create(json, function(err, doc){
-                if (err) {
-                    logger.error(err);
-                    reject(err);
-                } else {
-                    logger.info(`Saved User Team`);
+            TeamSchema.findOne({ userID: json.userID }, (err, doc) => {
+                let user = (doc) ? doc.set(json) : new TeamSchema(json);
+            
+                user.save((saveErr, savedStat) => {
+                    if (saveErr) throw saveErr;
+                    console.log("saved team user", savedStat);
                     resolve();
-                }
+                });
             });
         })
     }
