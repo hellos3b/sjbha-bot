@@ -125,9 +125,9 @@ export default {
         return bot.sendMessage(opt);
     },
 
-    shutdown: function() {
+    shutdown: async function() {
         Stats.save()
-        bot.sendMessage({
+        await bot.sendMessage({
             to: channels.ADMIN,
             message: "```SIGTERM shutdown```"
         });
