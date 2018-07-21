@@ -149,17 +149,17 @@ export default {
         let stats = await Stats.getHistory();
         let msg = stats.map( n => {
             let m = moment(n.timestamp);
-            let x = Math.floor( n.count / 25 );
+            let x = Math.ceil( n.count / 25 );
             let chart = new Array(x + 1).join( "■" );
-            let display = chart + " " + n.count;
+            let display = `[${chart}] ${n.count}`;
             if (!chart.length) {
-                display = n.count;
+                display = `[] ${n.count}`;
             }
-            return `[${m.format("ddd MM/DD hh:mm a")}] ${display}`;
+            return `${m.format("ddd MM/DD hh:mm a")} ${display}`;
         }).join("\n");
         await bot.sendMessage({
             to: channelID,
-            message: "```" + msg + "```"
+            message: "```ini\n" + msg + "```"
         })
     },
 
