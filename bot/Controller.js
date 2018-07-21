@@ -37,9 +37,11 @@ export default {
     
         // Captures all messages
         bot.on('message', async function(user, userID, channelID, message, evt) {
-            if (userID !== "430522654466768907") {
-                Stats.increment()
+            // if bot
+            if (userID === "430522654466768907") {
+                return;
             }
+            Stats.increment()
             // Our bot needs to know if it will execute a command
             // It will listen for messages that will start with `!`
 

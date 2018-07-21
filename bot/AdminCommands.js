@@ -9,6 +9,7 @@ import channels from './channels'
 import moment from 'moment'
 import MeetupsPlaintext from './MeetupsPlaintext'
 import Stats from './StatsTracking'
+import Points from './teams/Points'
 
 export default {
 
@@ -108,6 +109,22 @@ export default {
         await bot.sendMessage({
             to: channelID,
             "embed": embed
+        });
+    },
+
+    "!teamstat": async function({bot, channelID, message}) {
+        let [cmd, name] = message.split(" ");
+        let points = await Points.getPointsForOne(name);
+
+        let msg = "";
+        if (!points) {
+            msg = "Could not find someone with that ID"
+        } else {
+            msg = `**${name}**: Points: ${points.total}, Yes: ${points.yes}, Maybe: ${points.maybe}`
+        }
+        await bot.sendMessage({
+            to: channelID,
+            message: msg
         });
     },
 
