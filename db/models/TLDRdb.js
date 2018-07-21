@@ -14,6 +14,16 @@ export default {
         });
     },
 
+    getAll() {
+        return new Promise((resolve, reject) => {
+            TLDRModel.find()
+                .sort({'timestamp': -1})
+                .exec( (err, models) => {
+                    resolve(models);
+                });
+        })
+    },
+
     saveTLDR(json) {
         return new Promise((resolve, reject) => {
             TLDRModel.create(json, function(err, doc){

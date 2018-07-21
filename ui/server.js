@@ -10,6 +10,8 @@ import Strava from './Strava'
 import bots from '../boombot/game/bots'
 import channels from "../bot/channels"
 import Bot from "../bot/Controller"
+import TLDRUI from './tldr.js'
+import TLDRDB from '../db/models/TLDRdb'
 
 const app = express()
 
@@ -83,6 +85,14 @@ app.get('/db/swirls.json', (req,res) => {
 app.get('/db/players.json', (req, res) => {
     let players = PlayersDB.getAll();
     res.send(players);
+})
+
+app.get('/tldr', (req, res) => {
+    TLDRDB.getAll()
+        .then( tldrs => {
+            let view = TLDRUI({tldrs: tldrs})
+            res.send(view)
+        });
 })
 
 app.post('/api/reddithook', function(req, res) {
