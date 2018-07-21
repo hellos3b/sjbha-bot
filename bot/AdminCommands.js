@@ -149,10 +149,11 @@ export default {
         let stats = await Stats.getHistory();
         let msg = stats.map( n => {
             let m = moment(n.timestamp);
-            let display = n.count;
-            if (option === "chart") {
-                let x = Math.floor( n.count / 25 );
-                display = new Array(x + 1).join( "X" );
+            let x = Math.floor( n.count / 25 );
+            let chart = new Array(x + 1).join( "■" );
+            let display = chart + " " + n.count;
+            if (!chart.length) {
+                display = n.count;
             }
             return `[${m.format("ddd MM/DD hh:mm a")}] ${display}`;
         }).join("\n");
