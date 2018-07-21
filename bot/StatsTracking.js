@@ -23,7 +23,7 @@ export default {
     },
 
     compareTime(a, b) {
-        return a.format("MM/DD/YY hh:mm") === B.format("MM/DD/YY hh:mm")
+        return a.format("MM/DD/YY hh:mm") === b.format("MM/DD/YY hh:mm")
     },
 
     increment() {
