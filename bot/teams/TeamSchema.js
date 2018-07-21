@@ -4,6 +4,7 @@ const teamSchema = mongoose.Schema({
     user: String,
     userID: String,
     team: String,
+    oldTeam: String,
     resist: {
         type: Boolean,
         default: false

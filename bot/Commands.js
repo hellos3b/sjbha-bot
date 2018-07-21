@@ -317,6 +317,7 @@ export default {
                 console.log("[Resist] Joined team Resistance");
                 await bot.removeFromRole({serverID: SERVER_ID, userID, roleID: TEAMS[i].id})
                 await bot.addToRole({serverID: SERVER_ID, userID, roleID: Resistance.id});
+                team.oldTeam = team.team;
                 team.team = "Resistance";
                 team.resist = true;
                 msg = "💀 Welcome to the Resistance"
@@ -518,15 +519,21 @@ export default {
         let [cmd, option] = message.split(" ");
         let teams = await TeamDB.getAll();
 
-        let green = teams.filter( t => t.team === "Green Mafia");
-        let pink = teams.filter( t => t.team === "Pink Bombers");
+        let green = teams.filter( t => t.team === "Green Mafia" || t.oldTeam === "Green Mafia");
+        let pink = teams.filter( t => t.team === "Pink Bombers" || t.oldTeam === "Pink Bombers");
         let black = teams.filter( t => t.team === "Resistance");
 
         let greenList = green.map( n=> {
+            if (n.oldTeam) {
+                return "  " + new Array(n.user.length + 1).join( "~" );
+            }
             let resist = n.resist ? "x " : "  ";
             return resist + n.user;
         }).join("\n");
         let pinkList = pink.map(n=> {
+            if (n.oldTeam) {
+                return "  " + new Array(n.user.length + 1).join( "~" );
+            }
             let resist = n.resist ? "x " : "  ";
             return resist + n.user;
         }).join("\n");
