@@ -2,7 +2,7 @@ import TeamDB from './TeamDB'
 import MeetupsDB from '../MeetupsDB'
 
 const YES_POINTS = 3;
-const MAYBE_POINTS = 1;
+const MAYBE_POINTS = 0;
 
 export default {
 
