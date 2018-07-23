@@ -28,13 +28,47 @@ export default {
         return stats;
     },
 
-    getHistory() {
+    getHistory(limit) {
         return new Promise((resolve, reject) => {
             StatsModel.find()
                 .sort({timestamp: -1})
-                .limit(48).exec( (err, models) => {
+                .limit(limit).exec( (err, models) => {
                 resolve(models)
             });
+        })
+    },
+
+    getDailyHistory() {
+        return new Promise((resolve, reject) => {
+            let startDate = new Date()
+            startDate.setDate( startDate.getDate() - 14 );
+            startDate.setHours(0);
+            startDate.setMinutes(0);
+
+            let aggregate = [
+                { $match: {
+                    timestamp: { $gte: startDate }
+                }},
+                { $project: {
+                    timestamp: { $dateToString: { format: '%Y-%m-%d', date: '$timestamp' } },
+                    count: 1
+                }},
+                { $group: {
+                    _id: '$timestamp',
+                    count: {
+                        $sum: '$count'
+                    }
+                }}
+            ]
+            StatsModel.aggregate(aggregate)
+                .exec( (err, models) => {
+                    models = models.map (n => {
+                        n.timestamp = n._id;
+                        return n;
+                    });
+                    console.log(models);
+                    resolve(models)
+                });
         })
     },
 
