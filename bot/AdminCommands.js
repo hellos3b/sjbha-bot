@@ -146,16 +146,29 @@ export default {
 
     "!stats": async function({bot, channelID, message}) {
         let [cmd, option] = message.split(" ");
-        let stats = await Stats.getHistory();
+
+        let BAR_AMOUNT = 25;
+        let DATE_FORMAT = "ddd MM/DD hh:mm a";
+
+        let stats;
+        // set options
+        if (option === "daily") {
+            BAR_AMOUNT = 100;
+            DATE_FORMAT = "ddd MM/DD";
+            stats = await Stats.getDailyHistory();
+        } else {
+            stats = await Stats.getHistory(48);
+        }
+
         let msg = stats.map( n => {
             let m = moment(n.timestamp);
-            let x = Math.ceil( n.count / 25 );
+            let x = Math.ceil( n.count / BAR_AMOUNT );
             let chart = new Array(x + 1).join( "■" );
             let display = `[${chart}] ${n.count}`;
             if (!chart.length) {
                 display = `[] ${n.count}`;
             }
-            return `${m.format("ddd MM/DD hh:mm a")} ${display}`;
+            return `${m.format(DATE_FORMAT)} ${display}`;
         }).join("\n");
         await bot.sendMessage({
             to: channelID,
