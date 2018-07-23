@@ -31,6 +31,7 @@ function parseData(data) {
             date: k,
             list: tldrs[k]
         });
+        console.log(tldrs[k])
     }
 
     data.tldrs = groups;

@@ -6,7 +6,8 @@
     "author": "sebby",
     "scripts": {
         "start": "node -r babel-core/register app.js",
-        "dev": "node -r babel-core/register app.js"
+        "dev": "node -r babel-core/register app.js",
+        "web": "NODE_ENV=web node -r babel-core/register app.js"
     },
     "dependencies": {
         "ascii-table": "0.0.9",
@@ -20,6 +21,7 @@
         "diskdb": "^0.1.17",
         "dotenv": "^5.0.1",
         "express": "^4.16.3",
+        "human-readable-ids": "^1.0.4",
         "image-downloader": "^3.4.1",
         "moment": "^2.22.0",
         "mongoose": "^5.0.12",
@@ -29,6 +31,7 @@
         "node-jsondb": "0.0.1-alpha",
         "node-sparkbot": "^0.12.0",
         "require-text": "0.0.1",
+        "sillyid": "^0.2.2",
         "sugar-date": "^2.0.4",
         "winston": "^2.4.1"
     }
