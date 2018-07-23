@@ -156,6 +156,9 @@ export default {
             BAR_AMOUNT = 100;
             DATE_FORMAT = "ddd MM/DD";
             stats = await Stats.getDailyHistory();
+        } else if (option === "average") {
+            DATE_FORMAT = "hh:mm a";
+            stats = await Stats.getAverageHistory();
         } else {
             stats = await Stats.getHistory(48);
         }
@@ -164,9 +167,10 @@ export default {
             let m = moment(n.timestamp);
             let x = Math.ceil( n.count / BAR_AMOUNT );
             let chart = new Array(x + 1).join( "■" );
-            let display = `[${chart}] ${n.count}`;
+            let count = Math.round(n.count);
+            let display = `[${chart}] ${count}`;
             if (!chart.length) {
-                display = `[] ${n.count}`;
+                display = `[] ${count}`;
             }
             return `${m.format(DATE_FORMAT)} ${display}`;
         }).join("\n");

@@ -45,13 +45,14 @@ export default {
             startDate.setHours(0);
             startDate.setMinutes(0);
 
+            console.log('start date', startDate);
             let aggregate = [
                 { $match: {
                     timestamp: { $gte: startDate }
                 }},
                 { $project: {
-                    timestamp: { $dateToString: { format: '%Y-%m-%d', date: '$timestamp' } },
-                    count: 1
+                    timestamp: { $dateToString: { format: '%Y-%m-%d', date: '$timestamp', timezone: 'America/Los_Angeles' } },
+                    count: true
                 }},
                 { $group: {
                     _id: '$timestamp',
@@ -66,6 +67,39 @@ export default {
                         n.timestamp = n._id;
                         return n;
                     });
+                    console.log(models);
+                    resolve(models)
+                });
+        })
+    },
+
+    getAverageHistory() {
+        return new Promise((resolve, reject) => {
+            let aggregate = [
+                { $project: {
+                    timestamp: { $dateToString: { format: '%Y-%m-%dT%H:%M', date: '$timestamp', timezone: 'America/Los_Angeles' } },
+                    hour: { $dateToString: { format: '%H', date: '$timestamp', timezone: 'America/Los_Angeles' } },
+                    count: true
+                }},
+                { $group: {
+                    _id: '$hour',
+                    timestamp: {
+                        $first: '$timestamp'
+                    },
+                    count: {
+                        $avg: '$count'
+                    }
+                }}
+            ]
+            StatsModel.aggregate(aggregate)
+                .exec( (err, models) => {
+                    console.log(err);
+                    models = models.sort( (a, b) => {
+                        let ad = new Date(a.timestamp);
+                        let bd = new Date(b.timestamp);
+                        console.log(a.timestamp);
+                        return ad.getHours() > bd.getHours() ? 1 : -1
+                    })
                     console.log(models);
                     resolve(models)
                 });
