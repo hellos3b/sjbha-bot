@@ -30,7 +30,9 @@ export default {
 
     getHistory() {
         return new Promise((resolve, reject) => {
-            StatsModel.find().limit(24).exec( (err, models) => {
+            StatsModel.find()
+                .sort({timestamp: -1})
+                .limit(48).exec( (err, models) => {
                 resolve(models)
             });
         })

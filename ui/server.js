@@ -11,7 +11,12 @@ import bots from '../boombot/game/bots'
 import channels from "../bot/channels"
 import Bot from "../bot/Controller"
 import TLDRUI from './tldr.js'
+import MemoryUI from './memory.js'
 import TLDRDB from '../db/models/TLDRdb'
+import MemoryModel from '../db/models/MemoryModel'
+import SillyID from 'sillyid'
+
+const sid = new SillyID()
 
 const app = express()
 
@@ -94,6 +99,42 @@ app.get('/tldr', (req, res) => {
             res.send(view)
         });
 })
+
+app.get('/tldr/:id', (req, res) => {
+    let id = req.params.id;
+
+    MemoryModel.findOne({
+            readableID: id
+        })
+        .populate('tldrs')
+        .exec( (err, json) => {
+            let view = MemoryUI(json);
+            res.send(view); 
+        });
+    // res.send({ id })
+})
+
+app.post('/api/memory', function(req, res) {
+    let body = req.body;
+
+    if (!body.title || !body.tldrs || !body.tldrs.length) {
+        res.status(400).send({
+            error: "Missing title or memories"
+        });
+        return;
+    }
+
+    let id = sid.generate();
+    MemoryModel.create({
+        title: body.title,
+        tldrs: body.tldrs,
+        readableID: id
+    });
+    
+    res.send({
+        id
+    });
+});
 
 app.post('/api/reddithook', function(req, res) {
     console.log("Reddit webhook fired", req.body);

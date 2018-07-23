@@ -16,25 +16,28 @@ logger.add(logger.transports.Console, {
 logger.level = 'debug';
 
 DB.connect();
-Bot.start();
 
-// Update finished meetups
-// 4 hours - 0 */4 * * *
-//*/5 * * * *
+if (process.env.NODE_ENV !== "web") {
+    Bot.start();
 
-cron.schedule('0 */2 * * *', function(){
-    Bot.cron();
-});
+    // Update finished meetups
+    // 4 hours - 0 */4 * * *
+    //*/5 * * * *
 
-cron.schedule('28 0 * * 1', function(){
-    Bot.weeklyCron();
-});
+    cron.schedule('0 */2 * * *', function(){
+        Bot.cron();
+    });
 
-cron.schedule('0 * * * *', function() {
-    Bot.hourlyCron();
-})
+    cron.schedule('28 0 * * 1', function(){
+        Bot.weeklyCron();
+    });
 
-// When shutting down
-process.on('SIGTERM', function () {
-   Bot.shutdown();
-});
+    cron.schedule('0 * * * *', function() {
+        Bot.hourlyCron();
+    })
+
+    // When shutting down
+    process.on('SIGTERM', function () {
+    Bot.shutdown();
+    });
+}

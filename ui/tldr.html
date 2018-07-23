@@ -1,6 +1,9 @@
 <html>
     <head>
         <title> TLDR </title>
+        <meta name="twitter:title" content="San Jose TLDR" />
+        <meta name="twitter:description" content="Check out what's going on in the discord" />
+        <meta name="twitter:image" content="https://imgur.com/E0XJ6Hy.png" />
 
         <link href="https://fonts.googleapis.com/css?family=Gaegu" rel="stylesheet">
         <style type='text/css'>
@@ -18,6 +21,8 @@
             }
             .message {
                 font-size: 1.4em;
+                display: inline-block;
+                padding: 4px;
             }
             .author {
                 color: #3e8cc6;
@@ -44,28 +49,236 @@
             h1 {
                 text-align: center;
             }
+            .memory-save {
+                color: #000;
+                cursor: pointer;
+            }
+            .tldr.highlight .message {
+                background: rgba(222, 155, 235, 0.3);
+                border-radius: 4px;
+            }
+            .float {
+                position:fixed;
+                width:60px;
+                height:60px;
+                bottom:40px;
+                right:40px;
+                background-color:#d92acf;
+                color:#FFF;
+                border-radius:50px;
+                text-align:center;
+                box-shadow: 2px 2px 3px #999;
+                transform: translateY(110px);
+                transition: .15s ease-out;
+                cursor: pointer;
+            }
+            .float:hover {
+                background-color: #f16fea;
+            }
+            .float.show {
+                transform: translateY(0px);
+            }
+
+            .my-float{
+                margin-top:22px;
+            }
+        </style>
+        <!-- modal -->
+        <style type='text/css'>
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.15);
+            display: none;
+        }
+        .modal.show {
+            display: block;
+        }
+
+        .dialog {
+            background: #af5faf;
+            margin: 0 auto;
+            width: 40%;
+            margin-top: 10%;
+            border-radius: 4px;
+            box-shadow: 0px 1px 4px 2px rgba(0,0,0,0.15);
+            padding: 12px;
+        }
+        .dialog .title{
+            color: #fff;
+            font-size: 1.5em;
+        }
+        .dialog .input {
+            padding: 12px;
+        }
+        .dialog input {
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid #fff;
+            width: 100%;
+            font-size: 1.4em;
+            color: #fff;
+            outline: none;
+        }
+        .dialog .buttons {
+            display: flex;
+        }
+        .dialog .buttons > div {
+            width: 100%;
+            text-align: center;
+        }
+        .dialog .error {
+            padding-bottom: 12px;
+            color: #fff;
+        }
+        .btn {
+            text-align: center;
+            color: #fff;
+            background: #3cd0b0;
+            display: inline-block;
+            padding: 6px 24px;
+            min-width: 100px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background: #32b699;
+        }
+        .btn.cancel {
+            background: #888;
+        }
+        .btn.cancel:hover {
+            background: #727171;
+        }
         </style>
     </head>
     <body>
         <div class='container'>
             <h1>SJBHA:TLDR;</h1>
+            <div class='toolbar'>
+                <!-- <div class='link'>
+                    Memories
+                </div> -->
+            </div>
             {{#tldrs}}
                 <div class='date'>
                         {{date}}
                 </div>
                 {{#list}}
-                    <div class='tldr'>
+                    <div class='tldr' data-tldr-id="{{_id}}">
                         <div class='message'>
                             {{message}}
                         </div>
                         <div class='footer'>
                             <div class='timestamp'>
-                                {{date_str}}, by <span class='author'>{{from}}</span>
+                                <a class="memory-save" onclick="Memories.add('{{id}}')">+</a> {{date_str}}, by <span class='author'>{{from}}</span>
                             </div>
                         </div>
                     </div>
                 {{/list}}
             {{/tldrs}}
         </div>
+
+        <a class="float" id="save-memory" onclick="Memories.showDialog()">
+            <img src='https://imgur.com/n1uavdi.png' style="width: 37px;margin-top: 12px;">
+        </a>
+
+        <div class='modal'>
+            <div class='dialog'>
+                <div class='title'>
+                        <img src='https://imgur.com/n1uavdi.png' style="width: 24px; vertical-align: middle;"> Name this memory:
+                </div>
+                <div class='input'>
+                    <input type='text'>
+                </div>
+                <div class='error'>
+                </div>
+                <div class='buttons'>
+                    <div class='cancel'>
+                        <div class='btn cancel' onclick="Memories.cancel()">Cancel</div>
+                    </div>
+                    <div class='save'>
+                        <div class='btn save' onclick="Memories.save()">Save</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+            let Memories = (function() {
+                let memories = new Set();
+
+                const actionButton = document.querySelector("#save-memory");
+                const dialog = document.querySelector(".modal");
+                const modal = document.querySelector(".dialog")
+                const memoryName = document.querySelector(".dialog input")
+                const dialogError = document.querySelector(".dialog .error")
+
+                const showAction = () => actionButton.classList.add("show")
+                const hideAction = () => actionButton.classList.remove("show")
+                const showDialog = () => {
+                    dialog.classList.add("show")
+                    memoryName.focus();
+                }
+                const hideDialog = () => dialog.classList.remove("show")
+
+                return {
+
+                    add(id) {
+                        console.log("add memory", id);
+                        let el = document.querySelector(`[data-tldr-id='${id}']`);
+                        if (memories.has(id)) {
+                            el.classList.remove("highlight")
+                            memories.delete(id);
+                        } else {
+                            el.classList.add("highlight");
+                            memories.add(id);
+                        }
+
+                        if (memories.size > 0) {
+                            showAction()
+                        } else {
+                            hideAction()
+                        }
+                    },
+
+                    cancel: hideDialog,
+
+                    save() {
+                        let json = {
+                            title: memoryName.value,
+                            tldrs: Array.from(memories)
+                        };
+
+                        console.log("Save ",json);
+                        if (!json.title) {
+                            dialogError.innerHTML = "Please enter a name"
+                            return;
+                        }
+
+                        modal.innerHTML = "Saving";
+
+                        fetch('/api/memory', {
+                            method: "POST",
+                            headers: {
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(json)
+                        })
+                        .then( response => {
+                            return response.json();
+                        }).then( response => {
+                            window.location = `/tldr/${response.id}`;
+                        })
+                    },
+
+                    showDialog
+                };
+            })();
+        </script>
     </body>
 </html>
