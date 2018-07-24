@@ -1,4 +1,4 @@
-import MarkovModel from "./TLDRModel"
+import MarkovModel from "./MarkovModel"
 import logger from 'winston'
 
 export default {
@@ -31,7 +31,7 @@ export default {
                     logger.error(err);
                     reject(err);
                 } else {
-                    logger.info(`Saved TLDR model`);
+                    logger.info(`Saved markov model`);
                     resolve();
                 }
             });
