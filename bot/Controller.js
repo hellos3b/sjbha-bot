@@ -16,6 +16,7 @@ import SwirlCount from './SwirlCount'
 import Stats from './StatsTracking'
 
 import MarkovModel from '../db/models/MarkovModel'
+import MarkovDB from '../db/models/MarkovDB'
 
 let bot = null;
 
@@ -45,9 +46,9 @@ export default {
             }
 
             // markov testers
-            const users = new Set(["125829654421438464"]);
+            const users = new Set(["125829654421438464", "95628401045409792", "176492310207528961", "164375823741091850"]);
             if (users.has(userID)) {
-
+                MarkovDB.save({ userID, message });
             }
 
             Stats.increment()
