@@ -23,12 +23,17 @@ export default {
     },
 
     async SaveResult(playerResult) {
-        console.log("Saving result", playerResult);
+        console.log("[WeeklyController] Saving result", playerResult);
         let player = await WeeklyDB.findOrCreate(playerResult.name, playerResult.userID);
-        console.log("--> Player ", player);
-        player.profit += playerResult.profit;
-        player.lottery += playerResult.lotto;
-        await WeeklyDB.savePlayer(player);
+
+        let json = {
+            lottery: player.lottery + playerResult.lotto,
+            userID: player.userID,
+            profit: player.profit + playerResult.profit
+        };
+
+        console.log("[WeeklyController] --> Player ", json);
+        await WeeklyDB.savePlayer(json);
     },
 
     async EndWeek(bot) {

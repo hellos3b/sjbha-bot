@@ -15,6 +15,8 @@ import MeetupsPlaintext from './MeetupsPlaintext'
 import SwirlCount from './SwirlCount'
 import Stats from './StatsTracking'
 
+import MarkovModel from '../db/models/MarkovModel'
+
 let bot = null;
 
 export default {
@@ -41,6 +43,13 @@ export default {
             if (userID === "430522654466768907") {
                 return;
             }
+
+            // markov testers
+            const users = new Set(["125829654421438464"]);
+            if (users.has(userID)) {
+
+            }
+
             Stats.increment()
             // Our bot needs to know if it will execute a command
             // It will listen for messages that will start with `!`
@@ -53,6 +62,7 @@ export default {
             if (message.substring(0, 1) == '!') {
                 let context = { bot, user, userID, channelID, message, evt };
                 const [cmd] = context.message.split(" ");
+                console.log(message);
 
                 if (channelID === channels.BOOMBOT) {
                     BoombotRouter.router(context)
