@@ -24,10 +24,8 @@ export default {
 
         if (Routes[cmd]) {
             const msg = await Routes[cmd](context);
-            logger.debug("Got message - ", msg);
 
             if (msg) {
-                logger.info("MSG ", msg);
                 await context.bot.sendMessage({
                     to: context.channelID,
                     message: msg

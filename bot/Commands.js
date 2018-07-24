@@ -565,6 +565,12 @@ ${resistList}
         })
     },
 
+    "!chain": async function({bot, message, channelID, userID}) {
+        
+
+
+    },
+
     "!debug": async function({bot, message, channelID, userID}) {
         if (channelID !== channels.ADMIN) {
             return;
