@@ -46,8 +46,13 @@ export default {
             }
 
             // markov testers
+            // 125829654421438464 s3b
+            // 95628401045409792 Blue
+            // 176492310207528961 Mirelle
+            // 164375823741091850 Bangerz
             const users = new Set(["125829654421438464", "95628401045409792", "176492310207528961", "164375823741091850"]);
-            if (users.has(userID)) {
+            // Ignore bot-admin and boombot
+            if (users.has(userID) && channelID !== "430517752546197509" && channelID !== "432766496700235776") {
                 MarkovDB.save({ userID, message });
             }
 
