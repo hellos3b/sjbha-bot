@@ -24,6 +24,15 @@ export default {
     //     })
     // },
 
+    getFromUser(userID) {
+        return new Promise((resolve, reject) => {
+            MarkovModel.find({ userID })
+                .exec( (err, models) => {
+                    resolve(models);
+                });
+        });
+    },
+
     save(json) {
         return new Promise((resolve, reject) => {
             MarkovModel.create(json, function(err, doc){

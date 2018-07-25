@@ -23,6 +23,8 @@
         "express": "^4.16.3",
         "human-readable-ids": "^1.0.4",
         "image-downloader": "^3.4.1",
+        "markov-chains-text": "^1.0.0",
+        "markov-generator": "^1.2.2",
         "moment": "^2.22.0",
         "mongoose": "^5.0.12",
         "mustache": "^2.3.0",
