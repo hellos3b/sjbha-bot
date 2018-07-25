@@ -18,6 +18,8 @@ import Points from './teams/Points'
 import Strava from '../ui/Strava'
 import Table from 'ascii-table'
 import download from 'image-downloader'
+import MarkovDB from '../db/models/MarkovDB'
+import MarkovGen from 'markov-generator';
 
 const SERVER_ID = "358442034790400000";
 const TEAMS = [{
@@ -565,9 +567,23 @@ ${resistList}
         })
     },
 
-    "!chain": async function({bot, message, channelID, userID}) {
-        
+    "!guesswho": async function({bot, message, channelID, userID}) {
+        const users = ["125829654421438464", "95628401045409792", "176492310207528961", "164375823741091850"];
+        let id = users[Math.floor(Math.random()*users.length)]
 
+        let text = await MarkovDB.getFromUser(id);
+        text = text.map( n => n.message );
+
+        const markov = new MarkovGen({
+            input: text,
+            minLength: 1
+        });
+
+        console.log("user", id);
+        await bot.sendMessage({
+            to: channelID,
+            message: markov.makeChain()
+        });
 
     },
 
