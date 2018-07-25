@@ -696,7 +696,14 @@ ${resistList}
         let [cmd, param] = message.split(" ").map(m => m.trim());
 
         let meetups = await MeetupsDB.getMeetups();
-        meetups = meetups.map( m => new Meetup(m));
+        meetups = meetups.map( m => new Meetup(m))
+            .sort( (a, b) => {
+                if (a.date_moment().toISOString() < b.date_moment().toISOString())
+                    return -1;
+                if (a.date_moment().toISOString() > b.date_moment().toISOString())
+                    return 1;
+                return 0;
+            });;
         let meetup = null;
 
         if (meetups.length === 0) {
@@ -716,10 +723,11 @@ ${resistList}
         if (index === null) {
             return;
         }
-        if (index < 0 || index >= meetups.length) {
+        index = parseInt(index)
+        if (isNaN(index) || index < 0 || index >= meetups.length) {
             await bot.sendMessage({
                 to: channelID,
-                message: "That wasn't one of the choices"
+                message: "Not a valid option. To try again, do `!mention` again"
             });
             return;
         }
@@ -898,9 +906,12 @@ ${resistList}
         function isWithinAWeek(momentDate) {
             return momentDate.isBefore(A_WEEK);
         }
+        function isSameDayAndMonth(d1, d2){
+            return d1.getDate() === d2.getDate() && d1.getMonth() === d2.getMonth()
+        }
 
         if (option === "today") {
-            meetups = meetups.filter( m => isToday(m.date_moment()) );
+            meetups = meetups.filter( m => isSameDayAndMonth(m.date_moment().toDate(), new Date()) );
 
             if (!meetups.length) {
                 await bot.sendMessage({
