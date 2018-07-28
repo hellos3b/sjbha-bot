@@ -33,6 +33,8 @@ const TEAMS = [{
     id: "470114559911526402"
 }];
 
+let last_said = "";
+
 async function parseMeetupStr({bot, channelID, msg}) {
     let possibleOptions = new Set(["url", "type", "description", "location", "image"]);
 
@@ -574,6 +576,18 @@ ${resistList}
         let id = (user) ? user.replace("<@!","")
             .replace("<@","")
             .replace(">","") : userID
+
+        if (user === "rng") {
+            user = users[Math.floor(Math.random()*users.length)];
+            last_said = user
+        } 
+        if (user === "answer") {
+            await bot.sendMessage({
+                to: channelID,
+                message: `It was <@${last_said}>!`
+            });
+            return;
+        }
 
         let text = await MarkovDB.getFromUser(id);
         if (!text) {
