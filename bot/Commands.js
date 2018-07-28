@@ -578,8 +578,8 @@ ${resistList}
             .replace(">","") : userID
 
         if (user === "rng") {
-            user = users[Math.floor(Math.random()*users.length)];
-            last_said = user
+            id = users[Math.floor(Math.random()*users.length)];
+            last_said = id
         } 
         if (user === "answer") {
             await bot.sendMessage({
@@ -601,7 +601,7 @@ ${resistList}
 
         const markov = new MarkovGen({
             input: text,
-            minLength: 6
+            minLength: 10
         });
 
         await bot.sendMessage({
