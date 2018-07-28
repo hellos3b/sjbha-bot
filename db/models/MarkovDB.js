@@ -28,7 +28,11 @@ export default {
         return new Promise((resolve, reject) => {
             MarkovModel.find({ userID })
                 .exec( (err, models) => {
-                    resolve(models);
+                    if (!models.length) {
+                        resolve(null)
+                    } else {
+                        resolve(models)
+                    }
                 });
         });
     },
