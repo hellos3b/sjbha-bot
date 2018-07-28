@@ -567,11 +567,22 @@ ${resistList}
         })
     },
 
-    "!guesswho": async function({bot, message, channelID, userID}) {
+    "!chain": async function({bot, message, channelID, userID}) {
+        const [cmd, user] = message.split(" ");
         const users = ["125829654421438464", "95628401045409792", "176492310207528961", "164375823741091850"];
-        let id = users[Math.floor(Math.random()*users.length)]
+        // let id = users[Math.floor(Math.random()*users.length)]
+        let id = (user) ? user.replace("<@!","")
+            .replace("<@","")
+            .replace(">","") : userID
 
         let text = await MarkovDB.getFromUser(id);
+        if (!text) {
+            await bot.sendMessage({
+                to: channelID,
+                message: "Couldn't find any messages for user "+user
+            });
+            return;
+        }
         text = text.map( n => n.message );
 
         const markov = new MarkovGen({
@@ -579,7 +590,6 @@ ${resistList}
             minLength: 1
         });
 
-        console.log("user", id);
         await bot.sendMessage({
             to: channelID,
             message: markov.makeChain()
