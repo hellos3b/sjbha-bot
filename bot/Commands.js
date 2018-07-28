@@ -587,7 +587,7 @@ ${resistList}
 
         const markov = new MarkovGen({
             input: text,
-            minLength: 1
+            minLength: 6
         });
 
         await bot.sendMessage({
