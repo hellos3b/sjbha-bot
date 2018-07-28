@@ -567,7 +567,7 @@ ${resistList}
         })
     },
 
-    "!chain": async function({bot, message, channelID, userID}) {
+    "!speak": async function({bot, message, channelID, userID}) {
         const [cmd, user] = message.split(" ");
         const users = ["125829654421438464", "95628401045409792", "176492310207528961", "164375823741091850"];
         // let id = users[Math.floor(Math.random()*users.length)]
