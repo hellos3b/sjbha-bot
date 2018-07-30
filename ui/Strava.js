@@ -325,7 +325,7 @@ export default {
                 cal += "\n";
             }
             if (dates[c]) {
-                cal += "✓  ";
+                cal += "X  ";
             } else {
                 if (c === today) {
                     cal += "o  ";
