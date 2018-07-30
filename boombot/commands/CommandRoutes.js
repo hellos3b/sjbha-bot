@@ -74,6 +74,10 @@ export default {
         return "Cancelled the new game. Use `!new` to start a new game";
     },
 
+    "!loan": async function() {
+        return "Command is now called `!reset`";
+    },
+
     // start a game
     [commands.Start.trigger]: async function({bot, channelID, user, userID}) {
         Timeout.clear();
