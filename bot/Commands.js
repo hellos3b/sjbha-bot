@@ -478,6 +478,14 @@ export default {
         let [cmd, ...msg] = message.split(" ");
         msg = msg.join(" ");
 
+        if (message.includes("<@")) {
+            await bot.sendMessage({
+                to: channelID,
+                message: "Please don't mention people in tldrs, they don't show right - Just type the person's name out :)"
+            })
+            return;
+        }
+
         if (!msg) {
             if (channelID !== channels.GENERAL2 && channelID !== channels.ADMIN) {
                 await bot.sendMessage({
