@@ -66,6 +66,11 @@ export default {
                     models = models.map (n => {
                         n.timestamp = n._id;
                         return n;
+                    }).sort( (a, b) => {
+                        let ad = new Date(a.timestamp);
+                        let bd = new Date(b.timestamp);
+                        console.log(a.timestamp);
+                        return ad.getHours() > bd.getHours() ? 1 : -1
                     });
                     console.log(models);
                     resolve(models)
