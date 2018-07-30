@@ -232,7 +232,7 @@ export default {
 
         if (player.getBank() < buyin) {
             msg += `Woops, you don't have enough coins to start that game! You have ${player.getBank()} but the buyin is ${buyin}\n`;
-            msg += `You can use \`!loan\` to take out a loan`;
+            msg += `You can use \`!reset\` to reset your coins to 40`;
             return msg;
         }
 
@@ -285,7 +285,7 @@ export default {
         let buyin = game.getBuyin();
         if (player.getBank() < buyin) {
             msg += `Woops, you don't have enough coins to join a game! You have **${player.getBank()}** coins but the buyin is ${buyin}\n`;
-            msg += `You can use \`!loan\` to take out a loan`;
+            msg += `You can use \`!reset\` to reset your coins to 40`;
             return msg;
         }
 
@@ -788,7 +788,7 @@ Survive % ${survive_percent}%
 
     },
 
-    [commands.Loan.trigger]: async function({user, userID, message}) {
+    [commands.Reset.trigger]: async function({user, userID, message}) {
         let [cmd, amountStr] = message.split(" ");
         let player = await PlayersDB.findOrCreate(user, userID);
         let amount = 40;
@@ -823,29 +823,30 @@ Survive % ${survive_percent}%
     },
 
     [commands.Pay.trigger]: async function({user, userID, message}) {
-        let [cmd, amountStr] = message.split(" ");
-        let player = await PlayersDB.findOrCreate(user, userID);
-        let amount = parseInt(amountStr);
+        return "Debt doesn't exist anymore, chucklehead";
+        // let [cmd, amountStr] = message.split(" ");
+        // let player = await PlayersDB.findOrCreate(user, userID);
+        // let amount = parseInt(amountStr);
 
-        if (isNaN(amount)) {
-            return `That is not a valid amount`;
-        }
+        // if (isNaN(amount)) {
+        //     return `That is not a valid amount`;
+        // }
 
-        if (amount <= 0) {
-            return `Please enter an amount that's greater than 0`;
-        }
+        // if (amount <= 0) {
+        //     return `Please enter an amount that's greater than 0`;
+        // }
 
-        if (amount > player.getBank()) {
-            return `You don't have enough in your bank to pay that much`;
-        }
+        // if (amount > player.getBank()) {
+        //     return `You don't have enough in your bank to pay that much`;
+        // }
 
-        let pay_bonus = Math.floor( amount * PAY_MATCH_PERCENT );
-        amount = Math.floor(amount);
+        // let pay_bonus = Math.floor( amount * PAY_MATCH_PERCENT );
+        // amount = Math.floor(amount);
 
-        player.removeBank(amount);
-        player.removeDebt(amount + pay_bonus);
-        await PlayersDB.save(player);
+        // player.removeBank(amount);
+        // player.removeDebt(amount + pay_bonus);
+        // await PlayersDB.save(player);
 
-        return `Thanks for paying debt! As a token of appreciation, the house removed an extra ${pay_bonus} coins from your debt.\nYou now have ${player.getBank()} coins available, and are ${player.getDebt()} coins in debt`;
+        // return `Thanks for paying debt! As a token of appreciation, the house removed an extra ${pay_bonus} coins from your debt.\nYou now have ${player.getBank()} coins available, and are ${player.getDebt()} coins in debt`;
     }
 };

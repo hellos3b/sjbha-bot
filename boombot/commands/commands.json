@@ -50,9 +50,9 @@
         "description": "When it's your turn, pass the bomb at the cost of the pass"
     },
 
-    "Loan": {
-        "trigger": "!loan",
-        "description": "If you run out of coins, you can call for a loan with !loan {amount}"
+    "Reset": {
+        "trigger": "!reset",
+        "description": "If you run out of coins, you use this to reset back to 40"
     },
 
     "Pay": {
