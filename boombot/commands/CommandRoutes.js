@@ -7,6 +7,7 @@ import logger from 'winston'
 import Timeout from './Timeout'
 import WeeklyController from './WeeklyController'
 import Embeds from '../game/Embeds'
+import Season from '../game/Season'
 
 import Bots from '../game/bots'
 
@@ -486,6 +487,14 @@ export default {
         }
         
         return msg;
+    },
+
+    "!endseason": async function({bot, channelID, userID}) {
+        if (userID !== "125829654421438464") {
+            return;
+        }
+
+        Season.endSeason(bot);
     },
 
     "!p": async function(opt) {
