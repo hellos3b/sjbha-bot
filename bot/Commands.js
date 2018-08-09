@@ -966,11 +966,12 @@ ${resistList}
             return d1.getDate() === d2.getDate() && d1.getMonth() === d2.getMonth()
         }
 
+        
         if (option === "calendar" || option === "cal" || option === "c") {
             const dest = __dirname + '/charts/calendar.png';
             const browser = await puppeteer.launch();
             const page = await browser.newPage();
-            
+
             await page.setViewport({"width":1024,"height":480});
             await page.goto('http://sjbha-bot.herokuapp.com/calendar');
             await page.screenshot({path: dest, fullPage: true});
