@@ -15,6 +15,7 @@ import MemoryUI from './memory.js'
 import TLDRDB from '../db/models/TLDRdb'
 import MemoryModel from '../db/models/MemoryModel'
 import SillyID from 'sillyid'
+import Calendar from './calendar.js'
 
 const sid = new SillyID()
 
@@ -22,6 +23,7 @@ const app = express()
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use('/static', express.static(__dirname + '/public'))
 
 let port = ( process.env.PORT || 3000 );
 
@@ -98,6 +100,14 @@ app.get('/tldr', (req, res) => {
             let view = TLDRUI({tldrs: tldrs})
             res.send(view)
         });
+})
+
+app.get('/calendar', (req, res) => {
+    MeetupModel.find()
+        .exec( (err, meetups) => {
+            let view = Calendar({meetups})
+            res.send(view);
+        })
 })
 
 app.get('/tldr/:id', (req, res) => {

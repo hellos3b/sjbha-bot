@@ -405,7 +405,22 @@ export default {
             });
 
         } else if (opt === "leaders") {
-            let leaderboard = await Strava.getLeaderboard();
+            let sorter = (entry) => entry.moving_time;
+            let order = ["time", "distance", "pace"];
+
+            if (param === "distance") {
+                sorter = (entry) => entry.distance;
+                order = ["distance", "time", "pace"];
+            } else if (param === "pace") {
+                sorter = (entry) => {
+                    let d = Strava.getMiles(entry.distance)
+                    return entry.moving_time / d;
+                };
+                order = ["pace", "distance", "time"];
+                // sorter = (data) => 
+            }
+
+            let leaderboard = await Strava.getLeaderboard(sorter);
             var table = new Table("Past 4 Week Leaders");
             table.removeBorder();
             // table.setHeading(" ", "name", "net worth", "bank", "games", "survives");
@@ -413,13 +428,21 @@ export default {
             for (var i = 0; i < leaderboard.length; i++) {
                 let runs = leaderboard[i].count;
                 let distance = Strava.getMiles(leaderboard[i].distance);
-                let time = Strava.hhmmss(leaderboard[i].moving_time, true); 
+                let time = Strava.hhmmss(leaderboard[i].moving_time, true);
+                let pace = !distance ? "0:00" : Strava.hhmmss(leaderboard[i].moving_time / distance, true);
+
+                let stats = {
+                    distance: `${distance} mi`, 
+                    time: time, 
+                    pace: `${pace}/mi`
+                };
 
                 table.addRow(
                     `${i+1}.`, 
                     leaderboard[i].user, 
-                    `${time}`,
-                    `${distance} mi`,
+                    stats[order[0]],
+                    stats[order[1]],
+                    stats[order[2]],
                     "[" + runs + " runs]"
                 );
             }
