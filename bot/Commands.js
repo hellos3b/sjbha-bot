@@ -20,6 +20,7 @@ import Table from 'ascii-table'
 import download from 'image-downloader'
 import MarkovDB from '../db/models/MarkovDB'
 import MarkovGen from 'markov-generator';
+import puppeteer from 'puppeteer'
 
 const SERVER_ID = "358442034790400000";
 const TEAMS = [{
@@ -963,6 +964,26 @@ ${resistList}
         }
         function isSameDayAndMonth(d1, d2){
             return d1.getDate() === d2.getDate() && d1.getMonth() === d2.getMonth()
+        }
+
+        if (option === "calendar" || option === "cal" || option === "c") {
+            const dest = __dirname + '/charts/calendar.png';
+            const browser = await puppeteer.launch();
+            const page = await browser.newPage();
+            
+            await page.setViewport({"width":1024,"height":480});
+            await page.goto('http://sjbha-bot.herokuapp.com/calendar');
+            await page.screenshot({path: dest, fullPage: true});
+            
+            await browser.close();
+    
+
+            await bot.uploadFile({
+                to: channelID,
+                file: dest
+            });
+
+            return;
         }
 
         if (option === "today") {

@@ -32,6 +32,7 @@
         "node-flint": "^4.6.4",
         "node-jsondb": "0.0.1-alpha",
         "node-sparkbot": "^0.12.0",
+        "puppeteer": "^1.6.2",
         "require-text": "0.0.1",
         "sillyid": "^0.2.2",
         "sugar-date": "^2.0.4",
