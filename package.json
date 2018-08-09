@@ -35,6 +35,7 @@
         "require-text": "0.0.1",
         "sillyid": "^0.2.2",
         "sugar-date": "^2.0.4",
+        "vanilla-js-calendar": "^1.0.10",
         "winston": "^2.4.1"
     }
 }

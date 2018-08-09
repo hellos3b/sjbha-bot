@@ -25,6 +25,34 @@ let type_icons = {
     "active": "https://imgur.com/4HqAGBd.png"
 };
 
+const toParam = (obj) => {
+    return `?` + Object.entries(obj).map( ([key, value]) => key + '=' + encodeURI(value) ).join("&");
+}
+
+const flatISO = (dateStr) => {
+    return dateStr.replace(/-/g, "")
+        .replace(/:/g, "")
+        .replace(".000", "")
+}
+
+const GCALLink = (meetup) => {
+    let d = new Date(meetup.timestamp);
+    let post = new Date(meetup.timestamp);
+    post.setHours( post.getHours() + 1);
+
+    const baseUrl = `https://www.google.com/calendar/render`;
+    const params = {
+        action: "TEMPLATE",
+        text: meetup.info,
+        dates: `${flatISO(d.toISOString())}/${flatISO(post.toISOString())}`,
+        details: meetup.options.description,
+        location: meetup.location,
+        sprop:"name"
+    };
+
+    return baseUrl + toParam(params);
+}
+
 export default function({ 
     id = GUID(), 
     date, 
@@ -231,7 +259,8 @@ export default function({
             "color": 123456,
             "author": {
                 "name": info,
-                "icon_url": icon_url
+                "icon_url": icon_url,
+                "url": GCALLink(this.toJSON())
             },
             "footer": {
                 "text": `Started by @${username}`,

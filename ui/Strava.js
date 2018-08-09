@@ -55,6 +55,18 @@ function getUserInfoFromStrava(owner_id) {
     })
 }
 
+function sorter(fn) {
+    return (a, b) => {
+        if (fn(a) > fn(b)) {
+            return -1;
+        } else if (fn(a) < fn(b)) {
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+}
+
 function getUserInfoFromDiscord(userID) {
     return new Promise((resolve, reject) => {
         StravaModel.findOne({ userID: userID })
@@ -271,22 +283,14 @@ export default {
         return data;
     },
 
-    getLeaderboard: async function() {
+    getLeaderboard: async function(sortBy) {
         let users = await getAllUsers();
         let stats = await getBatchStats(users);
         let leaderboard = stats.map( s => {
                 let json = s.recent_run_totals;
                 json.user = s.username;
                 return json;
-            }).sort( (a, b) => {
-                if (a.moving_time > b.moving_time) {
-                    return -1;
-                } else if (a.moving_time < b.moving_time) {
-                    return 1;
-                } else {
-                    return 0;
-                }
-            });
+            }).sort( sorter(sortBy) );
         console.log("leaderboard", leaderboard);
         return leaderboard;
     },
