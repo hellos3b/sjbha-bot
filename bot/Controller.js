@@ -35,6 +35,7 @@ export default {
         bot.on('ready', evt => {
             logger.info('Connected!');
             logger.info(`Logged in as: ${bot.username} [${bot.id}]`);
+            bot.user.setUsername("BoredBot");
             Stats.start()
         });
     
