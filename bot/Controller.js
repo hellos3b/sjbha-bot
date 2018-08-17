@@ -36,6 +36,11 @@ export default {
             logger.info('Connected!');
             logger.info(`Logged in as: ${bot.username} [${bot.id}]`);
             Stats.start()
+
+            bot.sendMessage({
+                to: channels.GENERAL,
+                message: "👋🤖 Online!"
+            });
         });
     
         // Captures all messages
