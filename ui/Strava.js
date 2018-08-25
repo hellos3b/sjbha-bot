@@ -112,7 +112,7 @@ function dateString(date) {
 
 function hhmmss(secs, leadingZero) {
   var minutes = Math.floor(secs / 60);
-  secs = secs%60;
+  secs = Math.floor(secs%60);
   var hours = Math.floor(minutes/60)
   minutes = minutes%60;
   let result = "";
