@@ -104,39 +104,39 @@ export default {
         }
     },
 
-    "!chart": async function({bot, message, channelID, user, userID}) {
-        let [cmd, stock, optstyle] = message.split(" ");
-
-        if (channelID !== channels.ADMIN && channelID !== channels.STOCKS) {
-            return;
-        }
-
-        let style = "c";
-        if (optstyle === "line") {
-            style = "l"
-        }
-
-        let options = {
-            url: `https://finviz.com/chart.ashx?t=${stock}&ty=${style}&ta=0&p=d&s=l`,
-            dest: `${__dirname}/charts/chart.png`
-        }
-
-        bot.simulateTyping({ channelID })
-        console.log("url", options.url);
-        try {
-            const { filename, image } = await download.image(options)
-            await bot.uploadFile({
-                to: channelID,
-                file: options.dest
-            })
-        } catch(err) {
-            console.error(err)
-            await bot.sendMessage({
-                to: channelID,
-                message: "Something went wrong trying to get the chart"
-            });
-        }
-    },
+//    "!chart": async function({bot, message, channelID, user, userID}) {
+//        let [cmd, stock, optstyle] = message.split(" ");
+//
+//        if (channelID !== channels.ADMIN && channelID !== channels.STOCKS) {
+//            return;
+//        }
+//
+//        let style = "c";
+//        if (optstyle === "line") {
+//            style = "l"
+//        }
+//
+//        let options = {
+//            url: `https://finviz.com/chart.ashx?t=${stock}&ty=${style}&ta=0&p=d&s=l`,
+//            dest: `${__dirname}/charts/chart.png`
+//        }
+//
+//        bot.simulateTyping({ channelID })
+//        console.log("url", options.url);
+//        try {
+//            const { filename, image } = await download.image(options)
+//            await bot.uploadFile({
+//                to: channelID,
+//                file: options.dest
+//            })
+//        } catch(err) {
+//            console.error(err)
+//            await bot.sendMessage({
+//                to: channelID,
+//                message: "Something went wrong trying to get the chart"
+//            });
+//        }
+//    },
 
     "!ban": async function({bot, message, channelID, user, userID}) {
         let [cmd, name] = message.split(" ");
@@ -158,37 +158,37 @@ export default {
         });
     },
 
-    "!swirls": async function({bot, channelID}) {
-        await bot.sendMessage({
-            to: channelID,
-            message: "<:swirls:430968917540995072><:swirls:430968917540995072><:swirls:430968917540995072><:swirls:430968917540995072>\:laughing:\:rofl:  DID SOMEBODY SAY SWIRLS?! \:rofl:\:laughing:<:swirls:430968917540995072><:swirls:430968917540995072><:swirls:430968917540995072><:swirls:430968917540995072>"
-        })
-    },
+//    "!swirls": async function({bot, channelID}) {
+//        await bot.sendMessage({
+//            to: channelID,
+//            message: "<:swirls:430968917540995072><:swirls:430968917540995072><:swirls:430968917540995072><:swirls:430968917540995072>\:laughing:\:rofl:  DID SOMEBODY SAY SWIRLS?! \:rofl:\:laughing:<:swirls:430968917540995072><:swirls:430968917540995072><:swirls:430968917540995072><:swirls:430968917540995072>"
+//        })
+//    },
 
-    "!scooter": async function({bot, channelID}) {
-        await bot.sendMessage({
-            to: channelID,
-            message: "<:coolscooter:443185468348170240><:coolscooter:443185468348170240>😎😎SCOOTER GANG SCOOTER GANG SCOOTER GANG😎😎<:coolscooter:443185468348170240><:coolscooter:443185468348170240>"
-        })
-    },
+//    "!scooter": async function({bot, channelID}) {
+//        await bot.sendMessage({
+//            to: channelID,
+//            message: "<:coolscooter:443185468348170240><:coolscooter:443185468348170240>😎😎SCOOTER GANG SCOOTER GANG SCOOTER GANG😎😎<:coolscooter:443185468348170240><:coolscooter:443185468348170240>"
+//        })
+//    },
 
-    "!scooters": async function({bot, channelID}) {
-        await bot.sendMessage({
-            to: channelID,
-            message: "<:coolscooter:443185468348170240><:coolscooter:443185468348170240>😎😎SCOOTER GANG SCOOTER GANG SCOOTER GANG😎😎<:coolscooter:443185468348170240><:coolscooter:443185468348170240>"
-        })
-    },
+//    "!scooters": async function({bot, channelID}) {
+//        await bot.sendMessage({
+//            to: channelID,
+//            message: "<:coolscooter:443185468348170240><:coolscooter:443185468348170240>😎😎SCOOTER GANG SCOOTER GANG SCOOTER GANG😎😎<:coolscooter:443185468348170240><:coolscooter:443185468348170240>"
+//        })
+//    },
 
-    "!wheres": async function({bot, channelID, message}) {
-        let [cmd, param] = message.split(" ");
-
-        if (param.toLowerCase() === "james") {
-            await bot.sendMessage({
-                to: channelID,
-                message: "<@!115794072735580162>!"
-            })
-        }
-    },
+//    "!wheres": async function({bot, channelID, message}) {
+//        let [cmd, param] = message.split(" ");
+//
+//        if (param.toLowerCase() === "james") {
+//            await bot.sendMessage({
+//                to: channelID,
+//                message: "<@!115794072735580162>!"
+//            })
+//        }
+//    },
 
     "!admin": async function({bot, message, channelID, userID}) {
         if (channelID !== channels.ADMIN) {
@@ -262,240 +262,240 @@ export default {
         }
     },
 
-    "!team": async function({bot, message, channelID, userID, user}) {
-        let [cmd, option] = message.split(" ");
+//    "!team": async function({bot, message, channelID, userID, user}) {
+//        let [cmd, option] = message.split(" ");
+//
+//        let team = await TeamDB.findUser(userID);
+//
+//        if (!team) {
+//            let rng = Math.floor(Math.random()*2);
+//            let t = TEAMS[rng];
+//            await TeamDB.saveUser({
+//                userID,
+//                user,
+//                team: t.name
+//            });
+//            await bot.addToRole({serverID: SERVER_ID, userID, roleID: t.id});
+//            await bot.sendMessage({
+//                to: channelID,
+//                message: `Congratulations, you have been recruited to team **${t.name}**!`
+//            });
+//        } else {
+//            await bot.sendMessage({
+//                to: channelID,
+//                message: `You are on team ${team.team}`
+//            });
+//        }
+//    
+//    },
 
-        let team = await TeamDB.findUser(userID);
+//    "!resist": async function({bot, message, channelID, userID, user}) {
+//        let team = await TeamDB.findUser(userID);
+//        console.log(`${user} is trying to resist`);
+//
+//        if (!team) {
+//            console.log("[Resist] Not assigned to anything");
+//            await bot.sendMessage({
+//                to: channelID,
+//                message: `You have to have joined a team in order to resist`
+//            });
+//        } else if (team.team === "Resistance") {
+//            console.log("[Resist] Already on resistance");
+//            await bot.sendMessage({
+//                to: channelID,
+//                message: `You're already a part of the Resistance!`
+//            });
+//        } else if (team.resist) {
+//            console.log("[Resist] Already failed to resist");
+//            await bot.sendMessage({
+//                to: channelID,
+//                message: `You've already failed to resist, *traitor*`
+//            });
+//        } else {
+//            let resist = Math.random() < 0.5;
+//            let msg = "";
+//
+//            let i = (team.team === "Pink Bombers") ? 0 : 1;
+//            let Resistance = TEAMS[2];
+//            if (resist) {
+//                console.log("[Resist] Joined team Resistance");
+//                await bot.removeFromRole({serverID: SERVER_ID, userID, roleID: TEAMS[i].id})
+//                await bot.addToRole({serverID: SERVER_ID, userID, roleID: Resistance.id});
+//                team.oldTeam = team.team;
+//                team.team = "Resistance";
+//                team.resist = true;
+//                msg = "💀 Welcome to the Resistance"
+//            } else {
+//                console.log("[Resist] Denied to Resistance");
+//                team.resist = true;
+//                msg = "🚫 The Resistance does not welcome you"
+//            }
+//
+//            await TeamDB.saveUser(team);
+//
+//            await bot.sendMessage({
+//                to: channelID,
+//                message: msg
+//            });
+//        }
+//    },
 
-        if (!team) {
-            let rng = Math.floor(Math.random()*2);
-            let t = TEAMS[rng];
-            await TeamDB.saveUser({
-                userID,
-                user,
-                team: t.name
-            });
-            await bot.addToRole({serverID: SERVER_ID, userID, roleID: t.id});
-            await bot.sendMessage({
-                to: channelID,
-                message: `Congratulations, you have been recruited to team **${t.name}**!`
-            });
-        } else {
-            await bot.sendMessage({
-                to: channelID,
-                message: `You are on team ${team.team}`
-            });
-        }
-    
-    },
-
-    "!resist": async function({bot, message, channelID, userID, user}) {
-        let team = await TeamDB.findUser(userID);
-        console.log(`${user} is trying to resist`);
-
-        if (!team) {
-            console.log("[Resist] Not assigned to anything");
-            await bot.sendMessage({
-                to: channelID,
-                message: `You have to have joined a team in order to resist`
-            });
-        } else if (team.team === "Resistance") {
-            console.log("[Resist] Already on resistance");
-            await bot.sendMessage({
-                to: channelID,
-                message: `You're already a part of the Resistance!`
-            });
-        } else if (team.resist) {
-            console.log("[Resist] Already failed to resist");
-            await bot.sendMessage({
-                to: channelID,
-                message: `You've already failed to resist, *traitor*`
-            });
-        } else {
-            let resist = Math.random() < 0.5;
-            let msg = "";
-
-            let i = (team.team === "Pink Bombers") ? 0 : 1;
-            let Resistance = TEAMS[2];
-            if (resist) {
-                console.log("[Resist] Joined team Resistance");
-                await bot.removeFromRole({serverID: SERVER_ID, userID, roleID: TEAMS[i].id})
-                await bot.addToRole({serverID: SERVER_ID, userID, roleID: Resistance.id});
-                team.oldTeam = team.team;
-                team.team = "Resistance";
-                team.resist = true;
-                msg = "💀 Welcome to the Resistance"
-            } else {
-                console.log("[Resist] Denied to Resistance");
-                team.resist = true;
-                msg = "🚫 The Resistance does not welcome you"
-            }
-
-            await TeamDB.saveUser(team);
-
-            await bot.sendMessage({
-                to: channelID,
-                message: msg
-            });
-        }
-    },
-
-    "!strava": async function({bot, message, channelID, userID, user}) {
-        let [cmd, ...options] = message.split(" ");
-        if (channelID !== channels.ADMIN && channelID !== channels.RUN) {
-            await bot.sendMessage({
-                to: channelID,
-                message: "This command only works in the 5K channel"
-            });
-            return;
-        }
-
-        if (!options.length) {
-            await bot.sendMessage({
-                to:channelID,
-                message: "```md\n"+
-                    "< !strava auth > Authenticate the bot to your strava account\n"+
-                    "< !strava stats @user > View strava stats\n" +
-                    "< !strava leaders > View who ran the most in the last 4 weeks\n" +
-                    "< !strava calendar > View your 4 weeks calendar\n" +
-                    "< !strava avg > View your 4 weeks average stats\n" +
-                    "```"
-            });
-            return;
-        }
-
-        let [opt, param] = options;
-
-        if (opt === "auth") {
-            let url = `https://sjbha-bot.herokuapp.com/api/strava/auth?user=${user}&userID=${userID}`;
-
-            await bot.sendMessage({
-                to: userID,
-                message: `Hello! To auth the discord bot to post your strava times, just click on this link and accept the authorization\n${url}`
-            });
-
-            await bot.sendMessage({
-                to: channelID,
-                message: "DM'd you your authorization link!"
-            });
-        } else if (opt === "stats") {
-            let targetId = userID;
-            if (param) {
-                targetId = param.replace("<@!","")
-                    .replace("<@","")
-                    .replace(">","");
-            }
-            let stats = await Strava.getStats(targetId);
-
-            if (!stats) {
-                await bot.sendMessage({
-                    to: channelID,
-                    message: "This person has not authenticated with Strava!"
-                });
-                return;
-            }
-            console.log("stats", stats);
-            let runs = stats.recent_run_totals;
-            let distance = Strava.getMiles(runs.distance);
-            let time = Strava.hhmmss(runs.moving_time, true);
-
-            await bot.sendMessage({
-                to: channelID,
-                message: `${stats.username} has run ${runs.count} times in the last four weeks; ${distance} mi ${time} time`
-            });
-
-        } else if (opt === "leaders") {
-            let sorter = (entry) => entry.moving_time;
-            let order = ["time", "distance", "pace"];
-
-            if (param === "distance") {
-                sorter = (entry) => entry.distance;
-                order = ["distance", "time", "pace"];
-            } else if (param === "pace") {
-                sorter = (entry) => {
-                    let d = Strava.getMiles(entry.distance)
-                    return entry.moving_time / d;
-                };
-                order = ["pace", "distance", "time"];
-                // sorter = (data) => 
-            }
-
-            let leaderboard = await Strava.getLeaderboard(sorter);
-            var table = new Table("Past 4 Week Leaders");
-            table.removeBorder();
-            // table.setHeading(" ", "name", "net worth", "bank", "games", "survives");
-
-            for (var i = 0; i < leaderboard.length; i++) {
-                let runs = leaderboard[i].count;
-                let distance = Strava.getMiles(leaderboard[i].distance);
-                let time = Strava.hhmmss(leaderboard[i].moving_time, true);
-                let pace = !distance ? "0:00" : Strava.hhmmss(leaderboard[i].moving_time / distance, true);
-
-                let stats = {
-                    distance: `${distance} mi`, 
-                    time: time, 
-                    pace: `${pace}/mi`
-                };
-
-                table.addRow(
-                    `${i+1}.`, 
-                    leaderboard[i].user, 
-                    stats[order[0]],
-                    stats[order[1]],
-                    stats[order[2]],
-                    "[" + runs + " runs]"
-                );
-            }
-            
-            await bot.sendMessage({
-                to: channelID,
-                message: "```\n" + table.toString() + "```"
-            });
-        } else if (opt === "calendar") {
-            let targetId = userID;
-            if (param) {
-                targetId = param.replace("<@!","")
-                    .replace("<@","")
-                    .replace(">","");
-            }
-
-            let calendar = await Strava.getCalendar(targetId);
-
-            if (!calendar) {
-                await bot.sendMessage({
-                    to: channelID,
-                    message: "This person has not authenticated with Strava!"
-                });
-                return;
-            }
-
-            await bot.sendMessage({
-                to: channelID,
-                message: "```\n" + calendar + "```"
-            });
-        } else if (opt === "avg") {
-            let targetId = userID;
-            if (param) {
-                targetId = param.replace("<@!","")
-                    .replace("<@","")
-                    .replace(">","");
-            }
-            let avg = await Strava.getAverage(targetId);
-
-            if (!avg) {
-                await bot.sendMessage({
-                    to: channelID,
-                    message: "This person has not authenticated with Strava!"
-                });
-                return;
-            }
-
-            await bot.sendMessage({
-                to: channelID,
-                message: `**${avg.name}** last four weeks average: ${avg.total} runs,  ${avg.distance} mi, ${avg.pace}/mi pace`
-            });
-        }
-    },
+//    "!strava": async function({bot, message, channelID, userID, user}) {
+//        let [cmd, ...options] = message.split(" ");
+//        if (channelID !== channels.ADMIN && channelID !== channels.RUN) {
+//            await bot.sendMessage({
+//                to: channelID,
+//                message: "This command only works in the 5K channel"
+//            });
+//            return;
+//        }
+//
+//        if (!options.length) {
+//            await bot.sendMessage({
+//                to:channelID,
+//                message: "```md\n"+
+//                    "< !strava auth > Authenticate the bot to your strava account\n"+
+//                    "< !strava stats @user > View strava stats\n" +
+//                    "< !strava leaders > View who ran the most in the last 4 weeks\n" +
+//                    "< !strava calendar > View your 4 weeks calendar\n" +
+//                    "< !strava avg > View your 4 weeks average stats\n" +
+//                    "```"
+//            });
+//            return;
+//        }
+//
+//        let [opt, param] = options;
+//
+//        if (opt === "auth") {
+//            let url = `https://sjbha-bot.herokuapp.com/api/strava/auth?user=${user}&userID=${userID}`;
+//
+//            await bot.sendMessage({
+//                to: userID,
+//                message: `Hello! To auth the discord bot to post your strava times, just click on this link and accept the authorization\n${url}`
+//            });
+//
+//            await bot.sendMessage({
+//                to: channelID,
+//                message: "DM'd you your authorization link!"
+//            });
+//        } else if (opt === "stats") {
+//            let targetId = userID;
+//            if (param) {
+//                targetId = param.replace("<@!","")
+//                    .replace("<@","")
+//                    .replace(">","");
+//            }
+//            let stats = await Strava.getStats(targetId);
+//
+//            if (!stats) {
+//                await bot.sendMessage({
+//                    to: channelID,
+//                    message: "This person has not authenticated with Strava!"
+//                });
+//                return;
+//            }
+//            console.log("stats", stats);
+//            let runs = stats.recent_run_totals;
+//            let distance = Strava.getMiles(runs.distance);
+//            let time = Strava.hhmmss(runs.moving_time, true);
+//
+//            await bot.sendMessage({
+//                to: channelID,
+//                message: `${stats.username} has run ${runs.count} times in the last four weeks; ${distance} mi ${time} time`
+//            });
+//
+//        } else if (opt === "leaders") {
+//            let sorter = (entry) => entry.moving_time;
+//            let order = ["time", "distance", "pace"];
+//
+//            if (param === "distance") {
+//                sorter = (entry) => entry.distance;
+//                order = ["distance", "time", "pace"];
+//            } else if (param === "pace") {
+//                sorter = (entry) => {
+//                    let d = Strava.getMiles(entry.distance)
+//                    return entry.moving_time / d;
+//                };
+//                order = ["pace", "distance", "time"];
+//                // sorter = (data) => 
+//            }
+//
+//            let leaderboard = await Strava.getLeaderboard(sorter);
+//            var table = new Table("Past 4 Week Leaders");
+//            table.removeBorder();
+//            // table.setHeading(" ", "name", "net worth", "bank", "games", "survives");
+//
+//            for (var i = 0; i < leaderboard.length; i++) {
+//                let runs = leaderboard[i].count;
+//                let distance = Strava.getMiles(leaderboard[i].distance);
+//                let time = Strava.hhmmss(leaderboard[i].moving_time, true);
+//                let pace = !distance ? "0:00" : Strava.hhmmss(leaderboard[i].moving_time / distance, true);
+//
+//                let stats = {
+//                    distance: `${distance} mi`, 
+//                    time: time, 
+//                    pace: `${pace}/mi`
+//                };
+//
+//                table.addRow(
+//                    `${i+1}.`, 
+//                    leaderboard[i].user, 
+//                    stats[order[0]],
+//                    stats[order[1]],
+//                    stats[order[2]],
+//                    "[" + runs + " runs]"
+//                );
+//            }
+//            
+//            await bot.sendMessage({
+//                to: channelID,
+//                message: "```\n" + table.toString() + "```"
+//            });
+//        } else if (opt === "calendar") {
+//            let targetId = userID;
+//            if (param) {
+//                targetId = param.replace("<@!","")
+//                    .replace("<@","")
+//                    .replace(">","");
+//            }
+//
+//            let calendar = await Strava.getCalendar(targetId);
+//
+//            if (!calendar) {
+//                await bot.sendMessage({
+//                    to: channelID,
+//                    message: "This person has not authenticated with Strava!"
+//                });
+//                return;
+//            }
+//
+//            await bot.sendMessage({
+//                to: channelID,
+//                message: "```\n" + calendar + "```"
+//            });
+//        } else if (opt === "avg") {
+//            let targetId = userID;
+//            if (param) {
+//                targetId = param.replace("<@!","")
+//                    .replace("<@","")
+//                    .replace(">","");
+//            }
+//            let avg = await Strava.getAverage(targetId);
+//
+//            if (!avg) {
+//                await bot.sendMessage({
+//                    to: channelID,
+//                    message: "This person has not authenticated with Strava!"
+//                });
+//                return;
+//            }
+//
+//            await bot.sendMessage({
+//                to: channelID,
+//                message: `**${avg.name}** last four weeks average: ${avg.total} runs,  ${avg.distance} mi, ${avg.pace}/mi pace`
+//            });
+//        }
+//    },
 
     "!tldr": async function({bot, message, channelID, userID, user}) {
         let [cmd, ...msg] = message.split(" ");
