@@ -69,8 +69,8 @@ export default {
     },
 
     // Start a meetup
-    "!meetup": async function({bot, user, channelID, userID, message}) {
-        const msg = message.replace("!meetup", "");
+    "!event": async function({bot, user, channelID, userID, message}) {
+        const msg = message.replace("!event", "");
         let options = await parseMeetupStr({ bot, channelID, msg });
         console.log("options", options);
 
@@ -104,39 +104,39 @@ export default {
         }
     },
 
-    "!chart": async function({bot, message, channelID, user, userID}) {
-        let [cmd, stock, optstyle] = message.split(" ");
-
-        if (channelID !== channels.ADMIN && channelID !== channels.STOCKS) {
-            return;
-        }
-
-        let style = "c";
-        if (optstyle === "line") {
-            style = "l"
-        }
-
-        let options = {
-            url: `https://finviz.com/chart.ashx?t=${stock}&ty=${style}&ta=0&p=d&s=l`,
-            dest: `${__dirname}/charts/chart.png`
-        }
-
-        bot.simulateTyping({ channelID })
-        console.log("url", options.url);
-        try {
-            const { filename, image } = await download.image(options)
-            await bot.uploadFile({
-                to: channelID,
-                file: options.dest
-            })
-        } catch(err) {
-            console.error(err)
-            await bot.sendMessage({
-                to: channelID,
-                message: "Something went wrong trying to get the chart"
-            });
-        }
-    },
+//    "!chart": async function({bot, message, channelID, user, userID}) {
+//        let [cmd, stock, optstyle] = message.split(" ");
+//
+//        if (channelID !== channels.ADMIN && channelID !== channels.STOCKS) {
+//            return;
+//        }
+//
+//        let style = "c";
+//        if (optstyle === "line") {
+//            style = "l"
+//        }
+//
+//        let options = {
+//            url: `https://finviz.com/chart.ashx?t=${stock}&ty=${style}&ta=0&p=d&s=l`,
+//            dest: `${__dirname}/charts/chart.png`
+//        }
+//
+//        bot.simulateTyping({ channelID })
+//        console.log("url", options.url);
+//        try {
+//            const { filename, image } = await download.image(options)
+//            await bot.uploadFile({
+//                to: channelID,
+//                file: options.dest
+//            })
+//        } catch(err) {
+//            console.error(err)
+//            await bot.sendMessage({
+//                to: channelID,
+//                message: "Something went wrong trying to get the chart"
+//            });
+//        }
+//    },
 
     "!ban": async function({bot, message, channelID, user, userID}) {
         let [cmd, name] = message.split(" ");
@@ -158,37 +158,37 @@ export default {
         });
     },
 
-    "!swirls": async function({bot, channelID}) {
-        await bot.sendMessage({
-            to: channelID,
-            message: "<:swirls:430968917540995072><:swirls:430968917540995072><:swirls:430968917540995072><:swirls:430968917540995072>\:laughing:\:rofl:  DID SOMEBODY SAY SWIRLS?! \:rofl:\:laughing:<:swirls:430968917540995072><:swirls:430968917540995072><:swirls:430968917540995072><:swirls:430968917540995072>"
-        })
-    },
+//    "!swirls": async function({bot, channelID}) {
+//        await bot.sendMessage({
+//            to: channelID,
+//            message: "<:swirls:430968917540995072><:swirls:430968917540995072><:swirls:430968917540995072><:swirls:430968917540995072>\:laughing:\:rofl:  DID SOMEBODY SAY SWIRLS?! \:rofl:\:laughing:<:swirls:430968917540995072><:swirls:430968917540995072><:swirls:430968917540995072><:swirls:430968917540995072>"
+//        })
+//    },
 
-    "!scooter": async function({bot, channelID}) {
-        await bot.sendMessage({
-            to: channelID,
-            message: "<:coolscooter:443185468348170240><:coolscooter:443185468348170240>😎😎SCOOTER GANG SCOOTER GANG SCOOTER GANG😎😎<:coolscooter:443185468348170240><:coolscooter:443185468348170240>"
-        })
-    },
+//    "!scooter": async function({bot, channelID}) {
+//        await bot.sendMessage({
+//            to: channelID,
+//            message: "<:coolscooter:443185468348170240><:coolscooter:443185468348170240>😎😎SCOOTER GANG SCOOTER GANG SCOOTER GANG😎😎<:coolscooter:443185468348170240><:coolscooter:443185468348170240>"
+//        })
+//    },
 
-    "!scooters": async function({bot, channelID}) {
-        await bot.sendMessage({
-            to: channelID,
-            message: "<:coolscooter:443185468348170240><:coolscooter:443185468348170240>😎😎SCOOTER GANG SCOOTER GANG SCOOTER GANG😎😎<:coolscooter:443185468348170240><:coolscooter:443185468348170240>"
-        })
-    },
+//    "!scooters": async function({bot, channelID}) {
+//        await bot.sendMessage({
+//            to: channelID,
+//            message: "<:coolscooter:443185468348170240><:coolscooter:443185468348170240>😎😎SCOOTER GANG SCOOTER GANG SCOOTER GANG😎😎<:coolscooter:443185468348170240><:coolscooter:443185468348170240>"
+//        })
+//    },
 
-    "!wheres": async function({bot, channelID, message}) {
-        let [cmd, param] = message.split(" ");
-
-        if (param.toLowerCase() === "james") {
-            await bot.sendMessage({
-                to: channelID,
-                message: "<@!115794072735580162>!"
-            })
-        }
-    },
+//    "!wheres": async function({bot, channelID, message}) {
+//        let [cmd, param] = message.split(" ");
+//
+//        if (param.toLowerCase() === "james") {
+//            await bot.sendMessage({
+//                to: channelID,
+//                message: "<@!115794072735580162>!"
+//            })
+//        }
+//    },
 
     "!admin": async function({bot, message, channelID, userID}) {
         if (channelID !== channels.ADMIN) {
@@ -201,14 +201,14 @@ export default {
             await bot.sendMessage({
                 to: channelID,
                 message: "```" +
-                    "!admin list\n    List current active meetups along with their IDs```"
+                    "!admin list\n    List current active events along with their IDs```"
             });
         } else if (param === "list") {
             let meetups = await MeetupsDB.getMeetups();
             if (meetups.length === 0) {
                 await bot.sendMessage({
                     to: channelID,
-                    message: "No active meetups."
+                    message: "No active events."
                 });
                 return;
             }
@@ -224,17 +224,17 @@ export default {
             let meetupId = data;
             let meetup = await MeetupsDB.findMeetup(meetupId);
 
-            if (!meetup) {
+            if (!event) {
                 await bot.sendMessage({
                     to: channelID,
-                    message: `Can't find meetup with id \`${meetupId}\``
+                    message: `Can't find event with id \`${meetupId}\``
                 });
                 return;
             }
             let meetup_time = new moment(meetup.timestamp);
             await bot.sendMessage({
                 to: meetup.sourceChannelID,
-                message: `Reminder! There's the meetup \`${meetup.info}\` ${meetup_time.fromNow()}!`
+                message: `Reminder! There's the event \`${meetup.info}\` ${meetup_time.fromNow()}!`
             });
         } else if (param === "clean") {
             const meetups = await MeetupsDB.getMeetups();
@@ -262,240 +262,240 @@ export default {
         }
     },
 
-    "!team": async function({bot, message, channelID, userID, user}) {
-        let [cmd, option] = message.split(" ");
+//    "!team": async function({bot, message, channelID, userID, user}) {
+//        let [cmd, option] = message.split(" ");
+//
+//        let team = await TeamDB.findUser(userID);
+//
+//        if (!team) {
+//            let rng = Math.floor(Math.random()*2);
+//            let t = TEAMS[rng];
+//            await TeamDB.saveUser({
+//                userID,
+//                user,
+//                team: t.name
+//            });
+//            await bot.addToRole({serverID: SERVER_ID, userID, roleID: t.id});
+//            await bot.sendMessage({
+//                to: channelID,
+//                message: `Congratulations, you have been recruited to team **${t.name}**!`
+//            });
+//        } else {
+//            await bot.sendMessage({
+//                to: channelID,
+//                message: `You are on team ${team.team}`
+//            });
+//        }
+//    
+//    },
 
-        let team = await TeamDB.findUser(userID);
+//    "!resist": async function({bot, message, channelID, userID, user}) {
+//        let team = await TeamDB.findUser(userID);
+//        console.log(`${user} is trying to resist`);
+//
+//        if (!team) {
+//            console.log("[Resist] Not assigned to anything");
+//            await bot.sendMessage({
+//                to: channelID,
+//                message: `You have to have joined a team in order to resist`
+//            });
+//        } else if (team.team === "Resistance") {
+//            console.log("[Resist] Already on resistance");
+//            await bot.sendMessage({
+//                to: channelID,
+//                message: `You're already a part of the Resistance!`
+//            });
+//        } else if (team.resist) {
+//            console.log("[Resist] Already failed to resist");
+//            await bot.sendMessage({
+//                to: channelID,
+//                message: `You've already failed to resist, *traitor*`
+//            });
+//        } else {
+//            let resist = Math.random() < 0.5;
+//            let msg = "";
+//
+//            let i = (team.team === "Pink Bombers") ? 0 : 1;
+//            let Resistance = TEAMS[2];
+//            if (resist) {
+//                console.log("[Resist] Joined team Resistance");
+//                await bot.removeFromRole({serverID: SERVER_ID, userID, roleID: TEAMS[i].id})
+//                await bot.addToRole({serverID: SERVER_ID, userID, roleID: Resistance.id});
+//                team.oldTeam = team.team;
+//                team.team = "Resistance";
+//                team.resist = true;
+//                msg = "💀 Welcome to the Resistance"
+//            } else {
+//                console.log("[Resist] Denied to Resistance");
+//                team.resist = true;
+//                msg = "🚫 The Resistance does not welcome you"
+//            }
+//
+//            await TeamDB.saveUser(team);
+//
+//            await bot.sendMessage({
+//                to: channelID,
+//                message: msg
+//            });
+//        }
+//    },
 
-        if (!team) {
-            let rng = Math.floor(Math.random()*2);
-            let t = TEAMS[rng];
-            await TeamDB.saveUser({
-                userID,
-                user,
-                team: t.name
-            });
-            await bot.addToRole({serverID: SERVER_ID, userID, roleID: t.id});
-            await bot.sendMessage({
-                to: channelID,
-                message: `Congratulations, you have been recruited to team **${t.name}**!`
-            });
-        } else {
-            await bot.sendMessage({
-                to: channelID,
-                message: `You are on team ${team.team}`
-            });
-        }
-    
-    },
-
-    "!resist": async function({bot, message, channelID, userID, user}) {
-        let team = await TeamDB.findUser(userID);
-        console.log(`${user} is trying to resist`);
-
-        if (!team) {
-            console.log("[Resist] Not assigned to anything");
-            await bot.sendMessage({
-                to: channelID,
-                message: `You have to have joined a team in order to resist`
-            });
-        } else if (team.team === "Resistance") {
-            console.log("[Resist] Already on resistance");
-            await bot.sendMessage({
-                to: channelID,
-                message: `You're already a part of the Resistance!`
-            });
-        } else if (team.resist) {
-            console.log("[Resist] Already failed to resist");
-            await bot.sendMessage({
-                to: channelID,
-                message: `You've already failed to resist, *traitor*`
-            });
-        } else {
-            let resist = Math.random() < 0.5;
-            let msg = "";
-
-            let i = (team.team === "Pink Bombers") ? 0 : 1;
-            let Resistance = TEAMS[2];
-            if (resist) {
-                console.log("[Resist] Joined team Resistance");
-                await bot.removeFromRole({serverID: SERVER_ID, userID, roleID: TEAMS[i].id})
-                await bot.addToRole({serverID: SERVER_ID, userID, roleID: Resistance.id});
-                team.oldTeam = team.team;
-                team.team = "Resistance";
-                team.resist = true;
-                msg = "💀 Welcome to the Resistance"
-            } else {
-                console.log("[Resist] Denied to Resistance");
-                team.resist = true;
-                msg = "🚫 The Resistance does not welcome you"
-            }
-
-            await TeamDB.saveUser(team);
-
-            await bot.sendMessage({
-                to: channelID,
-                message: msg
-            });
-        }
-    },
-
-    "!strava": async function({bot, message, channelID, userID, user}) {
-        let [cmd, ...options] = message.split(" ");
-        if (channelID !== channels.ADMIN && channelID !== channels.RUN) {
-            await bot.sendMessage({
-                to: channelID,
-                message: "This command only works in the 5K channel"
-            });
-            return;
-        }
-
-        if (!options.length) {
-            await bot.sendMessage({
-                to:channelID,
-                message: "```md\n"+
-                    "< !strava auth > Authenticate the bot to your strava account\n"+
-                    "< !strava stats @user > View strava stats\n" +
-                    "< !strava leaders > View who ran the most in the last 4 weeks\n" +
-                    "< !strava calendar > View your 4 weeks calendar\n" +
-                    "< !strava avg > View your 4 weeks average stats\n" +
-                    "```"
-            });
-            return;
-        }
-
-        let [opt, param] = options;
-
-        if (opt === "auth") {
-            let url = `https://sjbha-bot.herokuapp.com/api/strava/auth?user=${user}&userID=${userID}`;
-
-            await bot.sendMessage({
-                to: userID,
-                message: `Hello! To auth the discord bot to post your strava times, just click on this link and accept the authorization\n${url}`
-            });
-
-            await bot.sendMessage({
-                to: channelID,
-                message: "DM'd you your authorization link!"
-            });
-        } else if (opt === "stats") {
-            let targetId = userID;
-            if (param) {
-                targetId = param.replace("<@!","")
-                    .replace("<@","")
-                    .replace(">","");
-            }
-            let stats = await Strava.getStats(targetId);
-
-            if (!stats) {
-                await bot.sendMessage({
-                    to: channelID,
-                    message: "This person has not authenticated with Strava!"
-                });
-                return;
-            }
-            console.log("stats", stats);
-            let runs = stats.recent_run_totals;
-            let distance = Strava.getMiles(runs.distance);
-            let time = Strava.hhmmss(runs.moving_time, true);
-
-            await bot.sendMessage({
-                to: channelID,
-                message: `${stats.username} has run ${runs.count} times in the last four weeks; ${distance} mi ${time} time`
-            });
-
-        } else if (opt === "leaders") {
-            let sorter = (entry) => entry.moving_time;
-            let order = ["time", "distance", "pace"];
-
-            if (param === "distance") {
-                sorter = (entry) => entry.distance;
-                order = ["distance", "time", "pace"];
-            } else if (param === "pace") {
-                sorter = (entry) => {
-                    let d = Strava.getMiles(entry.distance)
-                    return entry.moving_time / d;
-                };
-                order = ["pace", "distance", "time"];
-                // sorter = (data) => 
-            }
-
-            let leaderboard = await Strava.getLeaderboard(sorter);
-            var table = new Table("Past 4 Week Leaders");
-            table.removeBorder();
-            // table.setHeading(" ", "name", "net worth", "bank", "games", "survives");
-
-            for (var i = 0; i < leaderboard.length; i++) {
-                let runs = leaderboard[i].count;
-                let distance = Strava.getMiles(leaderboard[i].distance);
-                let time = Strava.hhmmss(leaderboard[i].moving_time, true);
-                let pace = !distance ? "0:00" : Strava.hhmmss(leaderboard[i].moving_time / distance, true);
-
-                let stats = {
-                    distance: `${distance} mi`, 
-                    time: time, 
-                    pace: `${pace}/mi`
-                };
-
-                table.addRow(
-                    `${i+1}.`, 
-                    leaderboard[i].user, 
-                    stats[order[0]],
-                    stats[order[1]],
-                    stats[order[2]],
-                    "[" + runs + " runs]"
-                );
-            }
-            
-            await bot.sendMessage({
-                to: channelID,
-                message: "```\n" + table.toString() + "```"
-            });
-        } else if (opt === "calendar") {
-            let targetId = userID;
-            if (param) {
-                targetId = param.replace("<@!","")
-                    .replace("<@","")
-                    .replace(">","");
-            }
-
-            let calendar = await Strava.getCalendar(targetId);
-
-            if (!calendar) {
-                await bot.sendMessage({
-                    to: channelID,
-                    message: "This person has not authenticated with Strava!"
-                });
-                return;
-            }
-
-            await bot.sendMessage({
-                to: channelID,
-                message: "```\n" + calendar + "```"
-            });
-        } else if (opt === "avg") {
-            let targetId = userID;
-            if (param) {
-                targetId = param.replace("<@!","")
-                    .replace("<@","")
-                    .replace(">","");
-            }
-            let avg = await Strava.getAverage(targetId);
-
-            if (!avg) {
-                await bot.sendMessage({
-                    to: channelID,
-                    message: "This person has not authenticated with Strava!"
-                });
-                return;
-            }
-
-            await bot.sendMessage({
-                to: channelID,
-                message: `**${avg.name}** last four weeks average: ${avg.total} runs,  ${avg.distance} mi, ${avg.pace}/mi pace`
-            });
-        }
-    },
+//    "!strava": async function({bot, message, channelID, userID, user}) {
+//        let [cmd, ...options] = message.split(" ");
+//        if (channelID !== channels.ADMIN && channelID !== channels.RUN) {
+//            await bot.sendMessage({
+//                to: channelID,
+//                message: "This command only works in the 5K channel"
+//            });
+//            return;
+//        }
+//
+//        if (!options.length) {
+//            await bot.sendMessage({
+//                to:channelID,
+//                message: "```md\n"+
+//                    "< !strava auth > Authenticate the bot to your strava account\n"+
+//                    "< !strava stats @user > View strava stats\n" +
+//                    "< !strava leaders > View who ran the most in the last 4 weeks\n" +
+//                    "< !strava calendar > View your 4 weeks calendar\n" +
+//                    "< !strava avg > View your 4 weeks average stats\n" +
+//                    "```"
+//            });
+//            return;
+//        }
+//
+//        let [opt, param] = options;
+//
+//        if (opt === "auth") {
+//            let url = `https://sjbha-bot.herokuapp.com/api/strava/auth?user=${user}&userID=${userID}`;
+//
+//            await bot.sendMessage({
+//                to: userID,
+//                message: `Hello! To auth the discord bot to post your strava times, just click on this link and accept the authorization\n${url}`
+//            });
+//
+//            await bot.sendMessage({
+//                to: channelID,
+//                message: "DM'd you your authorization link!"
+//            });
+//        } else if (opt === "stats") {
+//            let targetId = userID;
+//            if (param) {
+//                targetId = param.replace("<@!","")
+//                    .replace("<@","")
+//                    .replace(">","");
+//            }
+//            let stats = await Strava.getStats(targetId);
+//
+//            if (!stats) {
+//                await bot.sendMessage({
+//                    to: channelID,
+//                    message: "This person has not authenticated with Strava!"
+//                });
+//                return;
+//            }
+//            console.log("stats", stats);
+//            let runs = stats.recent_run_totals;
+//            let distance = Strava.getMiles(runs.distance);
+//            let time = Strava.hhmmss(runs.moving_time, true);
+//
+//            await bot.sendMessage({
+//                to: channelID,
+//                message: `${stats.username} has run ${runs.count} times in the last four weeks; ${distance} mi ${time} time`
+//            });
+//
+//        } else if (opt === "leaders") {
+//            let sorter = (entry) => entry.moving_time;
+//            let order = ["time", "distance", "pace"];
+//
+//            if (param === "distance") {
+//                sorter = (entry) => entry.distance;
+//                order = ["distance", "time", "pace"];
+//            } else if (param === "pace") {
+//                sorter = (entry) => {
+//                    let d = Strava.getMiles(entry.distance)
+//                    return entry.moving_time / d;
+//                };
+//                order = ["pace", "distance", "time"];
+//                // sorter = (data) => 
+//            }
+//
+//            let leaderboard = await Strava.getLeaderboard(sorter);
+//            var table = new Table("Past 4 Week Leaders");
+//            table.removeBorder();
+//            // table.setHeading(" ", "name", "net worth", "bank", "games", "survives");
+//
+//            for (var i = 0; i < leaderboard.length; i++) {
+//                let runs = leaderboard[i].count;
+//                let distance = Strava.getMiles(leaderboard[i].distance);
+//                let time = Strava.hhmmss(leaderboard[i].moving_time, true);
+//                let pace = !distance ? "0:00" : Strava.hhmmss(leaderboard[i].moving_time / distance, true);
+//
+//                let stats = {
+//                    distance: `${distance} mi`, 
+//                    time: time, 
+//                    pace: `${pace}/mi`
+//                };
+//
+//                table.addRow(
+//                    `${i+1}.`, 
+//                    leaderboard[i].user, 
+//                    stats[order[0]],
+//                    stats[order[1]],
+//                    stats[order[2]],
+//                    "[" + runs + " runs]"
+//                );
+//            }
+//            
+//            await bot.sendMessage({
+//                to: channelID,
+//                message: "```\n" + table.toString() + "```"
+//            });
+//        } else if (opt === "calendar") {
+//            let targetId = userID;
+//            if (param) {
+//                targetId = param.replace("<@!","")
+//                    .replace("<@","")
+//                    .replace(">","");
+//            }
+//
+//            let calendar = await Strava.getCalendar(targetId);
+//
+//            if (!calendar) {
+//                await bot.sendMessage({
+//                    to: channelID,
+//                    message: "This person has not authenticated with Strava!"
+//                });
+//                return;
+//            }
+//
+//            await bot.sendMessage({
+//                to: channelID,
+//                message: "```\n" + calendar + "```"
+//            });
+//        } else if (opt === "avg") {
+//            let targetId = userID;
+//            if (param) {
+//                targetId = param.replace("<@!","")
+//                    .replace("<@","")
+//                    .replace(">","");
+//            }
+//            let avg = await Strava.getAverage(targetId);
+//
+//            if (!avg) {
+//                await bot.sendMessage({
+//                    to: channelID,
+//                    message: "This person has not authenticated with Strava!"
+//                });
+//                return;
+//            }
+//
+//            await bot.sendMessage({
+//                to: channelID,
+//                message: `**${avg.name}** last four weeks average: ${avg.total} runs,  ${avg.distance} mi, ${avg.pace}/mi pace`
+//            });
+//        }
+//    },
 
     "!tldr": async function({bot, message, channelID, userID, user}) {
         let [cmd, ...msg] = message.split(" ");
@@ -542,105 +542,105 @@ export default {
         }
     },
 
-    "!teams": async function({bot, message, channelID, userID, user}) {
-        if (channelID !== channels.GENERAL2 && channelID !== channels.ADMIN) {
-            await bot.sendMessage({
-                to: channelID,
-                message: `Please keep team discussion in the general-2 channel!`
-            });
-            return;
-        }
-
-        let [cmd, option] = message.split(" ");
-        let teams = await TeamDB.getAll();
-
-        let green = teams.filter( t => t.team === "Green Mafia" || t.oldTeam === "Green Mafia");
-        let pink = teams.filter( t => t.team === "Pink Bombers" || t.oldTeam === "Pink Bombers");
-        let black = teams.filter( t => t.team === "Resistance");
-
-        let g_resist = green.filter( n => n.resist ).length;
-        let p_resist = pink.filter( n => n.resist ).length;
-        let greenList = green.map( n=> {
-            if (n.oldTeam) {
-                return null;
-            }
-            let resist = n.resist ? "x " : "  ";
-            return resist + n.user;
-        }).filter( n => !!n).join("\n");
-        let pinkList = pink.map(n=> {
-            if (n.oldTeam) {
-                return null;
-            }
-            let resist = n.resist ? "x " : "  ";
-            return resist + n.user;
-        }).filter( n => !!n).join("\n");
-        let resistList = black.map(n=> {
-            let symbol = n.oldTeam[0];
-            return symbol + " " + n.user;
-        }).join("\n");
-
-        let points = await Points.getPoints();
-
-        await bot.sendMessage({
-            to: channelID,
-            message: `\`\`\`md\n
-Team Pink Bombers [${points["Pink Bombers"]}] [-${p_resist}]
----------------
-${pinkList}
-
-Team Green Mafia [${points["Green Mafia"]}] [-${g_resist}]
--------------
-${greenList}
-
-Resistance [${points["Resistance"]}]
--------------
-${resistList}
-\`\`\`
-`
-        })
-    },
-
-    "!speak": async function({bot, message, channelID, userID}) {
-        const [cmd, user] = message.split(" ");
-        const users = ["125829654421438464", "95628401045409792", "176492310207528961", "164375823741091850"];
-        // let id = users[Math.floor(Math.random()*users.length)]
-        let id = (user) ? user.replace("<@!","")
-            .replace("<@","")
-            .replace(">","") : userID
-
-        if (user === "rng") {
-            id = users[Math.floor(Math.random()*users.length)];
-            last_said = id
-        } 
-        if (user === "answer") {
-            await bot.sendMessage({
-                to: channelID,
-                message: `It was <@${last_said}>!`
-            });
-            return;
-        }
-
-        let text = await MarkovDB.getFromUser(id);
-        if (!text) {
-            await bot.sendMessage({
-                to: channelID,
-                message: "Couldn't find any messages for user "+user
-            });
-            return;
-        }
-        text = text.map( n => n.message );
-
-        const markov = new MarkovGen({
-            input: text,
-            minLength: 10
-        });
-
-        await bot.sendMessage({
-            to: channelID,
-            message: markov.makeChain()
-        });
-
-    },
+//    "!teams": async function({bot, message, channelID, userID, user}) {
+//        if (channelID !== channels.GENERAL2 && channelID !== channels.ADMIN) {
+//            await bot.sendMessage({
+//                to: channelID,
+//                message: `Please keep team discussion in the general-2 channel!`
+//            });
+//            return;
+//        }
+//
+//        let [cmd, option] = message.split(" ");
+//        let teams = await TeamDB.getAll();
+//
+//        let green = teams.filter( t => t.team === "Green Mafia" || t.oldTeam === "Green Mafia");
+//        let pink = teams.filter( t => t.team === "Pink Bombers" || t.oldTeam === "Pink Bombers");
+//        let black = teams.filter( t => t.team === "Resistance");
+//
+//        let g_resist = green.filter( n => n.resist ).length;
+//        let p_resist = pink.filter( n => n.resist ).length;
+//        let greenList = green.map( n=> {
+//            if (n.oldTeam) {
+//                return null;
+//            }
+//            let resist = n.resist ? "x " : "  ";
+//            return resist + n.user;
+//        }).filter( n => !!n).join("\n");
+//        let pinkList = pink.map(n=> {
+//            if (n.oldTeam) {
+//                return null;
+//            }
+//            let resist = n.resist ? "x " : "  ";
+//            return resist + n.user;
+//        }).filter( n => !!n).join("\n");
+//        let resistList = black.map(n=> {
+//            let symbol = n.oldTeam[0];
+//            return symbol + " " + n.user;
+//        }).join("\n");
+//
+//        let points = await Points.getPoints();
+//
+//        await bot.sendMessage({
+//            to: channelID,
+//            message: `\`\`\`md\n
+//Team Pink Bombers [${points["Pink Bombers"]}] [-${p_resist}]
+//---------------
+//${pinkList}
+//
+//Team Green Mafia [${points["Green Mafia"]}] [-${g_resist}]
+//-------------
+//${greenList}
+//
+//Resistance [${points["Resistance"]}]
+//-------------
+//${resistList}
+//\`\`\`
+//`
+//        })
+//    },
+//
+//    "!speak": async function({bot, message, channelID, userID}) {
+//        const [cmd, user] = message.split(" ");
+//        const users = ["125829654421438464", "95628401045409792", "176492310207528961", "164375823741091850"];
+//        // let id = users[Math.floor(Math.random()*users.length)]
+//        let id = (user) ? user.replace("<@!","")
+//            .replace("<@","")
+//            .replace(">","") : userID
+//
+//        if (user === "rng") {
+//            id = users[Math.floor(Math.random()*users.length)];
+//            last_said = id
+//        } 
+//        if (user === "answer") {
+//            await bot.sendMessage({
+//                to: channelID,
+//                message: `It was <@${last_said}>!`
+//            });
+//            return;
+//        }
+//
+//        let text = await MarkovDB.getFromUser(id);
+//        if (!text) {
+//            await bot.sendMessage({
+//                to: channelID,
+//                message: "Couldn't find any messages for user "+user
+//            });
+//            return;
+//        }
+//        text = text.map( n => n.message );
+//
+//        const markov = new MarkovGen({
+//            input: text,
+//            minLength: 10
+//        });
+//
+//        await bot.sendMessage({
+//            to: channelID,
+//            message: markov.makeChain()
+//        });
+//
+//    },
 
     "!debug": async function({bot, message, channelID, userID}) {
         if (channelID !== channels.ADMIN) {
@@ -655,7 +655,7 @@ ${resistList}
             if (meetups.length === 0) {
                 await bot.sendMessage({
                     to: channelID,
-                    message: "You have no active meetups"
+                    message: "You have no active events"
                 });
                 return;
             }
@@ -713,7 +713,7 @@ ${resistList}
         if (meetups.length === 0) {
             await bot.sendMessage({
                 to: channelID,
-                message: "You don't have any active meetups to cancel!"
+                message: "You don't have any active events to cancel!"
             });
             return;
         }
@@ -721,7 +721,7 @@ ${resistList}
         let meetup_list = meetups.map( (m, i) => i + ": " + m.info() ).join("\n");
         await bot.sendMessage({
             to: channelID,
-            message: "Which meetup do you want to cancel?\n```"+meetup_list+"```"
+            message: "Which event do you want to cancel?\n```"+meetup_list+"```"
         });
         let index = await Query.wait({userID, channelID});
         if (index === null) {
@@ -764,7 +764,7 @@ ${resistList}
         if (meetups.length === 0) {
             await bot.sendMessage({
                 to: channelID,
-                message: "There are no active meetups"
+                message: "There are no active events"
             });
             return;
         }
@@ -772,7 +772,7 @@ ${resistList}
         let meetup_list = meetups.map( (m, i) => i + ": " + m.info() ).join("\n");
         await bot.sendMessage({
             to: channelID,
-            message: "Which meetup do you want to mention?\n```"+meetup_list+"```"
+            message: "Which event do you want to mention?\n```"+meetup_list+"```"
         });
         let index = await Query.wait({userID, channelID});
         if (index === null) {
@@ -826,7 +826,7 @@ ${resistList}
         if (meetups.length === 0) {
             await bot.sendMessage({
                 to: channelID,
-                message: "You don't have any active meetups to edit!"
+                message: "You don't have any active events to edit!"
             });
             return;
         }
@@ -834,7 +834,7 @@ ${resistList}
         let meetup_list = meetups.map( (m, i) => i + ": " + m.info() ).join("\n");
         await bot.sendMessage({
             to: channelID,
-            message: "Which meetup do you want to edit?\n```"+meetup_list+"```"
+            message: "Which event do you want to edit?\n```"+meetup_list+"```"
         });
         let index = await Query.wait({userID, channelID});
         if (index === null) {
@@ -934,7 +934,7 @@ ${resistList}
         });
     },
 
-    "!meetups": async function ({bot, message, userID, channelID }) {
+    "!events": async function ({bot, message, userID, channelID }) {
         const [cmd, option] = message.split(" ");
 
         let meetups = await MeetupsDB.getMeetups(userID);
@@ -968,29 +968,29 @@ ${resistList}
         if (option === "today") {
             meetups = meetups.filter( m => isSameDayAndMonth(m.date_moment().toDate(), new Date()) );
 
-            if (!meetups.length) {
+            if (!events.length) {
                 await bot.sendMessage({
                     to: channelID,
-                    message: "There are no scheduled meetups for today!"
+                    message: "There are no scheduled events for today!"
                 });
                 return;
             }
         }
         if (option === "week") {
             meetups = meetups.filter( m => isWithinAWeek(m.date_moment()) );
-            if (!meetups.length) {
+            if (!events.length) {
                 await bot.sendMessage({
                     to: channelID,
-                    message: "There are no scheduled meetups for this week!"
+                    message: "There are no scheduled events for this week!"
                 });
                 return;
             }
         }
 
-        if (!meetups.length) {
+        if (!events.length) {
             await bot.sendMessage({
                 to: channelID,
-                message: "There are no scheduled meetups coming up"
+                message: "There are no scheduled events coming up"
             });
             return;
         }
@@ -1017,15 +1017,15 @@ ${resistList}
         await bot.sendMessage({
             to: channelID,
             message:
-                "To create a meetup, copy paste this template; only the time and event name is required:\n\n"+
-                "```!meetup 12/20 6:00pm\n" + 
+                "To create an event, copy paste this template; only the time and event name is required:\n\n"+
+                "```!event 12/20 6:00pm\n" + 
                 "| (event-name-here) \n" + 
                 "| description:\n" +
                 "| location:\n" + 
                 "| url:\n" +
                 "| image:\n" +
-                "| type: (event, drinks, food, or active)```\n" +
-                "`!cancel` to cancel a meetup and `!edit` to edit\n\n" + 
+                "| type: (PVP, Abba, Race, Other)```\n" +
+                "`!cancel` to cancel an event and `!edit` to edit\n\n" + 
                 "To create a poll:\n" +
                 "`!poll Question? | option 1 | option 2 | option 3 | option 4`"
         });
