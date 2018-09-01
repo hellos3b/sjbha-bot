@@ -542,105 +542,105 @@ export default {
         }
     },
 
-    "!teams": async function({bot, message, channelID, userID, user}) {
-        if (channelID !== channels.GENERAL2 && channelID !== channels.ADMIN) {
-            await bot.sendMessage({
-                to: channelID,
-                message: `Please keep team discussion in the general-2 channel!`
-            });
-            return;
-        }
-
-        let [cmd, option] = message.split(" ");
-        let teams = await TeamDB.getAll();
-
-        let green = teams.filter( t => t.team === "Green Mafia" || t.oldTeam === "Green Mafia");
-        let pink = teams.filter( t => t.team === "Pink Bombers" || t.oldTeam === "Pink Bombers");
-        let black = teams.filter( t => t.team === "Resistance");
-
-        let g_resist = green.filter( n => n.resist ).length;
-        let p_resist = pink.filter( n => n.resist ).length;
-        let greenList = green.map( n=> {
-            if (n.oldTeam) {
-                return null;
-            }
-            let resist = n.resist ? "x " : "  ";
-            return resist + n.user;
-        }).filter( n => !!n).join("\n");
-        let pinkList = pink.map(n=> {
-            if (n.oldTeam) {
-                return null;
-            }
-            let resist = n.resist ? "x " : "  ";
-            return resist + n.user;
-        }).filter( n => !!n).join("\n");
-        let resistList = black.map(n=> {
-            let symbol = n.oldTeam[0];
-            return symbol + " " + n.user;
-        }).join("\n");
-
-        let points = await Points.getPoints();
-
-        await bot.sendMessage({
-            to: channelID,
-            message: `\`\`\`md\n
-Team Pink Bombers [${points["Pink Bombers"]}] [-${p_resist}]
----------------
-${pinkList}
-
-Team Green Mafia [${points["Green Mafia"]}] [-${g_resist}]
--------------
-${greenList}
-
-Resistance [${points["Resistance"]}]
--------------
-${resistList}
-\`\`\`
-`
-        })
-    },
-
-    "!speak": async function({bot, message, channelID, userID}) {
-        const [cmd, user] = message.split(" ");
-        const users = ["125829654421438464", "95628401045409792", "176492310207528961", "164375823741091850"];
-        // let id = users[Math.floor(Math.random()*users.length)]
-        let id = (user) ? user.replace("<@!","")
-            .replace("<@","")
-            .replace(">","") : userID
-
-        if (user === "rng") {
-            id = users[Math.floor(Math.random()*users.length)];
-            last_said = id
-        } 
-        if (user === "answer") {
-            await bot.sendMessage({
-                to: channelID,
-                message: `It was <@${last_said}>!`
-            });
-            return;
-        }
-
-        let text = await MarkovDB.getFromUser(id);
-        if (!text) {
-            await bot.sendMessage({
-                to: channelID,
-                message: "Couldn't find any messages for user "+user
-            });
-            return;
-        }
-        text = text.map( n => n.message );
-
-        const markov = new MarkovGen({
-            input: text,
-            minLength: 10
-        });
-
-        await bot.sendMessage({
-            to: channelID,
-            message: markov.makeChain()
-        });
-
-    },
+//    "!teams": async function({bot, message, channelID, userID, user}) {
+//        if (channelID !== channels.GENERAL2 && channelID !== channels.ADMIN) {
+//            await bot.sendMessage({
+//                to: channelID,
+//                message: `Please keep team discussion in the general-2 channel!`
+//            });
+//            return;
+//        }
+//
+//        let [cmd, option] = message.split(" ");
+//        let teams = await TeamDB.getAll();
+//
+//        let green = teams.filter( t => t.team === "Green Mafia" || t.oldTeam === "Green Mafia");
+//        let pink = teams.filter( t => t.team === "Pink Bombers" || t.oldTeam === "Pink Bombers");
+//        let black = teams.filter( t => t.team === "Resistance");
+//
+//        let g_resist = green.filter( n => n.resist ).length;
+//        let p_resist = pink.filter( n => n.resist ).length;
+//        let greenList = green.map( n=> {
+//            if (n.oldTeam) {
+//                return null;
+//            }
+//            let resist = n.resist ? "x " : "  ";
+//            return resist + n.user;
+//        }).filter( n => !!n).join("\n");
+//        let pinkList = pink.map(n=> {
+//            if (n.oldTeam) {
+//                return null;
+//            }
+//            let resist = n.resist ? "x " : "  ";
+//            return resist + n.user;
+//        }).filter( n => !!n).join("\n");
+//        let resistList = black.map(n=> {
+//            let symbol = n.oldTeam[0];
+//            return symbol + " " + n.user;
+//        }).join("\n");
+//
+//        let points = await Points.getPoints();
+//
+//        await bot.sendMessage({
+//            to: channelID,
+//            message: `\`\`\`md\n
+//Team Pink Bombers [${points["Pink Bombers"]}] [-${p_resist}]
+//---------------
+//${pinkList}
+//
+//Team Green Mafia [${points["Green Mafia"]}] [-${g_resist}]
+//-------------
+//${greenList}
+//
+//Resistance [${points["Resistance"]}]
+//-------------
+//${resistList}
+//\`\`\`
+//`
+//        })
+//    },
+//
+//    "!speak": async function({bot, message, channelID, userID}) {
+//        const [cmd, user] = message.split(" ");
+//        const users = ["125829654421438464", "95628401045409792", "176492310207528961", "164375823741091850"];
+//        // let id = users[Math.floor(Math.random()*users.length)]
+//        let id = (user) ? user.replace("<@!","")
+//            .replace("<@","")
+//            .replace(">","") : userID
+//
+//        if (user === "rng") {
+//            id = users[Math.floor(Math.random()*users.length)];
+//            last_said = id
+//        } 
+//        if (user === "answer") {
+//            await bot.sendMessage({
+//                to: channelID,
+//                message: `It was <@${last_said}>!`
+//            });
+//            return;
+//        }
+//
+//        let text = await MarkovDB.getFromUser(id);
+//        if (!text) {
+//            await bot.sendMessage({
+//                to: channelID,
+//                message: "Couldn't find any messages for user "+user
+//            });
+//            return;
+//        }
+//        text = text.map( n => n.message );
+//
+//        const markov = new MarkovGen({
+//            input: text,
+//            minLength: 10
+//        });
+//
+//        await bot.sendMessage({
+//            to: channelID,
+//            message: markov.makeChain()
+//        });
+//
+//    },
 
     "!debug": async function({bot, message, channelID, userID}) {
         if (channelID !== channels.ADMIN) {
