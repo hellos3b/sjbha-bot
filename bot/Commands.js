@@ -69,8 +69,8 @@ export default {
     },
 
     // Start a meetup
-    "!meetup": async function({bot, user, channelID, userID, message}) {
-        const msg = message.replace("!meetup", "");
+    "!event": async function({bot, user, channelID, userID, message}) {
+        const msg = message.replace("!event", "");
         let options = await parseMeetupStr({ bot, channelID, msg });
         console.log("options", options);
 
@@ -201,14 +201,14 @@ export default {
             await bot.sendMessage({
                 to: channelID,
                 message: "```" +
-                    "!admin list\n    List current active meetups along with their IDs```"
+                    "!admin list\n    List current active events along with their IDs```"
             });
         } else if (param === "list") {
             let meetups = await MeetupsDB.getMeetups();
             if (meetups.length === 0) {
                 await bot.sendMessage({
                     to: channelID,
-                    message: "No active meetups."
+                    message: "No active events."
                 });
                 return;
             }
@@ -224,17 +224,17 @@ export default {
             let meetupId = data;
             let meetup = await MeetupsDB.findMeetup(meetupId);
 
-            if (!meetup) {
+            if (!event) {
                 await bot.sendMessage({
                     to: channelID,
-                    message: `Can't find meetup with id \`${meetupId}\``
+                    message: `Can't find event with id \`${meetupId}\``
                 });
                 return;
             }
             let meetup_time = new moment(meetup.timestamp);
             await bot.sendMessage({
                 to: meetup.sourceChannelID,
-                message: `Reminder! There's the meetup \`${meetup.info}\` ${meetup_time.fromNow()}!`
+                message: `Reminder! There's the event \`${meetup.info}\` ${meetup_time.fromNow()}!`
             });
         } else if (param === "clean") {
             const meetups = await MeetupsDB.getMeetups();
@@ -655,7 +655,7 @@ export default {
             if (meetups.length === 0) {
                 await bot.sendMessage({
                     to: channelID,
-                    message: "You have no active meetups"
+                    message: "You have no active events"
                 });
                 return;
             }
@@ -713,7 +713,7 @@ export default {
         if (meetups.length === 0) {
             await bot.sendMessage({
                 to: channelID,
-                message: "You don't have any active meetups to cancel!"
+                message: "You don't have any active events to cancel!"
             });
             return;
         }
@@ -721,7 +721,7 @@ export default {
         let meetup_list = meetups.map( (m, i) => i + ": " + m.info() ).join("\n");
         await bot.sendMessage({
             to: channelID,
-            message: "Which meetup do you want to cancel?\n```"+meetup_list+"```"
+            message: "Which event do you want to cancel?\n```"+meetup_list+"```"
         });
         let index = await Query.wait({userID, channelID});
         if (index === null) {
@@ -764,7 +764,7 @@ export default {
         if (meetups.length === 0) {
             await bot.sendMessage({
                 to: channelID,
-                message: "There are no active meetups"
+                message: "There are no active events"
             });
             return;
         }
@@ -772,7 +772,7 @@ export default {
         let meetup_list = meetups.map( (m, i) => i + ": " + m.info() ).join("\n");
         await bot.sendMessage({
             to: channelID,
-            message: "Which meetup do you want to mention?\n```"+meetup_list+"```"
+            message: "Which event do you want to mention?\n```"+meetup_list+"```"
         });
         let index = await Query.wait({userID, channelID});
         if (index === null) {
@@ -826,7 +826,7 @@ export default {
         if (meetups.length === 0) {
             await bot.sendMessage({
                 to: channelID,
-                message: "You don't have any active meetups to edit!"
+                message: "You don't have any active events to edit!"
             });
             return;
         }
@@ -834,7 +834,7 @@ export default {
         let meetup_list = meetups.map( (m, i) => i + ": " + m.info() ).join("\n");
         await bot.sendMessage({
             to: channelID,
-            message: "Which meetup do you want to edit?\n```"+meetup_list+"```"
+            message: "Which event do you want to edit?\n```"+meetup_list+"```"
         });
         let index = await Query.wait({userID, channelID});
         if (index === null) {
@@ -934,7 +934,7 @@ export default {
         });
     },
 
-    "!meetups": async function ({bot, message, userID, channelID }) {
+    "!events": async function ({bot, message, userID, channelID }) {
         const [cmd, option] = message.split(" ");
 
         let meetups = await MeetupsDB.getMeetups(userID);
@@ -968,29 +968,29 @@ export default {
         if (option === "today") {
             meetups = meetups.filter( m => isSameDayAndMonth(m.date_moment().toDate(), new Date()) );
 
-            if (!meetups.length) {
+            if (!events.length) {
                 await bot.sendMessage({
                     to: channelID,
-                    message: "There are no scheduled meetups for today!"
+                    message: "There are no scheduled events for today!"
                 });
                 return;
             }
         }
         if (option === "week") {
             meetups = meetups.filter( m => isWithinAWeek(m.date_moment()) );
-            if (!meetups.length) {
+            if (!events.length) {
                 await bot.sendMessage({
                     to: channelID,
-                    message: "There are no scheduled meetups for this week!"
+                    message: "There are no scheduled events for this week!"
                 });
                 return;
             }
         }
 
-        if (!meetups.length) {
+        if (!events.length) {
             await bot.sendMessage({
                 to: channelID,
-                message: "There are no scheduled meetups coming up"
+                message: "There are no scheduled events coming up"
             });
             return;
         }
@@ -1017,15 +1017,15 @@ export default {
         await bot.sendMessage({
             to: channelID,
             message:
-                "To create a meetup, copy paste this template; only the time and event name is required:\n\n"+
-                "```!meetup 12/20 6:00pm\n" + 
+                "To create an event, copy paste this template; only the time and event name is required:\n\n"+
+                "```!event 12/20 6:00pm\n" + 
                 "| (event-name-here) \n" + 
                 "| description:\n" +
                 "| location:\n" + 
                 "| url:\n" +
                 "| image:\n" +
-                "| type: (event, drinks, food, or active)```\n" +
-                "`!cancel` to cancel a meetup and `!edit` to edit\n\n" + 
+                "| type: (PVP, Abba, Race, Other)```\n" +
+                "`!cancel` to cancel an event and `!edit` to edit\n\n" + 
                 "To create a poll:\n" +
                 "`!poll Question? | option 1 | option 2 | option 3 | option 4`"
         });
