@@ -4,6 +4,8 @@ import MeetupsDB from '../MeetupsDB'
 const YES_POINTS = 3;
 const MAYBE_POINTS = 0;
 
+const POINT_START_DATE = "8/1/2018";
+
 export default {
 
     getPointsForOne: async function(user) {
@@ -15,7 +17,7 @@ export default {
 
         let archive = await MeetupsDB.getArchive();
 
-        let x = new Date("6/1/2018");
+        let x = new Date(POINT_START_DATE);
 
         archive = archive.filter( arc => {
             let d = new Date(arc.date);
@@ -59,7 +61,7 @@ export default {
 
         console.log("people", people);
 
-        let x = new Date("6/1/2018");
+        let x = new Date(POINT_START_DATE);
 
         archive = archive.filter( arc => {
             let d = new Date(arc.date);
