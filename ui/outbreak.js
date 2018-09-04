@@ -46,6 +46,7 @@ function parseData(data) {
             action = "got immunity from";
         } 
         n.action = action;
+        n.isInfected = n.infection === "infected";
         return n;
     }).sort( (a,b) => a.timestamp < b.timestamp ? -1 : 1 );
     return data;
