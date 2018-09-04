@@ -11,6 +11,7 @@ import BoombotRouter from '../boombot/router'
 import BoombotWeeklyController from '../boombot/commands/WeeklyController'
 import AdminRouter from './AdminCommands'
 import MeetupsPlaintext from './MeetupsPlaintext'
+import Outbreak from './outbreak/Outbreak'
 
 import SwirlCount from './SwirlCount'
 import Stats from './StatsTracking'
@@ -50,6 +51,12 @@ export default {
                 return;
             }
 
+            if (process.env.NODE_ENV === "admin" && channelID !== channels.ADMIN) {
+                return;
+            }
+
+            Outbreak.check({user, userID, message});
+
             // markov testers
             // 125829654421438464 s3b
             // 95628401045409792 Blue
@@ -69,6 +76,8 @@ export default {
             if (message.toLowerCase().indexOf("swirl") !== -1) {
                 // SwirlCount.add({ user, userID, message });
             }
+
+            console.log(message);
 
             if (message.substring(0, 1) == '!') {
                 let context = { bot, user, userID, channelID, message, evt };
