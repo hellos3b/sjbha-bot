@@ -654,7 +654,7 @@ ${resistList}
     },
 
     "!speak": async function({bot, message, channelID, userID}) {
-        const denials = ["no speak", "Not sure what command that is", "What do you want me to do?", "No f u", ":angrynoises:", "You're already speaking", "I'm not your pet monkey", `How would you like if it I asked you to always do something? <@${userID}>! <@${userID}>! <@${userID}>! <@${userID}>!`, 'hello, am human', ':waver:'];
+        const denials = ["no speak", "Not sure what command that is", "What do you want me to do?", "No f u", "<:angrynoises:469564841212903438>", "You're already speaking", "I'm not your pet monkey", `How would you like if it I asked you to always do something? <@${userID}>! <@${userID}>! <@${userID}>! <@${userID}>!`, 'hello, am human', '<:waver:473601387448500224>'];
         const denial = denials[Math.floor(Math.random()*denials.length)];
         await bot.sendMessage({
             to: channelID,
