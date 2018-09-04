@@ -6,6 +6,7 @@ const outbreakSchema = mongoose.Schema({
     infectedBy: String, // infected by user
     infectedByID: String, // infected by user ID
     infection: String, // "infected", "vaccine"
+    message: String,
     timestamp: {
         type: Date,
         default: new Date()
