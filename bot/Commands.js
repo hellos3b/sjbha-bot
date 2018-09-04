@@ -33,6 +33,13 @@ const TEAMS = [{
     id: "470114559911526402"
 }];
 
+const SUBSCRIPTIONS = {
+    "photomeet": "486330820114513920",
+    "carmeet": "486331665870749707",
+    "drinks": "486331712645758996",
+    "boombot": "486331751963164692"
+};
+
 let last_said = "";
 
 async function parseMeetupStr({bot, channelID, msg}) {
@@ -188,6 +195,52 @@ export default {
                 message: "<@!115794072735580162>!"
             })
         }
+    },
+
+    "!subscribe": async function({bot, message, channelID, user, userID}) {
+        const [cmd, option] = message.split(" ");
+
+        if (!option) {
+            await bot.sendMessage({
+                to: channelID,
+                message: "Tags you can subscribe to: " + Object.keys(SUBSCRIPTIONS).join(", ")
+            });
+            return;
+        }
+
+        if (!SUBSCRIPTIONS[option]) {
+            await bot.sendMessage({
+                to: channelID,
+                message: `Couldn't find tag called '${option}'`
+            });
+            return;
+        }
+
+        const id = SUBSCRIPTIONS[option];
+        await bot.addToRole({serverID: SERVER_ID, userID, roleID: id});
+        await bot.sendMessage({
+            to: channelID,
+            message: `${user} subscribed to '${option}'`
+        });
+    },
+
+    "!unsubscribe": async function({bot, message, channelID, user, userID}) {
+        const [cmd, option] = message.split(" ");
+
+        if (!SUBSCRIPTIONS[option]) {
+            await bot.sendMessage({
+                to: channelID,
+                message: `Couldn't find tag called '${option}'`
+            });
+            return;
+        }
+
+        const id = SUBSCRIPTIONS[option];
+        await bot.removeFromRole({serverID: SERVER_ID, userID, roleID: id});
+        await bot.sendMessage({
+            to: channelID,
+            message: `${user} unsubscribed from '${option}'`
+        });
     },
 
     "!admin": async function({bot, message, channelID, userID}) {
