@@ -6,14 +6,39 @@
         <style type='text/css'>
         body {
             font-family: Inconsolata, 'Courier New', Courier, monospace;
+            color: #454545;
         }
         .timestamp {
-            color: #0f0;
+            color: #c25322;
             display: inline-block;
-            width: 100px;
+            width: 40px;
+            font-size: 0.75em;
+            font-weight: 800;
         }
         .container {
             padding: 48px;
+        }
+        .title {
+            display: inline-block;
+        }
+        .message {
+            font-size: 0.85em;
+            margin-left: 49px;
+            background: #f5f5f5;
+            padding: 8px 4px;
+            margin-bottom: 12px;
+            margin-top: 6px;
+            font-style: italic;
+        }
+        .user {
+            font-weight: 600;
+            color: #000;
+        }
+        .infected {
+            color: #922828;
+        }
+        .vaccine {
+            color: #379f37;
         }
         </style>
     </head>
@@ -23,7 +48,7 @@
             {{#infections}}
                 <div class='infection'>
                     <div class='timestamp'>+{{timeDiff}}</div>
-                    <div>{{infectedBy}} infected {{user}}</div>
+                    <div class='title'><span class='user'>{{user}}</span> <span class='{{infection}}'>{{action}}</span> {{infectedBy}}</div>
                     <div class='message'>{{message}}</div>
                 </div>
             {{/infections}}
