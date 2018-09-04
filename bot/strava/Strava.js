@@ -1,13 +1,16 @@
 import StravaModel from './StravaModel'
 import Axios from 'axios'
 import moment from 'moment'
-import channels from "../bot/channels"
-import Bot from "../bot/Controller"
+import channels from "../channels"
+import Bot from "../Controller"
+import StravaLevels from "./StravaLevels"
 import { start } from 'repl';
 
 // For authenticating
 let STRAVA_TOKEN_URL = 'https://www.strava.com/oauth/token';
 let REDIRECT_URL = 'https://sjbha-bot.herokuapp.com/api/strava/accept';
+
+// LEVELING UP SHIT
 
 function saveOwnerID(userID, code) {
     let client_id = process.env.STRAVA_CLIENT_ID;
@@ -174,8 +177,11 @@ async function notifyCreate(owner_id, activity_id) {
     console.log("notifyCreate", owner_id, activity_id);
     let user = await getUserInfoFromStrava(owner_id);
     let activity = await getActivityData(activity_id, user.accessToken);
+    let stats = await getAthleteStats(user.stravaID, user.accessToken, user.user);
 
-    console.log("GOT ACTIVITY!", activity.data);
+    // console.log("GOT ACTIVITY!", activity.data);
+    // console.log("user data", stats);
+
     let data = activity.data;
 
     if (data.type !== "Run") {
@@ -183,6 +189,66 @@ async function notifyCreate(owner_id, activity_id) {
         return;
     }
 
+    // calc averages
+    const recent_stats = stats.recent_run_totals;
+    let averages = {};
+    averages.distance = recent_stats.distance / recent_stats.count;
+    averages.time = recent_stats.moving_time / recent_stats.count;
+    averages.pace = averages.time / averages.distance;
+
+    // calc this stats
+    let run = {};
+    run.distance = data.distance;
+    run.pace = data.moving_time / data.distance;
+
+    let xp = data.moving_time;
+    let base_xp = xp;
+
+    const bonuses = {
+        distance: run.distance > averages.distance,
+        pace: run.pace < averages.pace
+    };
+
+    if (recent_stats.count >= StravaLevels.MIN_RUNS) {
+        let bonus = 0;
+        if (bonuses.distance) {
+            bonus += StravaLevels.BONUS_AMT;
+        }
+        if (bonuses.pace) {
+            bonus += StravaLevels.BONUS_AMT;
+        }
+        xp = xp + (xp*bonus);
+    }
+
+    xp = Math.floor(xp);
+    // Now add the EXP to the user
+    user.EXP += xp;
+
+    let lvldUp = false;
+    // Check if leveled up
+    if (user.EXP >= StravaLevels.LEVEL_EXP) {
+        user.level += 1;
+        user.EXP = user.EXP - StravaLevels.LEVEL_EXP;
+        lvldUp = true;
+    }
+
+    let level = {
+        level: user.level,
+        base_exp: base_xp,
+        exp: user.EXP,
+        distanceBonus: bonuses.distance,
+        paceBonus: bonuses.pace,
+        leveledUp: lvldUp
+    };
+
+    console.log("Saving user", user);
+    await saveUser(user);
+
+    console.log("Averages", averages);
+    console.log("This run", run);
+    console.log("XP", xp);
+    
+    // Get posted stats in readable units
     let distance = getMiles(data.distance);
     let seconds_pace = Math.round(data.moving_time / distance);
     let pace = hhmmss( seconds_pace );
@@ -192,15 +258,39 @@ async function notifyCreate(owner_id, activity_id) {
         time: hhmmss(data.moving_time),
         pace
     };
-
-    console.log("WORKOUT DETAILS", details);
-    await sendUpdate(details);
+    
+    await sendUpdate(details, level);
 }
 
-async function sendUpdate(data) {
+async function saveUser(json) {
+    const user = new StravaModel(json);
+            
+    return new Promise((resolve, reject) => {
+        user.save((saveErr, result) => {
+            if (saveErr) throw saveErr;
+            console.log("saved strava user", result);
+            resolve();
+        });  
+    });  
+}
+
+async function sendUpdate(data, lvl) {
     let message = `👏 **${data.name}** just recorded a run! ${data.distance} mi, ${data.pace} pace, ${data.time} time`;
+    let xp = `${lvl.level} ${StravaLevels.XPBar(lvl.exp, 15)} +${lvl.base_exp}xp`;
+    if (lvl.distanceBonus) {
+        xp += ' +dst';
+    }
+    if (lvl.paceBonus) {
+        xp += ' +spd';
+    }
+    if (lvl.leveledUp) {
+        xp += ' ⭐ LVL UP!';
+    }
+    xp = "```ini\n" + xp + "```";
+    message += "\n"+xp;
+
     await Bot.sendMessage({
-        to: channels.RUN,
+        to: channels.ADMIN,
         message
     });
 }
@@ -280,7 +370,23 @@ export default {
 
         let data = await getAthleteStats(user.stravaID, user.accessToken, user.user);
         data.username = user.user;
+        data.level = user.level;
+        data.xp = user.EXP;
         return data;
+    },
+
+    getLevel: async function(userID) {
+        let user = await getUserInfoFromDiscord(userID);
+
+        if (!user) {
+            return null;
+        }
+
+        return {
+            name: user.user,
+            level: user.level,
+            exp: user.EXP
+        };
     },
 
     getLeaderboard: async function(sortBy) {
@@ -292,6 +398,24 @@ export default {
                 return json;
             }).sort( sorter(sortBy) );
         console.log("leaderboard", leaderboard);
+        return leaderboard;
+    },
+
+    getLeaderboardLevels: async function() {
+        let users = await getAllUsers();
+        let leaderboard = users.sort( (a,b) => {
+            if (a.level < b.level) {
+                return 1;
+            } else if (a.level > b.level) {
+                return -1;
+            } else if (a.EXP < b.EXP) {
+                return 1;
+            } else if (a.EXP > b.EXP) {
+                return -1;
+            } else {
+                return 0;
+            }
+        });
         return leaderboard;
     },
 

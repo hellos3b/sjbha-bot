@@ -6,8 +6,7 @@ import SwirlCountModel from '../db/models/SwirlCount';
 
 import logger from 'winston'
 import PlayersDB from '../boombot/db/PlayersDB'
-import Strava from './Strava'
-import bots from '../boombot/game/bots'
+import Strava from '../bot/strava/Strava'
 import channels from "../bot/channels"
 import Bot from "../bot/Controller"
 import TLDRUI from './tldr.js'
