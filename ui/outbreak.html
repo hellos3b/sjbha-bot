@@ -1,0 +1,32 @@
+<html>
+    <head>
+        <title> SJBHA OUTBREAK </title>
+
+        <link href="https://fonts.googleapis.com/css?family=Inconsolata:400,700" rel="stylesheet">
+        <style type='text/css'>
+        body {
+            font-family: Inconsolata, 'Courier New', Courier, monospace;
+        }
+        .timestamp {
+            color: #0f0;
+            display: inline-block;
+            width: 100px;
+        }
+        .container {
+            padding: 48px;
+        }
+        </style>
+    </head>
+    <body>
+        <div class='container'>
+            <h1>OUTBREAK;</h1>
+            {{#infections}}
+                <div class='infection'>
+                    <div class='timestamp'>+{{timeDiff}}</div>
+                    <div>{{infectedBy}} infected {{user}}</div>
+                    <div class='message'>{{message}}</div>
+                </div>
+            {{/infections}}
+        </div>
+    </body>
+</html>
