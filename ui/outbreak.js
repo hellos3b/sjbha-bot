@@ -52,5 +52,10 @@ function parseData(data) {
 }
 
 export default (data) => {
-    return mustache.render(template, parseData(data))
+    let d = parseData(data);
+    d.group = {
+        infected: d.infections.filter(n => n.infection === "infected"),
+        immune: d.infections.filter(n => n.infection === "vaccine")
+    };
+    return mustache.render(template, d)
 }

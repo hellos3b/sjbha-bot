@@ -40,6 +40,18 @@
         .vaccine {
             color: #379f37;
         }
+        .current-list {
+            display: flex;
+            margin-top: 48px;
+            border-top: 1px solid #aaa;
+        }
+        .group {
+            padding: 48px;
+        }
+        .timestamp.muted {
+            color: #aaa;
+            font-weight: 400;
+        }
         </style>
     </head>
     <body>
@@ -52,6 +64,20 @@
                     <div class='message'>{{message}}</div>
                 </div>
             {{/infections}}
+            <div class='current-list'>
+                <div class='infected group'>
+                    <div class='header'>INFECTED ({{group.infected.length}})</div>
+                    {{#group.infected}}
+                    <div class='user'><span class='timestamp muted'>+{{timeDiff}}</span> {{user}}</div>
+                    {{/group.infected}}
+                </div>
+                <div class='vaccine group'>
+                        <div class='header'>IMMUNE ({{group.immune.length}})</div>
+                    {{#group.immune}}
+                        <div class='user'><span class='timestamp muted'>+{{timeDiff}}</span>  {{user}}</div>
+                    {{/group.immune}}
+                </div>
+            </div>
         </div>
     </body>
 </html>
