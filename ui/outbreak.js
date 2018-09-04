@@ -17,7 +17,7 @@ function msToHMS( ms ) {
     var minutes = parseInt( seconds / 60 ); // 60 seconds in 1 minute
     // 4- Keep only seconds not extracted to minutes:
     seconds = Math.floor(seconds % 60);
-    return pad(hours)+":"+pad(minutes)+":"+pad(seconds);
+    return pad(hours)+":"+pad(minutes);
 }
 
 function parseData(data) {
@@ -32,6 +32,20 @@ function parseData(data) {
         const diff = new Date(n.timestamp).getTime() - start.getTime();
         console.log("diff time", diff);
         n.timeDiff = msToHMS(diff);
+        n.message = n.message.replace(n.userID, n.user);
+        n.message = n.message.replace("125829654421438464", "s3b");
+
+        if (!n.user) {
+            n.user = "unknown";
+        }
+
+        let action = "";
+        if (n.infection === "infected") {
+            action = "got infected by";
+        } else if (n.infection === "vaccine") {
+            action = "got immunity from";
+        } 
+        n.action = action;
         return n;
     });
     return data;
