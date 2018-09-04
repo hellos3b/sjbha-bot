@@ -28,7 +28,8 @@ export default {
                     user,
                     userID,
                     infectedBy: "Patient Zero",
-                    infection
+                    infection,
+                    message
                 });
             }
 
@@ -45,11 +46,11 @@ export default {
         // Now infect the other people!
         ids.forEach((id) => {
             console.log("Infecting " + id);
-            this.infect({ person, id, user, userID });
+            this.infect({ person, id, user, userID, message });
         });
     },
 
-    infect: async function({person, user, userID, id}) {
+    infect: async function({person, user, userID, id, message}) {
         const check = await OutbreakDB.findUser(id);
         // already infected
         if (check) {
@@ -62,7 +63,8 @@ export default {
             userID: id,
             infectedBy: user,
             infectedByID: userID,
-            infection: person.infection
+            infection: person.infection,
+            message
         });
     },
 
