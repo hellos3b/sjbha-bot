@@ -9,7 +9,7 @@ const outbreakSchema = mongoose.Schema({
     message: String,
     timestamp: {
         type: Date,
-        default: new Date()
+        default: Date.now
     }
 });
 

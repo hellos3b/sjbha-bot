@@ -13,6 +13,8 @@ import Bot from "../bot/Controller"
 import TLDRUI from './tldr.js'
 import MemoryUI from './memory.js'
 import TLDRDB from '../db/models/TLDRdb'
+import OutbreakUI from './outbreak.js'
+import OutbreakDB from '../bot/outbreak/OutbreakDB'
 import MemoryModel from '../db/models/MemoryModel'
 import SillyID from 'sillyid'
 import Calendar from './calendar.js'
@@ -98,6 +100,14 @@ app.get('/tldr', (req, res) => {
     TLDRDB.getAll()
         .then( tldrs => {
             let view = TLDRUI({tldrs: tldrs})
+            res.send(view)
+        });
+})
+
+app.get('/outbreak', (req, res) => {
+    OutbreakDB.getAll()
+        .then( infections => {
+            let view = OutbreakUI({infections: infections})
             res.send(view)
         });
 })
