@@ -15,11 +15,10 @@ import BanReasons from './banreasons'
 import TLDRDB from '../db/models/TLDRdb'
 import TeamDB from './teams/TeamDB'
 import Points from './teams/Points'
-import Strava from '../ui/Strava'
+import Strava from './strava/Strava'
 import Table from 'ascii-table'
 import download from 'image-downloader'
-import MarkovDB from '../db/models/MarkovDB'
-import MarkovGen from 'markov-generator';
+import StravaLevels from './strava/StravaLevels'
 
 const SERVER_ID = "358442034790400000";
 const TEAMS = [{
@@ -409,6 +408,8 @@ export default {
                 message: "```md\n"+
                     "< !strava auth > Authenticate the bot to your strava account\n"+
                     "< !strava stats @user > View strava stats\n" +
+                    "< !strava level > View your XP and Level\n" +
+                    "< !strava levels > See everybody's level\n" +
                     "< !strava leaders > View who ran the most in the last 4 weeks\n" +
                     "< !strava calendar > View your 4 weeks calendar\n" +
                     "< !strava avg > View your 4 weeks average stats\n" +
@@ -457,6 +458,23 @@ export default {
                 message: `${stats.username} has run ${runs.count} times in the last four weeks; ${distance} mi ${time} time`
             });
 
+        } else if (opt === "levels") {
+            let leaderboard = await Strava.getLeaderboardLevels();
+            var table = new Table("Levels");
+            table.removeBorder();
+
+            for (var i = 0; i < leaderboard.length; i++) {
+                table.addRow( 
+                    leaderboard[i].user,
+                    `lvl ${leaderboard[i].level}`, 
+                    `${leaderboard[i].EXP}xp`
+                );
+            }
+            
+            await bot.sendMessage({
+                to: channelID,
+                message: "```\n" + table.toString() + "```"
+            });
         } else if (opt === "leaders") {
             let sorter = (entry) => entry.moving_time;
             let order = ["time", "distance", "pace"];
@@ -546,6 +564,19 @@ export default {
             await bot.sendMessage({
                 to: channelID,
                 message: `**${avg.name}** last four weeks average: ${avg.total} runs,  ${avg.distance} mi, ${avg.pace}/mi pace`
+            });
+        } else if (opt === "level") {
+            let user = await Strava.getLevel(userID);
+
+            const bar = StravaLevels.XPBar(user.exp);
+
+            await bot.sendMessage({
+                to: channelID,
+                message: "```ini\n" +
+                `; ${user.name}\nLvl ${user.level}\n` +
+                `XP: ${user.exp}/${StravaLevels.LEVEL_EXP}\n`+
+                `${bar}` +
+                "```"
             });
         }
     },

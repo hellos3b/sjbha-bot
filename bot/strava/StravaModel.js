@@ -10,6 +10,14 @@ const stravaSchema = mongoose.Schema({
     accessToken: {
         type: String,
         default: ""
+    },
+    level: {
+        type: Number,
+        default: 1
+    },
+    EXP: {
+        type: Number,
+        default: 0
     }
 });
 

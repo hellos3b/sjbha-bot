@@ -83,8 +83,8 @@ export default {
 
             if (message.substring(0, 1) == '!') {
                 let context = { bot, user, userID, channelID, message, evt };
-                const [cmd] = context.message.split(" ");
-                console.log(message);
+                let [cmd] = context.message.split(" ");
+                cmd = cmd.toLowerCase();
 
                 if (channelID === channels.BOOMBOT) {
                     BoombotRouter.router(context)
