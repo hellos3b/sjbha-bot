@@ -8,7 +8,7 @@ export default {
         const results = message.match(/<@.[0-9]*>/g);
         this.updateNames({user, userID});
 
-        if (!results.length) return;
+        if (!results) return;
 
         const ids = results.map( n => n.replace(/[<@|<@!|>]/g, ""));
 
@@ -16,13 +16,11 @@ export default {
 
         const person = await OutbreakDB.findUser(userID);
         const all = await OutbreakDB.getAll();
-        const infected = all.filter( n => n.infection === "infected" );
-        const vaccine = all.filter( n => n.infection === "vaccine" );
 
         // Check the patient zeros
-        if ( !(infected.length || vaccine.length) && !person) {
+        if ( all.length < 2 && !person) {
             if (ids.indexOf(SEB_ID) > -1) {
-                const infection = !infected.length ? "infected" : "vaccine";
+                const infection = (all.length === 0) ? "infected" : "vaccine";
                 console.log(`infecting ${user} with ${infection}`);
                 await OutbreakDB.saveUser({
                     user,
