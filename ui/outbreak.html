@@ -45,6 +45,10 @@
             margin-top: 48px;
             border-top: 1px solid #aaa;
         }
+        .icon {
+            width: 16px;
+            vertical-align: text-bottom;
+        }
         .group {
             padding: 48px;
         }
@@ -60,7 +64,17 @@
             {{#infections}}
                 <div class='infection'>
                     <div class='timestamp'>+{{timeDiff}}</div>
-                    <div class='title'><span class='user'>{{user}}</span> <span class='{{infection}}'>{{action}}</span> {{infectedBy}}</div>
+                    <div class='title'>
+                        {{#isInfected}}
+                            <img class="icon" src="https://imgur.com/iFOmVt9.png">
+                        {{/isInfected}}
+                        {{^isInfected}}
+                            <img class="icon" src="https://imgur.com/vVYlqPE.png">
+                        {{/isInfected}}
+                        <span class='user'>{{user}}</span> 
+                        <span class='{{infection}}'>{{action}}</span> 
+                        {{infectedBy}}
+                    </div>
                     <div class='message'>{{message}}</div>
                 </div>
             {{/infections}}
