@@ -47,7 +47,7 @@ function parseData(data) {
         } 
         n.action = action;
         return n;
-    });
+    }).sort( (a,b) => a.timestamp < b.timestamp ? -1 : 1 );
     return data;
 }
 
