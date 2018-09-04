@@ -64,9 +64,11 @@ export default {
             // 164375823741091850 Bangerz
             const users = new Set(["125829654421438464", "95628401045409792", "176492310207528961", "164375823741091850"]);
             // Ignore bot-admin and boombot
-            if (users.has(userID) && channelID !== "430517752546197509" && channelID !== "432766496700235776") {
-                MarkovDB.save({ userID, message });
-            }
+            
+            // REMOVED
+            // if (users.has(userID) && channelID !== "430517752546197509" && channelID !== "432766496700235776") {
+            //     MarkovDB.save({ userID, message });
+            // }
 
             Stats.increment()
             // Our bot needs to know if it will execute a command

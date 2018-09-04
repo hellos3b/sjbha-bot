@@ -654,44 +654,50 @@ ${resistList}
     },
 
     "!speak": async function({bot, message, channelID, userID}) {
-        const [cmd, user] = message.split(" ");
-        const users = ["125829654421438464", "95628401045409792", "176492310207528961", "164375823741091850"];
-        // let id = users[Math.floor(Math.random()*users.length)]
-        let id = (user) ? user.replace("<@!","")
-            .replace("<@","")
-            .replace(">","") : userID
-
-        if (user === "rng") {
-            id = users[Math.floor(Math.random()*users.length)];
-            last_said = id
-        } 
-        if (user === "answer") {
-            await bot.sendMessage({
-                to: channelID,
-                message: `It was <@${last_said}>!`
-            });
-            return;
-        }
-
-        let text = await MarkovDB.getFromUser(id);
-        if (!text) {
-            await bot.sendMessage({
-                to: channelID,
-                message: "Couldn't find any messages for user "+user
-            });
-            return;
-        }
-        text = text.map( n => n.message );
-
-        const markov = new MarkovGen({
-            input: text,
-            minLength: 10
-        });
-
+        const denials = ["no speak", "Not sure what command that is", "What do you want me to do?", "No f u", ":angrynoises:", "You're already speaking", "I'm not your pet monkey", `How would you like if it I asked you to always do something? <@${userID}>! <@${userID}>! <@${userID}>! <@${userID}>!`, 'hello, am human', ':waver:'];
+        const denail = denails(Math.floor(Math.random()*denials.length));
         await bot.sendMessage({
             to: channelID,
-            message: markov.makeChain()
+            message: denial
         });
+        // const [cmd, user] = message.split(" ");
+        // const users = ["125829654421438464", "95628401045409792", "176492310207528961", "164375823741091850"];
+        // // let id = users[Math.floor(Math.random()*users.length)]
+        // let id = (user) ? user.replace("<@!","")
+        //     .replace("<@","")
+        //     .replace(">","") : userID
+
+        // if (user === "rng") {
+        //     id = users[Math.floor(Math.random()*users.length)];
+        //     last_said = id
+        // } 
+        // if (user === "answer") {
+        //     await bot.sendMessage({
+        //         to: channelID,
+        //         message: `It was <@${last_said}>!`
+        //     });
+        //     return;
+        // }
+
+        // let text = await MarkovDB.getFromUser(id);
+        // if (!text) {
+        //     await bot.sendMessage({
+        //         to: channelID,
+        //         message: "Couldn't find any messages for user "+user
+        //     });
+        //     return;
+        // }
+        // text = text.map( n => n.message );
+
+        // const markov = new MarkovGen({
+        //     input: text,
+        //     minLength: 10
+        // });
+
+        // await bot.sendMessage({
+        //     to: channelID,
+        //     message: markov.makeChain()
+        // });
 
     },
 
