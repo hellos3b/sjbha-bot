@@ -51,6 +51,13 @@
             margin-top: 48px;
             border-top: 1px solid #aaa;
         }
+        h2 {
+            font-weight: 400;
+            letter-spacing: 1px;
+        }
+        .infection {
+            margin-left: 24px;
+        }
         .icon {
             width: 16px;
             vertical-align: text-bottom;
@@ -67,23 +74,26 @@
     <body>
         <div class='container'>
             <h1>OUTBREAK;</h1>
-            {{#infections}}
-                <div class='infection'>
-                    <div class='timestamp'>+{{timeDiff}}</div>
-                    <div class='title'>
-                        {{#isInfected}}
-                            <img class="icon" src="https://imgur.com/iFOmVt9.png">
-                        {{/isInfected}}
-                        {{^isInfected}}
-                            <img class="icon" src="https://imgur.com/vVYlqPE.png">
-                        {{/isInfected}}
-                        <span class='user'>{{user}}</span> 
-                        <span class='{{infection}}'>{{action}}</span> 
-                        {{infectedBy}}
+            {{#hourly}}
+                <h2>>{{key}}</h2>
+                {{#value}}
+                    <div class='infection'>
+                        <div class='timestamp'>+{{timeDiff}}</div>
+                        <div class='title'>
+                            {{#isInfected}}
+                                <img class="icon" src="https://imgur.com/iFOmVt9.png">
+                            {{/isInfected}}
+                            {{^isInfected}}
+                                <img class="icon" src="https://imgur.com/vVYlqPE.png">
+                            {{/isInfected}}
+                            <span class='user'>{{user}}</span> 
+                            <span class='{{infection}}'>{{action}}</span> 
+                            {{infectedBy}}
+                        </div>
+                        <div class='message'>{{message}}</div>
                     </div>
-                    <div class='message'>{{message}}</div>
-                </div>
-            {{/infections}}
+                {{/value}}
+            {{/hourly}}
             <div class='current-list'>
                 <div class='infected group'>
                     <div class='header'>INFECTED ({{group.infected.length}})</div>
