@@ -17,7 +17,7 @@ function msToHMS( ms ) {
     var minutes = parseInt( seconds / 60 ); // 60 seconds in 1 minute
     // 4- Keep only seconds not extracted to minutes:
     seconds = Math.floor(seconds % 60);
-    return pad(hours)+":"+pad(minutes);
+    return { hours, minutes, seconds };
 }
 
 function parseData(data) {
@@ -31,7 +31,8 @@ function parseData(data) {
     data.infections = data.infections.map( n => {
         const diff = new Date(n.timestamp).getTime() - start.getTime();
         console.log("diff time", diff);
-        n.timeDiff = msToHMS(diff);
+        n.rawDiff = msToHMS(diff);
+        n.timeDiff = pad(n.rawDiff.hours)+":"+pad(n.rawDiff.minutes);
         n.message = n.message.replace(n.userID, n.user);
         n.message = n.message.replace("125829654421438464", "s3b");
 
@@ -49,6 +50,31 @@ function parseData(data) {
         n.isInfected = n.infection === "infected";
         return n;
     }).sort( (a,b) => a.timestamp < b.timestamp ? -1 : 1 );
+
+    data.hourly = data.infections.reduce( (res, n) => {
+        let hours = n.rawDiff.hours;
+        let index = `HOUR ${hours}`;
+        if (hours > 24) {
+            let day = Math.floor(hours / 24);
+            let hour = hours % 24;
+            index = `DAY ${day + 1} HOUR ${hour}`;
+        }
+
+        if (!res[index]) {
+            res[index] = [];
+        }
+
+        res[index].push(n);
+
+        return res;
+    }, {});
+
+    data.hourly = Object.entries(data.hourly)
+        .map( ([key, value]) => {
+            return { key, value }
+        });
+
+    console.log(data.hourly);
     return data;
 }
 
