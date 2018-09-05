@@ -464,16 +464,18 @@ export default {
             table.removeBorder();
 
             for (var i = 0; i < leaderboard.length; i++) {
+                const bar = StravaLevels.XPBar(leaderboard[i].EXP, 12);
                 table.addRow( 
                     leaderboard[i].user,
                     `lvl ${leaderboard[i].level}`, 
-                    `${leaderboard[i].EXP}xp`
+                    `${bar}`,
+                    `${leaderboard[i].EXP}XP`
                 );
             }
             
             await bot.sendMessage({
                 to: channelID,
-                message: "```\n" + table.toString() + "```"
+                message: "```ini\n" + table.toString() + "```"
             });
         } else if (opt === "leaders") {
             let sorter = (entry) => entry.moving_time;
