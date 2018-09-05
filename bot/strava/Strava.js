@@ -234,7 +234,7 @@ async function notifyCreate(owner_id, activity_id) {
 
     let level = {
         level: user.level,
-        base_exp: base_xp,
+        gained_xp: xp,
         exp: user.EXP,
         distanceBonus: bonuses.distance,
         paceBonus: bonuses.pace,
@@ -276,7 +276,7 @@ async function saveUser(json) {
 
 async function sendUpdate(data, lvl) {
     let message = `👏 **${data.name}** just recorded a run! ${data.distance} mi, ${data.pace} pace, ${data.time} time`;
-    let xp = `${lvl.level} ${StravaLevels.XPBar(lvl.exp, 15)} +${lvl.base_exp}xp`;
+    let xp = `${lvl.level} ${StravaLevels.XPBar(lvl.exp, 15)} +${lvl.gained_xp}xp`;
     if (lvl.distanceBonus) {
         xp += ' +dst';
     }
@@ -284,7 +284,7 @@ async function sendUpdate(data, lvl) {
         xp += ' +spd';
     }
     if (lvl.leveledUp) {
-        xp += ' ⭐ LVL UP!';
+        xp += '\n⭐ LVL UP!';
     }
     xp = "```ini\n" + xp + "```";
     message += "\n"+xp;
