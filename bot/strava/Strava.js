@@ -290,7 +290,7 @@ async function sendUpdate(data, lvl) {
     message += "\n"+xp;
 
     await Bot.sendMessage({
-        to: channels.ADMIN,
+        to: channels.RUN,
         message
     });
 }
@@ -397,7 +397,7 @@ export default {
                 json.user = s.username;
                 return json;
             }).sort( sorter(sortBy) );
-        console.log("leaderboard", leaderboard);
+
         return leaderboard;
     },
 
@@ -470,34 +470,31 @@ export default {
 
     getAverage: async function(userID) {
         let user = await getUserInfoFromDiscord(userID);
-        console.log("user", user);
+
         if (!user) {
             return null;
         }
 
-        let start_date = new Date();
-        start_date.setDate(start_date.getDate() - 28);
+        let stats = await getAthleteStats(user.stravaID, user.accessToken, user.user);
+        let data = stats.recent_run_totals;
 
-        let data = await getAthleteActivities(user.stravaID, user.accessToken, start_date);
+        let dist_total = getMiles(data.distance);
+        let pace_total = data.moving_time / dist_total;
 
-        let dist_total = 0;
-        let pace_total = 0;
-        for (var i = 0; i < data.length; i++) {
-            let distance = getMiles(data[i].distance);
-            let seconds_pace = Math.round(data[i].moving_time / distance);
-            dist_total += distance;
-            pace_total += seconds_pace;
-        }
+        console.log("Math", {
+            dist_total, dist: data.distance,
+            pace_total, moving_time: data.moving_time
+        })
 
-        let dist_avg = dist_total / data.length;
+        let dist_avg = dist_total / data.count;
         dist_avg = Math.floor(dist_avg * 100) / 100;
-        let pace_avg = Math.round(pace_total / data.length);
+        // let pace_avg = Math.round(pace_total / data.count);
 
         return {
-            total: data.length,
+            total: data.count,
             name: user.user,
             distance: dist_avg,
-            pace: hhmmss(pace_avg)
+            pace: hhmmss(pace_total)
         };
     }
 }
