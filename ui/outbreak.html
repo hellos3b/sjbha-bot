@@ -15,6 +15,12 @@
             font-size: 0.75em;
             font-weight: 800;
         }
+        .spreadcount {
+            display: inline-block;
+            width: 20px;
+            font-size: 0.75em;
+            font-weight: 800;            
+        }
         .container {
             padding: 48px;
         }
@@ -52,7 +58,7 @@
         .group {
             padding: 48px;
         }
-        .timestamp.muted {
+        .muted, .timestamp.muted {
             color: #aaa;
             font-weight: 400;
         }
@@ -91,6 +97,18 @@
                         <div class='user'><span class='timestamp muted'>+{{timeDiff}}</span>  {{user}}</div>
                     {{/group.immune}}
                 </div>
+                <div class='infected group'>
+                        <div class='header'>WORST INFECTORS</div>
+                        {{#leaders.infected}}
+                        <div class='user'><span class='spreadcount muted'>(+{{count}})</span> {{name}}</div>
+                        {{/leaders.infected}}
+                    </div>
+                    <div class='vaccine group'>
+                            <div class='header'>BEST PROTECTORS</div>
+                        {{#leaders.immune}}
+                            <div class='user'><span class='spreadcount muted'>(+{{count}})</span>  {{name}}</div>
+                        {{/leaders.immune}}
+                    </div>
             </div>
         </div>
     </body>

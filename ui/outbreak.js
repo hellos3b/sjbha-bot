@@ -52,11 +52,41 @@ function parseData(data) {
     return data;
 }
 
+function leaderboard(data) {
+    let users = data.reduce( (users, n) => {
+        if (!users[n.infectedBy]) {
+            users[n.infectedBy] = {
+                name: n.infectedBy,
+                count: 0,
+                infection: n.infection
+            };
+        }
+        users[n.infectedBy].count++;
+        return users;
+    }, {});
+    let infected = [], immune = [];
+    for (var k in users) {
+        if (users[k].infection === "infected") {
+            infected.push(users[k]);
+        } else {
+            immune.push(users[k]);
+        }
+    }
+    infected = infected.sort( (a,b) => a.count > b.count ? -1: 1 );
+    immune = immune.sort( (a,b) => a.count > b.count ? -1: 1);
+
+    return {
+        infected, immune
+    };
+}
+
 export default (data) => {
     let d = parseData(data);
     d.group = {
         infected: d.infections.filter(n => n.infection === "infected"),
         immune: d.infections.filter(n => n.infection === "vaccine")
     };
+    d.leaders = leaderboard(d.infections);
+    console.log(d.leaders);
     return mustache.render(template, d)
 }
