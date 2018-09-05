@@ -204,12 +204,14 @@ async function notifyCreate(owner_id, activity_id) {
     let xp = data.moving_time;
     let base_xp = xp;
 
-    const bonuses = {
-        distance: run.distance > averages.distance,
-        pace: run.pace < averages.pace
-    };
-
+    let bonuses = {};
+    
     if (recent_stats.count >= StravaLevels.MIN_RUNS) {
+        bonuses = {
+            distance: run.distance > averages.distance,
+            pace: run.pace < averages.pace
+        };
+
         let bonus = 0;
         if (bonuses.distance) {
             bonus += StravaLevels.BONUS_AMT;
