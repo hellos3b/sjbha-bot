@@ -109,8 +109,8 @@ function leaderboard(data) {
 export default (data) => {
     let d = parseData(data);
     d.group = {
-        infected: d.infections.filter(n => n.infection === "infected"),
-        immune: d.infections.filter(n => n.infection === "vaccine")
+        infected: d.infections.filter(n => n.infection === "infected" && n.infectedBy !== "Patient Zero"),
+        immune: d.infections.filter(n => n.infection === "vaccine" && n.infectedBy !== "Patient Zero")
     };
     d.leaders = leaderboard(d.infections);
     console.log(d.leaders);
