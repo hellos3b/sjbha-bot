@@ -1,6 +1,5 @@
-import StatsModel from '../db/models/StatsModel'
 import moment from 'moment'
-import { Stats } from 'fs';
+import mongoose from 'mongoose'
 
 let stats = {};
 export default {
@@ -30,7 +29,7 @@ export default {
 
     getHistory(limit) {
         return new Promise((resolve, reject) => {
-            StatsModel.find()
+            mongoose.model('stats').find()
                 .sort({timestamp: -1})
                 .limit(limit).exec( (err, models) => {
                 resolve(models)
@@ -45,7 +44,6 @@ export default {
             startDate.setHours(0);
             startDate.setMinutes(0);
 
-            console.log('start date', startDate);
             let aggregate = [
                 { $match: {
                     timestamp: { $gte: startDate }
@@ -61,7 +59,7 @@ export default {
                     }
                 }}
             ]
-            StatsModel.aggregate(aggregate)
+            mongoose.model('stats').aggregate(aggregate)
                 .exec( (err, models) => {
                     models = models.map (n => {
                         n.timestamp = n._id;
@@ -69,10 +67,8 @@ export default {
                     }).sort( (a, b) => {
                         let ad = new Date(a.timestamp);
                         let bd = new Date(b.timestamp);
-                        console.log(a.timestamp);
                         return ad.getHours() > bd.getHours() ? 1 : -1
                     });
-                    console.log(models);
                     resolve(models)
                 });
         })
@@ -96,23 +92,21 @@ export default {
                     }
                 }}
             ]
-            StatsModel.aggregate(aggregate)
+            mongoose.model('stats').aggregate(aggregate)
                 .exec( (err, models) => {
-                    console.log(err);
                     models = models.sort( (a, b) => {
                         let ad = new Date(a.timestamp);
                         let bd = new Date(b.timestamp);
-                        console.log(a.timestamp);
                         return ad.getHours() > bd.getHours() ? 1 : -1
                     })
-                    console.log(models);
                     resolve(models)
                 });
         })
     },
 
     compareTime(a, b) {
-        return a.format("MM/DD/YY hh:mm") === b.format("MM/DD/YY hh:mm")
+        if (a && b) return a.format("MM/DD/YY hh:mm") === b.format("MM/DD/YY hh:mm")
+        return false
     },
 
     increment() {
@@ -126,26 +120,23 @@ export default {
     },
 
     save() {
-        console.log("Saving stats", stats);
         let count = stats.count;
         let timestamp = stats.timestamp;
+        const StatsModel = mongoose.model('stats')
         StatsModel.findOne({ timestamp: timestamp.toISOString() }, (err, doc) => {
             let stat = null;
             if (doc) {
                 stat = doc;
                 stat.count += count;
-                console.log("document exists", stat);
             } else {
                 stat = new StatsModel({
                     count: count,
                     timestamp: timestamp.toISOString()
                 });
-                console.log("new statsModel:", stat);
             }
         
             stat.save((saveErr, savedStat) => {
                 if (saveErr) throw saveErr;
-                console.log("saved stat", savedStat);
             });
         });
     }

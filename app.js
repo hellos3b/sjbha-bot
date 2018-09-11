@@ -1,43 +1,35 @@
 import dotenv from 'dotenv'
-dotenv.config();
+dotenv.config()
 
-import logger from 'winston'
-import Bot from './bot/Controller'
-import Server from './ui/server'
-import cron from 'node-cron'
-import DB from './db/MLab'
-import keepalive from './keepalive'
+import Bastion from './lib/bastion'
+import botModules from './config/plugins.config'
+import Boombot from './plugins/Boombot'
 
-// Configure logger settings
-logger.remove(logger.transports.Console);
-logger.add(logger.transports.Console, {
-    colorize: true
-});
-logger.level = 'debug';
-
-DB.connect();
-
-if (process.env.NODE_ENV !== "web") {
-    Bot.start();
-
-    // Update finished meetups
-    // 4 hours - 0 */4 * * *
-    //*/5 * * * *
-
-    cron.schedule('0 */2 * * *', function(){
-        Bot.cron();
-    });
-
-    cron.schedule('28 0 * * 1', function(){
-        Bot.weeklyCron();
-    });
-
-    cron.schedule('0 * * * *', function() {
-        Bot.hourlyCron();
-    })
-
-    // When shutting down
-    process.on('SIGTERM', function () {
-    Bot.shutdown();
-    });
+const channels = {
+    "admin": "430517752546197509",
+    "general-2": "466328017342431233",
+    "strava": "430517752546197509",
+    "boombot": "432766496700235776",
+    "stocks": "363123179696422916",
+    "announcement": "430878436027006978",
+    "compact": "464561717821702144",
 }
+
+const bastion = Bastion({
+    token: process.env.DISCORD_TOKEN,
+    channels,
+    serverId: "358442034790400000",
+    prefix: process.env.NODE_ENV === "production" ? "!" : "_"
+})
+
+if (process.env.NODE_ENV === "admin") {
+    bastion.channels.restrict( channels.admin )
+}
+    
+// Load modules
+bastion.use(botModules(bastion), { ignore: [channels.boombot] })
+bastion.use(Boombot(bastion, {
+    restrict: [channels.boombot, channels.admin]
+}))
+
+bastion.connect()
