@@ -40,7 +40,7 @@ export default {
             key = (key === "info") ? "name" : key
             value = value.join(":")
             if (!possibleOptions.has(key)) {
-                console.log("   ", chalk.blue(`[${config.name}]`), chalk.gray(`Option '${key}' not a valid ${config.name} option`))
+                console.log("   ", chalk.blue(`[Events]`), chalk.gray(`Option '${key}' not a valid Event option`))
             } else {
                 res[key] = value
             }
