@@ -1,3 +1,5 @@
+import chalk from 'chalk'
+
 export default {
 
     toParam(obj) {
@@ -35,6 +37,7 @@ export default {
         return opt.reduce( (res, o) => {
             let [key, ...value] = o.split(":").map(s => s.trim())
             key = key.toLowerCase()
+            if (key === "info") key = "name"
             value = value.join(":")
             if (!possibleOptions.has(key)) {
                 console.log("   ", chalk.blue(`[${config.name}]`), chalk.gray(`Option '${key}' not a valid ${config.name} option`))
