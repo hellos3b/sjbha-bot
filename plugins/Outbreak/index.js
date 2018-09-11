@@ -36,7 +36,7 @@ export default function(bastion, opt={}) {
                 let msg = user.message.replace(context.userID, context.user)
                 msg = msg.message.replace("125829654421438464", "s3b")
 
-                const action = (user.infection === "infected") ? "got infected by" : "got immunity from"
+                const action = (user.infection === "infected") ? "was infected by" : "got immunity from"
 
                 if (user.infectedBy === "Patient Zero") {
                     const tagline = (user.infection === "infected") ?
@@ -49,7 +49,7 @@ export default function(bastion, opt={}) {
                         `     ${msg}`
                 }
                 let result = `${hourstamp} hours after outbreak\n`
-                result += `${context.user} was infected by ${user.infectedBy}\n\n`
+                result += `${context.user} ${action} ${user.infectedBy}\n\n`
                 result += `MESSAGE:\n`
                 result += `     ${msg}`
                 return bastion.helpers.code(result)
