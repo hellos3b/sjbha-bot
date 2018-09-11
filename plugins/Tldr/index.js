@@ -26,14 +26,11 @@ export default function(bastion, opt={}) {
             command: config.command,
             help,
 
-            validate(context, message) {
-                if (message.includes("<@")) return "Please don't mention people in tldrs, they don't show right - Just type the person's name out :)"
-            },
-
             resolve: async function(context, message) {
                 if (!message) return this.route("show")
 
-                await q.create({ message, from: context.user })
+                const msg = bastion.bot.fixMessage(message)
+                await q.create({ message: msg, from: context.user })
 
                 return "Saved, thanks!"
             }
