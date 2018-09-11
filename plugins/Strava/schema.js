@@ -21,4 +21,4 @@ const Schema = mongoose.Schema({
     }
 });
 
-export default mongoose.model('strava', Schema);
+export default mongoose.model('stravaID', Schema);
