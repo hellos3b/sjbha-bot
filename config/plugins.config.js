@@ -12,6 +12,7 @@ import Ask from '../plugins/Ask'
 import Stats from '../plugins/Stats'
 import db from '../plugins/db'
 import Teams from '../plugins/Teams'
+import Outbreak from '../plugins/Outbreak'
 
 const subscriptions = {
     "photomeet": "486330820114513920",
@@ -58,5 +59,8 @@ export default bastion => ([
             "threeWeeksId":"471806508913655828",
             "laterId":"471806527603212298"
         }
+    }),
+    Outbreak(bastion, {
+        restrict: ["general-2"]
     })
 ])
