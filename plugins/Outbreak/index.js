@@ -23,7 +23,11 @@ export default function(bastion, opt={}) {
             restrict: config.restrict,
             restrictMessage: "Outbreak limited to general 2",
 
+            options: bastion.parsers.args(["cmd"]),
+
             resolve: async function(context, cmd) {
+                if (cmd === "spread") return this.route("spread")
+
                 const startDate = new Date("2018-09-04T18:39:00.000Z")
                 const user = await q.findOne({ userID: context.userID })
 
@@ -72,6 +76,20 @@ export default function(bastion, opt={}) {
                 pad(v) {
                     return (v < 10) ? `0${v}` : v;
                 }
+            }
+        },
+
+        {
+            action: `${config.command}:spread`,
+
+            resolve: async function(context, cmd) {
+                const user = await q.findOne({ userID: context.userID })
+                const list = await q.find({ infectedByID: context.userID })
+
+                if (!user) return "You haven't been tagged with anything"
+
+                const verb = (user.infection === "infected") ? "infection": "immunity"
+                return bastion.helpers.code(`${context.user} spread ${verb} to ${list.length} other users`)
             }
         }
 
