@@ -13,6 +13,7 @@ import Stats from '../plugins/Stats'
 import db from '../plugins/db'
 import Teams from '../plugins/Teams'
 import Outbreak from '../plugins/Outbreak'
+import AutoTag from '../plugins/AutoTag'
 
 const subscriptions = {
     "photomeet": "486330820114513920",
@@ -62,5 +63,8 @@ export default bastion => ([
     }),
     Outbreak(bastion, {
         restrict: ["general-2"]
+    }),
+    AutoTag(bastion, {
+        restrict: ["416708557984104448"]
     })
 ])
