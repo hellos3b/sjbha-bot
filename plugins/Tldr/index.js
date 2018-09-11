@@ -31,7 +31,12 @@ export default function(bastion, opt={}) {
 
                 const msg = bastion.bot.fixMessage(message)
                 const channel = bastion.channels[context.channelID]
-                await q.create({ message: msg, from: context.user, channel: channel.name })
+                await q.create({ 
+                    message: msg, 
+                    from: context.user, 
+                    channelID: context.channelID, 
+                    channel: channel.name 
+                })
 
                 return "Saved, thanks!"
             }
