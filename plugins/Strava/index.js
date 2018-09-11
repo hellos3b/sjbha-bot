@@ -31,7 +31,8 @@ export default function(bastion, opt={}) {
         `< ${cmd} calendar > View your 4 weeks calendar\n` +
         `< ${cmd} avg > View your 4 weeks average stats\n`,
     "md")
-    const q = new bastion.Queries('strava')
+
+    const q = new bastion.Queries('stravaID')
     const auth = Auth(bastion)
     const api = Api(bastion)
 
