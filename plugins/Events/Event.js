@@ -1,56 +1,12 @@
 import chrono from 'chrono-node'
 import moment from 'moment'
-
-import MeetupsDB from './MeetupsDB'
-
-import logger from 'winston'
-import GUID from "../utils/GUID"
-
-import Query from "./Query"
-import channels from "./channels"
+import GUID from "../../utils/GUID"
+import utils from './utils'
 
 const States = {
     STARTED: 0,
     FINISHED: 1,
     CANCELLED: 2
-};
-
-let type_icons = {
-    "notype": "https://imgur.com/VXuD9Rb.png",
-    "food": "https://imgur.com/TsecfdH.png",
-    "alcohol": "https://imgur.com/wwDUMWP.png",
-    "drinking": "https://imgur.com/wwDUMWP.png",
-    "drinks": "https://imgur.com/wwDUMWP.png",
-    "event": "https://imgur.com/eHxA5dN.png",
-    "active": "https://imgur.com/4HqAGBd.png"
-};
-
-const toParam = (obj) => {
-    return `?` + Object.entries(obj).map( ([key, value]) => key + '=' + encodeURI(value) ).join("&");
-}
-
-const flatISO = (dateStr) => {
-    return dateStr.replace(/-/g, "")
-        .replace(/:/g, "")
-        .replace(".000", "")
-}
-
-const GCALLink = (meetup) => {
-    let d = new Date(meetup.timestamp);
-    let post = new Date(meetup.timestamp);
-    post.setHours( post.getHours() + 1);
-
-    const baseUrl = `https://www.google.com/calendar/render`;
-    const params = {
-        action: "TEMPLATE",
-        text: meetup.info,
-        dates: `${flatISO(d.toISOString())}/${flatISO(post.toISOString())}`,
-        details: meetup.options.description,
-        location: meetup.location,
-        sprop:"name"
-    };
-
-    return baseUrl + toParam(params);
 }
 
 export default function({ 
@@ -64,24 +20,24 @@ export default function({
     state = States.STARTED,
     info_id = null,
     rsvp_id = null
-}) {
+}, config) {
     // parse date
-    let parsed_date = chrono.parseDate(date);
-    let date_moment = new moment(parsed_date).utcOffset(-8, true);
-    let date_str = date_moment.format("dddd M/D @ h:mma");
-    let date_date = date_moment.format("dddd M/D");
-    let date_time = date_moment.format("h:mma");
+    let parsed_date = chrono.parseDate(date)
+    let date_moment = new moment(parsed_date).utcOffset(-8, true)
+    let date_str = date_moment.format("dddd M/D @ h:mma")
+    let date_date = date_moment.format("dddd M/D")
+    let date_time = date_moment.format("h:mma")
 
-    let meetup_info = `${info} | ${date_str}`;
+    let meetup_info = `${info} | ${date_str}`
 
-    let reactions = { yes: [], maybe: [] };
+    let reactions = { yes: [], maybe: [] }
 
     this.parseDate = function() {
-        parsed_date = chrono.parseDate(date);
-        date_moment = new moment(parsed_date);
-        date_str = date_moment.format("dddd M/D @ h:mma");
-        date_date = date_moment.format("dddd M/D");
-        date_time = date_moment.format("h:mma");
+        parsed_date = chrono.parseDate(date)
+        date_moment = new moment(parsed_date)
+        date_str = date_moment.format("dddd M/D @ h:mma")
+        date_date = date_moment.format("dddd M/D")
+        date_time = date_moment.format("h:mma")
     }
 
     this.updateInfo = function() {
@@ -92,65 +48,49 @@ export default function({
         await bot.sendMessage({
             to: sourceChannelID,
             message: `When is the meetup?`
-        });
+        })
 
-        date = await Query.wait({ userID, channelID: sourceChannelID });
+        // date = await Query.wait({ userID, channelID: sourceChannelID })
 
         if (date === null) {
-            return `I'm cancelling the meetup request, if you want to try again restart from the beginning`;
-        }
-
-        this.parseDate();
-
-        if (!date_moment.isValid()) {
-            return `Don't think that's a real date. Try starting a new meetup again with \`!meetup\``;
-        }
-
-        return null;
-    }
-
-    this.getInfo = async function(bot) {
-        await bot.sendMessage({
-            to: sourceChannelID,
-            message: `What is the meetup? (Bowling @ sunnyvale, swirls @ Aquis)`
-        });
-
-        info = await Query.wait({ userID, channelID: sourceChannelID });
-
-        if (!info) {
             return `I'm cancelling the meetup request, if you want to try again restart from the beginning`
         }
 
-        this.updateInfo();
+        this.parseDate()
+
+        if (!date_moment.isValid()) {
+            return `Don't think that's a real date. Try starting a new meetup again with \`!meetup\``
+        }
 
         return null;
     }
 
-    this.validate = async function(bot, question=true) {
+    this.validate = function(opt) {
+        opt = opt || options
+        if (!opt.name || !opt.date) {
+            return "Missing date or name"
+        }
+
+        const pd = chrono.parseDate(opt.date)
+        const m = new moment(pd)      
+        // Date is an actual date  
+        if (!m.isValid()) {
+           return `🤔 Not sure if that date is valid. I'm having trouble understanding \`${date}\`, try:  \`month/day time (am/pm)\``;
+        }
+
+        // Date is not in the past
+        if (moment().utcOffset(-8).diff(m, 'seconds') > 0) {
+            return `${config.name} is set to the past, needs to be a future date`
+        }
+
+        // Date is not too far into the future
+        if (moment().utcOffset(-8).diff(date_moment, 'days') < -90) {
+            return `Date is set too far into the future`
+        }
+    }
+
+    this._validate = async function(bot, question=true) {
         let msg = null;
-        // Has both info and date set
-        if (!info && !date) {
-            if (!question) {
-                logger.warn("Invalid date or info");
-                return "Invalid date or info";
-            }
-            let date_error = await this.getDate(bot);
-            if (date_error) {
-                logger.warn(date_error);
-                return date_error;
-            } 
-
-            let info_error = await this.getInfo(bot);
-
-            if (info_error) {
-                logger.warn(info_error);
-                return info_error;
-            }
-        }
-
-        if (!info || !date) {
-
-        }
 
         // Date is an actual date
         if (!date_moment.isValid()) {
@@ -168,7 +108,7 @@ export default function({
         }
 
         if (msg) {
-            logger.warn(msg);
+
             return msg;
         }
         return null;
@@ -178,34 +118,30 @@ export default function({
         let embed = this.embed();
 
         return new Promise( async function(resolve, reject) {
-            logger.info("Announcing meetup");
-            logger.debug(embed);
             let response = await bot.sendMessage({
-                to: channels.MEETUPS,
+                to: config.announcementChannel,
                 embed: embed
-                // message: `\`👉 ${meetup_info}\`\n`
-                //     +    `*Started by <@!${userID}> in <#${sourceChannelID}>* `
             });
-            logger.info("ID: ", response.id);
+
             info_id = response.id;
 
             let { id: msg_id } = await bot.sendMessage({
-                to: channels.MEETUPS,
+                to: config.announcementChannel,
                 message: `RSVP for **${info}**`
             });
 
             rsvp_id = msg_id;
 
             await bot.addReaction({
-                channelID: channels.MEETUPS,
+                channelID: config.announcementChannel,
                 messageID: msg_id,
-                reaction: "☑"
+                reaction: config.reactionMaybe
             });
                 
             await bot.addReaction({
-                channelID: channels.MEETUPS,
+                channelID: config.announcementChannel,
                 messageID: msg_id,
-                reaction: "🤔"
+                reaction: config.reactionYes
             });
 
             resolve();
@@ -243,10 +179,10 @@ export default function({
             });
         }
 
-        let icon_url = type_icons.notype;
+        let icon_url = config.typeIcons.notype;
         if (options.type) {
-            if (type_icons[options.type]) {
-                icon_url = type_icons[options.type];
+            if (config.typeIcons[options.type]) {
+                icon_url = config.typeIcons[options.type];
             }
         }
 
@@ -260,7 +196,7 @@ export default function({
             "author": {
                 "name": info,
                 "icon_url": icon_url,
-                "url": GCALLink(this.toJSON())
+                "url": utils.GCALLink(this.toJSON())
             },
             "footer": {
                 "text": `Started by @${username}`,
@@ -284,10 +220,9 @@ export default function({
 
     this.confirm = async function(bot) {
         return new Promise(async function(resolve) {
-            logger.info("Confirming meetup");
             await bot.sendMessage({
                 to: sourceChannelID,
-                message: `Meetup added: \`${meetup_info}\` Find it in <#${channels.MEETUPS}>!`
+                message: `Meetup added: \`${meetup_info}\` Find it in <#${config.announcementChannel}>!`
             });
 
             resolve();
@@ -295,19 +230,25 @@ export default function({
     }
 
     this.getReactions = async function(bot) {
-        console.log("Getting reactions for " + info);
-        console.log("RSVPID", rsvp_id);
-        let maybe = await bot.getReaction({
-            channelID: channels.MEETUPS,
-            messageID: rsvp_id,
-            reaction: "🤔"
-        });
+        let maybe, yes;
 
-        let yes = await bot.getReaction({
-            channelID: channels.MEETUPS,
-            messageID: rsvp_id,
-            reaction: "☑"
-        });
+        try {
+            maybe = await bot.getReaction({
+                channelID: config.announcementChannel,
+                messageID: rsvp_id,
+                reaction: config.reactionYes
+            })
+
+            yes = await bot.getReaction({
+                channelID: config.announcementChannel,
+                messageID: rsvp_id,
+                reaction: config.reactionMaybe
+            })
+        } catch (err) {
+            console.log("Failed to get reactions, setting to 0")
+            maybe = []
+            yes = []
+        }
 
         maybe = maybe.filter( m => !m.bot );
         yes = yes.filter( m => !m.bot );
@@ -322,64 +263,57 @@ export default function({
     this.finish = async function(bot) {
         state = States.FINISHED;
         await bot.deleteMessage({
-            channelID: channels.MEETUPS,
+            channelID: config.announcementChannel,
             messageID: rsvp_id
         });
 
         let rsvp_list = `(y: ${reactions.yes.length} m: ${reactions.maybe.length})`;
         
         await bot.editMessage({
-            channelID: channels.MEETUPS,
+            channelID: config.announcementChannel,
             messageID: info_id,
             message: `\`✅ ${meetup_info} ${rsvp_list}\`\n`
         });
     }
 
-    this.editInfo = async function(bot) {
-        let embed = this.embed();
+    this.updateAnnouncement = async function(bot) {
+        let embed = this.embed()
+
         await bot.editMessage({
-            channelID: channels.MEETUPS,
+            channelID: config.announcementChannel,
             messageID: info_id,
             embed: embed
-            // message: `\`${meetup_info}\`\n`
-            //     +    `*Started by <@!${userID}> in <#${sourceChannelID}>* `
         });
 
         await bot.editMessage({
-            channelID: channels.MEETUPS,
+            channelID: config.announcementChannel,
             messageID: rsvp_id,
             message: `RSVP for **${info}**`
         });
     }
 
     this.getMeetupString = function() {
-        let str = date + " | " + info;
-        let option_str = Object.entries(options)
-            .filter( ([k,v]) => k !== "info" && k !== "date" )
-            .map( ([k,v]) => k+":"+v).join(" | ");
-        if (option_str) {
-            str += " | " + option_str;
-        }
-        return str;
+        return Object.entries(options)
+            .map( ([k,v]) => k+": "+v).join(" | ");
     }
 
     this.cancel = async function(bot) {
         state = States.CANCELLED;
         await bot.deleteMessage({
-            channelID: channels.MEETUPS,
+            channelID: config.announcementChannel,
             messageID: rsvp_id
-        });
+        })
 
         await bot.editMessage({
-            channelID: channels.MEETUPS,
+            channelID: config.announcementChannel,
             messageID: info_id,
             message: `\`❌ (canceled) ${meetup_info}\`\n`
-        });
+        })
     }
 
-    this.update = function(new_date, new_info, new_options) {
-        date = new_date;
-        info = new_info;
+    this.update = function(new_options) {
+        date = new_options.date;
+        info = new_options.name;
         options = new_options;
         this.parseDate();
         this.updateInfo();

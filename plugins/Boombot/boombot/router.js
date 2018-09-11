@@ -1,7 +1,6 @@
 import Discord from 'discord.io'
 import logger from 'winston'
 import Routes from "./commands/CommandRoutes"
-import channels from "../bot/channels"
 import Season from './game/Season'
 
 // setTimeout(() => {
@@ -11,9 +10,6 @@ import Season from './game/Season'
 export default {
 
     router: async function(context) {
-
-        logger.info(`<${context.user}> ${context.message}`);
-
         const [cmd] = context.message.split(" ");
     
         // await context.bot.sendMessage({

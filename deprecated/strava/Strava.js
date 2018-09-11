@@ -144,19 +144,19 @@ function getAllUsers() {
     })
 }
 
-function getAthleteStats(owner_id, access_token, user) {
-    let url = `https://www.strava.com/api/v3/athletes/${owner_id}/stats`;
+// function getAthleteStats(owner_id, access_token, user) {
+//     let url = `https://www.strava.com/api/v3/athletes/${owner_id}/stats`;
 
-    return Axios.get(url, {
-        headers: {
-            "Authorization": `Bearer ${access_token}`
-        }
-    }).then( res => {
-        let data = res.data;
-        data.username = user;
-        return data; 
-    });;
-}
+//     return Axios.get(url, {
+//         headers: {
+//             "Authorization": `Bearer ${access_token}`
+//         }
+//     }).then( res => {
+//         let data = res.data;
+//         data.username = user;
+//         return data; 
+//     });;
+// }
 
 function getAthleteActivities(owner_id, access_token, start_date) {
     let epoch = start_date.getTime() / 1000;
@@ -363,19 +363,19 @@ export default {
         return hhmmss(sec, leadingZero);
     },
 
-    getStats: async function(userID) {
-        let user = await getUserInfoFromDiscord(userID);
+    // getStats: async function(userID) {
+    //     let user = await getUserInfoFromDiscord(userID);
 
-        if (!user) {
-            return null;
-        }
+    //     if (!user) {
+    //         return null;
+    //     }
 
-        let data = await getAthleteStats(user.stravaID, user.accessToken, user.user);
-        data.username = user.user;
-        data.level = user.level;
-        data.xp = user.EXP;
-        return data;
-    },
+    //     let data = await getAthleteStats(user.stravaID, user.accessToken, user.user);
+    //     data.username = user.user;
+    //     data.level = user.level;
+    //     data.xp = user.EXP;
+    //     return data;
+    // },
 
     getLevel: async function(userID) {
         let user = await getUserInfoFromDiscord(userID);

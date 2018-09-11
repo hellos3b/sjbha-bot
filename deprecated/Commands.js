@@ -583,50 +583,50 @@ export default {
         }
     },
 
-    "!tldr": async function({bot, message, channelID, userID, user}) {
-        let [cmd, ...msg] = message.split(" ");
-        msg = msg.join(" ");
+    // "!tldr": async function({bot, message, channelID, userID, user}) {
+    //     let [cmd, ...msg] = message.split(" ");
+    //     msg = msg.join(" ");
 
-        if (message.includes("<@")) {
-            await bot.sendMessage({
-                to: channelID,
-                message: "Please don't mention people in tldrs, they don't show right - Just type the person's name out :)"
-            })
-            return;
-        }
+    //     if (message.includes("<@")) {
+    //         await bot.sendMessage({
+    //             to: channelID,
+    //             message: "Please don't mention people in tldrs, they don't show right - Just type the person's name out :)"
+    //         })
+    //         return;
+    //     }
 
-        if (!msg) {
-            if (channelID !== channels.GENERAL2 && channelID !== channels.ADMIN) {
-                await bot.sendMessage({
-                    to: channelID,
-                    message: `You can only get the TLDR list in the general 2 channel`
-                });
-                return;
-            }
+    //     if (!msg) {
+    //         if (channelID !== channels.GENERAL2 && channelID !== channels.ADMIN) {
+    //             await bot.sendMessage({
+    //                 to: channelID,
+    //                 message: `You can only get the TLDR list in the general 2 channel`
+    //             });
+    //             return;
+    //         }
 
-            let tldrs = await TLDRDB.getRecent();
-            let review = tldrs.map( td => {
-                let m = new moment(td.timestamp);
-                let date = m.format('ddd M/D h:mm a');
-                return `\`${date} - [${td.from}] - ${td.message}\``;
-            }).join("\n");
+    //         let tldrs = await TLDRDB.getRecent();
+    //         let review = tldrs.map( td => {
+    //             let m = new moment(td.timestamp);
+    //             let date = m.format('ddd M/D h:mm a');
+    //             return `\`${date} - [${td.from}] - ${td.message}\``;
+    //         }).join("\n");
 
-            await bot.sendMessage({
-                to: channelID,
-                message: `Catch up on what's going on!\n${review}`
-            });
-        } else {
-            await TLDRDB.saveTLDR({
-                message: msg,
-                from: user
-            });
-            await bot.sendMessage({
-                to: channelID,
-                message: `Saved, thanks!`
-            });
-            return;
-        }
-    },
+    //         await bot.sendMessage({
+    //             to: channelID,
+    //             message: `Catch up on what's going on!\n${review}`
+    //         });
+    //     } else {
+    //         await TLDRDB.saveTLDR({
+    //             message: msg,
+    //             from: user
+    //         });
+    //         await bot.sendMessage({
+    //             to: channelID,
+    //             message: `Saved, thanks!`
+    //         });
+    //         return;
+    //     }
+    // },
 
     "!teams": async function({bot, message, channelID, userID, user}) {
         if (channelID !== channels.GENERAL2 && channelID !== channels.ADMIN) {
