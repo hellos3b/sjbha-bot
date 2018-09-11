@@ -34,7 +34,7 @@ export default function(bastion, opt={}) {
                 const hourstamp = this.pad(diff.hours) + ":" + this.pad(diff.minutes)
 
                 let msg = user.message.replace(context.userID, context.user)
-                msg = msg.message.replace("125829654421438464", "s3b")
+                msg = msg.replace("125829654421438464", "s3b")
 
                 const action = (user.infection === "infected") ? "was infected by" : "got immunity from"
 
@@ -48,7 +48,8 @@ export default function(bastion, opt={}) {
                         `MESSAGE:\n` +
                         `     ${msg}`
                 }
-                let result = `${hourstamp} hours after outbreak\n`
+                let result = `${context.user}\nSTATUS: ${user.infection}\n` +
+                `${hourstamp} hours after outbreak\n`
                 result += `${context.user} ${action} ${user.infectedBy}\n\n`
                 result += `MESSAGE:\n`
                 result += `     ${msg}`
