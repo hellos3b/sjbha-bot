@@ -30,7 +30,8 @@ export default function(bastion, opt={}) {
                 if (!message) return this.route("show")
 
                 const msg = bastion.bot.fixMessage(message)
-                await q.create({ message: msg, from: context.user })
+                const channel = bastion.channels[context.channelID]
+                await q.create({ message: msg, from: context.user, channel: channel.name })
 
                 return "Saved, thanks!"
             }
@@ -45,7 +46,7 @@ export default function(bastion, opt={}) {
                 const tldrs = await this.getRecent()
                 const list = this.formatTLDRs(tldrs)
 
-                return `Catch up on what's going on!\n${list}`
+                return list
             },
 
             methods: {
@@ -57,10 +58,11 @@ export default function(bastion, opt={}) {
                 },
 
                 formatTLDRs(tldrs) {
-                    return tldrs.map( td => {
+                    return tldrs.reverse().map( td => {
                         let m = new moment(td.timestamp);
-                        let date = m.format('ddd M/D h:mm a');
-                        return `\`${date} - [${td.from}] - ${td.message}\``;
+                        let date = m.format('ddd M/D h:mma');
+                        const channel = td.channel? `[#${td.channel}]` : ""
+                        return `${td.message}\n\`${date} [${td.from}]${channel}\`\n`;
                     }).join("\n")
                 }
             }

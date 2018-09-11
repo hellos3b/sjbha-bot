@@ -75,5 +75,12 @@ export default function(bastion, config={}) {
             }
         }
 
+        // {
+        //     command: "test",
+        //     resolve(context) {
+        //         console.log('channels', bastion.bot.channels[context.channelID].name)
+        //     }
+        // }
+
     ]
 }
