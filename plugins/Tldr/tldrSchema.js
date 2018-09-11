@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 const Schema = mongoose.Schema({
     message: String,
     from: String,
+    channelID: String,
     channel: String,
     timestamp: { 
         type : Date, 
