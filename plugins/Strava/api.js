@@ -6,7 +6,7 @@ import utils from './utils'
 const logPrefix = `    ` + chalk.blue("[Strava]")
 
 export default bastion =>{
-    const $ = new bastion.Queries('strava')
+    const $ = new bastion.Queries('stravaID')
 
     return {
         // Creates the header JSON for Axios

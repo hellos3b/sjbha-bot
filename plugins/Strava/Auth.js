@@ -15,7 +15,7 @@ const urls = {
 }
 
 export default bastion => {
-    const q = new bastion.Queries('strava')
+    const q = new bastion.Queries('stravaID')
 
     const Auth = {
         saveOwnerID: async function(userID, code) {
