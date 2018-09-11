@@ -33,8 +33,8 @@ export default function(bastion, opt={}) {
                 const diff = this.msToHMS(msdiff)
                 const hourstamp = this.pad(diff.hours) + ":" + this.pad(diff.minutes)
 
-                let msg = user.message.replace(user.userID, context.user)
-                msg = user.message.replace("125829654421438464", "s3b")
+                let msg = user.message.replace(context.userID, context.user)
+                msg = msg.message.replace("125829654421438464", "s3b")
 
                 const action = (user.infection === "infected") ? "got infected by" : "got immunity from"
 
