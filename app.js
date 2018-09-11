@@ -12,7 +12,7 @@ const channels = {
     "boombot": "432766496700235776",
     "stocks": "363123179696422916",
     "announcement": "430878436027006978",
-    "compact": "464561717821702144",
+    "compact": "464561717821702144"
 }
 
 const bastion = Bastion({
