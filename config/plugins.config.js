@@ -31,7 +31,9 @@ export default bastion => ([
     Ping,
     Echos,
     Poll,
-    TLDR,
+    TLDR(bastion, {
+        listRestrict: ["general-2"]
+    }),
     Ban,
     Stats,
     Teams(bastion, {

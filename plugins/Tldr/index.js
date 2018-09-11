@@ -8,7 +8,9 @@ import moment from 'moment'
 import './tldrSchema'
 
 const baseConfig = {
-    command: "tldr"
+    command: "tldr",
+    listRestrict: [],
+    restrict: []
 }
 
 export default function(bastion, opt={}) {
@@ -39,7 +41,7 @@ export default function(bastion, opt={}) {
 
         {
             action: `${config.command}:show`,
-            restrict: ["general-2"],
+            restrict: config.listRestrict,
             restrictMessage: `You can only get the TLDR list in the general 2 channel`, 
 
             resolve: async function(context, message) {
