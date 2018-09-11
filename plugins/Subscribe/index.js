@@ -30,17 +30,10 @@ export default function(bastion, opt={}) {
             },
 
             resolve: async function(context, tag) {  
-                const id = config.subscriptions[tag];
-                await context.bot.addToRole({
-                    serverID: bastion.config.serverId, 
-                    userID: context.userID, 
-                    roleID: id
-                })
+                const id = config.subscriptions[tag]
+                await bastion.addRole(context.userID, id)
 
-                await context.bot.sendMessage({
-                    to: context.channelID,
-                    message: `${context.user} subscribed to '${tag}'`
-                })
+                return `${context.user} subscribed to '${tag}'`
             }
         },
 
@@ -57,16 +50,9 @@ export default function(bastion, opt={}) {
 
             resolve: async function(context, tag) {  
                 const id = config.subscriptions[tag];
-                await context.bot.removeFromRole({
-                    serverID: bastion.config.serverId, 
-                    userID: context.userID, 
-                    roleID: id
-                });
+                await bot.removeRole(context.userID, id)
 
-                await context.bot.sendMessage({
-                    to: context.channelID,
-                    message: `${context.user} unsubscribed from '${tag}'`
-                });
+                return `${context.user} unsubscribed from '${tag}'`
             }
 
         }
