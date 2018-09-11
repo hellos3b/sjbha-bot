@@ -30,7 +30,7 @@ export default function(bastion, opt={}) {
                 if (!message) return this.route("show")
 
                 const msg = bastion.bot.fixMessage(message)
-                const channel = bastion.channels[context.channelID]
+                const channel = bastion.bot.channels[context.channelID]
                 await q.create({ 
                     message: msg, 
                     from: context.user, 
