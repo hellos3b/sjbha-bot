@@ -32,12 +32,12 @@ export default bastion => ([
     Echos,
     Poll,
     TLDR(bastion, {
-        listRestrict: ["general-2"]
+        listRestrict: ["general-2", "admin"]
     }),
     Ban,
     Stats,
     Teams(bastion, {
-        listRestrict: ["general-2"]
+        listRestrict: ["general-2", "admin"]
     }),
     StockChart(bastion, {
         restrict: ["stocks"]
