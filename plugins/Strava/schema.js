@@ -1,5 +1,23 @@
 import mongoose from 'mongoose';
 
+const ChallengeSchema = mongoose.Schema({
+    challenge: {
+        type: { type: String },
+        multi: Number,
+        distanceMulti: Number,
+        name: String
+    },
+    targets: {
+        time: Number,
+        distance: Number,
+        pace_seconds: Number
+    },
+    finished: {
+        type: Boolean,
+        default: false
+    }
+})
+
 const Schema = mongoose.Schema({
     user: String,
     userID: String,
@@ -18,7 +36,8 @@ const Schema = mongoose.Schema({
     EXP: {
         type: Number,
         default: 0
-    }
+    },
+    challenge: ChallengeSchema
 });
 
 export default mongoose.model('stravaID', Schema);

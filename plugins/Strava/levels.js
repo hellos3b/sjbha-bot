@@ -1,13 +1,15 @@
 import utils from './utils'
+import challenges from './challenges'
 
 const SQUARES = 30; // default squares in XP bar
 const LEVEL_EXP = 10800; // how much xp to level up
 const MIN_RUNS = 5; // amount of runs in average to get bonuses
 const BONUS_AMT = 0.2;
+const CHALLENGE_BONUS = 1200
 
 export default {
 
-    LEVEL_EXP, MIN_RUNS, BONUS_AMT,
+    CHALLENGE_BONUS, LEVEL_EXP, MIN_RUNS, BONUS_AMT,
 
     XPBar(exp, squares) {
         squares = squares || SQUARES;
@@ -24,6 +26,11 @@ export default {
         let xp = activity.moving_time
         let stats = utils.getActivityStats(activity)
 
+        const challengeDone = challenges.test(stats, user)
+        if (challengeDone) {
+            xp += CHALLENGE_BONUS
+        }
+
         let bonuses = []
         if (averages.total >= MIN_RUNS) {
             const distDiff = stats.distance - averages.distance
@@ -39,8 +46,8 @@ export default {
                 let perc = Math.floor(paceDiff / averages.pace_seconds * 1000)/10
                 bonuses.push(`+${perc}% spd`)
             }
-
-            xp += BONUS_AMT*bonuses.length
+            const xpbonus = BONUS_AMT*bonuses.length
+            xp += xp*xpbonus
         }
         xp = Math.floor(xp)
 
@@ -48,7 +55,7 @@ export default {
         let lvldUp = false
         if (user.EXP >= LEVEL_EXP) {
             user.level += 1
-            user.EXP = user.EXP - StravaLevels.LEVEL_EXP
+            user.EXP = user.EXP - LEVEL_EXP
             lvldUp = true
         }
 
@@ -56,7 +63,8 @@ export default {
             user,
             xp,
             bonuses,
-            lvldUp
+            lvldUp,
+            challengeDone
         }
     }
 
