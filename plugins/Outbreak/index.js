@@ -89,8 +89,8 @@ export default function(bastion, opt={}) {
                 if (!user) return "You haven't been tagged with anything"
 
                 const userList = list.map( n => {
-                    return `> ${n.user}`
-                }).join("\n")
+                    return n.user
+                }).join(", ")
                 const verb = (user.infection === "infected") ? "infection": "immunity"
                 return bastion.helpers.code(`${context.user} spread ${verb} to ${list.length} other users:\n${userList}`)
             }
