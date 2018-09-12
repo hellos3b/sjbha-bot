@@ -93,7 +93,7 @@ export default function(bastion, opt={}) {
                     const msdiff = new Date(n.timestamp).getTime() - startDate.getTime()
                     const diff = this.msToHMS(msdiff)
                     const hourstamp = this.pad(diff.hours) + ":" + this.pad(diff.minutes)
-                    return bastion.bot.fixMessage(`[${hourstamp}]n.user`)
+                    return bastion.bot.fixMessage(`[${hourstamp}]${n.user || 'unknown'}`)
                 }).join(", ")
                 const verb = (user.infection === "infected") ? "infection": "immunity"
                 return bastion.helpers.code(`${context.user} spread ${verb} to ${list.length} other users:\n${userList}`)
