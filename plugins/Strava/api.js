@@ -192,10 +192,13 @@ export default bastion =>{
         resetChallenges: async function() {
             const averages = await this.getAllAverages()
             // Only if you have 4 or more runs do you qualify
+            const newChallenge = challenges.randomizeChallenge()
 
             return Promise.all(averages.map( n => {
                 let challenge = null
-                if (n.total >= 4) challenge = challenges.create(n)
+                if (n.total >= 4) {
+                    challenge = challenges.create(newChallenge, n)
+                }
 
                 return this.saveChallenge(n.userID, challenge)
             }))

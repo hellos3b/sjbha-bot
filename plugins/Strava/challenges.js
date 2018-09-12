@@ -25,10 +25,12 @@ const challenges = [
 
 export default {
 
-    create(averages) {
+    randomizeChallenge() {
         const rng = Math.floor(Math.random()*challenges.length)
-        const challenge = challenges[rng]
+        return challenges[rng]
+    },
 
+    create(challenge, averages) {
         let targets = {}
         if (challenge.type === "time") {
             targets.time = averages.time * challenge.multi
