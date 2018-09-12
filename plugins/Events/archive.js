@@ -43,7 +43,7 @@ export default function(bastion, config) {
             bastion.send(bastion.channels.admin, "`Archived "+event.info_str()+"`")
         }
     } 
-488845972932263966
+
     return {
         archiveMeetups
     }
