@@ -128,16 +128,17 @@ export default {
     },
 
     challengeTable(challengers) {
-        var table = new Table();
+        // hacky way of getting the challenge name
+        const challengeName = challengers[0].challenge.challenge.name
+        var table = new Table(`Weekly Challenge: ${challengeName}`);
         table.removeBorder();
-        table.setHeading('User', 'Challenge', 'Target', '')
+        table.setHeading('User', 'Goal', '')
         table.setHeadingAlignLeft(Table.LEFT)
 
         challengers.forEach( (entry) => {
             const finished = entry.challenge.finished ? `👏` : ''
             table.addRow(
                 entry.user, 
-                entry.challenge.challenge.name,
                 this.getChallengeTargetStr(entry.challenge.targets),
                 finished
             )
