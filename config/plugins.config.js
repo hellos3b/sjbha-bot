@@ -46,7 +46,7 @@ export default bastion => ([
     }),
     Subscribe(bastion, { subscriptions }),
     Strava(bastion, {
-        restrict: ["strava"]
+        restrict: ["strava", "430517752546197509"]
     }),
     Events(bastion, {
         command: "meetup",
