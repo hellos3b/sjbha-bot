@@ -62,7 +62,7 @@ export default bastion => ([
         }
     }),
     Outbreak(bastion, {
-        restrict: ["general-2"]
+        restrict: ["general-2", "430517752546197509"]
     }),
     AutoTag(bastion, {
         restrict: ["416708557984104448"]
