@@ -17,12 +17,15 @@ export default function(bastion, config) {
     bastion.on('schedule-bihourly', archiveMeetups)
 
     async function archiveMeetups() {
+        log("Archiving meetups")
         const meetups = await Meetups.getAll()
 
+        log("Meetup count: ", meetups.length)
         for (var i = 0; i < meetups.length; i++) {
             let diff = moment().utcOffset(-8).diff(meetups[i].timestamp, 'hours')
 
-            if (diff < config.archiveTime) break
+            log(`Meetup ${meetups[i].info}: diff ${diff}`, meetups[i])
+            if (diff < config.archiveTime) continue
 
             const event = new Event(meetups[i], config)
             const archive = await event.toArchiveJSON(bastion.bot)
@@ -39,8 +42,8 @@ export default function(bastion, config) {
             log("Updating admin DB", event.info_str())
             bastion.send(bastion.channels.admin, "`Archived "+event.info_str()+"`")
         }
-    }
-
+    } 
+488845972932263966
     return {
         archiveMeetups
     }
