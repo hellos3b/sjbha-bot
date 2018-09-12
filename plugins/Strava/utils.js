@@ -1,3 +1,4 @@
+import Table from 'ascii-table'
 
 export default {
     getMiles(i) {
@@ -38,6 +39,7 @@ export default {
     runTotalAverages(run_totals) {
         const dist_total = this.getMiles(run_totals.distance);
         const pace_total = run_totals.moving_time / dist_total;
+        const moving_avg = run_totals.moving_time / run_totals.count
 
         let dist_avg = dist_total / run_totals.count;
         dist_avg = Math.floor(dist_avg * 100) / 100;
@@ -46,8 +48,25 @@ export default {
             total: run_totals.count,
             distance: dist_avg,
             pace: this.hhmmss(pace_total),
-            pace_seconds: pace_total
+            pace_seconds: pace_total,
+            time: moving_avg,
+            moving_time: run_totals.moving_time
         };        
+    },
+
+    runTotals(run_totals) {
+        const dist_total = this.getMiles(run_totals.distance);
+        const pace_total = (dist_total) ? run_totals.moving_time / dist_total : 0
+        const moving_time = run_totals.moving_time
+
+        return {
+            total: run_totals.count,
+            time: moving_time,
+            timeStr: this.hhmmss(moving_time, true),
+            distance: dist_total,
+            pace: pace_total,
+            paceStr: this.hhmmss(pace_total, true)
+        }
     },
 
     getActivityStats(activity, padded=false) {
@@ -55,7 +74,8 @@ export default {
         const pace_seconds = Math.round(activity.moving_time / distance)
         const pace = !distance ? "0:00" : this.hhmmss( pace_seconds, padded )
         const time = this.hhmmss( activity.moving_time, padded )
-        return { distance, pace, time, pace_seconds }
+
+        return { moving_time: activity.moving_time, distance, pace, time, pace_seconds }
     },
 
     calendar(user, activities, start_date) {
@@ -93,5 +113,36 @@ export default {
         }
 
         return cal
+    },
+
+    getChallengeTargetStr(targets) {
+        if (targets.pace_seconds) {
+            return `${this.hhmmss( targets.pace_seconds, true )}/mi for ${targets.distance}mi`
+        }
+        if (targets.time) {
+            return `${this.hhmmss( targets.time )} time`
+        }
+        if (targets.distance) {
+            return `${targets.distance}mi`
+        }
+    },
+
+    challengeTable(challengers) {
+        var table = new Table();
+        table.removeBorder();
+        table.setHeading('User', 'Challenge', 'Target', '')
+        table.setHeadingAlignLeft(Table.LEFT)
+
+        challengers.forEach( (entry) => {
+            const finished = entry.challenge.finished ? `👏` : ''
+            table.addRow(
+                entry.user, 
+                entry.challenge.challenge.name,
+                this.getChallengeTargetStr(entry.challenge.targets),
+                finished
+            )
+        })
+
+        return table.toString()
     }
 }

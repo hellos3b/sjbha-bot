@@ -4,7 +4,6 @@
  */
 
 import deepmerge from 'deepmerge'
-import chalk from 'chalk'
 
 import Auth from './Auth'
 import Webhook from './webhook'
@@ -12,6 +11,7 @@ import utils from './utils'
 import Api from './api'
 import levels from './levels'
 import Table from 'ascii-table'
+import challenges from './challenges'
 
 const baseConfig = {
     command: "strava",
@@ -29,7 +29,8 @@ export default function(bastion, opt={}) {
         `< ${cmd} levels > See everybody's level\n` +
         `< ${cmd} leaders > View who ran the most in the last 4 weeks\n` +
         `< ${cmd} calendar > View your 4 weeks calendar\n` +
-        `< ${cmd} avg > View your 4 weeks average stats\n`,
+        `< ${cmd} avg > View your 4 weeks average stats\n` +
+        `< ${cmd} challenges > View this week's challenges\n`,
     "md")
 
     const q = new bastion.Queries('stravaID')
@@ -44,6 +45,18 @@ export default function(bastion, opt={}) {
     webhook.on('activity', async (data) => {
         const details = await api.addActivity(data)
         const msg = api.getActivityString(details)
+        bastion.send(bastion.channels.strava, msg)
+    })
+
+    bastion.on('schedule-weekly', async () => {
+        await api.resetChallenges()
+        const users = await q.getAll()
+        const challengers = users.filter(n => n.challenge)
+
+        const msg = "**<:kudos:477927260826107904> Runday Monday!**\nHere's this weeks challenges:\n"
+        msg += bastion.helpers.code( utils.challengeTable(challengers) ) 
+        msg += "\n\nGood luck!"
+
         bastion.send(bastion.channels.strava, msg)
     })
 
@@ -149,7 +162,7 @@ export default function(bastion, opt={}) {
 
         {
             action: `${config.command}:leaders`,
-            options: ["cmd", "type"],
+            options: bastion.parsers.args(["cmd", "type"]),
             resolve: async function(context, cmd, type) {
                 bastion.bot.simulateTyping(context.channelID)
                 const { sorter, order } = this.getSortfn(type)
@@ -163,8 +176,8 @@ export default function(bastion, opt={}) {
                 leaderboard.forEach( (entry, i) => {
                     let stats = {
                         distance: `${entry.distance} mi`, 
-                        time: entry.time, 
-                        pace: `${entry.pace}/mi`
+                        time: entry.timeStr, 
+                        pace: `${entry.paceStr}/mi`
                     }
     
                     table.addRow(
@@ -182,7 +195,7 @@ export default function(bastion, opt={}) {
 
             methods: {
                 getSortfn(type) {
-                    let sorter = (entry) => entry.moving_time
+                    let sorter = (a,b) => a.time < b.time ? 1 : -1
                     let order = ["time", "distance", "pace"]
         
                     if (type === "distance") {
@@ -200,7 +213,7 @@ export default function(bastion, opt={}) {
             }
         },
 
-        // leaderboard for levels
+        // calendar
         {
             action: `${config.command}:calendar`,
             resolve: async function(context, cmd, target) {
@@ -220,5 +233,44 @@ export default function(bastion, opt={}) {
             }
         },
 
+         // View challenge
+         {
+            action: `${config.command}:challenge`,
+
+            resolve: async function(context, cmd, target) {
+                const user = await api.getUserInfo({ userID: target })
+                if (!user.challenge) return "You need at least 4 runs in the last month to get a challenge! Keep on' runnin!"
+
+                const output = utils.getChallengeTargetStr(user.challenge.targets)
+
+                const finished = (user.challenge.finished) ? '[👏 DONE]' : ''
+                return `${user.challenge.challenge.name} - ${output} ${finished}`
+            }
+        },
+
+        // set challenges manually
+        {
+            action: `${config.command}:set-challenge`,
+
+            restrict: ["430517752546197509"],
+
+            resolve: async function(context, cmd, target) {
+                await api.resetChallenges()
+
+                return "done"
+            }
+        },
+
+        // View all challenges
+        {
+            action: `${config.command}:challenges`,
+
+            resolve: async function(context) {
+                const users = await q.getAll()
+                const challengers = users.filter(n => n.challenge)
+
+                return bastion.helpers.code( utils.challengeTable(challengers) ) 
+            }
+        }
     ]
 }
