@@ -54,7 +54,7 @@ export default function(bastion, opt={}) {
         const challengers = users.filter(n => n.challenge)
 
         const msg = "**<:kudos:477927260826107904> Runday Monday!**\nHere's this weeks challenges:\n"
-        msg += bastion.helpers.code( utils.challengeTable(challengers) ) 
+        msg += bastion.helpers.code( utils.challengeTable(challengers), "md") 
         msg += "\n\nGood luck!"
 
         bastion.send(bastion.channels.strava, msg)
@@ -269,7 +269,7 @@ export default function(bastion, opt={}) {
                 const users = await q.getAll()
                 const challengers = users.filter(n => n.challenge)
 
-                return bastion.helpers.code( utils.challengeTable(challengers) ) 
+                return bastion.helpers.code( utils.challengeTable(challengers), "md" ) 
             }
         }
     ]
