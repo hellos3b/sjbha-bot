@@ -5,6 +5,7 @@
 
 import deepmerge from 'deepmerge'
 import './Schema'
+import router from './ui/router'
 
 const baseConfig = {
     command: "outbreak",
@@ -15,6 +16,8 @@ export default function(bastion, opt={}) {
     const config = deepmerge(baseConfig, opt)
     const q = new bastion.Queries('Outbreak')
     const log = bastion.Logger("Outbreak").log
+
+    bastion.app.use('/outbreak', router(bastion, config))
 
     return [
 
