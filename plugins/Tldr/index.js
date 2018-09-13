@@ -66,11 +66,11 @@ export default function(bastion, opt={}) {
                 },
 
                 formatTLDRs(tldrs) {
-                    return tldrs.reverse().map( td => {
+                    return tldrs.map( td => {
                         let m = new moment(td.timestamp);
                         let date = m.format('ddd M/D h:mma');
                         const channel = td.channel? `[#${td.channel}]` : ""
-                        return `${td.message}\n\`${date} [${td.from}]${channel}\`\n`;
+                        return `\`${td.message}\n[${date}][${td.from}]${channel}\`\n`;
                     }).join("\n")
                 }
             }
