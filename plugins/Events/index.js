@@ -10,6 +10,9 @@ import baseConfig from './event.config'
 import utils from './utils'
 import Archive from './archive'
 import compact from './compact'
+import path from 'path'
+import router from './ui/router'
+import express from 'express'
 
 export default function(bastion, opt={}) {
     const config = deepmerge(baseConfig, opt)
@@ -38,6 +41,10 @@ export default function(bastion, opt={}) {
         const events = await q.getAll()
         compact.update(bastion, config, events.map( e => new Event(e, config)))
     })
+
+    // Set up calendar UI
+    bastion.app.use('/calendar/public', express.static(path.join(__dirname, 'ui', 'public')))
+    bastion.app.use('/calendar', router(bastion, config))
 
     return [
 

@@ -33,7 +33,9 @@ const Group = function(msg_id, title, date, isWeek) {
     }
 
     this.getFields = function() {
-        return this.events.map(this.getEventField)
+        return this.events
+            .sort((a,b) => a.date_moment().isAfter(b.date_moment())? 1 : -1)
+            .map(this.getEventField)
     }
 
     this.getEventField = function(event) {

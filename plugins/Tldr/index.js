@@ -5,6 +5,7 @@
 
 import deepmerge from 'deepmerge'
 import moment from 'moment'
+import router from './ui/router'
 import './tldrSchema'
 
 const baseConfig = {
@@ -19,6 +20,8 @@ export default function(bastion, opt={}) {
     const help = `Use ${cmd} to view a list of most recent tldrs, or add a tldr by using ${cmd} <msg>`
 
     const q = new bastion.Queries('tldr')
+
+    bastion.app.use('/tldr', router(bastion, config))
 
     return [
 
