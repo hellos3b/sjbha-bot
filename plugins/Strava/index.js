@@ -81,7 +81,7 @@ export default function(bastion, opt={}) {
 
             resolve: async function(context) {
                 bastion.bot.simulateTyping(context.channelID)
-                const url = auth.createAuthUrl(userID, user, config.apiUrl)
+                const url = auth.createAuthUrl(context.userID, context.user, config.apiUrl)
                 await this.send(context.userID, `Hello! To auth the discord bot to post your strava times, just click on this link and accept the authorization\n${url}`)
 
                 return `DM'd you your authorization link!`
