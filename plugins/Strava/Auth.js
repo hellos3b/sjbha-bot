@@ -85,7 +85,7 @@ export default bastion => {
         },
 
         createAuthUrl(userID, user, apiUrl) {
-            return url.get(apiUrl, { userID, user })   
+            return url.get(`${apiUrl}/auth`, { userID, user })   
         }
 
     }
