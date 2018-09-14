@@ -232,7 +232,7 @@ export default function(bastion, opt={}) {
                 chooseEvent: async function(context, events) {
                     const event_list = events.map( (e, i) => `${i}: ${e.info()}`).join("\n")
 
-                    const index = await bastion.Ask(`Which ${config.name} do you want to cancel?\n${bastion.helpers.code(event_list)}`, 
+                    const index = await bastion.Ask(`Which ${config.name} do you want to mention?\n${bastion.helpers.code(event_list)}`, 
                         context, 
                         (val) => {
                             if (isNaN(parseInt(val))) return `'${val}' is not a valid option; Please pick an option from 0-${events.length}`
