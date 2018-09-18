@@ -84,7 +84,7 @@ export default function({
         }
 
         // Date is not too far into the future
-        if (moment().utcOffset(-8).diff(date_moment, 'days') < -90) {
+        if (moment().utcOffset(-8).diff(date_moment, 'days') < -180) {
             return `Date is set too far into the future`
         }
     }
