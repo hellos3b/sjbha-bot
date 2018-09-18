@@ -45,7 +45,7 @@ export default function(bastion, opt={}) {
     webhook.on('activity', async (data) => {
         const details = await api.addActivity(data)
         const msg = api.getActivityString(details)
-        bastion.send(bastion.channels.admin, msg)
+        bastion.send(bastion.channels.strava, msg)
     })
 
     bastion.on('schedule-weekly', async () => {
