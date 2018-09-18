@@ -55,6 +55,8 @@ export default {
         if (!user.challenge) return false
         if (user.challenge.finished) return false
 
+        console.log("testing activity challenge", user)
+        console.log(stats, user)
         const challenge = user.challenge.challenge
         const targets = user.challenge.targets
 
@@ -65,7 +67,8 @@ export default {
             return stats.distance >= targets.distance
         }
         if (challenge.type === "pace") {
-            return stats.distance >= targets.distance && stats.pace_seconds <= targets.pace
+            console.log("testing pace", stats.distance, targets.distance, stats.pace_seconds, targets.pace)
+            return stats.distance >= targets.distance && stats.pace_seconds <= targets.pace_seconds
         }
         return false
     }
