@@ -15,6 +15,7 @@ const baseConfig = {
 export default function(bastion, opt={}) {
     const config = deepmerge(baseConfig, opt)
     const help = "Tags you can subscribe to: " + Object.keys(config.subscriptions).join(", ")
+    const helpUnsubscribe = "Tags you can unsubscribe from: " + Object.keys(config.subscriptions).join(", ")
 
     return [
 
@@ -40,9 +41,9 @@ export default function(bastion, opt={}) {
         // Unsubscribe
         {
             command: config.commandUnsubscribe,
-            help,
+            help: helpUnsubscribe,
             helpOnEmpty: true,
-            options: ["tag"],
+            options: bastion.parsers.args(["tag"]),
 
             validate(context, tag) {
                 if (!config.subscriptions[tag]) return `Couldn't find tag called '${tag}'`
