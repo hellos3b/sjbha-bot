@@ -51,7 +51,7 @@ export default function(bastion, opt={}) {
 
             resolve: async function(context, tag) {  
                 const id = config.subscriptions[tag];
-                await bot.removeRole(context.userID, id)
+                await bastion.removeRole(context.userID, id)
 
                 return `${context.user} unsubscribed from '${tag}'`
             }
