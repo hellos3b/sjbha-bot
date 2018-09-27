@@ -38,7 +38,7 @@ export default function(bastion, opt={}) {
             }
         },
 
-        // Unsubscribe
+        // Unsubscribe 
         {
             command: config.commandUnsubscribe,
             help: helpUnsubscribe,
