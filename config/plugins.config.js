@@ -73,6 +73,6 @@ export default bastion => ([
     Upvotes,
     Dungeon,
     Reddit(bastion, {
-        channel: "430517752546197509"
+        channel: "466328017342431233"
     })
 ])
