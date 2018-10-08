@@ -11,6 +11,7 @@ const channels = {
     "strava": "450913008323919872",
     "boombot": "432766496700235776",
     "stocks": "363123179696422916",
+    "dungeon": "497505757865050112",
     "announcement": (process.env.NODE_ENV === 'production' ) ? "430878436027006978" : "487730873278398475",
     "compact": (process.env.NODE_ENV === 'production') ? "464561717821702144" : "488850092045107202"
 }
