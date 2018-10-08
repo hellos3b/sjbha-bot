@@ -15,6 +15,8 @@ import Teams from '../plugins/Teams'
 import Outbreak from '../plugins/Outbreak'
 import AutoTag from '../plugins/AutoTag'
 import Upvotes from '../plugins/Upvotes'
+import Dungeon from '../plugins/Dungeon'
+import Reddit from '../plugins/Reddit'
 
 const subscriptions = {
     "photomeet": "486330820114513920",
@@ -68,5 +70,9 @@ export default bastion => ([
     AutoTag(bastion, {
         restrict: ["416708557984104448"]
     }),
-    Upvotes
+    Upvotes,
+    Dungeon,
+    Reddit(bastion, {
+        channel: "430517752546197509"
+    })
 ])
