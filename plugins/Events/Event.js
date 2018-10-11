@@ -276,6 +276,11 @@ export default function({
         });
     }
 
+    this.setOwner = function(newUserID, newUser) {
+        userID = newUserID
+        username = newUser
+    }
+
     this.updateAnnouncement = async function(bot) {
         let embed = this.embed()
 
