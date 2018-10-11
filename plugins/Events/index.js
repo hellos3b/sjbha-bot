@@ -63,6 +63,7 @@ export default function(bastion, opt={}) {
                 if (message === "cancel") return this.route('cancel')
                 if (message === "mention") return this.route('mention')
                 if (message === "edit") return this.route('edit')
+                if (message === "transfer") return this.route('transfer')
 
                 const opt = utils.getOptions(message.split("|").map(n=>n.trim()))
                 if (!opt.date || !opt.name) return log("Missing required fields (date, name)")
@@ -148,7 +149,7 @@ export default function(bastion, opt={}) {
                 // Step 1: get all events
                 let events = await q.find({userID: context.userID})
                 events = events.map( e => new Event(e, config))
-                if (events.length === 0) return log(`You don't have any active ${config.name}s to cancel!`)
+                if (events.length === 0) return log(`You don't have any active ${config.name}s to edit!`)
 
                 const event = await this.chooseEvent(context, events)
                 if (!event) return log("(edit) Failed to get event"), null
@@ -338,7 +339,67 @@ export default function(bastion, opt={}) {
                 const events = await q.getAll()
                 compact.update(bastion, config, events.map( e => new Event(e, config)))
             }
-        }
+        },
+
+                // Cancel a meetup
+                {
+                    // Command to start it
+                    action: `${config.command}:transfer`, 
+        
+                    // Core of the command
+                    resolve: async function(context, message) {
+                        // Step 1: get all events
+                        let events = await q.find({userID: context.userID})
+                        events = events.map( e => new Event(e, config))
+                        if (events.length === 0) return log(`You don't have any active ${config.name}s to transfer!`)
+        
+                        const event = await this.chooseEvent(context, events)
+                        if (!event) return log("(transfer) Failed to get event"), null
+        
+                        const reactions = await event.getReactions(bastion.bot)
+                        const owners = reactions.yes.filter( u => u.id !== context.userID)
+                        if (!owners.length) return "Nobody else has RSVP'd for the event. To transfer, the new owner should be RSVP'd"
+
+                        const newOwner = await this.chooseOwner(context, owners)
+
+                        event.setOwner(newOwner.id, newOwner.username)
+                        event.updateAnnouncement(bastion.bot)
+
+                        log("Saving to database")
+                        console.log(event.toJSON())
+                        q.update({ id: event.id() }, event.toJSON())
+
+                        bastion.emit("events-update")
+                        return `Alright, ${bastion.helpers.toMention(newOwner.id)} is now in charge of '${event.info()}'`
+                    },
+        
+                    methods: {
+                        chooseEvent: async function(context, events) {
+                            const event_list = events.map( (e, i) => `${i}: ${e.info()}`).join("\n")
+        
+                            const index = await bastion.Ask(`Which ${config.name} do you want to transfer?\n${bastion.helpers.code(event_list)}`, 
+                                context, 
+                                (val) => {
+                                    if (isNaN(parseInt(val))) return `'${val}' is not a valid option; Please pick an option from 0-${events.length}`
+                                    if (val < 0 || val >= events.length) return `'${val}' is not a valid option; Please pick an option from 0-${events.length}`
+                                }, 2)
+        
+                            return events[index]
+                        },
+                        chooseOwner: async function(context, owners) {
+                            const choice = owners.map( (u, i) => `${i}: ${u.username}`)
+                            
+                            const index = await bastion.Ask(`Which user do you want to give ownership to?\n${bastion.helpers.code(choice)}`, 
+                            context, 
+                            (val) => {
+                                if (isNaN(parseInt(val))) return `'${val}' is not a valid option; Please pick an option from 0-${events.length}`
+                                if (val < 0 || val >= owners.length) return `'${val}' is not a valid option; Please pick an option from 0-${events.length}`
+                            }, 2)
+
+                            return owners[index]
+                        }
+                    }
+                },
         
     ]
 }

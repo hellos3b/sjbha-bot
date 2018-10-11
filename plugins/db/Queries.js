@@ -42,8 +42,17 @@ export default class {
     }
 
     update(q, json) {
-        return this.Schema.update(q, {
-            $set: json
+        console.log("Updating", q, json)
+        return new Promise((resolve, reject) => {
+            return this.Schema.findOne(q, (err, result) => {
+                if (!result) throw err
+                let doc = result.set(json)
+            
+                doc.save((saveErr, savedStat) => {
+                    if (saveErr) throw saveErr;
+                    resolve();
+                })
+            })
         })
     }
 }
