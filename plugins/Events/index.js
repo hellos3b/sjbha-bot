@@ -32,7 +32,8 @@ export default function(bastion, opt={}) {
         ) +
         `\`${cmd} cancel\` to cancel\n`+
         `\`${cmd} edit\` to edit\n` +
-        `\`${cmd} mention\` to mention`
+        `\`${cmd} mention\` to mention` +
+        `\`${cmd} transfer\` to make someone else owner`
     
     const q = new bastion.Queries('Meetup')
 
@@ -387,7 +388,7 @@ export default function(bastion, opt={}) {
                             return events[index]
                         },
                         chooseOwner: async function(context, owners) {
-                            const choice = owners.map( (u, i) => `${i}: ${u.username}`)
+                            const choice = owners.map( (u, i) => `${i}: ${u.username}`).join("\n")
                             
                             const index = await bastion.Ask(`Which user do you want to give ownership to?\n${bastion.helpers.code(choice)}`, 
                             context, 
