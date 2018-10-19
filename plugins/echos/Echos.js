@@ -4,7 +4,7 @@
 
 export default function(bastion, config={}) {
 
-    return [ 
+    return [
 
         {
             command: "help",
@@ -29,6 +29,11 @@ export default function(bastion, config={}) {
         {
             command: "mention",
             resolve: "Commands been changed to `!meetup mention`"
+        },
+
+        {
+            command: "mocha",
+            resolve: "\:coffee:\:coffee: TIME FOR A MOCHA BREAK \:no_entry_sign:\:sleeping:"
         },
 
         {
