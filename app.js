@@ -7,7 +7,7 @@ import Boombot from './plugins/Boombot'
 
 const channels = {
     "admin": "430517752546197509",
-    "general-2": "466328017342431233",
+    "shitpost": "506911331257942027",
     "strava": "450913008323919872",
     "boombot": "432766496700235776",
     "stocks": "363123179696422916",
