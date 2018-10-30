@@ -10,6 +10,10 @@ export default {
     bang(channelID) {
         if (!ducks[channelID]) return null
 
-        return ducks[channelID]
+        const msgId = ducks[channelID]
+
+        ducks[channelID] = null
+
+        return msgId
     }
 }
