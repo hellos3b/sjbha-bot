@@ -38,12 +38,12 @@ export default bastion => ([
     Echos,
     Poll,
     TLDR(bastion, {
-        listRestrict: ["general-2", "admin"]
+        listRestrict: ["shitpost", "admin"]
     }),
     Ban,
     Stats,
     Teams(bastion, {
-        listRestrict: ["general-2", "admin"]
+        listRestrict: ["shitpost", "admin"]
     }),
     StockChart(bastion, {
         restrict: ["stocks"]
@@ -66,7 +66,7 @@ export default bastion => ([
         }
     }),
     Outbreak(bastion, {
-        restrict: ["general-2", "430517752546197509"]
+        restrict: ["shitpost", "430517752546197509"]
     }),
     AutoTag(bastion, {
         restrict: ["416708557984104448"]

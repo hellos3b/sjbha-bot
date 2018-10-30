@@ -48,7 +48,7 @@ export default function(bastion, opt={}) {
         {
             action: `${config.command}:show`,
             restrict: config.listRestrict,
-            restrictMessage: `You can only get the TLDR list in the general 2 channel`, 
+            restrictMessage: `You can only get the TLDR in <#506911331257942027>`, 
 
             resolve: async function(context, message) {
                 const tldrs = await this.getRecent()

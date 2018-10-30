@@ -24,7 +24,7 @@ export default function(bastion, opt={}) {
         {
             command: config.command,
             restrict: config.restrict,
-            restrictMessage: "Outbreak limited to general 2",
+            restrictMessage: "Outbreak limited to <#506911331257942027>",
 
             options: bastion.parsers.args(["cmd"]),
 
