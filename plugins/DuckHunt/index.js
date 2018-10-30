@@ -31,7 +31,7 @@ const baseConfig = {
     ]
 }
 
-const SIX_HOURS = 1000 * 60 * 60 * 6
+const SIX_HOURS = 1000 * 60 * 60 * 1
 const EIGHTEEN_HOURS = 1000 * 60 * 60 * 12
 
 let timeout = null
@@ -130,20 +130,20 @@ export default function(bastion, opt={}) {
             command: "bang",
 
             resolve: async function(context, tag) {
+                const msg_id = context.evt.d.id
+
+                await bastion.bot.deleteMessage({
+                    channelID: context.channelID,
+                    messageID: msg_id
+                })
+
                 const id = Ducks.bang(context.channelID)
                 if (!id) return;
 
                 await bastion.bot.editMessage({
                     channelID: context.channelID,
                     messageID: id,
-                    message: `*duck shot by ${context.user}*`
-                })
-
-                const msg_id = context.evt.d.id
-
-                await bastion.bot.deleteMessage({
-                    channelID: context.channelID,
-                    messageID: msg_id
+                    message: `\:dog: *duck shot by ${context.user}*`
                 })
 
                 saveBang(context.user, context.userID)
