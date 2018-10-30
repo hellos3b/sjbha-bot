@@ -147,6 +147,8 @@ export default function(bastion, opt={}) {
                 })
 
                 saveBang(context.user, context.userID)
+
+                startTimeout()
             }
         }
 
