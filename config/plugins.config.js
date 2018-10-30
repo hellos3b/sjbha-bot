@@ -17,6 +17,7 @@ import AutoTag from '../plugins/AutoTag'
 import Upvotes from '../plugins/Upvotes'
 import Dungeon from '../plugins/Dungeon'
 import Reddit from '../plugins/Reddit'
+import DuckHunt from '../plugins/DuckHunt'
 
 const subscriptions = {
     "photomeet": "486330820114513920",
@@ -74,5 +75,6 @@ export default bastion => ([
     Dungeon,
     Reddit(bastion, {
         channel: "466328017342431233"
-    })
+    }),
+    DuckHunt
 ])
