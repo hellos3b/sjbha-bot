@@ -32,7 +32,7 @@ const baseConfig = {
 }
 
 const SIX_HOURS = 1000 * 60 * 60 * 6
-const EIGHTEEN_HOURS = 1000 * 60 * 60 * 18
+const EIGHTEEN_HOURS = 1000 * 60 * 60 * 12
 
 let timeout = null
 
