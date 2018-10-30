@@ -72,6 +72,8 @@ export default function(bastion, opt={}) {
         }, time)
     }
 
+    startTimeout()
+
     return [
 
         // {
