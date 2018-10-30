@@ -76,15 +76,15 @@ export default function(bastion, opt={}) {
 
     return [
 
-        // {
-        //     command: 'duck',
+        {
+            command: 'duck',
 
-        //     resolve: async function(context, tag) {  
-        //         const msg = await bastion.send(context.channelID, "\:duck:")
-        //         Ducks.create(context.channelID, msg.id)
-        //         // sendDuck()
-        //     }
-        // },
+            resolve: async function(context, tag) {  
+                const msg = await bastion.send(context.channelID, "\:duck:")
+                Ducks.create(context.channelID, msg.id)
+                // sendDuck()
+            }
+        },
 
         {
             command: 'duckhunt',
@@ -133,9 +133,10 @@ export default function(bastion, opt={}) {
                 const id = Ducks.bang(context.channelID)
                 if (!id) return;
 
-                await bastion.bot.deleteMessage({
+                await bastion.bot.editMessage({
                     channelID: context.channelID,
-                    messageID: id
+                    messageID: id,
+                    message: `*duck shot by ${context.user}*`
                 })
 
                 const msg_id = context.evt.d.id
