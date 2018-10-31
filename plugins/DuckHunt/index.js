@@ -2,6 +2,7 @@ import deepmerge from 'deepmerge'
 import chalk from 'chalk'
 import Ducks from './Duck'
 import './schema'
+import './shotSchema'
 
 const baseConfig = {
     channels: [
@@ -34,11 +35,17 @@ const baseConfig = {
 const SIX_HOURS = 1000 * 60 * 60 * 6
 const EIGHTEEN_HOURS = 1000 * 60 * 60 * 12
 
+let nextDuck = {
+    start: 0,
+    end: 0
+}
+
 let timeout = null
 
 export default function(bastion, opt={}) {
     const config = deepmerge(baseConfig, opt)
     const q = new bastion.Queries("Duckhunt")
+    const qShot = new bastion.Queries("DuckhuntShot")
 
     async function saveBang(user, userID) {
         let player = await q.findOne({ userID })
@@ -66,10 +73,37 @@ export default function(bastion, opt={}) {
 
     function startTimeout() {
         const time = getRandomInt(SIX_HOURS, EIGHTEEN_HOURS)
+        const d = new Date().getTime()
+
+        nextDuck = {
+            start: new Date(d + SIX_HOURS),
+            end: new Date(d + EIGHTEEN_HOURS)
+        }
 
         timeout = setTimeout(() => {
             sendDuck()
         }, time)
+    }
+
+    function formatTime(date) {
+        let hours = date.getHours()
+        let ampm = (hours > 12) ? "pm" : "am"
+        hours = (hours > 12) ? hours - 12 : hours
+        hours = (hours === 0) ? 12 : hours
+        let minutes = date.getMinutes()
+        minutes = minutes < 10 ? "0" + minutes : minutes
+
+        return `${hours}:${minutes}${ampm}`
+    }
+
+    function getSeason() {
+        const d = new Date()
+
+        if (d < nextDuck.start) {
+            return `Next season: ${formatTime(nextDuck.start)} - ${formatTime(nextDuck.end)}`
+        } else {
+            return `It's hunting season!`
+        }
     }
 
     startTimeout()
@@ -93,6 +127,7 @@ export default function(bastion, opt={}) {
 
             resolve: async function(context, tag) {  
                 if (tag === "all") return this.route("all")
+                if (tag === "log") return this.route("log")
 
                 const user = await q.findOne({ userID: context.userID })
                 if (!user) return `You haven't shot any ducks, keep looking!`
@@ -122,7 +157,27 @@ export default function(bastion, opt={}) {
                     }).map( p => {
                         return counter(p.count) + ' ' + p.user
                     }).join("\n")
-                return "Duck Hunt leaderboard: \n" + bastion.helpers.code(msg)
+                return getSeason() + bastion.helpers.code(msg)
+            }
+        },
+
+        {
+            action: 'duckhunt:log',
+
+            resolve: async function(context, tag) {  
+                const shots = await qShot.Schema
+                    .find()
+                    .sort('-timestamp')
+                    .limit(5)
+                    .exec()
+
+                let msg = shots.map( n => {
+                    return `${formatTime(n.timestamp)} by ${n.shotBy.user} in <#${n.channelID}>`
+                }).join("\n")
+
+                msg = bastion.bot.fixMessage(msg)
+
+                return getSeason() + bastion.helpers.code(msg)
             }
         },
 
@@ -137,18 +192,41 @@ export default function(bastion, opt={}) {
                     messageID: msg_id
                 })
 
-                const id = Ducks.bang(context.channelID)
-                if (!id) return;
+                const duck = Ducks.bang(bastion, context.channelID, context.userID, context.user)
+                if (!duck) return;
+
+                const time = this.getSecondsMinutes(duck.shotTime)
+                let msg = `\:dog: *duck shot by ${duck.shotBy.user} in ${time}* `
+
+                if (duck.misses.length) {
+                    msg += ` \`[${duck.misses.length} miss]\``
+                }
 
                 await bastion.bot.editMessage({
                     channelID: context.channelID,
-                    messageID: id,
-                    message: `\:dog: *duck shot by ${context.user}*`
+                    messageID: duck.msgId,
+                    message: msg
                 })
 
-                saveBang(context.user, context.userID)
+                if (duck.newShot) {
+                    saveBang(context.user, context.userID)
+                }
 
                 startTimeout()
+            },
+
+            methods: {
+                getSecondsMinutes(shotTime) {
+                    let time = shotTime / 1000
+                    time = Math.floor(time * 10) / 10
+    
+                    if (time < 60) {
+                        return time + "s"
+                    }
+
+                    time = Math.floor(time / 60)
+                    return time + "m"
+                }
             }
         }
 
