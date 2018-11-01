@@ -28,17 +28,22 @@ const baseConfig = {
         "376901773656326144",
         "450913008323919872",
         "420136050065801227",
-        "359573690033242119"
+        "359573690033242119",
+        "506911331257942027"
     ]
 }
 
 const SIX_HOURS = 1000 * 60 * 60 * 6
 const EIGHTEEN_HOURS = 1000 * 60 * 60 * 12
+const FIVE_MINUTES = 100 * 60 * 5
 
 let nextDuck = {
     start: 0,
     end: 0
 }
+
+let isActive = false
+let activeTrack = {}
 
 let timeout = null
 
@@ -60,11 +65,43 @@ export default function(bastion, opt={}) {
         }
     }
 
+    function startTrack() {
+        isActive = true
+        activeTrack = {}
+
+        for (var i = 0; i < config.channels.length; i++) {
+            activeTrack[config.channels[i]] = 0
+        }
+
+        setTimeout(() => {
+            sendDuck()
+        }, FIVE_MINUTES)
+    }
+
+    bastion.on('message', (context) => {
+        if (!isActive) return;
+        if (!activeTrack[context.channelID]) return;
+
+        activeTrack[context.channelID]++
+    })
+
     async function sendDuck() {
-        const i = Math.floor(Math.random()*config.channels.length)
-        const id = config.channels[i]
+        const activeChannels = Object.entries(activeTrack)
+            .map( ([k,v]) => ({ id: k, count: v }))
+            .sort( (a,b) => {
+                if (a.count > b.count) return -1
+                if (a.count < b.count) return 1
+                else return 0
+            })
+            .slice(0, 3)
+
+        const i = Math.floor(Math.random()*activeChannels.length)
+        const id = activeChannels[i].id
         const msg = await bastion.send(id, "\:duck:")
         Ducks.create(id, msg.id)
+
+        isActive = false
+        activeTrack = {}
     }
     
     function getRandomInt(min, max) {
@@ -81,7 +118,7 @@ export default function(bastion, opt={}) {
         }
 
         timeout = setTimeout(() => {
-            sendDuck()
+            startTrack()
         }, time)
     }
 
@@ -100,9 +137,9 @@ export default function(bastion, opt={}) {
         const d = new Date()
 
         if (d < nextDuck.start) {
-            return `Next season: ${formatTime(nextDuck.start)} - ${formatTime(nextDuck.end)}`
+            return `Next season: ${formatTime(nextDuck.start)} - ${formatTime(nextDuck.end)} `
         } else {
-            return `It's hunting season!`
+            return `It's hunting season till ${formatTime(nextDuck.end)} ! `
         }
     }
 
