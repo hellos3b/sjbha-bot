@@ -35,7 +35,7 @@ const baseConfig = {
 
 const SIX_HOURS = 1000 * 60 * 60 * 6
 const EIGHTEEN_HOURS = 1000 * 60 * 60 * 12
-const FIVE_MINUTES = 100 * 60 * 5
+const FIVE_MINUTES = 1000 * 60 * 5
 
 let nextDuck = {
     start: 0,
@@ -70,7 +70,7 @@ export default function(bastion, opt={}) {
         activeTrack = {}
 
         for (var i = 0; i < config.channels.length; i++) {
-            activeTrack[config.channels[i]] = 0
+            activeTrack[config.channels[i]] = 1
         }
 
         setTimeout(() => {
@@ -86,27 +86,29 @@ export default function(bastion, opt={}) {
     })
 
     async function sendDuck() {
-        const activeChannels = Object.entries(activeTrack)
+        console.log("activeTrack", activeTrack)
+        let activeChannels = Object.entries(activeTrack)
             .map( ([k,v]) => ({ id: k, count: v }))
             .sort( (a,b) => {
                 if (a.count > b.count) return -1
                 if (a.count < b.count) return 1
                 else return 0
             })
-            .filter(n => b.count > 0)
+            .filter(n => n.count > 1)
             .slice(0, 3)
 
         console.log("ACTIVE CHANNELS", activeChannels)
-
-        isActive = false
-        activeTrack = {}
 
         if (!activeChannels.length) {
             activeChannels = Object.entries(activeTrack).map( ([k,v]) => ({ id: k, count: v }))
         }
 
+        isActive = false
+        activeTrack = {}
+
         const i = Math.floor(Math.random()*activeChannels.length)
         const id = activeChannels[i].id
+
         const msg = await bastion.send(id, "\:duck:")
         Ducks.create(id, msg.id)
     }
