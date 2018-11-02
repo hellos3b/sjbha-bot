@@ -93,15 +93,22 @@ export default function(bastion, opt={}) {
                 if (a.count < b.count) return 1
                 else return 0
             })
+            .filter(n => b.count > 0)
             .slice(0, 3)
+
+        console.log("ACTIVE CHANNELS", activeChannels)
+
+        isActive = false
+        activeTrack = {}
+
+        if (!activeChannels.length) {
+            activeChannels = Object.entries(activeTrack).map( ([k,v]) => ({ id: k, count: v }))
+        }
 
         const i = Math.floor(Math.random()*activeChannels.length)
         const id = activeChannels[i].id
         const msg = await bastion.send(id, "\:duck:")
         Ducks.create(id, msg.id)
-
-        isActive = false
-        activeTrack = {}
     }
     
     function getRandomInt(min, max) {
