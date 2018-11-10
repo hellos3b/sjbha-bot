@@ -32,7 +32,7 @@ export default function(bastion, opt={}) {
         ) +
         `\`${cmd} cancel\` to cancel\n`+
         `\`${cmd} edit\` to edit\n` +
-        `\`${cmd} mention\` to mention` +
+        `\`${cmd} mention\` to mention\n` +
         `\`${cmd} transfer\` to make someone else owner`
     
     const q = new bastion.Queries('Meetup')

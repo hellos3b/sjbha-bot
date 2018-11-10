@@ -126,6 +126,10 @@ export default function(bastion, opt={}) {
             end: new Date(d + EIGHTEEN_HOURS)
         }
 
+        if (timeout) {
+            clearTimeout(timeout)
+        }
+        
         timeout = setTimeout(() => {
             startTrack()
         }, time)
