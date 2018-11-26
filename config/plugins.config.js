@@ -26,7 +26,7 @@ const subscriptions = {
     "overwatch": "488848900900388884",
     "dota": "488848948598145026",
     "food": "488849102243889152"
-}
+};
 
 export default bastion => ([ 
     db(bastion, {
@@ -40,7 +40,9 @@ export default bastion => ([
         listRestrict: ["general-2", "admin"]
     }),
     Ban,
-    Stats,
+    Stats(bastion, {
+        listRestrict: ["general-2", "admin"]
+    }),
     Teams(bastion, {
         listRestrict: ["general-2", "admin"]
     }),
