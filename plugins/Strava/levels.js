@@ -23,7 +23,7 @@ export default {
     },
 
     calculate(activity, averages, user) {
-        let xp = activity.moving_time
+        let xp = activity.distance * 0.5
         let stats = utils.getActivityStats(activity)
 
         const challengeDone = challenges.test(stats, user)

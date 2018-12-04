@@ -175,9 +175,13 @@ export default function(bastion, opt={}) {
 
             options: bastion.parsers.args(["tag"]),
 
+            restrict: config.listRestrict,
+            restrictMessage: `You can only get the duckhunt list in <#506911331257942027>`, 
+
             resolve: async function(context, tag) {  
                 if (tag === "all") return this.route("all")
-                if (tag === "log") return this.route("log")
+
+                return this.route("log")
 
                 const user = await q.findOne({ userID: context.userID })
                 if (!user) return `You haven't shot any ducks, keep looking!`
@@ -191,10 +195,13 @@ export default function(bastion, opt={}) {
 
             resolve: async function(context, tag) {  
                 const counter = function(val) {
-                    if (val < 10) return '0' + val
+                    if (val < 10) return ' ' + val
                     else return val
                 }
+
                 const players = await q.getAll()
+
+                console.log(players)
                 const msg = players
                     .sort( (a, b) => {
                         if (a.count > b.count) {
@@ -202,12 +209,16 @@ export default function(bastion, opt={}) {
                         } else if (a.count < b.count) {
                             return 1
                         } else {
-                            return 0
+                            if (a.misses > b.misses) {
+                                return -1
+                            } else {
+                                return 1
+                            }
                         }
                     }).map( p => {
-                        return counter(p.count) + ' ' + p.user
+                        return `[${counter(p.count)}-${p.misses}] ${p.user}`
                     }).join("\n")
-                return getSeason() + bastion.helpers.code(msg)
+                return getSeason() + bastion.helpers.code(msg, "ini")
             }
         },
 

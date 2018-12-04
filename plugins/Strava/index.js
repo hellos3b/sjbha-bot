@@ -168,39 +168,42 @@ export default function(bastion, opt={}) {
                 const { sorter, order } = this.getSortfn(type)
 
                 const leaderboard = await api.leaderboard()
-                const sorted = leaderboard.sort(sorter)
+                const sorted = leaderboard
+                    .filter(n => n.total > 0)
+                    .sort(sorter)
 
                 var table = new Table("Past 4 Week Leaders");
                 table.removeBorder();
     
-                leaderboard.forEach( (entry, i) => {
-                    let stats = {
-                        distance: `${entry.distance} mi`, 
-                        time: entry.timeStr, 
-                        pace: `${entry.paceStr}/mi`
-                    }
-    
-                    table.addRow(
-                        `${i+1}.`, 
-                        entry.user, 
-                        stats[order[0]],
-                        stats[order[1]],
-                        stats[order[2]],
-                        "[" + entry.total + " runs]"
-                    )
-                })
+                sorted.filter(n => n.total > 0)
+                    .forEach( (entry, i) => {
+                        let stats = {
+                            distance: `${entry.distance} mi`, 
+                            time: entry.timeStr, 
+                            pace: `${entry.paceStr}/mi`
+                        }
+        
+                        table.addRow(
+                            `${i+1}.`, 
+                            entry.user, 
+                            stats[order[0]],
+                            stats[order[1]],
+                            stats[order[2]],
+                            "[" + entry.total + " runs]"
+                        )
+                    })
 
                 return bastion.helpers.code(table.toString(), "ini")
             },
 
             methods: {
                 getSortfn(type) {
-                    let sorter = (a,b) => a.time < b.time ? 1 : -1
-                    let order = ["time", "distance", "pace"]
+                    let sorter = (a, b) => a.distance < b.distance ? 1 : -1
+                    let order = ["distance", "time", "pace"]
         
-                    if (type === "distance") {
-                        sorter = (entry) => entry.distance
-                        order = ["distance", "time", "pace"]
+                    if (type === "time") {
+                        sorter = (a,b) => a.time < b.time ? 1 : -1
+                        order = ["time", "distance", "pace"]
                     } else if (type === "pace") {
                         sorter = (entry) => entry.pace_seconds
                         order = ["pace", "distance", "time"]
