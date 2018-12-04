@@ -14,6 +14,26 @@ export default {
         }
     },
 
+    saveMisses: async function(q, misses) {
+        console.log("saveMisses", misses)
+
+        for (var i = 0; i < misses.length; i++) {
+            let userID = misses[i].userID
+            let player = await q.findOne({ userID })
+            if (!player) {
+                q.create({
+                    user: misses[i].user, 
+                    userID,
+                    count: 0,
+                    misses: 1
+                })
+            } else {
+                player.misses++
+                q.update({ userID }, player)
+            }
+        }
+    },
+
     bang(bastion, channelID, userID, user) {
         if (!ducks[channelID]) return null
 
@@ -34,6 +54,8 @@ export default {
                     channelID: channelID,
                     timestamp: duck.shotTimestamp
                 })
+
+                this.saveMisses(new bastion.Queries("Duckhunt"), duck.misses)
                 ducks[channelID] = null
             }, MISS_TIMER) 
 
@@ -41,7 +63,10 @@ export default {
                 newShot: true
             })
         } else {
-            duck.misses.push({ user, userID })
+            // Check if it's not already in it
+            if (userID !== duck.shotBy && !duck.misses.filter(n => n.userID === userID).length) {
+                duck.misses.push({ user, userID })
+            }
         }
 
         return duck
