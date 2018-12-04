@@ -78,6 +78,21 @@ export default function(bastion, config={}) {
                 bastion.bot.simulateTyping(channelID)
                 this.send(channelID, msg.join(" "))
             }
+        },
+
+        {
+            command: "git",
+            resolve: "Github: https://github.com/hellos3b/sjbha-bot"
+        },
+
+        {
+            command: "github",
+            resolve: "Github: https://github.com/hellos3b/sjbha-bot"
+        },
+
+        {
+            command: "bug",
+            resolve: "Submit the bug here so I can keep track of them: https://github.com/hellos3b/sjbha-bot/issues/new"
         }
 
         // {
