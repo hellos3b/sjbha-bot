@@ -70,9 +70,9 @@ export default function(bastion, opt={}) {
                     if (user.bucks < 0) {
                         user.bucks = 0
                     }
-                    
+
                     await q.update({userID: user.userID}, user)
-                    return `${user} was just fined 50rrb for trying to exploit the system`
+                    return `✋ ${user} was just fined 50rrb for trying to exploit the system`
                 }
 
                 user.bucks -= bucks

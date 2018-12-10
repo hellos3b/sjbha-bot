@@ -146,7 +146,9 @@ export default function(bastion, opt={}) {
             restrict: config.listRestrict,
 
             resolve: async function(context, user) {
-                const teams = await q.getAll()
+                let teams = await q.getAll()
+
+                teams = teams.filter( n => !n.pruned )
                 
                 this.type()
 
