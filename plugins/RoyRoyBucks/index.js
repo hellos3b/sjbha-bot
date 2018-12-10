@@ -65,6 +65,16 @@ export default function(bastion, opt={}) {
 
                 if (!reciever) return `${targetName} hasn't opened up a bank account yet`
 
+                if (target === user.userID) {
+                    user.bucks -= 50
+                    if (user.bucks < 0) {
+                        user.bucks = 0
+                    }
+                    
+                    await q.update({userID: user.userID}, user)
+                    return `${user} was just fined 50rrb for trying to exploit the system`
+                }
+
                 user.bucks -= bucks
                 reciever.bucks += bucks
 
