@@ -78,7 +78,7 @@ export default bastion => ([
     Upvotes,
     Dungeon,
     Reddit(bastion, {
-        channel: "466328017342431233"
+        channel: "506911331257942027"
     }),
     DuckHunt(bastion, {
         listRestrict: ["shitpost", "430517752546197509"]
