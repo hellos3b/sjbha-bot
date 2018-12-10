@@ -8,7 +8,8 @@ const Schema = mongoose.Schema({
     resist: {
         type: Boolean,
         default: false
-    }
+    },
+    pruned: Boolean
 });
 
 export default mongoose.model('TeamSchema', Schema);
