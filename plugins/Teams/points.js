@@ -72,7 +72,10 @@ export default (bastion, config) => {
                     user: n.user,
                     userID: n.userID,
                     team: n.team,
+                    oldTeam: n.oldTeam,
                     resist: n.resist,
+                    guardian: n.guardian,
+                    uprising: n.uprising,
                     yes, maybe,
                     points: yes * config.yes + maybe * config.maybe
                 }

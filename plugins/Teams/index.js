@@ -316,7 +316,7 @@ export default function(bastion, opt={}) {
 
             methods: {
                 createOutput(groupedTeams) {
-                    let msg = ""
+                    let msg = "Legend: \n† Denied by Resistance\n⧪ Unfit for Guardian\n± Captian in Uprising\n⦰ Rejected by Uprising\n\n"
 
                     for (var k in groupedTeams) {
                         const points = groupedTeams[k]
@@ -325,14 +325,41 @@ export default function(bastion, opt={}) {
                                 if (person.team === "Guardians") {
                                     points *= 2
                                 }
+                                if (person.team === "Uprising" && person.oldTeam === "Resistance") {
+                                    points *= 2
+                                }
                                 return res + points
                             }, 0)
 
                         const users = groupedTeams[k]
                             .sort( (a,b) => a.points < b.points ? 1 : -1)
                             .map( n => {
-                                const pre = (n.resist && n.team !== "Resistance" && n.team !== "Observers") ? "x " : "  "
+                                let pre = "  "
+
+                                if (n.resist) {
+                                    if (n.team !== "Resistance" && n.team !== "Observers" && n.team !== "Uprising") {
+                                            pre = "† "
+                                    }
+                                }
+
+                                if (n.uprising) {
+                                    if (n.team !== "Uprising" && n.team !== "Observers") {
+                                        pre = "⦰ " 
+                                    }
+                                }
+
+                                if (n.team === "Uprising" && n.oldTeam === "Resistance") {
+                                    pre = "± "
+                                }
+
+                                if (n.guardian) {
+                                    if (n.team !== "Guardians") {
+                                        pre = "⧪ " 
+                                    }
+                                }
+
                                 let pts = (n.points || "").toString().padEnd(3)
+
                                 if (n.team === "Observers") {
                                     pts = "".padEnd(3)
                                 }
