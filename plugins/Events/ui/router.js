@@ -13,5 +13,12 @@ export default (bastion, config) => {
             });
     })
 
+    router.get('/api/archive.json', async (req, res) => {
+        let q2 = new bastion.Queries('MeetupArchive')
+        let archive = await q2.getAll()
+
+        res.send(archive)
+    })
+
     return router
 }
