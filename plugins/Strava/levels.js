@@ -5,6 +5,7 @@ const SQUARES = 30; // default squares in XP bar
 const LEVEL_EXP = 10800; // how much xp to level up
 const MIN_RUNS = 5; // amount of runs in average to get bonuses
 const BONUS_AMT = 0.2;
+const BASE_EXP = 2000;
 const CHALLENGE_BONUS = 1200
 
 export default {
@@ -23,8 +24,10 @@ export default {
     },
 
     calculate(activity, averages, user) {
-        let xp = activity.distance * 0.5
-        let stats = utils.getActivityStats(activity)
+        const stats = utils.getActivityStats(activity)
+        let xp = (averages.total >= MIN_RUNS) ?
+            BASE_EXP * (stats.distance / averages.distance) 
+            : 1000
 
         const challengeDone = challenges.test(stats, user)
         if (challengeDone) {
@@ -34,21 +37,13 @@ export default {
         let bonuses = []
         if (averages.total >= MIN_RUNS) {
             const distDiff = stats.distance - averages.distance
-            const paceDiff = averages.pace_seconds - stats.pace_seconds
-            
+
             if (distDiff > 0) {
-                let perc = Math.floor(distDiff / averages.distance * 1000)/10
                 const dist = Math.floor(distDiff*100) / 100
                 bonuses.push(`+${dist}mi`)
             }
-
-            if (paceDiff > 0) {
-                let perc = Math.floor(paceDiff / averages.pace_seconds * 1000)/10
-                bonuses.push(`+${perc}% spd`)
-            }
-            const xpbonus = BONUS_AMT*bonuses.length
-            xp += xp*xpbonus
         }
+
         xp = Math.floor(xp)
 
         user.EXP += xp
