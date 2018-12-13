@@ -26,7 +26,6 @@ export default function(bastion, opt={}) {
         `< ${cmd} auth > Authenticate the bot to your strava account\n`+
         `< ${cmd} stats @user > View strava stats\n` +
         `< ${cmd} level > View your XP and Level\n` +
-        `< ${cmd} levels > See everybody's level\n` +
         `< ${cmd} leaders > View who ran the most in the last 4 weeks\n` +
         `< ${cmd} calendar > View your 4 weeks calendar\n` +
         `< ${cmd} avg > View your 4 weeks average stats\n` +
@@ -136,31 +135,6 @@ export default function(bastion, opt={}) {
                     `XP: ${user.EXP}/${levels.LEVEL_EXP}\n`+
                     `${bar}`, 
                 "ini")
-            }
-        },
-
-        // leaderboard for levels
-        {
-            action: `${config.command}:levels`,
-            resolve: async function(context) {
-                bastion.bot.simulateTyping(context.channelID)
-                const leaderboard = await api.leaderboardLevels()
-
-                // create table
-                var table = new Table("Levels")
-                table.removeBorder()
-    
-                leaderboard.forEach( entry => {
-                    const bar = levels.XPBar(entry.EXP, 12)
-                    table.addRow( 
-                        entry.user,
-                        `lvl ${entry.level}`, 
-                        `${bar}`,
-                        `${entry.EXP}XP`
-                    )
-                })
-
-                return bastion.helpers.code(table.toString(), "ini")
             }
         },
 
