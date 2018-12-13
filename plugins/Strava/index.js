@@ -42,6 +42,17 @@ export default function(bastion, opt={}) {
     bastion.app.use(config.apiUrl, auth.router())
     bastion.app.use(config.apiUrl, webhook.router())
 
+    async function sendRundayMessage() {
+        const users = await q.getAll()
+        const challengers = users.filter(n => n.challenge)
+
+        let msg = "**<:kudos:477927260826107904> Runday Monday!**\n\nHere's this weeks challenges:\n"
+        msg += bastion.helpers.code( utils.challengeTable(challengers), "md") 
+        msg += "\n*Good luck!*"
+
+        bastion.send(bastion.channels.strava, msg)
+    }
+
     webhook.on('activity', async (data) => {
         const details = await api.addActivity(data)
         const msg = api.getActivityString(details)
@@ -50,14 +61,7 @@ export default function(bastion, opt={}) {
 
     bastion.on('schedule-weekly', async () => {
         await api.resetChallenges()
-        const users = await q.getAll()
-        const challengers = users.filter(n => n.challenge)
-
-        const msg = "**<:kudos:477927260826107904> Runday Monday!**\nHere's this weeks challenges:\n"
-        msg += bastion.helpers.code( utils.challengeTable(challengers), "md") 
-        msg += "\n\nGood luck!"
-
-        bastion.send(bastion.channels.strava, msg)
+        sendRundayMessage()
     })
 
     return [
