@@ -41,7 +41,7 @@ export default bastion =>{
 
         getAthleteActivities(owner_id, access_token, start_date) {
             const epoch = start_date.getTime() / 1000
-            const url = `https://www.strava.com/api/v3/athlete/activities?after=${epoch}&page=1`
+            const url = `https://www.strava.com/api/v3/athlete/activities?after=${epoch}&page=1&per_page=100`
         
             return Axios.get(url, this.authHeader(access_token)).then( res => res.data )
         },    
