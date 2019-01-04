@@ -3,6 +3,8 @@
  * 
  */
 
+/** @typedef {import('@/types').PluginResolver} PluginResolver */
+
 import deepmerge from 'deepmerge'
 import chalk from 'chalk'
 
@@ -12,6 +14,7 @@ const baseConfig = {
     subscriptions: {}
 }
 
+/** @type {PluginResolver} */
 export default function(bastion, opt={}) {
     const config = deepmerge(baseConfig, opt)
     const help = "Tags you can subscribe to: " + Object.keys(config.subscriptions).join(", ")

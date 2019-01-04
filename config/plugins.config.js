@@ -18,6 +18,7 @@ import Upvotes from '../plugins/Upvotes'
 import Dungeon from '../plugins/Dungeon'
 import Reddit from '../plugins/Reddit'
 import DuckHunt from '../plugins/DuckHunt'
+import RoyRoyBucks from '../plugins/RoyRoyBucks'
 
 const subscriptions = {
     "photomeet": "486330820114513920",
@@ -77,9 +78,10 @@ export default bastion => ([
     Upvotes,
     Dungeon,
     Reddit(bastion, {
-        channel: "466328017342431233"
+        channel: "506911331257942027"
     }),
     DuckHunt(bastion, {
         listRestrict: ["shitpost", "430517752546197509"]
-    })
+    }),
+    RoyRoyBucks
 ])

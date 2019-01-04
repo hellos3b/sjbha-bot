@@ -6,11 +6,20 @@ import challenges from './challenges'
 
 const logPrefix = `    ` + chalk.blue("[Strava]")
 
+const dateID = date => {
+    const month = date.getMonth()
+    const day = date.getDate()
+    return `${month}-${day}`
+}
+
 export default bastion =>{
     const $ = new bastion.Queries('stravaID')
 
     return {
-        // Creates the header JSON for Axios
+        /**
+         * Provides the header for REST calls to the Strava api
+         * @param {string} token User's Token
+         */
         authHeader(token) {
             return { 
                 headers: {
@@ -19,7 +28,10 @@ export default bastion =>{
             }
         },
 
-        // Get user info from mongo
+        /**
+         * Get user data via search query
+         * @param {object} obj 
+         */
         getUserInfo: async function(obj) {
             console.log(logPrefix, chalk.gray("getAthlete -> "), obj)
             const user = await $.findOne(obj)
@@ -41,7 +53,7 @@ export default bastion =>{
 
         getAthleteActivities(owner_id, access_token, start_date) {
             const epoch = start_date.getTime() / 1000
-            const url = `https://www.strava.com/api/v3/athlete/activities?after=${epoch}&page=1&per_page=100`
+            const url = `https://www.strava.com/api/v3/athlete/activities?after=${epoch}&per_page=100`
         
             return Axios.get(url, this.authHeader(access_token)).then( res => res.data )
         },    
@@ -51,7 +63,7 @@ export default bastion =>{
             const user = await this.getUserInfo({userID})
             if (!user) return null
 
-            const stats = await this.getAthleteStats(user.stravaID, user.accessToken, user.user)
+            const stats = await this.getAthleteStats(user.stravaID, user.accessToken)
             if (!stats) return null
 
             stats.username = user.user
@@ -64,7 +76,7 @@ export default bastion =>{
         getBatchStats: async function(users) {
             console.log(logPrefix, chalk.gray("getBatchStats -> "), users.length)
             const promises = users.map( n => {
-                return this.getAthleteStats(n.stravaID, n.accessToken, n.user)
+                return this.getAthleteStats(n.stravaID, n.accessToken)
                     .then( json => {
                         if (!json) return null
                         json.user = n.user
@@ -105,6 +117,18 @@ export default bastion =>{
         addActivity: async function({ owner_id, activity_id }) {
             console.log(logPrefix, chalk.gray("addActivity -> ", activity_id))
             const user = await this.getUserInfo({stravaID: owner_id})
+
+            let addXP = true
+            // limit to 1 level a day
+            if (user.lastRun) {
+                const a = dateID(new Date())
+                const b = dateID(new Date(user.lastRun))
+
+                if (a === b) {
+                    addXP = false
+                }
+            }
+
             const [activityData, stats] = await Promise.all([
                 this.getActivity(activity_id, user.accessToken),
                 this.getAthleteStats(user.stravaID, user.accessToken)
@@ -115,31 +139,40 @@ export default bastion =>{
 
             const statsParsed = utils.getActivityStats(activity)
             const averages = utils.runTotalAverages(stats.recent_run_totals)
-            const level = levels.calculate(activity, averages, user)
+            let level = null
+            if (addXP) {
+                level = levels.calculate(activity, averages, user)
 
-            if (level.challengeDone) {
-                user.challenge.finished = true
+                if (level.challengeDone) {
+                    user.challenge.finished = true
+                }
             }
 
+            user.lastRun = new Date()
             await $.update({userID: user.userID}, user)
 
             return {
+                activity,
                 level,
                 stats: statsParsed,
                 user
             }  
         },
 
-        getActivityString({level, stats, user}) {
+        getActivityString({activity, level, stats, user}) {
             console.log(logPrefix, chalk.gray("getActivityString -> "))
-            let message = `👏 **${user.user}** just recorded a run! ${stats.distance} mi, ${stats.pace} pace, ${stats.time} time`
-            let xp = `${user.level} ${levels.XPBar(user.EXP, 15)} +${level.xp}xp `
-            xp += level.bonuses.join(" ")
-            xp += level.challengeDone ? `\n👏 Weekly Challenge! +${levels.CHALLENGE_BONUS}xp` : ''
-            xp += level.lvldUp ? '\n⭐ LVL UP!' : ''
+            const verb = activity.manual ? 'logged' : 'recorded'
+            let message = `👏 **${user.user}** just ${verb} a run! - *${activity.name}*\n\`\`\`📍${stats.distance} mi   🏃${stats.pace} pace   🕒${stats.time} time\`\`\``
 
-            message += "```ini\n" + xp + "```"
-        
+            if (level) {
+                let xp = `${user.level} ${levels.XPBar(user.EXP, 15)} +${level.xp}xp `
+                xp += level.bonuses.join(" ")
+                xp += level.challengeDone ? `\n👏 Weekly Challenge! +${levels.CHALLENGE_BONUS}xp` : ''
+                xp += level.lvldUp ? '\n⭐ LVL UP!' : ''
+
+                message += "```ini\n" + xp + "```"
+            }
+
             return message
         },
 

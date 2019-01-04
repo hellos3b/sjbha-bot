@@ -37,7 +37,8 @@ const Schema = mongoose.Schema({
         type: Number,
         default: 0
     },
-    challenge: ChallengeSchema
+    challenge: ChallengeSchema,
+    lastRun: Date
 });
 
 export default mongoose.model('stravaID', Schema);

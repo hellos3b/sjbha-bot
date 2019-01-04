@@ -29,6 +29,18 @@ const baseConfig = {
         {
             name: "Resistance",
             roleId: "470114559911526402"
+        },
+        {
+            name: "Observers",
+            roleId: "521592522796171274"
+        },
+        {
+            name: "Guardians",
+            roleId: "521592460728598528"
+        },
+        {
+            name: "Uprising",
+            roleId: "521592718783283200"
         }
     ]
 }
@@ -39,6 +51,17 @@ export default function(bastion, opt={}) {
     const log = bastion.Logger("Teams").log
     const points = Points(bastion, config.points)
 
+    function removeRoles(userID) {
+        const promises = config.teams.map( t => {
+            return bastion.bot.removeFromRole({
+                serverID: bastion.config.serverId,
+                roleID: t.roleId,
+                userID
+            })
+        })
+        return Promise.all(promises)
+    }
+
     return [
 
         {
@@ -48,6 +71,9 @@ export default function(bastion, opt={}) {
 
             resolve: async function(context, cmd) {
                 if (cmd === "resist") return this.route("resist")
+                if (cmd === "observers") return this.route("observe")
+                if (cmd === "guardians") return this.route("guardian")
+                if (cmd === "uprising") return this.route("uprising")
                 if (cmd === "list") return this.route("list")
                 return this.route("assign")
             }
@@ -94,9 +120,13 @@ export default function(bastion, opt={}) {
 
                 // if already on resistance
                 if (user.team === 'Resistance') return `You're already a part of the Resistance!`
+                if (user.team === 'Uprising') return `You can't resist the Resistance's Resistance`
+                if (user.team === 'Guardians') return `You can't resist`
+                if (user.team === 'Observers') return `You can't resist`
 
                 // If failed to resist
                 if (user.resist) return `You've already failed to resist, *traitor*`
+                if (user.guardian) return `You tried to be a hero and join the Guardians, now you're not welcomed to the Resistance`
 
                 return user
             },
@@ -110,7 +140,7 @@ export default function(bastion, opt={}) {
                     user.oldTeam = user.team
                     user.team = "Resistance"
 
-                    await this.removeRoles(context.userID)
+                    await removeRoles(context.userID)
                     const resistance = config.teams.find( n => n.name === "Resistance")
                     bastion.bot.addToRole({
                         serverID: bastion.config.serverId,
@@ -123,19 +153,143 @@ export default function(bastion, opt={}) {
                 }
 
                 user.save()
+            }
+        },
+
+        // Observers
+        {
+            action: "team:observe", 
+
+            validate: async function(context) {
+                const user = await q.findOne({userID: context.userID})
+
+                // If they aren't on a team yet
+                if (!user) return `You have to have joined a team in order to join the Observers`
+
+                // if already on resistance
+                if (user.team === 'Resistance') return `You can't join observers from Resistance`
+                if (user.team === 'Uprising') return `You can't join observers from Uprising`
+                if (user.team === 'Observers') return `You're already on the Observers`
+
+                return user
             },
 
-            methods: {
-                removeRoles: async function(userID) {
-                    const promises = config.teams.map( t => {
-                        return bastion.bot.removeFromRole({
-                            serverID: bastion.config.serverId,
-                            roleID: t.roleId,
-                            userID
-                        })
+            resolve: async function(context, user) {
+
+                user.resist = true
+
+                user.oldTeam = user.team
+                user.team = "Observers"
+
+                await removeRoles(context.userID)
+                const resistance = config.teams.find( n => n.name === "Observers")
+                bastion.bot.addToRole({
+                    serverID: bastion.config.serverId,
+                    userID: context.userID,
+                    roleID: resistance.roleId
+                })
+                this.send(context.channelID, "⛑ Welcome to the Observers")
+
+                user.save()
+            }
+        },
+
+        // Guardian
+        {
+            action: "team:guardian", 
+
+            validate: async function(context) {
+                const user = await q.findOne({userID: context.userID})
+
+                // If they aren't on a team yet
+                if (!user) return `You have to have joined a team in order to join the Guardians`
+
+                // if already on resistance
+                if (user.team === 'Resistance') return `The Resistance isn't welcome to the Guardians`
+                if (user.team === 'Uprising') return `The Uprising isn't welcome to the Guardians`
+                if (user.team === 'Observers') return `You can't join the Guardians`
+                if (user.team === 'Guardians') return `You are already on the Guardians`
+
+                if (user.resist) return `The Guardians don't accept resistors`
+
+                // If failed to guardian
+                if (user.guardian) return `You tried out for the Guardians, but were found not fit`
+
+                return user
+            },
+
+            resolve: async function(context, user) {
+                const rng = Math.random() < 0.5
+
+                user.guardian = true
+
+                if (rng) {
+                    user.oldTeam = user.team
+                    user.team = "Guardians"
+
+                    await removeRoles(context.userID)
+                    const resistance = config.teams.find( n => n.name === "Guardians")
+                    bastion.bot.addToRole({
+                        serverID: bastion.config.serverId,
+                        userID: context.userID,
+                        roleID: resistance.roleId
                     })
-                    return Promise.all(promises)
+                    this.send(context.channelID, "⚔ Welcome to the Guardians")
+                } else {
+                    this.send(context.channelID, "🚫 You tried out for the Guardians, but were found not fit")
                 }
+
+                user.save()
+            }
+        },
+
+        // Uprising
+        {
+            action: "team:uprising", 
+
+            validate: async function(context) {
+                const user = await q.findOne({userID: context.userID})
+
+                // If they aren't on a team yet
+                if (!user) return `You have to have joined a team in order to join the Guardians`
+
+                // if already on resistance
+                if (user.team === 'Uprising') return `You're already in the Uprising`
+                if (user.team === 'Observers') return `You can't join the Uprising`
+                if (user.team === 'Guardians') return `The Uprising doesn't accept Guardians`
+
+                if (!user.resist) return `The Uprising is only for people who tried to resist`
+
+                if (user.uprising) return `You've already tried joining the Uprising, they said no`
+
+                // If failed to guardian
+                if (user.guardian) return `The Uprising doesn't accept anyone who tried to join the Guardians`
+
+                return user
+            },
+
+            resolve: async function(context, user) {
+                const rng = Math.random() < 0.5
+
+                user.uprising = true
+
+                if (rng) {
+                    user.oldTeam = user.team
+                    user.team = "Uprising"
+
+                    await removeRoles(context.userID)
+                    const resistance = config.teams.find( n => n.name === "Uprising")
+                    bastion.bot.addToRole({
+                        serverID: bastion.config.serverId,
+                        userID: context.userID,
+                        roleID: resistance.roleId
+                    })
+                    this.send(context.channelID, "✊ Welcome to the Uprising")
+                } else {
+                    this.send(context.channelID, "🚫 The Uprising does not welcome you")
+                }
+
+                user.save()
             }
         },
 
@@ -146,7 +300,9 @@ export default function(bastion, opt={}) {
             restrict: config.listRestrict,
 
             resolve: async function(context, user) {
-                const teams = await q.getAll()
+                let teams = await q.getAll()
+
+                teams = teams.filter( n => !n.pruned )
                 
                 this.type()
 
@@ -160,19 +316,54 @@ export default function(bastion, opt={}) {
 
             methods: {
                 createOutput(groupedTeams) {
-                    let msg = ""
+                    let msg = "Legend: \n† Denied by Resistance\n⧪ Unfit for Guardian\n± Captian in Uprising\n⦰ Rejected by Uprising\n\n"
 
                     for (var k in groupedTeams) {
                         const points = groupedTeams[k]
                             .reduce( (res, person) => {
-                                return res + person.points
+                                let points = person.points
+                                if (person.team === "Guardians") {
+                                    points *= 2
+                                }
+                                if (person.team === "Uprising" && person.oldTeam === "Resistance") {
+                                    points *= 2
+                                }
+                                return res + points
                             }, 0)
 
                         const users = groupedTeams[k]
                             .sort( (a,b) => a.points < b.points ? 1 : -1)
                             .map( n => {
-                                const pre = (n.resist && n.team !== "Resistance") ? "x " : "  "
-                                const pts = (n.points || "").toString().padEnd(3)
+                                let pre = "  "
+
+                                if (n.resist) {
+                                    if (n.team !== "Resistance" && n.team !== "Observers" && n.team !== "Uprising") {
+                                            pre = "† "
+                                    }
+                                }
+
+                                if (n.uprising) {
+                                    if (n.team !== "Uprising" && n.team !== "Observers") {
+                                        pre = "⦰ " 
+                                    }
+                                }
+
+                                if (n.team === "Uprising" && n.oldTeam === "Resistance") {
+                                    pre = "± "
+                                }
+
+                                if (n.guardian) {
+                                    if (n.team !== "Guardians") {
+                                        pre = "⧪ " 
+                                    }
+                                }
+
+                                let pts = (n.points || "").toString().padEnd(3)
+
+                                if (n.team === "Observers") {
+                                    // @ts-ignore
+                                    pts = "".padEnd(3)
+                                }
                                 return pts + pre + n.user
                             }).join("\n")
 

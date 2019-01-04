@@ -26,7 +26,6 @@ export default function(bastion, opt={}) {
         `< ${cmd} auth > Authenticate the bot to your strava account\n`+
         `< ${cmd} stats @user > View strava stats\n` +
         `< ${cmd} level > View your XP and Level\n` +
-        `< ${cmd} levels > See everybody's level\n` +
         `< ${cmd} leaders > View who ran the most in the last 4 weeks\n` +
         `< ${cmd} calendar > View your 4 weeks calendar\n` +
         `< ${cmd} avg > View your 4 weeks average stats\n` +
@@ -42,22 +41,33 @@ export default function(bastion, opt={}) {
     bastion.app.use(config.apiUrl, auth.router())
     bastion.app.use(config.apiUrl, webhook.router())
 
+    async function sendRundayMessage() {
+        const users = await q.getAll()
+        const challengers = users.filter(n => n.challenge)
+
+        let msg = "**<:kudos:477927260826107904> Runday Monday!**\n\nHere's this weeks challenges:\n"
+        msg += bastion.helpers.code( utils.challengeTable(challengers), "md") 
+        msg += "\n*Good luck!*"
+
+        bastion.send(bastion.channels.strava, msg)
+    }
+
     webhook.on('activity', async (data) => {
         const details = await api.addActivity(data)
+        if (!details) {
+            return
+        }
+
         const msg = api.getActivityString(details)
+        
+        // for dev
+        // bastion.send("430517752546197509", msg)
         bastion.send(bastion.channels.strava, msg)
     })
 
     bastion.on('schedule-weekly', async () => {
         await api.resetChallenges()
-        const users = await q.getAll()
-        const challengers = users.filter(n => n.challenge)
-
-        const msg = "**<:kudos:477927260826107904> Runday Monday!**\nHere's this weeks challenges:\n"
-        msg += bastion.helpers.code( utils.challengeTable(challengers), "md") 
-        msg += "\n\nGood luck!"
-
-        bastion.send(bastion.channels.strava, msg)
+        sendRundayMessage()
     })
 
     return [
@@ -135,31 +145,6 @@ export default function(bastion, opt={}) {
             }
         },
 
-        // leaderboard for levels
-        {
-            action: `${config.command}:levels`,
-            resolve: async function(context) {
-                bastion.bot.simulateTyping(context.channelID)
-                const leaderboard = await api.leaderboardLevels()
-
-                // create table
-                var table = new Table("Levels")
-                table.removeBorder()
-    
-                leaderboard.forEach( entry => {
-                    const bar = levels.XPBar(entry.EXP, 12)
-                    table.addRow( 
-                        entry.user,
-                        `lvl ${entry.level}`, 
-                        `${bar}`,
-                        `${entry.EXP}XP`
-                    )
-                })
-
-                return bastion.helpers.code(table.toString(), "ini")
-            }
-        },
-
         {
             action: `${config.command}:leaders`,
             options: bastion.parsers.args(["cmd", "type"]),
@@ -230,6 +215,10 @@ export default function(bastion, opt={}) {
                 if (!user) return "This person has not authenticated with Strava!"
 
                 const activities = await api.getActivities(user, start_date)
+                if (!activities.length && context.userID === user.userID) {
+                    return `You haven't run in the last 4 weeks. Go run, Tubertha!`
+                }
+
                 const calendar = utils.calendar(user, activities, start_date)
 
                 return bastion.helpers.code(calendar)
