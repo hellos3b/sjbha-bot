@@ -16,7 +16,10 @@ export default bastion =>{
     const $ = new bastion.Queries('stravaID')
 
     return {
-        // Creates the header JSON for Axios
+        /**
+         * Provides the header for REST calls to the Strava api
+         * @param {string} token User's Token
+         */
         authHeader(token) {
             return { 
                 headers: {
@@ -25,7 +28,10 @@ export default bastion =>{
             }
         },
 
-        // Get user info from mongo
+        /**
+         * Get user data via search query
+         * @param {object} obj 
+         */
         getUserInfo: async function(obj) {
             console.log(logPrefix, chalk.gray("getAthlete -> "), obj)
             const user = await $.findOne(obj)
@@ -57,7 +63,7 @@ export default bastion =>{
             const user = await this.getUserInfo({userID})
             if (!user) return null
 
-            const stats = await this.getAthleteStats(user.stravaID, user.accessToken, user.user)
+            const stats = await this.getAthleteStats(user.stravaID, user.accessToken)
             if (!stats) return null
 
             stats.username = user.user
@@ -70,7 +76,7 @@ export default bastion =>{
         getBatchStats: async function(users) {
             console.log(logPrefix, chalk.gray("getBatchStats -> "), users.length)
             const promises = users.map( n => {
-                return this.getAthleteStats(n.stravaID, n.accessToken, n.user)
+                return this.getAthleteStats(n.stravaID, n.accessToken)
                     .then( json => {
                         if (!json) return null
                         json.user = n.user

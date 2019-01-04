@@ -361,6 +361,7 @@ export default function(bastion, opt={}) {
                                 let pts = (n.points || "").toString().padEnd(3)
 
                                 if (n.team === "Observers") {
+                                    // @ts-ignore
                                     pts = "".padEnd(3)
                                 }
                                 return pts + pre + n.user

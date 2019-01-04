@@ -1,4 +1,5 @@
 import dotenv from 'dotenv'
+
 dotenv.config()
 
 import Bastion from './lib/bastion'
@@ -20,7 +21,7 @@ const bastion = Bastion({
     token: process.env.DISCORD_TOKEN,
     channels,
     serverId: "358442034790400000",
-    prefix: process.env.NODE_ENV === "production" ? "!" : "_"
+    prefix: process.env.NODE_ENV === "production" ? "!" : (process.env.npm_config_symbol || "_")
 })
     
 // Load modules
