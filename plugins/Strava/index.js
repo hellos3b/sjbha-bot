@@ -54,7 +54,14 @@ export default function(bastion, opt={}) {
 
     webhook.on('activity', async (data) => {
         const details = await api.addActivity(data)
+        if (!details) {
+            return
+        }
+
         const msg = api.getActivityString(details)
+        
+        // for dev
+        // bastion.send("430517752546197509", msg)
         bastion.send(bastion.channels.strava, msg)
     })
 
@@ -208,6 +215,10 @@ export default function(bastion, opt={}) {
                 if (!user) return "This person has not authenticated with Strava!"
 
                 const activities = await api.getActivities(user, start_date)
+                if (!activities.length && context.userID === user.userID) {
+                    return `You haven't run in the last 4 weeks. Go run, Tubertha!`
+                }
+
                 const calendar = utils.calendar(user, activities, start_date)
 
                 return bastion.helpers.code(calendar)
