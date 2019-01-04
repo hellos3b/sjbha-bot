@@ -6,7 +6,7 @@
     "author": "sebby",
     "scripts": {
         "start": "node -r babel-core/register app.js",
-        "dev": "node -r babel-core/register app.js",
+        "dev": "NODE_ENV=development node -r babel-core/register app.js",
         "web": "NODE_ENV=web node -r babel-core/register app.js",
         "admin": "NODE_ENV=admin node -r babel-core/register app.js"
     },
@@ -42,5 +42,8 @@
         "sugar-date": "^2.0.4",
         "vanilla-js-calendar": "^1.0.10",
         "winston": "^2.4.1"
+    },
+    "devDependencies": {
+        "@types/node": "^10.12.18"
     }
 }
