@@ -11,7 +11,7 @@ const baseConfig = {
   command: "lotto",
   listRestrict: [],
   restrict: [],
-  cost: 10
+  cost: 25
 }
 
 const delay = ms => 
