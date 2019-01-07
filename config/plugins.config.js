@@ -86,6 +86,6 @@ export default bastion => ([
     }),
     RoyRoyBucks,
     Lotto(bastion, {
-        restrict: ["506911331257942027"]
+        restrict: ["506911331257942027", "430517752546197509"]
     })
 ])
