@@ -45,7 +45,7 @@ export default bastion => ([
     }),
     Ban,
     Stats(bastion, {
-        restrict: "430517752546197509"
+        restrict: ["430517752546197509"]
     }),
     Teams(bastion, {
         listRestrict: ["shitpost", "admin"]
