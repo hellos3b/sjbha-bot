@@ -80,7 +80,11 @@ export default {
 
     calendar(user, activities, start_date) {
         // Convert into a hashmap of datestring
-        const dates = activities.map(n => {
+        const dates = activities
+        .filter(n => {
+            return n.type === "Run"
+        })
+        .map(n => {
             let date = new Date(n.start_date)
             return this.dateString(date)
         }).reduce( (res, obj) => {

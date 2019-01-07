@@ -68,7 +68,7 @@ export interface Plugin {
   validate?: Resolver;
   /** Main router for the command. If string is returned, will reply with just that */
   resolve: string|Resolver;
-
+  /** Container for command-specific methods. Gets mapped to `this` inside of validate() and resolve() */
   methods?: {
     [key: string]: Function
   };

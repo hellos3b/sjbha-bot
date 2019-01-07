@@ -219,6 +219,8 @@ export default function(bastion, opt={}) {
                     return `You haven't run in the last 4 weeks. Go run, Tubertha!`
                 }
 
+                console.log("activities", activities)
+
                 const calendar = utils.calendar(user, activities, start_date)
 
                 return bastion.helpers.code(calendar)

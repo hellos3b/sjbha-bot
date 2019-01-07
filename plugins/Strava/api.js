@@ -64,6 +64,7 @@ export default bastion =>{
             if (!user) return null
 
             const stats = await this.getAthleteStats(user.stravaID, user.accessToken)
+            console.log("Stats", stats)
             if (!stats) return null
 
             stats.username = user.user

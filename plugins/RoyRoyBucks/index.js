@@ -32,7 +32,7 @@ export default function(bastion, opt={}) {
                     user = {
                         user: context.user,
                         userID: context.userID,
-                        bucks: Math.floor(Math.random()*(config.max-config.min)) + config.min
+                        bucks: 1000
                     }
                     await q.create(user)
                 }
@@ -40,6 +40,7 @@ export default function(bastion, opt={}) {
                 const [cmd, ...args] = message.split(" ")
                 console.log(cmd)
                 if (cmd === 'give') return this.route("give")
+                if (cmd === 'reset') return this.route("reset")
 
                 return `**Bank**: ${user.bucks} royroybucks`
             }
