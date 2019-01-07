@@ -53,6 +53,9 @@ export default function (bastion, opt = {}) {
         
         if (user.bucks < config.cost) return `You don't have enough royroybucks to enter the lotto (cost: ${config.cost}, bank: ${user.bucks})`
 
+        const guessCount = await q.find({userID: context.userID})
+        if (guessCount.length >= 10) return `You've hit the max number of lotto tickets (10)`
+
         const hasGuessed = await q.findOne({userID: context.userID, guess: guess})
         if (hasGuessed) return `You've already picked that number`
 
