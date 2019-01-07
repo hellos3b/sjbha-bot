@@ -123,7 +123,7 @@ export default function (bastion, opt = {}) {
         const picks = lotto.filter( n => n.userID === context.userID )
         const pickMsg = picks.length ? picks.map(n => n.guess).join(", ") : "None"
 
-        return `Current pool: ${amt}rrb\nYour picks: ${pickMsg}`
+        return `Current pool: ${amt}rrb\nYour picks (${picks.length}/10): ${pickMsg}`
       }
     },
 
