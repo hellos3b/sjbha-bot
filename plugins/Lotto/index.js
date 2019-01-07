@@ -84,7 +84,7 @@ export default function (bastion, opt = {}) {
         rrb.update({userID: user.userID}, user)
 
         const res = guesses.map(n => `#${n}`).join(" ")
-        return `Bought ticket for ${res}`
+        return `Bought ticket(s) for ${res}`
         // const guess = parseInt(cmd)
 
         // if (isNaN(guess)) return `Please pick a valid number from 1-100 for the lotto`
