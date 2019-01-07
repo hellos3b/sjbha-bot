@@ -46,32 +46,69 @@ export default function (bastion, opt = {}) {
         if (!cmd) return this.route("info")
         if (cmd === 'draw') return this.route("draw")
 
-        const guess = parseInt(cmd)
+        let guessList = await q.find({userID: context.userID})
+        const prevGuesses = new Set(guessList.map(n => n.guess))
 
-        if (isNaN(guess)) return `Please pick a valid number from 1-100 for the lotto`
-        if (guess < 1 || guess > 100) return `Please pick a valid number from 1-100 for the lotto`
+        const guesses = [...new Set(
+          message.split(" ")
+            .map( n => parseInt(n))
+            .filter( n => !isNaN(n))
+            .filter( n => n)
+            .filter( n => n >= 1 && n <= 100)
+            .filter( n => !prevGuesses.has(n))
+        )]
+
+        if (user.bucks < guesses.length*config.cost) return `You don't have enough royroybucks to buy ${guesses.length} tickets`
+        if (!guesses.length) return `None of those ticket numbers are valid`
+
+        let count = guessList.length
+
+        if (count >= 10) return 'You already have the max number of tickets (10)'
         
-        if (user.bucks < config.cost) return `You don't have enough royroybucks to enter the lotto (cost: ${config.cost}, bank: ${user.bucks})`
+        let successes = []
+        for (var i = 0; i < guesses.length; i++) {
+          if (count >= 10) break;
+          user.bucks -= config.cost
+        
+          const entry = {
+            user: user.user,
+            userID: user.userID,
+            guess: guesses[i]
+          }
+          q.create(entry)
+          successes.push(guesses[i])
 
-        const guessCount = await q.find({userID: context.userID})
-        if (guessCount.length >= 10) return `You've hit the max number of lotto tickets (10)`
-
-        const hasGuessed = await q.findOne({userID: context.userID, guess: guess})
-        if (hasGuessed) return `You've already picked that number`
-
-        this.type()
-        user.bucks -= config.cost
-
-        await rrb.update({userID: user.userID}, user)
-
-        const entry = {
-          user: user.user,
-          userID: user.userID,
-          guess: guess
+          count++
         }
-        await q.create(entry)
 
-        return `Bought ticket for #${guess}`
+        rrb.update({userID: user.userID}, user)
+
+        const res = guesses.map(n => `#${n}`).join(" ")
+        return `Bought ticket for ${res}`
+        // const guess = parseInt(cmd)
+
+        // if (isNaN(guess)) return `Please pick a valid number from 1-100 for the lotto`
+        // if (guess < 1 || guess > 100) return `Please pick a valid number from 1-100 for the lotto`
+        
+        // if (user.bucks < config.cost) return `You don't have enough royroybucks to enter the lotto (cost: ${config.cost}, bank: ${user.bucks})`
+
+
+        // const hasGuessed = await q.findOne({userID: context.userID, guess: guess})
+        // if (hasGuessed) return `You've already picked that number`
+
+        // this.type()
+        // user.bucks -= config.cost
+
+        // await rrb.update({userID: user.userID}, user)
+
+        // const entry = {
+        //   user: user.user,
+        //   userID: user.userID,
+        //   guess: guess
+        // }
+        // await q.create(entry)
+
+        // return `Bought ticket for #${guess}`
       }
     },
 
