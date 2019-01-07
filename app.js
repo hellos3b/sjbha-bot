@@ -25,9 +25,9 @@ const bastion = Bastion({
 })
     
 // Load modules
-// bastion.use(botModules(bastion), { ignore: [channels.boombot] })
-bastion.use(Boombot(bastion, {
-    restrict: [channels.boombot, channels.admin]
-}))
+bastion.use(botModules(bastion), { ignore: [channels.boombot] })
+// bastion.use(Boombot(bastion, {
+//     restrict: [channels.boombot, channels.admin]
+// }))
 
 bastion.connect()
