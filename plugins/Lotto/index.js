@@ -25,6 +25,10 @@ export default function (bastion, opt = {}) {
   const q = new bastion.Queries('lotto')
   const rrb = new bastion.Queries('rrbucks')
 
+  const markStale = async () => {
+    return q.Schema.update({}, { $set: { stale: true }}, { multi: true })
+  }
+
   return [
 
     {
@@ -59,9 +63,9 @@ export default function (bastion, opt = {}) {
         )]
 
         if (user.bucks < guesses.length*config.cost) return `You don't have enough royroybucks to buy ${guesses.length} tickets`
-        if (!guesses.length) return `None of those ticket numbers are valid`
+        if (!guesses.length) return `None of those ticket numbers are valid (You may already have picked them)`
 
-        let count = guessList.length
+        let count = guessList.filter(n => !n.stale).length
 
         if (count >= 10) return 'You already have the max number of tickets (10)'
         
@@ -84,31 +88,7 @@ export default function (bastion, opt = {}) {
         rrb.update({userID: user.userID}, user)
 
         const res = guesses.map(n => `#${n}`).join(" ")
-        return `Bought ticket(s) for ${res}`
-        // const guess = parseInt(cmd)
-
-        // if (isNaN(guess)) return `Please pick a valid number from 1-100 for the lotto`
-        // if (guess < 1 || guess > 100) return `Please pick a valid number from 1-100 for the lotto`
-        
-        // if (user.bucks < config.cost) return `You don't have enough royroybucks to enter the lotto (cost: ${config.cost}, bank: ${user.bucks})`
-
-
-        // const hasGuessed = await q.findOne({userID: context.userID, guess: guess})
-        // if (hasGuessed) return `You've already picked that number`
-
-        // this.type()
-        // user.bucks -= config.cost
-
-        // await rrb.update({userID: user.userID}, user)
-
-        // const entry = {
-        //   user: user.user,
-        //   userID: user.userID,
-        //   guess: guess
-        // }
-        // await q.create(entry)
-
-        // return `Bought ticket for #${guess}`
+        return `Bought ticket(s) for ${res}.\nroyroybucks: ${user.bucks}`
       }
     },
 
@@ -117,13 +97,25 @@ export default function (bastion, opt = {}) {
 
       resolve: async function (context, message) {
         const lotto = await q.find()
-
         const amt = lotto.length * config.cost
 
         const picks = lotto.filter( n => n.userID === context.userID )
-        const pickMsg = picks.length ? picks.map(n => n.guess).join(", ") : "None"
+        const stalePicks = picks.filter( n => n.stale )
+        const currentPicks = picks.filter( n => !n.stale )
+        const currentMsg = currentPicks.length ? currentPicks.map(n => n.guess).join(", ") : "None"
+        const staleMsg = stalePicks.length ? stalePicks.map(n => n.guess).join(", ") : ""
 
-        return `Current pool: ${amt}rrb\nYour picks (${picks.length}/10): ${pickMsg}`
+        let msg = `Pool: ${amt}rrb\nPicks (${currentPicks.length}/10): ${currentMsg}`
+
+        if (stalePicks.length) {
+          msg += `\nCarried picks: ${staleMsg}`
+        }
+
+        let custom = bastion.helpers.code(msg, 'js')
+
+        custom += "*Lotto is drawn on Wednesday nights*"
+
+        return custom
       }
     },
 
@@ -139,16 +131,22 @@ export default function (bastion, opt = {}) {
         const pool = lottoAll.length * config.cost
         const lotto = await q.find({ guess: pick })
 
-        bastion.send(context.channelID, "Today's lotto pick is.... *drum roll*")
-        await delay(4000)
+        bastion.send(context.channelID, "Today's lotto pick is....")
+        await delay(3000)
+        bastion.send(context.channelID, "*drum roll*")
+        await delay(3000)
 
-        let result = bastion.helpers.code(pick)
+        let winningNumber = bastion.helpers.code(pick)
+
+        bastion.send(context.channelID, winningNumber)
+        await delay(3000)
 
         if (!lotto.length) {
-          result += "Nobody has won the lotto this time! Check back next time!"
-          return result
+          await markStale()
+          return "Nobody has won the lotto this time! Check back next time!"
         }
 
+        let result = ""
         // EZ way to only get uniques in an array by using Set
         const winners = [...new Set(lotto.map( n => n.userID ))]
         const winnerStr = winners.map(bastion.helpers.toMention).join(", ")
