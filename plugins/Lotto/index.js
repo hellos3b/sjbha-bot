@@ -49,6 +49,7 @@ export default function (bastion, opt = {}) {
 
         if (!cmd) return this.route("info")
         if (cmd === 'draw') return this.route("draw")
+        if (cmd === 'coverage') return this.route("coverage")
 
         let guessList = await q.find({userID: context.userID})
         const prevGuesses = new Set(guessList.map(n => n.guess))
@@ -116,6 +117,39 @@ export default function (bastion, opt = {}) {
         custom += "*Lotto is drawn on Wednesday nights*"
 
         return custom
+      }
+    },
+
+    {
+      action: `${config.command}:coverage`,
+
+      resolve: async function (context, message) {
+        if (context.userID !== '125829654421438464') return;
+
+        const lotto = await q.find()
+        const unique = new Set(lotto.map(n => n.guess))
+        const uniqueUsers = new Set(lotto.map(n => n.userID))
+
+        let picks = {}
+        for (var i = 0; i < lotto.length; i++) {
+          const guess = lotto[i].guess
+          if (!picks[guess]) {
+            picks[guess] = 1
+          } else {
+            picks[guess] ++
+          }
+        }
+
+        let counts = {}
+        for (var k in picks) {
+          if (!counts[picks[k]]) {
+            counts[picks[k]] = 1
+          } else {
+            counts[picks[k]]++
+          }
+        }
+
+        return `total: ${lotto.length}, unique: ${unique.size}, users: ${uniqueUsers.size}\n${JSON.stringify(counts)}`
       }
     },
 

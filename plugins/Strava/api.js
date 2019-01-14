@@ -119,6 +119,10 @@ export default bastion =>{
             console.log(logPrefix, chalk.gray("addActivity -> ", activity_id))
             const user = await this.getUserInfo({stravaID: owner_id})
 
+            const ignoreList = new Set(['213248932078288896'])
+
+            if (ignoreList.has(user.userID)) return;
+            
             let addXP = true
             // limit to 1 level a day
             if (user.lastRun) {
