@@ -52,7 +52,16 @@ export default function(bastion, opt={}) {
         bastion.send(bastion.channels.strava, msg)
     }
 
+    const delay = ms => new Promise((resolve, reject) => {
+        setTimeout(() => resolve(), ms)
+    })
+
     webhook.on('activity', async (data) => {
+        // Give candinavian some time to edit the title
+        if (data.owner_id === '718741') {
+            await delay(5*60*1000); // 5 minutes
+        }
+        
         const details = await api.addActivity(data)
         if (!details) {
             return
