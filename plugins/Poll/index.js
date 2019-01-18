@@ -4,8 +4,8 @@ import chalk from 'chalk'
 
 const baseConfig = {
     command: "poll",
-    reactions: ["🇦", "🇧", "🇨", "🇩"],    // Emotes added as voting reactions
-    reactionsText: ["A", "B", "C", "D"],   // text version for the prompt
+    reactions:     ["🇦", "🇧", "🇨", "🇩", "🇪", "🇫", "🇬", "🇭", "🇮", "🇯"],    // Emotes added as voting reactions
+    reactionsText: ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"],          // text version for the prompt
     timeLimit: 10 * 60 * 1000              // Time limit before printing results
 }
 
