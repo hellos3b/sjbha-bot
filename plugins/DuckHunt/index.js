@@ -79,9 +79,9 @@ export default function(bastion, opt={}) {
     }
 
     bastion.on('message', (context) => {
-        if (context.message.includes("🦆") && context.message.length < 10) {
+        if (context.message.includes("🦆")) {
             const msg_id = context.evt.d.id
-            
+
             bastion.bot.deleteMessage({
                 channelID: context.channelID,
                 messageID: msg_id
