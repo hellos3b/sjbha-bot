@@ -79,6 +79,16 @@ export default function(bastion, opt={}) {
     }
 
     bastion.on('message', (context) => {
+        if (context.message.includes("🦆") && context.message.length < 10) {
+            const msg_id = context.evt.d.id
+            
+            bastion.bot.deleteMessage({
+                channelID: context.channelID,
+                messageID: msg_id
+            })
+            return;
+        }
+
         if (!isActive) return;
         if (!activeTrack[context.channelID]) return;
 
