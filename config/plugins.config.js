@@ -20,6 +20,7 @@ import Reddit from '../plugins/Reddit'
 import DuckHunt from '../plugins/DuckHunt'
 import RoyRoyBucks from '../plugins/RoyRoyBucks'
 import Lotto from '../plugins/Lotto'
+import Music from '../plugins/Music'
 
 const subscriptions = {
     "photomeet": "486330820114513920",
@@ -87,5 +88,6 @@ export default bastion => ([
     RoyRoyBucks,
     Lotto(bastion, {
         restrict: ["506911331257942027", "430517752546197509"]
-    })
+    }),
+    Music
 ])
