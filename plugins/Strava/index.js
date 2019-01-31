@@ -199,7 +199,7 @@ export default function(bastion, opt={}) {
                         sorter = (a,b) => a.time < b.time ? 1 : -1
                         order = ["time", "distance", "pace"]
                     } else if (type === "pace") {
-                        sorter = (entry) => entry.pace_seconds
+                        sorter = (a, b) => a.pace < b.pace ? -1 : 1
                         order = ["pace", "distance", "time"]
                     }
 
