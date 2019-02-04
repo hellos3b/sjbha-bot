@@ -284,7 +284,7 @@ export default function(bastion, opt={}) {
                 let msg = `\:dog: *duck shot by ${duck.shotBy.user} in ${time}* `
 
                 if (duck.misses.length) {
-                    msg += ` \`[${duck.misses.length} miss]\``
+                    msg += ` \`[misses: ${duck.misses.map(n => n.user).join(",")}]\``
                 }
 
                 await bastion.bot.editMessage({
