@@ -209,11 +209,21 @@ export default function(bastion, opt={}) {
                     else return val
                 }
 
-                const players = await q.getAll()
+                const padScore = val => {
+                    if (val < 10) return '  ' + val
+                    if (val < 100) return ' ' + val
+                    return val
+                }
 
-                console.log(players)
-                const msg = players
+                const players = await q.getAll()
+                const playerScores = players.map(n => {
+                    n.score = n.count*10 + n.misses*5
+                    return n
+                })
+                console.log(playerScores)
+                const msg = playerScores
                     .sort( (a, b) => {
+                        return a.score > b.score ? -1 : 1;
                         if (a.count > b.count) {
                             return -1
                         } else if (a.count < b.count) {
@@ -226,7 +236,7 @@ export default function(bastion, opt={}) {
                             }
                         }
                     }).map( p => {
-                        return `[${counter(p.count)}-${p.misses}] ${p.user}`
+                        return `${padScore(p.score)} [${counter(p.count)}-${p.misses}] ${p.user}`
                     }).join("\n")
                 return getSeason() + bastion.helpers.code(msg, "ini")
             }
@@ -243,7 +253,11 @@ export default function(bastion, opt={}) {
                     .exec()
 
                 let msg = shots.map( n => {
-                    return `${formatTime(n.timestamp)} by ${n.shotBy.user} in <#${n.channelID}>`
+                    let msg = `${formatTime(n.timestamp)} by ${n.shotBy.user} in <#${n.channelID}>`
+                    for (var i = 0; i < n.misses.length; i++) {
+                        msg += `\n    > miss: ${n.misses[i].user}`
+                    }
+                    return msg
                 }).join("\n")
 
                 msg = bastion.bot.fixMessage(msg)
