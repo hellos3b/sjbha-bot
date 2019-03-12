@@ -114,11 +114,23 @@ export default function(bastion, opt={}) {
                 const event = await this.chooseEvent(context, events)
                 if (!event) return log("(cancel) Failed to get event"), null
 
+                const reactions = await event.getReactions(bastion.bot)
+                console.log(reactions)
+
+                const rsvps = reactions.yes.map(n => n.id)
+                    .concat(reactions.maybe.map(n => n.id))
+
+                const rsvpUnique = [...new Set(rsvps)]
+
                 log("Removing event", event.id())
                 await event.cancel(bastion.bot)
                 await q.remove({id: event.id()})
 
                 bastion.emit("events-update")
+
+                for (var i = 0; i < rsvpUnique.length; i++) {
+                    bastion.send(rsvpUnique[i], `Meetup '**${event.info_str()}**' on **${event.date_str()}** has been cancelled\n\`You are getting this message because you had RSVP'd for the meetup\``)
+                }
 
                 return "Canceled `"+event.info_str()+"`"
             },

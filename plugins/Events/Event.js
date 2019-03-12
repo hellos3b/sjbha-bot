@@ -246,6 +246,7 @@ export default function({
             })
         } catch (err) {
             console.log("Failed to get reactions, setting to 0")
+            console.log(err)
             maybe = []
             yes = []
         }
