@@ -60,17 +60,16 @@ export default bastion => ([
     }),
     Events(bastion, {
         command: "meetup",
-        announcementChannel: `530595597884063764`,//bastion.channels.announcement,
-        compactChannel: `555101122176745482`,//bastion.channels.compact,
-        compact: {"todayId":"555101253634490378","thisWeekId":"555101256121843723","nextWeekId":"555101259770626056","twoWeeksId":"555101260307628043","threeWeeksId":"555101261213597696","laterId":"555101276099313664"},
-        // {
-        //     "todayId":"471806505365143552",
-        //     "thisWeekId":"471806506321575936",
-        //     "nextWeekId":"471806507093065749",
-        //     "twoWeeksId":"471806508041109504",
-        //     "threeWeeksId":"471806508913655828",
-        //     "laterId":"471806527603212298"
-        // }
+        announcementChannel: bastion.channels.announcement,
+        compactChannel: bastion.channels.compact,
+        compact: {
+            "todayId":"471806505365143552",
+            "thisWeekId":"471806506321575936",
+            "nextWeekId":"471806507093065749",
+            "twoWeeksId":"471806508041109504",
+            "threeWeeksId":"471806508913655828",
+            "laterId":"471806527603212298"
+        }
     }),
     Outbreak(bastion, {
         restrict: ["shitpost", "430517752546197509"]
