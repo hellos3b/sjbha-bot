@@ -149,7 +149,12 @@ export default function (bastion, opt = {}) {
           }
         }
 
-        return `total: ${lotto.length}, unique: ${unique.size}, users: ${uniqueUsers.size}\n${JSON.stringify(counts)}`
+        let output = ''
+        for (var k in counts) {
+          output += `${counts[k]} numbers with ${k} picks \n`
+        }
+
+        return `total: ${lotto.length}, unique: ${unique.size}, users: ${uniqueUsers.size}\n${output}`
       }
     },
 
