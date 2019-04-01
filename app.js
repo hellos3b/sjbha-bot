@@ -20,6 +20,7 @@ const channels = {
 const bastion = Bastion({
     token: process.env.DISCORD_TOKEN,
     channels,
+    // serverId: "358442034790400000", // dev
     serverId: "358442034790400000",
     prefix: process.env.NODE_ENV === "production" ? "!" : (process.env.npm_config_symbol || "_")
 })
