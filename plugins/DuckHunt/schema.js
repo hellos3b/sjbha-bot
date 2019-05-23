@@ -10,4 +10,4 @@ const Schema = mongoose.Schema({
     }
 });
 
-export default mongoose.model('Duckhunt', Schema);
+export default mongoose.model('Duckhunt-s2', Schema);

@@ -47,10 +47,22 @@ let activeTrack = {}
 
 let timeout = null
 
+const getSecondsMinutes = (shotTime) => {
+    let time = shotTime / 1000
+    time = Math.floor(time * 10) / 10
+
+    if (time < 60) {
+        return time + "s"
+    }
+
+    time = Math.floor(time / 60)
+    return time + "m"
+}
+
 export default function(bastion, opt={}) {
     const config = deepmerge(baseConfig, opt)
-    const q = new bastion.Queries("Duckhunt")
-    const qShot = new bastion.Queries("DuckhuntShot")
+    const q = new bastion.Queries("Duckhunt-s2")
+    const qShot = new bastion.Queries("DuckhuntShot-s2")
 
     async function saveBang(user, userID) {
         let player = await q.findOne({ userID })
@@ -145,6 +157,22 @@ export default function(bastion, opt={}) {
         }, time)
     }
 
+    Ducks.onDone(duck => {
+        console.log("DONE", duck)
+        const time = getSecondsMinutes(duck.shotTime)
+        let msg = `\:dog: *duck shot by ${duck.shotBy.user} in ${time}* `
+
+        if (duck.misses.length) {
+            msg += ` \`[misses: ${duck.misses.map(n => n.user).join(",")}]\``
+        }
+
+        bastion.bot.editMessage({
+            channelID: duck.channelID,
+            messageID: duck.msgId,
+            message: msg
+        })
+    })
+
     function formatTime(date) {
         let hours = date.getHours()
         let ampm = (hours > 12) ? "pm" : "am"
@@ -170,15 +198,15 @@ export default function(bastion, opt={}) {
 
     return [
 
-        // {
-        //     command: 'duck',
+        {
+            command: 'duck',
 
-        //     resolve: async function(context, tag) {  
-        //         const msg = await bastion.send(context.channelID, "\:duck:")
-        //         Ducks.create(context.channelID, msg.id)
-        //         // sendDuck()
-        //     }
-        // },
+            resolve: async function(context, tag) {  
+                const msg = await bastion.send(context.channelID, "\:duck:")
+                Ducks.create(context.channelID, msg.id)
+                // sendDuck()
+            }
+        },
 
         {
             command: 'duckhunt',
@@ -238,7 +266,7 @@ export default function(bastion, opt={}) {
                     }).map( p => {
                         return `${padScore(p.score)} [${counter(p.count)}-${p.misses}] ${p.user}`
                     }).join("\n")
-                return getSeason() + bastion.helpers.code(msg, "ini")
+                return `[season 2]\n` + getSeason() + bastion.helpers.code(msg, "ini")
             }
         },
 
@@ -262,7 +290,7 @@ export default function(bastion, opt={}) {
 
                 msg = bastion.bot.fixMessage(msg)
 
-                return getSeason() + bastion.helpers.code(msg)
+                return `[season 2]\n` + getSeason() + bastion.helpers.code(msg)
             }
         },
 
@@ -280,12 +308,7 @@ export default function(bastion, opt={}) {
                 const duck = Ducks.bang(bastion, context.channelID, context.userID, context.user)
                 if (!duck) return;
 
-                const time = this.getSecondsMinutes(duck.shotTime)
-                let msg = `\:dog: *duck shot by ${duck.shotBy.user} in ${time}* `
-
-                if (duck.misses.length) {
-                    msg += ` \`[misses: ${duck.misses.map(n => n.user).join(",")}]\``
-                }
+                let msg = `🦆💥${duck.misses.map(n => `💥`)}`
 
                 await bastion.bot.editMessage({
                     channelID: context.channelID,

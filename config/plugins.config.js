@@ -50,9 +50,9 @@ export default bastion => ([
     Stats(bastion, {
         restrict: ["430517752546197509"]
     }),
-    // Teams(bastion, {
-    //     listRestrict: ["shitpost", "admin"]
-    // }),
+    Teams(bastion, {
+        listRestrict: ["shitpost", "admin"]
+    }),
     StockChart(bastion, {
         restrict: ["stocks"]
     }),
@@ -84,15 +84,15 @@ export default bastion => ([
     Reddit(bastion, {
         channel: "506911331257942027"
     }),
-    // DuckHunt(bastion, {
-    //     listRestrict: ["shitpost", "430517752546197509"]
-    // }),
+    DuckHunt(bastion, {
+        listRestrict: ["shitpost", "430517752546197509"]
+    }),
     RoyRoyBucks,
     Lotto(bastion, {
         restrict: ["506911331257942027", "430517752546197509"]
     }),
-    Music,
-    Fools(bastion, {
-        listRestrict: ["shitpost", "430517752546197509"]
-    })
+    Music
+    // Fools(bastion, {
+    //     listRestrict: ["shitpost", "430517752546197509"]
+    // })
 ])

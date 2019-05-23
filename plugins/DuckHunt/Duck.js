@@ -1,17 +1,22 @@
 let ducks = {}
 
 const MISS_TIMER = 1000 * 5
-
+let onDone = (duck) => {}
 
 export default {
 
     create(channelID, msgId) {
         ducks[channelID] = {
             msgId,
+            channelID,
             active: true,
             misses: [],
             timestamp: new Date()
         }
+    },
+
+    onDone(fn) {
+        onDone = fn
     },
 
     saveMisses: async function(q, misses) {
@@ -47,7 +52,7 @@ export default {
             duck.shotTime = ts.getTime() - duck.timestamp.getTime()
 
             setTimeout(() => {
-                const q = new bastion.Queries("DuckhuntShot")
+                const q = new bastion.Queries("DuckhuntShot-s2")
                 q.create({
                     shotBy: duck.shotBy,
                     misses: duck.misses,
@@ -55,8 +60,9 @@ export default {
                     timestamp: duck.shotTimestamp
                 })
 
-                this.saveMisses(new bastion.Queries("Duckhunt"), duck.misses)
+                this.saveMisses(new bastion.Queries("Duckhunt-s2"), duck.misses)
                 ducks[channelID] = null
+                onDone(duck)
             }, MISS_TIMER) 
 
             return Object.assign({}, duck, {
