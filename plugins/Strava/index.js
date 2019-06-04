@@ -76,6 +76,7 @@ export default function(bastion, opt={}) {
 
     bastion.on('schedule-weekly', async () => {
         await api.resetChallenges()
+        await api.saveTrends()
         sendRundayMessage()
     })
 
@@ -274,6 +275,31 @@ export default function(bastion, opt={}) {
 
                 return bastion.helpers.code( utils.challengeTable(challengers), "md" ) 
             }
+        },
+
+        // View trends
+        {
+            action: `${config.command}:trend`,
+            resolve: async function(context, cmd, target) {
+                const user = await api.getUserInfo({ userID: target })
+
+                if (!user.averages.length) {
+                    return "Maintain a 4 run average to save Trends!\n(You don't have any trends saved)"
+                }
+
+                return bastion.helpers.code( utils.averageTable(user.averages), 'md' )
+            }
         }
+
+        // {
+        //     action: `${config.command}:trend-save`,
+        //     resolve: async function(context, cmd, target) {
+        //         // const user = await api.getUserInfo({ userID: target })
+        //         await api.saveTrend()
+        //         // console.log("USER", user)
+        //         return 'done'
+        //         // return bastion.helpers.code( utils.averageTable(user.averages), 'md' )
+        //     }
+        // }
     ]
 }

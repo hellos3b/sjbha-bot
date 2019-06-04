@@ -18,6 +18,17 @@ const ChallengeSchema = mongoose.Schema({
     }
 })
 
+const AverageSchema = mongoose.Schema({
+    timestamp: {
+        type: Date,
+        default: Date.now
+    },
+    pace_seconds: Number,
+    distance: Number,
+    time: Number,
+    total: Number
+})
+
 const Schema = mongoose.Schema({
     user: String,
     userID: String,
@@ -37,6 +48,7 @@ const Schema = mongoose.Schema({
         type: Number,
         default: 0
     },
+    averages: [AverageSchema],
     challenge: ChallengeSchema,
     lastRun: Date
 });

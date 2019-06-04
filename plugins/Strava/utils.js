@@ -1,4 +1,5 @@
 import Table from 'ascii-table'
+import moment from 'moment'
 
 export default {
     getMiles(i) {
@@ -147,6 +148,43 @@ export default {
                 finished
             )
         })
+
+        return table.toString()
+    },
+
+    averageTable(averages) {
+        var table = new Table();
+        table.removeBorder();
+
+        table.setHeading("date", "pace", "distance", "time");
+        table.setHeadingAlignLeft(Table.LEFT)
+
+        const withEmoji = (va, vb) => { 
+            return (va > vb) ? `↑` : ''
+        }
+        
+        for (var i = 0; i < averages.length; i++) {
+            const ts = moment(averages[i].timestamp)
+            const ts_str = ts.format("MMM-DD")
+
+            let paceEmoji = '', 
+                timeEmoji = '', 
+                distanceEmoji = '';
+
+            if (i !== 0) {
+                paceEmoji = withEmoji(averages[i - 1].pace_seconds, averages[i].pace_seconds)
+                timeEmoji = withEmoji(averages[i].time, averages[i - 1].time)
+                distanceEmoji = withEmoji(averages[i].distance, averages[i- 1].distance)
+            }
+            const pace = this.hhmmss(averages[i].pace_seconds)
+            const time = this.hhmmss(averages[i].time, true)
+            table.addRow(
+                `<${ts_str}>`,
+                pace + '/mi ' + paceEmoji,
+                averages[i].distance + 'mi ' + distanceEmoji,
+                time + ' ' + timeEmoji
+            )
+        }
 
         return table.toString()
     }
