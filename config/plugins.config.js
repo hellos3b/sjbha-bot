@@ -23,6 +23,7 @@ import Lotto from '../plugins/Lotto'
 import Music from '../plugins/Music'
 import Fools from '../plugins/Fools'
 import Olympics from '../plugins/Olympics'
+import UrbanDictionary from '../plugins/UrbanDictionary'
 
 const subscriptions = {
     "photomeet": "486330820114513920",
@@ -93,7 +94,8 @@ export default bastion => ([
         restrict: ["506911331257942027", "430517752546197509"]
     }),
     Music,
-    Olympics
+    Olympics,
+    UrbanDictionary
     // Fools(bastion, {
     //     listRestrict: ["shitpost", "430517752546197509"]
     // })
