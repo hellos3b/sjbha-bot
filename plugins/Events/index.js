@@ -16,6 +16,8 @@ import createRouter from './ui/router-help'
 import express from 'express'
 const Diff = require('diff')
 
+const webhost = `https://sjbha-bot.herokuapp.com`
+
 export default function(bastion, opt={}) {
     const config = deepmerge(baseConfig, opt)
     const archive = Archive(bastion, config)
@@ -32,7 +34,7 @@ export default function(bastion, opt={}) {
             '| image:\n' +
             '| type: (choices: event, drinks, food, or active)'
         ) +
-        `\n**Or use the new meetup helper:** http://localhost:3000/create-meetup\n\n` +
+        `\n**Or use the new meetup helper:** ${webhost}/create-meetup\n\n` +
         `\`${cmd} cancel\` to cancel\n`+
         `\`${cmd} edit\` to edit\n` +
         `\`${cmd} mention\` to mention\n` +
@@ -243,7 +245,7 @@ export default function(bastion, opt={}) {
                 },
                 getUpdated: async function(context, event) {
                     const val = await bastion.Ask(
-                        `Ok, editing '${event.info_str()}' - What do you want to change it to?\nYou can copy and paste this:\n${bastion.helpers.code(event.getMeetupString())}\nOr, use the UI: http://localhost:3000/create-meetup?id=${event.id()}`,
+                        `Ok, editing '${event.info_str()}' - What do you want to change it to?\nYou can copy and paste this:\n${bastion.helpers.code(event.getMeetupString())}\nOr, use the UI: ${webhost}/create-meetup?id=${event.id()}`,
                         context, 
                         val => {
                             const obj = utils.getOptions(val.split("|").map(n => n.trim()))
