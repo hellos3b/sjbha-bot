@@ -12,7 +12,9 @@ import Archive from './archive'
 import compact from './compact'
 import path from 'path'
 import router from './ui/router'
+import createRouter from './ui/router-help'
 import express from 'express'
+const Diff = require('diff')
 
 export default function(bastion, opt={}) {
     const config = deepmerge(baseConfig, opt)
@@ -30,6 +32,7 @@ export default function(bastion, opt={}) {
             '| image:\n' +
             '| type: (choices: event, drinks, food, or active)'
         ) +
+        `\n**Or use the new meetup helper:** http://localhost:3000/create-meetup\n\n` +
         `\`${cmd} cancel\` to cancel\n`+
         `\`${cmd} edit\` to edit\n` +
         `\`${cmd} mention\` to mention\n` +
@@ -44,8 +47,9 @@ export default function(bastion, opt={}) {
     })
 
     // Set up calendar UI
-    bastion.app.use('/calendar/public', express.static(path.join(__dirname, 'ui', 'public')))
+    bastion.app.use('/public', express.static(path.join(__dirname, 'ui', 'public')))
     bastion.app.use('/calendar', router(bastion, config))
+    bastion.app.use('/create-meetup', createRouter(bastion, config))
 
     return [
 
@@ -170,16 +174,57 @@ export default function(bastion, opt={}) {
                 const update = await this.getUpdated(context, event)
                 if (!update) return log("(edit) Failed to get update string"), null
 
-                log("Editing event", event.id())
+                const oldEvent = event.toJSON().options
+                oldEvent.date = event.date_str()
+
+                log("Editing event", event.toJSON())
                 event.update(update)
                 event.updateAnnouncement(bastion.bot)
+
+                const newEvent = event.toJSON().options
+                newEvent.date = event.date_str()
 
                 log("Saving to database")
                 q.update({ id: event.id() }, event.toJSON())
 
                 log("Emitting events-update")
                 bastion.emit("events-update")
-                return `You got it! Updated to \`${event.info()}\``
+
+                console.log(oldEvent)
+                console.log("options", oldEvent, newEvent)
+                // Create the DIFF
+                let changes = ``
+                const compare = (key) => {
+                    console.log(oldEvent[key], "==", newEvent[key])
+                    return oldEvent[key] === newEvent[key]
+                }
+                const addChange = (key) => {
+                    if (!compare(key)) {
+                        changes += `${key}:\n` +
+                            `- ${oldEvent[key]} \n` +
+                            `+ ${newEvent[key]} \n\n`
+                    }
+                }
+
+                addChange('date')
+
+                if (!compare('description')) {
+                    if (newEvent.description.length < 240 && oldEvent.description.length < 240) {
+                        changes += `description:\n` +
+                            `- ${oldEvent.description} \n` +
+                            `+ ${newEvent.description} \n \n`
+                    } else {
+                        changes += `description has been updated\n\n`
+                    }
+                }
+
+                addChange('name')
+                addChange('location')
+                addChange('url')
+                addChange('image')
+                addChange('type')
+
+                return `You got it! The following has been updated:` + bastion.helpers.code(changes, 'diff')
             },
 
             methods: {
@@ -198,7 +243,7 @@ export default function(bastion, opt={}) {
                 },
                 getUpdated: async function(context, event) {
                     const val = await bastion.Ask(
-                        `Ok, editing '${event.info_str()}' - What do you want to change it to?\nYou can copy and paste this:\n${bastion.helpers.code(event.getMeetupString())}`,
+                        `Ok, editing '${event.info_str()}' - What do you want to change it to?\nYou can copy and paste this:\n${bastion.helpers.code(event.getMeetupString())}\nOr, use the UI: http://localhost:3000/create-meetup?id=${event.id()}`,
                         context, 
                         val => {
                             const obj = utils.getOptions(val.split("|").map(n => n.trim()))

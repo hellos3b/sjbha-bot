@@ -13,15 +13,17 @@ const channels = {
     "boombot": "432766496700235776",
     "stocks": "363123179696422916",
     "dungeon": "497505757865050112",
-    "announcement": (process.env.NODE_ENV === 'production' ) ? "430878436027006978" : "487730873278398475",
-    "compact": (process.env.NODE_ENV === 'production') ? "464561717821702144" : "488850092045107202"
+    "announcement": "530595597884063764",
+    "compact": "555101122176745482"
+    // "announcement": (process.env.NODE_ENV === 'production' ) ? "430878436027006978" : "487730873278398475",
+    // "compact": (process.env.NODE_ENV === 'production') ? "464561717821702144" : "488850092045107202"
 }
 
 const bastion = Bastion({
     token: process.env.DISCORD_TOKEN,
     channels,
-    // serverId: "358442034790400000", // dev
-    serverId: "358442034790400000",
+    serverId: "358442034790400000", // dev
+    // serverId: "358442034790400000",
     prefix: process.env.NODE_ENV === "production" ? "!" : (process.env.npm_config_symbol || "_")
 })
     
