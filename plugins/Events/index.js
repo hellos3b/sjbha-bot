@@ -226,7 +226,11 @@ export default function(bastion, opt={}) {
                 addChange('image')
                 addChange('type')
 
-                return `You got it! The following has been updated:` + bastion.helpers.code(changes, 'diff')
+                if (changes.length) {
+                    return `You got it! The following has been updated:` + bastion.helpers.code(changes, 'diff')
+                } else {
+                    return `You didn't change anything :|`
+                }
             },
 
             methods: {
