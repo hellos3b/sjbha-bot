@@ -44,7 +44,8 @@ const toJSON = () => Object.keys(inputs)
   .reduce( (res, k) => Object.assign(res, { [k]: inputs[k].value }), {})
 
 const formatDate = (date, time) => {
-  const d = new Date(date)
+  const [year, month, day] = date.split("-")
+  const d = new Date(year, month - 1, day)
   return `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()} ${time}`
 }
 
