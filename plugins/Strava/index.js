@@ -58,17 +58,18 @@ export default function(bastion, opt={}) {
 
     webhook.on('activity', async (data) => {
         // Give candinavian some time to edit the title
-        if (data.owner_id === '718741') {
-            await delay(5*60*1000); // 5 minutes
-        }
+        // await delay(5*60*1000); // 5 minutes
         
+        console.log("adding activity")
         const details = await api.addActivity(data)
         if (!details) {
+            console.log("no details, early exit")
             return
         }
 
         const msg = api.getActivityString(details)
         
+        console.log("strava msg", msg)
         // for dev
         // bastion.send("430517752546197509", msg)
         bastion.send(bastion.channels.strava, msg)
