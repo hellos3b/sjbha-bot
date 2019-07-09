@@ -7,9 +7,7 @@ export default {
     },
 
     get(path, objParams) {
-        const baseUrl = (process.env.NODE_ENV === 'production') ?
-            process.env.PRODUCTION_HOST :
-            `http://localhost:${process.env.PORT}`;
+        const baseUrl = process.env.DOMAIN 
 
         return baseUrl + path + "?" + this.objToParams(objParams);
     }
