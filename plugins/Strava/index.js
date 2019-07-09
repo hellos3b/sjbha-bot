@@ -60,10 +60,9 @@ export default function(bastion, opt={}) {
         // Give candinavian some time to edit the title
         // await delay(5*60*1000); // 5 minutes
         
-        console.log("adding activity")
+        console.log("adding activity", data)
         const details = await api.addActivity(data)
         if (!details) {
-            console.log("no details, early exit")
             return
         }
 
