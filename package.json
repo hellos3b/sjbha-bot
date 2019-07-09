@@ -12,7 +12,7 @@
     },
     "dependencies": {
         "ascii-table": "0.0.9",
-        "axios": "^0.18.0",
+        "axios": "^0.18.1",
         "babel-preset-node6": "^11.0.0",
         "body-parser": "^1.18.2",
         "chalk": "^2.4.1",
