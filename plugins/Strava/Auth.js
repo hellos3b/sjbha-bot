@@ -10,7 +10,7 @@ import url from '../../utils/url'
 const urls = {
     auth: 'https://www.strava.com/oauth/authorize',
     token: 'https://www.strava.com/oauth/token',
-    redirect: 'https://sjbha-bot.herokuapp.com/api/strava/accept',
+    redirect: process.env.DOMAIN + '/api/strava/accept',
     redirect_dev: 'http://localhost:3000/api/strava/accept'
 }
 

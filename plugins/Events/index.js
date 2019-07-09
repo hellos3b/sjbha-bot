@@ -14,9 +14,8 @@ import path from 'path'
 import router from './ui/router'
 import createRouter from './ui/router-help'
 import express from 'express'
-const Diff = require('diff')
 
-const webhost = `https://sjbha-bot.herokuapp.com`
+const webhost = process.env.DOMAIN
 
 export default function(bastion, opt={}) {
     const config = deepmerge(baseConfig, opt)
