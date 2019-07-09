@@ -6,27 +6,28 @@ import utils from './utils'
 
 const challenges = [
     {
-        type: "pace",
-        multi: 0.96,
-        distanceMulti: 0.75,
-        name: "Run Faster"
-    },
-    {
         type: "distance",
-        multi: 1.3,
+        multi: 1.5,
         name: "Go the Distance"
     },
     {
         type: "time",
         multi: 1.3,
         name: "Stay out Longer"
+    },
+    {
+        type: "pace",
+        multi: 0.96,
+        distanceMulti: 0.75,
+        name: "Run Faster"
     }
 ]
 
 export default {
 
     randomizeChallenge() {
-        const rng = Math.floor(Math.random()*challenges.length)
+        const d = new Date();
+        const rng = d.getDate() % 3
         return challenges[rng]
     },
 
