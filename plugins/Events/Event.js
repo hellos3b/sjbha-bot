@@ -1,5 +1,6 @@
 import chrono from 'chrono-node'
 import moment from 'moment'
+import 'moment-timezone'
 import GUID from "../../utils/GUID"
 import utils from './utils'
 
@@ -21,11 +22,15 @@ export default function({
     info_id = null,
     rsvp_id = null
 }, config) {
-    // parse date
+    // Parse the incoming date string to an ISO string
     let parsed_date = chrono.parseDate(date)
-    let date_moment = new moment(parsed_date).utcOffset(-8, true)
+    // Create a moment instance
+    let date_moment = moment.tz(parsed_date, "America/Los_Angeles")
+    // String for display in meetups/discord
     let date_str = date_moment.format("dddd M/D @ h:mma")
+    // Formatted but just the date
     let date_date = date_moment.format("dddd M/D")
+    // Time
     let date_time = date_moment.format("h:mma")
 
     let meetup_info = `${info} | ${date_str}`

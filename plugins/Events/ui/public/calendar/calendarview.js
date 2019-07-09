@@ -80,6 +80,8 @@
             duration : 1000 * 60 * 60
         }
 
+        console.log("EVENT", event)
+
         matrix[year][month][day].push(event);
         return matrix;
     }, {});
