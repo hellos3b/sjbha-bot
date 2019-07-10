@@ -173,14 +173,14 @@ export default function(bastion, opt={}) {
                 const update = await this.getUpdated(context, event)
                 if (!update) return log("(edit) Failed to get update string"), null
 
-                const oldEvent = event.toJSON().options
+                const oldEvent = Object.assign({}, event.toJSON().options)
                 oldEvent.date = event.date_str()
 
                 log("Editing event", event.toJSON())
                 event.update(update)
                 event.updateAnnouncement(bastion.bot)
 
-                const newEvent = event.toJSON().options
+                const newEvent = Object.assign({}, event.toJSON().options)
                 newEvent.date = event.date_str()
 
                 log("Saving to database")
