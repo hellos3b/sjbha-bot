@@ -1,4 +1,5 @@
 import moment from 'moment'
+import 'moment-timezone'
 import grouping from './grouping'
 import utils from './utils'
 
@@ -64,7 +65,7 @@ export default {
     update: async function(bastion, config, eventsList) {
         const log = bastion.Logger("Compact").log
 
-        log("Updating compact list")
+        log("Begin Compact List Update")
         let groups = {
             "Today": new Group(config.compact.todayId, `Today`, new Date(), false),
             "This Week": new Group(config.compact.thisWeekId, `Later This Week`, utils.weekStart(0), true),
@@ -101,6 +102,8 @@ export default {
             })
             log("Updated group", k)
         }
+
+        log("End Compact List Update")
     }
 
 }

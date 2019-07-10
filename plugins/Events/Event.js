@@ -84,12 +84,12 @@ export default function({
         }
 
         // Date is not in the past
-        if (moment().utcOffset(-8).diff(m, 'seconds') > 0) {
+        if (moment().diff(m, 'seconds') > 0) {
             return `${config.name} is set to the past, needs to be a future date`
         }
 
         // Date is not too far into the future
-        if (moment().utcOffset(-8).diff(date_moment, 'days') < -180) {
+        if (moment().diff(date_moment, 'days') < -180) {
             return `Date is set too far into the future`
         }
     }
@@ -103,12 +103,12 @@ export default function({
         }
 
         // Date is not in the past
-        if (moment().utcOffset(-8).diff(date_moment, 'seconds') > 0) {
+        if (moment().diff(date_moment, 'seconds') > 0) {
             msg =  `Would be a cool meetup if we had a time machine, but we don't. Try choosing a time in the future!`;
         }
 
         // Date is not too far into the future
-        if (moment().utcOffset(-8).diff(date_moment, 'days') < -90) {
+        if (moment().diff(date_moment, 'days') < -90) {
             msg =  `Realistically though, I don't think we're planning out meetups more than 3 months in advance. Thanks for testing out my validations though!`;
         }
 

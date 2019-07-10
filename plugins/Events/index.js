@@ -39,10 +39,14 @@ export default function(bastion, opt={}) {
     
     const q = new bastion.Queries('Meetup')
 
+    const updateCompact = async () => {
+        const events = await q.getAll()
+        compact.update(bastion, config, events.map( e => new Event(e, config)))        
+    }
+
     bastion.on('schedule-hourly', async function() {
         log("Updating compact events on schedule")
-        const events = await q.getAll()
-        compact.update(bastion, config, events.map( e => new Event(e, config)))
+        updateCompact()
     })
 
     // Set up calendar UI
@@ -90,6 +94,7 @@ export default function(bastion, opt={}) {
                     // Post the event in event announcements
                     log("Announcing Event")
                     await event.announce(bastion.bot)
+                    updateCompact()
         
                     log("Saving to database")
                     q.createOrUpdate({ id: event.id()}, event.toJSON())
@@ -179,6 +184,7 @@ export default function(bastion, opt={}) {
                 log("Editing event", event.toJSON())
                 event.update(update)
                 event.updateAnnouncement(bastion.bot)
+                updateCompact()
 
                 const newEvent = Object.assign({}, event.toJSON().options)
                 newEvent.date = event.date_str()
@@ -314,7 +320,8 @@ export default function(bastion, opt={}) {
             command: "archive",
             restrict: ["admin"],
             resolve: async () => {
-                archive.archiveMeetups(0)
+                archive.archiveMeetups()
+                updateCompact()
             }
         },
 
@@ -391,6 +398,15 @@ export default function(bastion, opt={}) {
 
         {
             command: "compact-update",
+            restrict: ["admin"],
+            resolve: async function(context) {
+                const events = await q.getAll()
+                compact.update(bastion, config, events.map( e => new Event(e, config)))
+            }
+        },
+
+        {
+            command: "archive-update",
             restrict: ["admin"],
             resolve: async function(context) {
                 const events = await q.getAll()
