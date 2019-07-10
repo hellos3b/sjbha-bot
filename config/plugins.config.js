@@ -69,16 +69,16 @@ export default bastion => ([
         compactChannel: bastion.channels.compact,
 
         // dev
-        compact: {"todayId":"598646940770631800","thisWeekId":"598646943412912139","nextWeekId":"598646944465813504","twoWeeksId":"598646945317388309","threeWeeksId":"598646946420359170","laterId":"598646962463571975"}
+        // compact: {"todayId":"598646940770631800","thisWeekId":"598646943412912139","nextWeekId":"598646944465813504","twoWeeksId":"598646945317388309","threeWeeksId":"598646946420359170","laterId":"598646962463571975"}
         // prod
-        // compact: {
-        //     "todayId":"471806505365143552",
-        //     "thisWeekId":"471806506321575936",
-        //     "nextWeekId":"471806507093065749",
-        //     "twoWeeksId":"471806508041109504",
-        //     "threeWeeksId":"471806508913655828",
-        //     "laterId":"471806527603212298"
-        // }
+        compact: {
+            "todayId":"471806505365143552",
+            "thisWeekId":"471806506321575936",
+            "nextWeekId":"471806507093065749",
+            "twoWeeksId":"471806508041109504",
+            "threeWeeksId":"471806508913655828",
+            "laterId":"471806527603212298"
+        }
     }),
     Outbreak(bastion, {
         restrict: ["shitpost", "430517752546197509"]
