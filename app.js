@@ -7,7 +7,7 @@ import botModules from './config/plugins.config'
 import Boombot from './plugins/Boombot'
 
 const channels = {
-    "admin": "430517752546197509",
+    "admin": process.env.C_ADMIN,
     "shitpost": "506911331257942027",
     "strava": "450913008323919872",
     "boombot": "432766496700235776",
