@@ -25,7 +25,7 @@ export default function({
     // Parse the incoming date string to an ISO string
     let parsed_date = chrono.parseDate(date)
     // Create a moment instance
-    let date_moment = moment.tz(parsed_date, "America/Los_Angeles")
+    let date_moment = new moment(parsed_date)
     // String for display in meetups/discord
     let date_str = date_moment.format("dddd M/D @ h:mma")
     // Formatted but just the date
