@@ -18,13 +18,14 @@ export default function(bastion, config) {
 
     async function archiveMeetups() {
         log("Begin Meetup Archive")
-        const meetups = await Meetups.getAll()
+        const meetupsraw = await Meetups.getAll()
+        const meetups = meetupsraw.map( e => new Event(e, config))
 
         log("Meetup count: ", meetups.length)
         for (var i = 0; i < meetups.length; i++) {
-            let diff = moment().diff(meetups[i].timestamp, 'hours')
+            let diff = moment().diff(meetups[i].date_moment(), 'hours')
 
-            log(`Checking meetup`, `${meetups[i].info}: diff ${diff}`, meetups[i])
+            log(`Checking meetup`, `[${meetups[i].info()}] diff ${diff} date: ${meetups[i].date_moment()}`, meetups[i])
             if (diff < config.archiveTime) continue
 
             log(`Archiving meetup ${meetups[i].info}`)

@@ -12,7 +12,7 @@ export default {
 
         // Assign each event a group
         return events.map( event => {
-            const d = event.date_moment().toDate()
+            const d = event.date_moment().tz("America/Los_Angeles")
             let group = ""
 
             if (utils.isToday(d)) {

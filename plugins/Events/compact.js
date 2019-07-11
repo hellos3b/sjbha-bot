@@ -13,7 +13,7 @@ const Group = function(msg_id, title, date, isWeek) {
     }
 
     this.getTitle = function() {
-        let start = new moment(date).format(dateFormat)
+        let start = new moment(date).tz("America/Los_Angeles").format(dateFormat)
 
         if (!isWeek) {
             // If not week, just show the date the group points to
@@ -22,13 +22,12 @@ const Group = function(msg_id, title, date, isWeek) {
             // If is week, find the (date -> date).
             // If date is before /today/, make the date today + 1
             if (date < new Date()) {
-                start = new Date()
-                start.setDate(start.getDate() + 1)
-                start = new moment(start).format(dateFormat)
+                start = new moment(date)
+                    .tz("America/Los_Angeles")
+                    .add(1, 'days')
+                    .format(dateFormat)
             }
-            let end = new Date(date.getTime())
-            end.setDate( end.getDate() + 6)
-            end = new moment(end).format(dateFormat)
+            let end = date.endOf("week").format(dateFormat)
             return `${title} (${start} - ${end})`
         }
     }
@@ -43,7 +42,7 @@ const Group = function(msg_id, title, date, isWeek) {
         const url = `https://discordapp.com/channels/358442034790400000/430878436027006978/${event.info_id()}`;
         const title = event.info_str();
         const fromNow = event.date_moment().fromNow();
-        const date = event.date_moment().format("ddd, MMMM D @ h:mma");
+        const date = event.date_moment().tz("America/Los_Angeles").format("ddd, MMMM D @ h:mma");
 
         return {
             name: `${title} | ${date} (${fromNow})`,

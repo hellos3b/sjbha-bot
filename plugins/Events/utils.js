@@ -1,4 +1,6 @@
 import chalk from 'chalk'
+import moment from 'moment'
+import 'moment-timezone'
 
 export default {
 
@@ -55,18 +57,16 @@ export default {
 
     weekStart(offset) {
         if (typeof offset === 'number') {
-            let d = new Date()
-            d.setDate( d.getDate() + offset - d.getDay() )
-            return d
+            return new moment().tz("America/Los_Angeles")
+                .add(offset, 'days')
+                .startOf("week")
         } else {
-            let d = new Date(offset.getTime())
-            d.setDate( d.getDate() - d.getDay() )
-            return d
+            return offset.startOf("week")
         }
     },
 
     dayFormat(d) {
-        return `${d.getMonth()}-${d.getDate()}`
+        return `${d.month()}-${d.date()}`
     },
 
     isSameDayAndMonth(d1, d2) {
@@ -74,8 +74,8 @@ export default {
     },
 
     isToday(d) {
-        const today = new Date()
-        return this.isSameDayAndMonth(d, new Date())
+        const today = new moment().tz("America/Los_Angeles")
+        return this.isSameDayAndMonth(d, today)
     },
 
     isInWeek(d, week) {

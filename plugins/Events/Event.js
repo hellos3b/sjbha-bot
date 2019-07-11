@@ -22,27 +22,33 @@ export default function({
     info_id = null,
     rsvp_id = null
 }, config) {
+    let refDate = new moment()
     // Parse the incoming date string to an ISO string
-    let parsed_date = chrono.parseDate(date)
+    let parsed_date = chrono.parse(date, refDate)[0].start
+    parsed_date.assign('timezoneOffset', -420)
+
     // Create a moment instance
-    let date_moment = new moment(parsed_date)
+    let date_moment = new moment(parsed_date.date())
     // String for display in meetups/discord
-    let date_str = date_moment.format("dddd M/D @ h:mma")
+    let date_str = date_moment.tz("America/Los_Angeles").format("dddd M/D @ h:mma")
     // Formatted but just the date
-    let date_date = date_moment.format("dddd M/D")
+    let date_date = date_moment.tz("America/Los_Angeles").format("dddd M/D")
     // Time
-    let date_time = date_moment.format("h:mma")
+    let date_time = date_moment.tz("America/Los_Angeles").format("h:mma")
 
     let meetup_info = `${info} | ${date_str}`
 
     let reactions = { yes: [], maybe: [] }
 
     this.parseDate = function() {
-        parsed_date = chrono.parseDate(date)
-        date_moment = new moment(parsed_date)
-        date_str = date_moment.format("dddd M/D @ h:mma")
-        date_date = date_moment.format("dddd M/D")
-        date_time = date_moment.format("h:mma")
+        refDate = new moment()
+        parsed_date = chrono.parse(date, refDate)[0].start
+        parsed_date.assign('timezoneOffset', -420)
+        date_moment = new moment(parsed_date.date())
+
+        date_str = date_moment.tz("America/Los_Angeles").format("dddd M/D @ h:mma")
+        date_date = date_moment.tz("America/Los_Angeles").format("dddd M/D")
+        date_time = date_moment.tz("America/Los_Angeles").format("h:mma")
     }
 
     this.updateInfo = function() {
