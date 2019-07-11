@@ -41,9 +41,13 @@ const Group = function(msg_id, title, date, isWeek) {
     this.getEventField = function(event) {
         const url = `https://discordapp.com/channels/358442034790400000/430878436027006978/${event.info_id()}`;
         const title = event.info_str();
+
+        console.log("event field", event.toJSON())
         const fromNow = event.date_moment().fromNow();
+        console.log("from now?", fromNow, event.date_moment())
         const date = event.date_moment().tz("America/Los_Angeles").format("ddd, MMMM D @ h:mma");
 
+        console.log(`   - ${title}`)
         return {
             name: `${title} | ${date} (${fromNow})`,
             value: `<${url}>`
