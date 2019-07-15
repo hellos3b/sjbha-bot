@@ -1,5 +1,6 @@
 import Table from 'ascii-table'
 import moment from 'moment'
+import 'moment-timezone'
 
 export default {
     getMiles(i) {
@@ -86,7 +87,7 @@ export default {
             return n.type === "Run"
         })
         .map(n => {
-            let date = new Date(n.start_date)
+            let date = new Date(n.start_date_local)
             return this.dateString(date)
         }).reduce( (res, obj) => {
             res[obj] = true
@@ -94,8 +95,8 @@ export default {
         }, {})
 
         let cal = `S  M  T  W  T  F  S`;
-        const tomorrow = new Date();
-        const today = this.dateString(new Date());
+        const tomorrow = moment.utc(new Date()).tz("America/Los_Angeles").toDate()
+        const today = this.dateString( moment.utc(new Date()).tz("America/Los_Angeles").toDate() );
         tomorrow.setDate(tomorrow.getDate() + 1);
         const t = this.dateString(tomorrow);
         let c = this.dateString(start_date);
