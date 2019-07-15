@@ -29,7 +29,7 @@ export default function(bastion, config) {
             if (diff < config.archiveTime) continue
 
             log(`Archiving meetup ${meetups[i].info}`)
-            const event = new Event(meetups[i], config)
+            const event = new Event(meetups[i].toJSON(), config)
             const archive = await event.toArchiveJSON(bastion.bot)
 
             log("Finishing ", event.info_str())

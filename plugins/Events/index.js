@@ -41,7 +41,7 @@ export default function(bastion, opt={}) {
 
     const updateCompact = async () => {
         const events = await q.getAll()
-        compact.update(bastion, config, events.map( e => new Event(e, config)))        
+        await compact.update(bastion, config, events.map( e => new Event(e, config)))        
     }
 
     bastion.on('schedule-hourly', async function() {
@@ -94,7 +94,7 @@ export default function(bastion, opt={}) {
                     // Post the event in event announcements
                     log("Announcing Event")
                     await event.announce(bastion.bot)
-                    updateCompact()
+                    await updateCompact()
         
                     log("Saving to database")
                     q.createOrUpdate({ id: event.id()}, event.toJSON())
@@ -183,14 +183,13 @@ export default function(bastion, opt={}) {
 
                 log("Editing event", event.toJSON())
                 event.update(update)
-                event.updateAnnouncement(bastion.bot)
-                updateCompact()
+                await event.updateAnnouncement(bastion.bot)
 
                 const newEvent = Object.assign({}, event.toJSON().options)
                 newEvent.date = event.date_str()
 
                 log("Saving to database")
-                q.update({ id: event.id() }, event.toJSON())
+                await q.update({ id: event.id() }, event.toJSON())
 
                 log("Emitting events-update")
                 bastion.emit("events-update")
@@ -228,6 +227,8 @@ export default function(bastion, opt={}) {
                 addChange('url')
                 addChange('image')
                 addChange('type')
+
+                updateCompact()
 
                 if (changes.length) {
                     return `You got it! The following has been updated:` + bastion.helpers.code(changes, 'diff')
@@ -320,8 +321,9 @@ export default function(bastion, opt={}) {
             command: "archive",
             restrict: ["admin"],
             resolve: async () => {
-                archive.archiveMeetups()
-                updateCompact()
+                await archive.archiveMeetups()
+                await updateCompact()
+                return "Archived"
             }
         },
 

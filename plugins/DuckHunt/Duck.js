@@ -70,7 +70,7 @@ export default {
             })
         } else {
             // Check if it's not already in it
-            if (userID !== duck.shotBy && !duck.misses.filter(n => n.userID === userID).length) {
+            if (userID !== duck.shotBy.userID && !duck.misses.filter(n => n.userID === userID).length) {
                 duck.misses.push({ user, userID })
             }
         }

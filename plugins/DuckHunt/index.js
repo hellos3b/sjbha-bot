@@ -3,6 +3,7 @@ import chalk from 'chalk'
 import Ducks from './Duck'
 import './schema'
 import './shotSchema'
+import moment from 'moment'
 
 const baseConfig = {
     channels: [
@@ -174,6 +175,7 @@ export default function(bastion, opt={}) {
     })
 
     function formatTime(date) {
+        date = new moment(date).tz("America/Los_Angeles").toDate()
         let hours = date.getHours()
         let ampm = (hours > 12) ? "pm" : "am"
         hours = (hours > 12) ? hours - 12 : hours
@@ -187,7 +189,7 @@ export default function(bastion, opt={}) {
     function getSeason() {
         const d = new Date()
 
-        if (d < nextDuck.start) {
+        if (d.getTime() < nextDuck.start) {
             return `Next season: ${formatTime(nextDuck.start)} - ${formatTime(nextDuck.end)} `
         } else {
             return `It's hunting season till ${formatTime(nextDuck.end)} ! `
@@ -198,15 +200,15 @@ export default function(bastion, opt={}) {
 
     return [
 
-        // {
-        //     command: 'duck',
+        {
+            command: 'duck',
 
-        //     resolve: async function(context, tag) {  
-        //         const msg = await bastion.send(context.channelID, "\:duck:")
-        //         Ducks.create(context.channelID, msg.id)
-        //         // sendDuck()
-        //     }
-        // },
+            resolve: async function(context, tag) {  
+                const msg = await bastion.send(context.channelID, "\:duck:")
+                Ducks.create(context.channelID, msg.id)
+                // sendDuck()
+            }
+        },
 
         {
             command: 'duckhunt',

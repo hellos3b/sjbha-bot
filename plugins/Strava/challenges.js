@@ -32,7 +32,11 @@ export default {
     },
 
     create(challenge, averages) {
-        let targets = {}
+        let targets = {
+            distance: null,
+            time: null,
+            pace_seconds: null
+        }
         if (challenge.type === "time") {
             targets.time = averages.time * challenge.multi
         }
@@ -49,6 +53,7 @@ export default {
             targets
         }
 
+        console.log('create challenge', result)
         return result
     },
 
