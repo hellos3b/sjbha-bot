@@ -84,7 +84,9 @@ export default function({
             return "Missing date or name"
         }
 
-        const pd = chrono.parseDate(opt.date)
+        let refDate = new moment().tz("America/Los_Angeles")
+        let pd = chrono.parse(opt.date, refDate)[0].start
+        pd.assign('timezoneOffset', -420)
         const m = new moment(pd)      
         // Date is an actual date  
         if (!m.isValid()) {
