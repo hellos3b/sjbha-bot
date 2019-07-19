@@ -87,46 +87,22 @@ export default function({
         let refDate = new moment().tz("America/Los_Angeles")
         let pd = chrono.parse(opt.date, refDate)[0].start
         pd.assign('timezoneOffset', -420)
-        const m = new moment(pd)      
+        const m = new moment(pd.date())      
+
         // Date is an actual date  
         if (!m.isValid()) {
            return `🤔 Not sure if that date is valid. I'm having trouble understanding \`${date}\`, try:  \`month/day time (am/pm)\``;
         }
 
         // Date is not in the past
-        if (moment().diff(m, 'seconds') > 0) {
+        if (refDate.diff(m, 'seconds') > 0) {
             return `${config.name} is set to the past, needs to be a future date`
         }
 
         // Date is not too far into the future
-        if (moment().diff(date_moment, 'days') < -180) {
+        if (refDate.diff(date_moment, 'days') < -180) {
             return `Date is set too far into the future`
         }
-    }
-
-    this._validate = async function(bot, question=true) {
-        let msg = null;
-
-        // Date is an actual date
-        if (!date_moment.isValid()) {
-            msg =  `🤔 Not sure if that date is valid. I'm having trouble understanding \`${date}\`, try:  \`month/day time (am/pm)\``;
-        }
-
-        // Date is not in the past
-        if (moment().diff(date_moment, 'seconds') > 0) {
-            msg =  `Would be a cool meetup if we had a time machine, but we don't. Try choosing a time in the future!`;
-        }
-
-        // Date is not too far into the future
-        if (moment().diff(date_moment, 'days') < -90) {
-            msg =  `Realistically though, I don't think we're planning out meetups more than 3 months in advance. Thanks for testing out my validations though!`;
-        }
-
-        if (msg) {
-
-            return msg;
-        }
-        return null;
     }
 
     this.announce = function(bot) {
