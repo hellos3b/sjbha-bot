@@ -349,7 +349,7 @@ export default function(bastion, opt={}) {
                 outputString(event) {
                     const title = event.info_str(),
                         fromNow = event.date_moment().fromNow(),
-                        date = event.date_moment().format("dddd, MMMM D @ h:mma")
+                        date = event.date_moment().tz("America/Los_Angeles").format("dddd, MMMM D @ h:mma")
 
                     return `**# ${title}**\n${fromNow} - ${date}`
                 }
