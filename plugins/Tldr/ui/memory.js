@@ -5,6 +5,7 @@ import moment from 'moment'
 let template =  requireText('./memory.html', require)
 
 function parseData(data) {
+    console.log("data", data)
     data.tldrs = data.tldrs.map( n => {
         let m = moment(n.timestamp).format("MMMM Do, hh:mm a")
         n.date_str = m;

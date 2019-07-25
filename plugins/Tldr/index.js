@@ -7,6 +7,7 @@ import deepmerge from 'deepmerge'
 import moment from 'moment'
 import router from './ui/router'
 import './tldrSchema'
+import './memorySchema'
 
 const baseConfig = {
     command: "tldr",
