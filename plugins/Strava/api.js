@@ -52,12 +52,14 @@ export default bastion => {
     },
 
     getAthleteActivities(owner_id, access_token, start_date) {
+      console.log(logPrefix, chalk.gray("getAthleteActivities -> "), owner_id);
       const epoch = start_date.getTime() / 1000;
       const url = `https://www.strava.com/api/v3/athlete/activities?after=${epoch}&per_page=100`;
 
       return Axios.get(url, this.authHeader(access_token)).then(
-        res => res.data
-      );
+          res => res.data
+        ).catch( r => [])
+        .then( r => r.filter(n => n.type === 'Run'));
     },
 
     getStats: async function(userID) {
@@ -89,6 +91,21 @@ export default bastion => {
       return Promise.all(promises).then(res => res.filter(n => n));
     },
 
+    getBatchActivities: async function(users) {
+      console.log(logPrefix, chalk.gray("getBatchActivities -> "), users.length);
+      const promises = users.map(n => {
+        return this.getLastMonthActivities(n).then(activities => {
+          if (!activities.length) return null;
+          return {
+            activities,
+            user: n.user,
+            userID: n.userID
+          };
+        });
+      });
+      return Promise.all(promises).then(res => res.filter(n => n));
+    },
+
     getActivity(activity_id, accessToken) {
       console.log(logPrefix, chalk.gray("getActivity -> "), activity_id);
       const url = `https://www.strava.com/api/v3/activities/${activity_id}`;
@@ -102,6 +119,14 @@ export default bastion => {
         user.accessToken,
         start_date
       );
+    },
+
+    getLastMonthActivities: async function(user) {
+      const start_date = new Date()
+      start_date.setDate(start_date.getDate() - 28)
+      start_date.setDate(start_date.getDate() - start_date.getDay())
+
+      return this.getActivities(user, start_date)
     },
 
     getAverageStats: async function(userID) {
@@ -221,6 +246,11 @@ export default bastion => {
       });
     },
 
+    getAllActivities: async function() {
+      const users = await $.getAll();
+      return this.getBatchActivities(users);    
+    },
+
     getAllAverages: async function() {
       const users = await $.getAll();
       const stats = await this.getBatchStats(users);
@@ -239,18 +269,21 @@ export default bastion => {
     },
 
     resetChallenges: async function() {
-      const averages = await this.getAllAverages();
+      const activities = await this.getAllActivities();
+
       // Only if you have 4 or more runs do you qualify
       const newChallenge = challenges.randomizeChallenge();
 
       return Promise.all(
-        averages.map(n => {
+        activities.map(activity => {
+          const {activities} = activity
+
           let challenge = null;
-          if (n.total >= 4) {
-            challenge = challenges.create(newChallenge, n);
+          if (activities.length >= 4) {
+            challenge = challenges.create(newChallenge, activity);
           }
 
-          return this.saveChallenge(n.userID, challenge);
+          return this.saveChallenge(activity.userID, challenge);
         })
       );
     },
