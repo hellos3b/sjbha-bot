@@ -8,24 +8,8 @@ export default (bastion, config) => {
 
     router.get('/', (req, res) => {
 
-      let template =  requireText('./template.html', require)
-
-      const q = new bastion.Queries('Olympics')
-      q.getAll()
-        .then(teamsData => {
-          const teams = new Array(8).fill({ empty: true }).map( (n, i) => {
-            if (teamsData[i]) {
-              let t = teamsData[i]
-              t.flagHTML = createFlag(t.flag, t.primary, t.secondary)
-              return t
-            } else {
-              return n
-            }
-          })
-
-          let view = mustache.render(template, {teams})
-          res.send(view)
-        })
+      let template =  requireText('./results.html', require)
+      res.send(template)
     })
     
     return router
