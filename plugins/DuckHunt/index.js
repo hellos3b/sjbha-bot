@@ -4,6 +4,7 @@ import Ducks from './Duck'
 import './schema'
 import './shotSchema'
 import moment from 'moment'
+import Analyze from './Analyze'
 
 const baseConfig = {
     channels: [
@@ -64,6 +65,8 @@ export default function(bastion, opt={}) {
     const config = deepmerge(baseConfig, opt)
     const q = new bastion.Queries("Duckhunt-s2")
     const qShot = new bastion.Queries("DuckhuntShot-s2")
+
+    const an = Analyze(bastion)
 
     async function saveBang(user, userID) {
         let player = await q.findOne({ userID })
