@@ -61,7 +61,9 @@ export default (bastion) => {
     // if (listenChannels.indexOf(channelID) === -1) return;
 
     if (message === "!s") {
-      bastion.send(channelID, getScore(channelID))
+      const score = getScore(channelID)
+      console.log("score:" , score)
+      bastion.send(channelID, `score: ${getScore(channelID)}`)
       return;
     }
     const derp = analyze[channelID]
