@@ -32,8 +32,12 @@ const listenChannels = [
 const RESET_RATE = 1000 * 60
 const damperThingy = 0.5
 
+const TWO_HOURS = 1000 * 60 * 60 * 2
+
 const scoreHistory = {}
 const MAX_HISTORY = 10
+
+const FIVE_MINUTES = 1000 * 60 * 5
 
 export default (bastion) => {
   let analyze = {}
@@ -101,4 +105,40 @@ export default (bastion) => {
 
   // Do the thing
   setInterval(() => resetCounts(), RESET_RATE)
+
+  // Do the actual calculations
+  const monitor = () => {
+    bastion.send(430517752546197509, `\`Beginning monitoring for duck spawn\``)
+
+    const interval = setInterval(() => {
+      const channel = checkChannels()
+      if (!channel) return;
+
+      clearInterval(interval)
+      const mention = `<#${channel}>`
+      bastion.send(430517752546197509, `-> POST DUCK in ${mention}`)
+      setTimeout(() => {
+        monitor()
+      }, TWO_HOURS)
+    }, FIVE_MINUTES)
+  }
+  
+  const checkChannels = () => {
+    for (var cid in scoreHistory) {
+      const high = scoreHistory[cid].find( n => n.score >= 350)
+      if (high) {
+        bastion.send(430517752546197509, `HIGH threshold reached: ${JSON.stringify(high)}`)
+        return cid;
+      }
+
+      const med = scoreHistory[cid].filter( n => n.score >= 200)
+      if (med.length >= 2) {
+        bastion.send(430517752546197509, `MED threshold reached: ${JSON.stringify(med)}`)
+        return cid;
+      }
+    }
+    return null;
+  }
+
+  monitor()
 }
