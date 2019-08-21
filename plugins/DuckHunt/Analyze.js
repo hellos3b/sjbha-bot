@@ -80,7 +80,7 @@ export default (bastion) => {
 
   bastion.on("message", ({userID, channelID, message}) => {
     // TODO: uncomment for prod
-    // if (listenChannels.indexOf(channelID) === -1) return;
+    if (listenChannels.indexOf(channelID) === -1) return;
 
     if (message.startsWith("!s")) {
       if (channelID !== '430517752546197509') return;
@@ -142,5 +142,5 @@ export default (bastion) => {
   
   setTimeout(() => {
     monitor()
-  }, 1000)
+  }, 10000)
 }
