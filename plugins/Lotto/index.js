@@ -196,7 +196,7 @@ export default function (bastion, opt = {}) {
         const taxes = Math.floor(pool * TAX_RATE)
         const split = Math.floor( (pool - taxes) / winners.length)
         result += `\nEach winner gets ${split} royroybucks`
-        result += `\n<:bankbot:613855784996044826> takes ${taxes}`
+        result += `\n<:bankbot:613855784996044826> Takes **${taxes}**`
 
         const bank = await rrb.findOne({ userID: "FED-RESERVE"})
         bank.bucks += taxes

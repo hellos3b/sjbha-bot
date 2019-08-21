@@ -60,7 +60,7 @@ export default function(bastion, opt={}) {
 
                 const reserve = bank.bucks
 
-                return `<:bankbot:613855784996044826> **Economy:** ${economy} **Reserve: ${reserve}**`
+                return `<:bankbot:613855784996044826> Economy: **${economy}** Reserve: **${reserve}**`
             }
         },
 
