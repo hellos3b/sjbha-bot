@@ -234,6 +234,34 @@ export default function(bastion, opt={}) {
         },
 
         {
+            command: 'fix',
+
+            resolve: async function() {
+                const hits = await q.getAll()
+                const shots = await qShot.getAll()
+                console.log(shots)
+                const removeMiss = {}
+                for (var i = 0; i < shots.length; i++) {
+                    const shotBy = shots[i].shotBy.userID
+                    const misses = shots[i].misses
+
+                    const dupeMiss = misses.find( n => n.userID === shotBy)
+                    if (dupeMiss) {
+                        console.log("OFFENDER", shots[i].shotBy.user)
+
+                        if (!removeMiss[shotBy]) {
+                            removeMiss[shotBy] = 1
+                        } else {
+                            removeMiss[shotBy]++
+                        }
+                    }
+                }
+                console.log(removeMiss)
+                return "Sup?"
+            }
+        },
+
+        {
             action: 'duckhunt:all',
 
             resolve: async function(context, tag) {  

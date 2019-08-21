@@ -14,6 +14,8 @@ const baseConfig = {
   cost: 5
 }
 
+const TAX_RATE = 0.07
+
 const delay = ms => 
   new Promise( (resolve, reject) => {
     setTimeout(resolve, ms)
@@ -191,8 +193,15 @@ export default function (bastion, opt = {}) {
         const winnerStr = winners.map(bastion.helpers.toMention).join(", ")
         result += "Our winners: \n👏 "+winnerStr
 
-        const split = Math.floor(pool / winners.length)
+        const taxes = Math.floor(pool * TAX_RATE)
+        const split = Math.floor( (pool - taxes) / winners.length)
         result += `\nEach winner gets ${split} royroybucks`
+        result += `\n<:bankbot:613855784996044826> takes ${taxes}`
+
+        const bank = await rrb.findOne({ userID: "FED-RESERVE"})
+        bank.bucks += taxes
+
+        await rrb.update({ userID: "FED-RESERVE"}, bank)
 
         for (var i = 0; i < winners.length; i++) {
           const user = await rrb.findOne({ userID: winners[i] })

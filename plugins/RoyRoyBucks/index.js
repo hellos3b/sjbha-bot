@@ -41,8 +41,26 @@ export default function(bastion, opt={}) {
                 console.log(cmd)
                 if (cmd === 'give') return this.route("give")
                 if (cmd === 'reset') return this.route("reset")
+                if (cmd === 'reserve') return this.route("reserve")
 
                 return `**Bank**: ${user.bucks} royroybucks`
+            }
+        },
+
+        {
+            action: `${config.command}:reserve`,
+
+            resolve: async function(context, message) {
+                let bank = await q.findOne({ userID: "FED-RESERVE"})
+                let total = await q.getAll()
+
+                const economy = total.reduce( (res, usr) => {
+                    return res + usr.bucks
+                }, 0)
+
+                const reserve = bank.bucks
+
+                return `<:bankbot:613855784996044826> **Economy:** ${economy} **Reserve: ${reserve}**`
             }
         },
 
