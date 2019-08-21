@@ -137,7 +137,7 @@ export default (bastion) => {
       }
 
       if (med.length >= 2) {
-        bastion.send(ADMIN_CHANNEL, `**MED threshold reached!** Score: ${high.score}, messages: ${high.msgCount}, users: ${high.userIDS.size}`)
+        bastion.send(ADMIN_CHANNEL, `**MED threshold reached!** ${med.length} samples > 200`)
         return cid;
       }
     }
