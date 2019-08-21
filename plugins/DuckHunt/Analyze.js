@@ -35,7 +35,7 @@ const damperThingy = 0.5
 const TWO_HOURS = 1000 * 60 * 60 * 2
 
 const scoreHistory = {}
-const MAX_HISTORY = 10
+const MAX_HISTORY = 6
 
 const FIVE_MINUTES = 1000 * 60 * 5
 
