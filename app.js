@@ -23,7 +23,7 @@ const bastion = Bastion({
     serverId: process.env.SERVER_ID,
     prefix: process.env.NODE_ENV === "production" ? "!" : (process.env.npm_config_symbol || "_")
 })
-    
+
 // Load modules
 bastion.use(botModules(bastion), { ignore: [channels.boombot] })
 bastion.use(Boombot(bastion, {

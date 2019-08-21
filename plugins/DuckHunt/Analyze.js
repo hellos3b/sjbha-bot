@@ -39,6 +39,9 @@ const MAX_HISTORY = 6
 
 const FIVE_MINUTES = 1000 * 60 * 5
 
+const ADMIN_CHANNEL = "430517752546197509"
+// const ADMIN_CHANNEL = "530597070558461972"
+
 export default (bastion) => {
   let analyze = {}
   let lastAnalyze = {}
@@ -83,7 +86,7 @@ export default (bastion) => {
     if (listenChannels.indexOf(channelID) === -1) return;
 
     if (message.startsWith("!s")) {
-      if (channelID !== '430517752546197509') return;
+      if (channelID !== ADMIN_CHANNEL) return;
       const [cmd, CID] = message.split(" ")
       if (!CID) return bastion.send(channelID, "Need a channel ID")
       const history = scoreHistory[CID]
@@ -108,7 +111,7 @@ export default (bastion) => {
 
   // Do the actual calculations
   const monitor = () => {
-    bastion.send(430517752546197509, `\`Beginning monitoring for duck spawn\``)
+    bastion.send(ADMIN_CHANNEL, `\`Beginning monitoring for duck spawn\``)
 
     const interval = setInterval(() => {
       const channel = checkChannels()
@@ -116,7 +119,7 @@ export default (bastion) => {
 
       clearInterval(interval)
       const mention = `<#${channel}>`
-      bastion.send(430517752546197509, `-> POST DUCK in ${mention}`)
+      bastion.send(ADMIN_CHANNEL, `-> POST DUCK in ${mention}`)
       setTimeout(() => {
         monitor()
       }, TWO_HOURS)
@@ -127,20 +130,20 @@ export default (bastion) => {
     for (var cid in scoreHistory) {
       const high = scoreHistory[cid].find( n => n.score >= 350)
       if (high) {
-        bastion.send(430517752546197509, `HIGH threshold reached: ${JSON.stringify(high)}`)
+        bastion.send(ADMIN_CHANNEL, `HIGH threshold reached: ${JSON.stringify(high)}`)
         return cid;
       }
 
       const med = scoreHistory[cid].filter( n => n.score >= 200)
       if (med.length >= 2) {
-        bastion.send(430517752546197509, `MED threshold reached: ${JSON.stringify(med)}`)
+        bastion.send(ADMIN_CHANNEL, `MED threshold reached: ${JSON.stringify(med)}`)
         return cid;
       }
     }
     return null;
   }
   
-  setTimeout(() => {
+  bastion.on('ready', () => {
     monitor()
-  }, 10000)
+  })
 }
