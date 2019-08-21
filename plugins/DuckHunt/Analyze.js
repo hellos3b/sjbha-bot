@@ -139,6 +139,8 @@ export default (bastion) => {
     }
     return null;
   }
-
-  monitor()
+  
+  setTimeout(() => {
+    monitor()
+  }, 1000)
 }
