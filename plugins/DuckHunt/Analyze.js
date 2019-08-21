@@ -83,10 +83,7 @@ export default (bastion) => {
 
   bastion.on("message", ({userID, channelID, message}) => {
     // TODO: uncomment for prod
-    if (listenChannels.indexOf(channelID) === -1) return;
-
-    if (message.startsWith("!s")) {
-      if (channelID !== ADMIN_CHANNEL) return;
+    if (message.startsWith("!s") && channelID === ADMIN_CHANNEL) {
       const [cmd, CID] = message.split(" ")
       if (!CID) return bastion.send(channelID, "Need a channel ID")
       const history = scoreHistory[CID]
@@ -95,6 +92,9 @@ export default (bastion) => {
       bastion.send(channelID, bastion.helpers.code(output))
       return;
     }
+
+    if ( (listenChannels.indexOf(channelID) === -1) ) return;
+
     const derp = analyze[channelID]
     derp.msgCount++
     derp.userIDS.add(userID)
