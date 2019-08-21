@@ -29,8 +29,11 @@ const listenChannels = [
 ]
 
 // How often to stop tracking shit (in ms)
-const RESET_RATE = 1000
+const RESET_RATE = 1000 * 60
 const damperThingy = 0.5
+
+const scoreHistory = {}
+const MAX_HISTORY = 10
 
 export default (bastion) => {
   let analyze = {}
@@ -38,6 +41,21 @@ export default (bastion) => {
 
   const resetCounts = () => {
     lastAnalyze = Object.assign({}, analyze)
+
+    for (var k in lastAnalyze) {
+      const arr = scoreHistory[k] || []
+      const sc = getScore(k)
+
+      if (arr.length > MAX_HISTORY) {
+        arr.splice(0, 1)
+      }
+      
+      const data = Object.assign({
+        score: sc
+      }, lastAnalyze[k])
+      arr.push(data)
+      scoreHistory[k] = arr
+    }
 
     analyze = listenChannels.reduce( (obj, channelID) => {
       obj[channelID] = {
@@ -60,10 +78,14 @@ export default (bastion) => {
     // TODO: uncomment for prod
     // if (listenChannels.indexOf(channelID) === -1) return;
 
-    if (message === "!s") {
-      const score = getScore(channelID)
-      console.log("score:" , score)
-      bastion.send(channelID, `score: ${getScore(channelID)}`)
+    if (message.startsWith("!s")) {
+      if (channelID !== '430517752546197509') return;
+      const [cmd, CID] = message.split(" ")
+      if (!CID) return bastion.send(channelID, "Need a channel ID")
+      const history = scoreHistory[CID]
+
+      const output = history.map( n => `S: ${n.score} | C: ${n.msgCount} | U: ${n.userIDS.size}`).join('\n')
+      bastion.send(channelID, bastion.helpers.code(output))
       return;
     }
     const derp = analyze[channelID]
