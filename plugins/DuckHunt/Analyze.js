@@ -131,12 +131,12 @@ export default (bastion) => {
       const high = scoreHistory[cid].find( n => n.score >= 350)
       const med = scoreHistory[cid].filter( n => n.score >= 200)
 
-      if (high && med.length > 1) {
+      if (high) {
         bastion.send(ADMIN_CHANNEL, `**HIGH threshold reached!** Score: ${high.score}, messages: ${high.messages}, users: ${high.userIDS.size}`)
         return cid;
       }
 
-      if (med.length >= 3) {
+      if (med.length >= 2) {
         bastion.send(ADMIN_CHANNEL, `**MED threshold reached!** Score: ${high.score}, messages: ${high.messages}, users: ${high.userIDS.size}`)
         return cid;
       }
