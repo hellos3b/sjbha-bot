@@ -56,7 +56,7 @@ export default function(bastion, opt = {}) {
       restrictMessage: `RRB Trading is only for <#363123179696422916>`, 
 
       resolve: async function(context, message) {
-        let holdings = await q.find({ userID: context.userID })
+        let holdings = await q.find({ userID: context.userID, sold: false })
 
         if (!holdings.length) return `You're not invested in anything! Use \`!buy\` to get started`
 
@@ -141,7 +141,7 @@ export default function(bastion, opt = {}) {
       restrictMessage: `RRB Trading is only for <#363123179696422916>`, 
 
       resolve: async function(context, message) {
-        const holdings = await q.find({userID: context.userID})
+        const holdings = await q.find({userID: context.userID, sold: false})
 
         if (!holdings.length) {
           return `<:bankbot:613855784996044826> You're not invested in anything`
@@ -171,13 +171,16 @@ export default function(bastion, opt = {}) {
 
         const confirm = await bastion.Ask(`Sell ${seller.amt} **${seller.ticker.toUpperCase()}** for **${sellPrice}** royroybucks? (y/n)\n<:bankbot:613855784996044826> *+${FEE}rrb Transaction Fee*`, context)   
 
-        if (confirm !== 'y') {
+        if (confirm.toLowerCase() !== 'y') {
           return `Okay, cancelling transaction`
         }
 
         const award = sellPrice - FEE
 
-        await q.remove({ _id: seller._id })
+        seller.sold = true
+        seller.soldTimestamp = Date.now()
+        seller.soldPrice = stockPrice
+        await q.update({ _id: seller._id }, seller)
 
         const bank = await rrb.findOne({ userID: "FED-RESERVE"})
         bank.bucks += FEE
@@ -242,7 +245,7 @@ export default function(bastion, opt = {}) {
           context, 
           (val) => {}, 2)
 
-        if (confirm !== 'y') return `Okay, cancelling`
+        if (confirm.toLowerCase() !== 'y') return `Okay, cancelling`
 
         const bank = await rrb.findOne({ userID: "FED-RESERVE"})
         bank.bucks += FEE

@@ -8,7 +8,13 @@ const Schema = mongoose.Schema({
     timestamp: {
       default: Date.now,
       type: Date
-    }
+    },
+    sold: {
+      type: Boolean,
+      default: false
+    },
+    soldTimestamp: Date,
+    soldPrice: Number
 })
 
 export default mongoose.model('holdings', Schema)
