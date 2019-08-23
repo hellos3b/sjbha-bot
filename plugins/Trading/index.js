@@ -220,6 +220,11 @@ export default function(bastion, opt = {}) {
           return `<:bankbot:613855784996044826> We are being rate limited by the API, try again later (5/min, 500/day)`
         }
 
+        const err = response.data['Error Message']
+        if (err) {
+          return `Can't find stock **${ticker}**`
+        }
+
         const quote = response.data['Global Quote']
         const stockPrice = parseInt(quote['05. price'])
         const user = await rrb.findOne({ userID: context.userID })
