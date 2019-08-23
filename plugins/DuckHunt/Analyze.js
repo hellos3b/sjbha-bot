@@ -37,7 +37,7 @@ const TWO_HOURS = 1000 * 60 * 60 * 2
 const scoreHistory = {}
 const MAX_HISTORY = 6
 
-const FIVE_MINUTES = 1000 * 60 * 5
+const ONE_MINUTE = 1000 * 60
 
 const ADMIN_CHANNEL = "430517752546197509"
 // const ADMIN_CHANNEL = "530597070558461972"
@@ -123,7 +123,7 @@ export default (bastion) => {
       setTimeout(() => {
         monitor()
       }, TWO_HOURS)
-    }, FIVE_MINUTES)
+    }, ONE_MINUTE)
   }
   
   const checkChannels = () => {
