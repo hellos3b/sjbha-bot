@@ -52,6 +52,9 @@ export default function(bastion, opt = {}) {
     {
       command: `portfolio`,
 
+      restrict: ['363123179696422916'],
+      restrictMessage: `RRB Trading is only for <#363123179696422916>`, 
+
       resolve: async function(context, message) {
         let holdings = await q.find({ userID: context.userID })
 
@@ -134,6 +137,9 @@ export default function(bastion, opt = {}) {
     {
       command: `sell`,
 
+      restrict: ['363123179696422916'],
+      restrictMessage: `RRB Trading is only for <#363123179696422916>`, 
+
       resolve: async function(context, message) {
         const holdings = await q.find({userID: context.userID})
 
@@ -188,6 +194,9 @@ export default function(bastion, opt = {}) {
 
     {
       command: `buy`,
+
+      restrict: ['363123179696422916'],
+      restrictMessage: `RRB Trading is only for <#363123179696422916>`, 
 
       resolve: async function(context, message) {
         const [amtInput, ticker] = message.split(" ")
