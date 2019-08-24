@@ -230,6 +230,11 @@ export default function(bastion, opt = {}) {
 
         const quote = response.data['Global Quote']
         const stockPrice = parseInt(quote['05. price'])
+
+        if (stockPrice < 10) {
+          return `<:bankbot:613855784996044826> Sorry, that stock is not on the RRB market (only stocks $10 or more can be traded)`
+        }
+
         const user = await rrb.findOne({ userID: context.userID })
 
         if (!user) return `You need royroybucks. Use \`!royroybucks\` to initialize your bank`
