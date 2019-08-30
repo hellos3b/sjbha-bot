@@ -5,6 +5,7 @@
 
 import deepmerge from 'deepmerge'
 import reasons from './reasons'
+import selfReasons from './self-reasons'
 
 const baseConfig = {
     command: "ban"
@@ -25,7 +26,7 @@ export default function(bastion, opt={}) {
                 const reason = reasons.getReason()
                 const rng = Math.floor(Math.random()*6)
 
-                if (rng === 3) return `<@!${context.userID}> has been banned from the server; Reason: *ABUSING THE BAN COMMAND UR NOT AN ADMIN*`
+                if (rng === 3) return `<@!${context.userID}> has been banned from the server; Reason: 🖕 ${selfReasons.getReason()}`
                 if (!name) return `<@!${context.userID}> has been banned from the server; Reason: *Doesn't know how to use the ban command properly*`
 
                 return `${name} has been banned from the server; Reason: *${reason}*`
