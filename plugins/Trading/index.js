@@ -41,6 +41,24 @@ const getDiff = (original, current) => {
 
 const FEE = 3
 
+const getTime = () => {
+  return moment(Date.now()).tz("America/Los_Angeles")
+}
+
+const marketIsOpen = () => {
+  const time = getTime()
+  const hours = time.hours()
+  const day = time.day()
+
+  // If weekend, its closed
+  if (day === 0 || day === 6) return false;
+
+  // 6am - 1pm
+  return (hours >= 6 && hours < 13) 
+}
+
+const toFixed = (val) => Math.floor(parseFloat(val) * 100) / 100
+
 export default function(bastion, opt = {}) {
   const config = deepmerge(baseConfig, opt);
 
@@ -56,6 +74,8 @@ export default function(bastion, opt = {}) {
       restrictMessage: `RRB Trading is only for <#363123179696422916>`, 
 
       resolve: async function(context, message) {
+        const [arg] = message.split(" ")
+
         let holdings = await q.find({ userID: context.userID, sold: false })
 
         if (!holdings.length) return `You're not invested in anything! Use \`!buy\` to get started`
@@ -78,18 +98,26 @@ export default function(bastion, opt = {}) {
               const symbol =  c['1. symbol']
               const price = c['2. price']
               return Object.assign({}, l, {
-                [symbol.toLowerCase()]: parseInt(price)
+                [symbol.toLowerCase()]: toFixed(price)
               })
             }, {})
 
         // Attach current price to holdings
         holdings = holdings.map( h => {
+          const currentPrice = quotes[h.ticker.toLowerCase()]
+          const original = Math.floor(h.amt * toFixed(h.buyPrice))
+          const value =  Math.floor(h.amt * toFixed(currentPrice))
+
           return Object.assign({}, {
             ticker: h.ticker,
             buyPrice: h.buyPrice,
-            amt: h.amt
+            amt: h.amt,
+            value: value,
+            original: original,
+            hDiff: getDiff(original, value),
+            hPercent: getPercentage(original, value)
           },  {
-            currentPrice: quotes[h.ticker.toLowerCase()]
+            currentPrice: currentPrice
           })
         })
 
@@ -104,35 +132,85 @@ export default function(bastion, opt = {}) {
 
         // Calculate percentage gain on portfolio
 
+        portfolio.original = Math.floor(portfolio.original)
+        portfolio.current = Math.floor(portfolio.current)
         const percent = getPercentage(portfolio.original, portfolio.current)
         const diff = getDiff(portfolio.original, portfolio.current)
 
-        msg = `Value [${portfolio.original} ► ${portfolio.current}] G/L [${diff} ${percent}]\n\n`
+        msg = `Value [${portfolio.original} ► ${portfolio.current}] G/L [${diff} ${percent}]\n`
 
         const table = new Table()
         table.setHeading('smbl', 'qty', 'price', 'today', 'value', 'g/l', '%')
         for (var i = 0; i < holdings.length; i++) {
           const h = holdings[i]
-
-          const value = h.amt * h.currentPrice
-          const original = h.amt * h.buyPrice
-          const hDiff = getDiff(original, value)
-          const hPercent = getPercentage(original, value)
-
+          
           table.addRow(
             h.ticker.toUpperCase(),
             h.amt,
             h.buyPrice,
             h.currentPrice,
-            value,
-            hDiff,
-            hPercent
+            h.value,
+            h.hDiff,
+            h.hPercent
           )
         }
 
-        return bastion.helpers.code(msg + table.toString(), "ini")
+        if (arg === "full") {
+          return bastion.helpers.code(msg + '\n' + table.toString(), "ini")
+        }
+
+        msg = msg = `${portfolio.original} ► **${portfolio.current}** ${diff} (${percent})\n`
+        const minView = holdings.map( h => `**${h.amt} ${h.ticker.toUpperCase()}** ${h.hDiff} (${h.hPercent})`).join(' ')
+        return msg + minView
       }
     },
+
+    // #region stonks
+    // {
+    //   command: `stonks`,
+
+    //   restrict: ['363123179696422916'],
+    //   restrictMessage: `RRB Trading is only for <#363123179696422916>`, 
+
+    //   resolve: async function(context, message) {
+    //     let holdings = await q.find({ sold: false })
+
+    //     const total = holdings.reduce( (amt, r) => {
+    //       return amt + (r.buyPrice * r.amt)
+    //     }, 0)
+
+    //     const tickers = holdings.map( n => n.ticker )
+
+    //     let currentPrices;
+        
+    //     try {
+    //       currentPrices = await getBatchPrices(holdings.map(n => n.ticker));
+    //     } catch (e) {
+    //       return 'Something went wrong trying to get the current stock prices'
+    //     }
+
+    //     if (currentPrices.data['Note']) {
+    //       return `<:bankbot:613855784996044826> We are being rate limited by the API, try again later (5/min, 500/day)`
+    //     }
+
+    //     const quotes = currentPrices.data['Stock Quotes']
+    //       .reduce( (l, c) => {
+    //           const symbol =  c['1. symbol']
+    //           const price = c['2. price']
+    //           return Object.assign({}, l, {
+    //             [symbol.toLowerCase()]: parseFloat(price)
+    //           })
+    //         }, {})
+
+    //     let progress = holdings.reduce( (amt, holding) => {
+    //       const price = quotes[holding.ticker.toLowerCase()]
+    //       return amt + (quotes[holding.ticker.toLowerCase()]) * holding.amt
+    //     }, 0)
+
+    //     return `Total: ${total}, Progress: ${progress}`
+    //   }
+    // },
+    // #endregion
 
     {
       command: `sell`,
@@ -141,6 +219,8 @@ export default function(bastion, opt = {}) {
       restrictMessage: `RRB Trading is only for <#363123179696422916>`, 
 
       resolve: async function(context, message) {
+        if (!marketIsOpen()) return `<:bankbot:613855784996044826> Market is closed! Come back next trading day`
+
         const holdings = await q.find({userID: context.userID, sold: false})
 
         if (!holdings.length) {
@@ -166,7 +246,7 @@ export default function(bastion, opt = {}) {
         }
 
         const quote = response.data['Global Quote']
-        const stockPrice = parseInt(quote['05. price'])
+        const stockPrice = parseFloat(quote['05. price'])
         const sellPrice = seller.amt * stockPrice
 
         const confirm = await bastion.Ask(`Sell ${seller.amt} **${seller.ticker.toUpperCase()}** for **${sellPrice}** royroybucks? (y/n)\n<:bankbot:613855784996044826> *+${FEE}rrb Transaction Fee*`, context)   
@@ -202,15 +282,17 @@ export default function(bastion, opt = {}) {
       restrictMessage: `RRB Trading is only for <#363123179696422916>`, 
 
       resolve: async function(context, message) {
+        if (!marketIsOpen()) return `<:bankbot:613855784996044826> Market is closed! Come back next trading day`
+
         const [amtInput, ticker] = message.split(" ")
 
-        if (!amtInput) {
+        if (!amtInput || !ticker) {
           return `Command is: \`!buy {amount} {symbol}\``
         }
 
         const amt = parseInt(amtInput)
 
-        if (!Number.isInteger(amt)) return `'${amt}' is not a valid amount`
+        if (!Number.isInteger(amt)) return `'${amtInput}' is not a valid amount`
 
         let response;
         try {
@@ -229,7 +311,7 @@ export default function(bastion, opt = {}) {
         }
 
         const quote = response.data['Global Quote']
-        const stockPrice = parseInt(quote['05. price'])
+        let stockPrice = toFixed(quote['05. price'])
 
         if (stockPrice < 10) {
           return `<:bankbot:613855784996044826> Sorry, that stock is not on the RRB market (only stocks $10 or more can be traded)`
@@ -239,11 +321,10 @@ export default function(bastion, opt = {}) {
 
         if (!user) return `You need royroybucks. Use \`!royroybucks\` to initialize your bank`
 
-        const price = (amt * stockPrice)
+        const price = Math.floor((amt * stockPrice))
 
-        if (user.bucks < (price + FEE)) return `You don't have enough royroybucks to execute the trade (Cost: ${price} Bucks: ${user.bucks})`
+        if (user.bucks < (price + FEE)) return `You don't have enough royroybucks to execute the trade (Cost: ${price + FEE} Bucks: ${user.bucks})`
 
-        // let user = await q.findOne({ userID: context.userID });
 
         const confirm = await bastion.Ask(
           `<@${context.userID}> Buy ${amt} shares of ${ticker} for ${price}rrb? (y/n)\n<:bankbot:613855784996044826> *+${FEE}rrb Transaction Fee*`, 
