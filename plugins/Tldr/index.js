@@ -70,8 +70,30 @@ export default function(bastion, opt={}) {
                     return tldrs.map( td => {
                         let m = new moment(td.timestamp).tz("America/Los_Angeles");
                         let date = m.format('ddd M/D h:mma');
+                        let today = moment().tz("America/Los_Angeles")
+                        let yesterday = moment().tz("America/Los_Angeles").subtract(1, 'day')
+                        const time = m.format('h:mma')
+                        let fromNow = m.fromNow()
+
+                        if (m.isSame(today, 'd')) {
+                            if (m.diff(today, 'hours') >= -6) {
+                                fromNow = fromNow;
+                            } else if (m.hours() < 4) {
+                                fromNow = "Last Night"
+                            } else if (m.hours() < 9) {
+                                fromNow = "This Morning"
+                            } else {
+                                fromNow = "Today"
+                            }
+                        } else if (m.isSame(yesterday, 'd')) {
+                            if (m.hours() >= 20) {
+                                fromNow = "Last Night"
+                            } else {
+                                fromNow = "Yesterday"
+                            }
+                        }
                         const channel = td.channel? `<#${td.channelID}>` : ""
-                        return `> **${td.message}**\n*${date} - ${td.from} - ${channel}*\n`;
+                        return `> **${td.message}**\n*${fromNow} @ ${time} - ${td.from} - ${channel}*\n`;
                     }).join("\n")
                 }
             }
