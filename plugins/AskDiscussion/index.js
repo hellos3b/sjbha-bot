@@ -60,13 +60,13 @@ export default function(bastion, opt = {}) {
   })
 
   return [
-    {
-      command: "ask",
+    // {
+    //   command: "ask",
 
-      resolve: async function(context, tag) {
-        const winner = await chooseThread()
-        sendEmbed(winner)
-      }
-    }
+    //   resolve: async function(context, tag) {
+    //     const winner = await chooseThread()
+    //     sendEmbed(winner)
+    //   }
+    // }
   ];
 }
