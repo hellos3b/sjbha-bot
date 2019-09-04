@@ -247,9 +247,9 @@ export default function(bastion, opt = {}) {
 
         const quote = response.data['Global Quote']
         const stockPrice = parseFloat(quote['05. price'])
-        const sellPrice = seller.amt * stockPrice
+        const sellPrice = Math.floor(seller.amt * stockPrice)
 
-        const confirm = await bastion.Ask(`Sell ${seller.amt} **${seller.ticker.toUpperCase()}** for **${sellPrice}** royroybucks? (y/n)\n<:bankbot:613855784996044826> *+${FEE}rrb Transaction Fee*`, context)   
+        const confirm = await bastion.Ask(`Sell ${seller.amt} **${seller.ticker.toUpperCase()}** for **${sellPrice - FEE}** royroybucks? (y/n)\n<:bankbot:613855784996044826> *+${FEE}rrb Transaction Fee*`, context)   
 
         if (confirm.toLowerCase() !== 'y') {
           return `Okay, cancelling transaction`
