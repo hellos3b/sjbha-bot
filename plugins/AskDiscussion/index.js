@@ -5,6 +5,8 @@ import moment from "moment"
 
 const baseConfig = {
   channelID: "506911331257942027"
+  //dev
+  // channelID: "530586255197732876"
 };
 
 export default function(bastion, opt = {}) {
@@ -14,13 +16,13 @@ export default function(bastion, opt = {}) {
     bastion.bot.sendMessage({
       to: config.channelID,
       embed: {
-        "color": 13708610,
+        "color": 0x3598db,
         "footer": {
           "text": "Daily Ask Discord question from r/askreddit"
         },
         "author": {
           "name": thread.title,
-          "icon_url": "https://imgur.com/g8XuWn1.png"
+          "icon_url": "https://imgur.com/uhf6rG3.png"
         }
       }
     })
