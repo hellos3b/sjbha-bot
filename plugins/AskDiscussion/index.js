@@ -4,7 +4,7 @@ import Axios from "axios";
 import moment from "moment"
 
 const baseConfig = {
-  channelID: "506911331257942027"
+  channelID: "358442034790400001"
   //dev
   // channelID: "530586255197732876"
 };
@@ -52,7 +52,7 @@ export default function(bastion, opt = {}) {
     sendEmbed(thread)
   }
 
-  bastion.schedule('30 * * * *', () => {
+  bastion.schedule('0 * * * *', () => {
     const m = moment().tz("America/Los_Angeles")
     if (m.hours() !== 16) return;
 
