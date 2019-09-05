@@ -42,7 +42,11 @@ export default function(bastion, opt = {}) {
     threads = threads.map( n => Object.assign({}, {
       title: n.title,
       award_score: n.all_awardings.reduce( (total, r) => (total + r.coin_price), 0)
-    })).sort( (a, b) => a.award_score > b.award_score ? -1 : 1)
+    })).sort( (a, b) => {
+      if (a.award_score > b.award_score) return -1
+      if (a.award_score < b.award_score) return 1
+      return 0
+    })
 
     return threads[0]
   }
