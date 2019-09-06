@@ -192,6 +192,8 @@ export default function(bastion, opt={}) {
     function getSeason() {
         const d = new Date()
 
+        return `Season 2 is over!`
+
         if (d.getTime() < nextDuck.start) {
             return `Next season: ${formatTime(nextDuck.start)} - ${formatTime(nextDuck.end)} `
         } else {
@@ -199,7 +201,7 @@ export default function(bastion, opt={}) {
         }
     }
 
-    startTimeout()
+    // startTimeout()
 
     return [
 
@@ -233,33 +235,33 @@ export default function(bastion, opt={}) {
             }
         },
 
-        {
-            command: 'fix',
+        // {
+        //     command: 'fix',
 
-            resolve: async function() {
-                const hits = await q.getAll()
-                const shots = await qShot.getAll()
-                console.log(shots)
-                const removeMiss = {}
-                for (var i = 0; i < shots.length; i++) {
-                    const shotBy = shots[i].shotBy.userID
-                    const misses = shots[i].misses
+        //     resolve: async function() {
+        //         const hits = await q.getAll()
+        //         const shots = await qShot.getAll()
+        //         console.log(shots)
+        //         const removeMiss = {}
+        //         for (var i = 0; i < shots.length; i++) {
+        //             const shotBy = shots[i].shotBy.userID
+        //             const misses = shots[i].misses
 
-                    const dupeMiss = misses.find( n => n.userID === shotBy)
-                    if (dupeMiss) {
-                        console.log("OFFENDER", shots[i].shotBy.user)
+        //             const dupeMiss = misses.find( n => n.userID === shotBy)
+        //             if (dupeMiss) {
+        //                 console.log("OFFENDER", shots[i].shotBy.user)
 
-                        if (!removeMiss[shotBy]) {
-                            removeMiss[shotBy] = 1
-                        } else {
-                            removeMiss[shotBy]++
-                        }
-                    }
-                }
-                console.log(removeMiss)
-                return "Sup?"
-            }
-        },
+        //                 if (!removeMiss[shotBy]) {
+        //                     removeMiss[shotBy] = 1
+        //                 } else {
+        //                     removeMiss[shotBy]++
+        //                 }
+        //             }
+        //         }
+        //         console.log(removeMiss)
+        //         return "Sup?"
+        //     }
+        // },
 
         {
             action: 'duckhunt:all',
@@ -323,7 +325,7 @@ export default function(bastion, opt={}) {
 
                 msg = bastion.bot.fixMessage(msg)
 
-                return `[season 2]\n` + getSeason() + bastion.helpers.code(msg)
+                return `[season 2 results]\n` + getSeason() + bastion.helpers.code(msg)
             }
         },
 
