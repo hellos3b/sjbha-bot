@@ -82,7 +82,6 @@ export default (bastion) => {
   }
 
   bastion.on("message", ({userID, channelID, message}) => {
-    // TODO: uncomment for prod
     if (message.startsWith("!s") && channelID === ADMIN_CHANNEL) {
       const [cmd, CID] = message.split(" ")
       if (!CID) return bastion.send(channelID, "Need a channel ID")
@@ -110,19 +109,21 @@ export default (bastion) => {
   setInterval(() => resetCounts(), RESET_RATE)
 
   // Do the actual calculations
-  const monitor = () => {
-    bastion.send(ADMIN_CHANNEL, `\`Beginning monitoring for duck spawn\``)
+  const monitor = (onDuckSpawn) => {
+    console.log(`Beginning monitoring for duck spawn`)
 
     const interval = setInterval(() => {
       const channel = checkChannels()
       if (!channel) return;
 
       clearInterval(interval)
-      const mention = `<#${channel}>`
-      bastion.send(ADMIN_CHANNEL, `-> POST DUCK in ${mention}`)
-      setTimeout(() => {
-        monitor()
-      }, TWO_HOURS)
+      onDuckSpawn(channel)
+
+      // const mention = `<#${channel}>`
+      // bastion.send(ADMIN_CHANNEL, `-> POST DUCK in ${mention}`)
+      // setTimeout(() => {
+      //   monitor()
+      // }, TWO_HOURS)
     }, ONE_MINUTE)
   }
   
@@ -132,19 +133,19 @@ export default (bastion) => {
       const med = scoreHistory[cid].filter( n => n.score >= 200)
 
       if (high) {
-        bastion.send(ADMIN_CHANNEL, `**HIGH threshold reached!** Score: ${high.score}, messages: ${high.msgCount}, users: ${high.userIDS.size}`)
+        console.log(`>>HIGH threshold reached! Score: ${high.score}, messages: ${high.msgCount}, users: ${high.userIDS.size}`)
         return cid;
       }
 
       if (med.length >= 2) {
-        bastion.send(ADMIN_CHANNEL, `**MED threshold reached!** ${med.length} samples > 200`)
+        console.log(`>>MED threshold reached! ${med.length} samples > 200`)
         return cid;
       }
     }
     return null;
   }
-  
-  bastion.on('ready', () => {
-    monitor()
-  })
+
+  return {
+    monitor: (onDuckSpawn) => monitor(onDuckSpawn)
+  }
 }

@@ -13,4 +13,4 @@ const Schema = mongoose.Schema({
     timestamp: Date
 });
 
-export default mongoose.model('DuckhuntShot-s2', Schema);
+export default mongoose.model('DuckhuntShot-s3', Schema);

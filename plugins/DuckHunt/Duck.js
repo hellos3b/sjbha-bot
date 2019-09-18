@@ -52,7 +52,7 @@ export default {
             duck.shotTime = ts.getTime() - duck.timestamp.getTime()
 
             setTimeout(() => {
-                const q = new bastion.Queries("DuckhuntShot-s2")
+                const q = new bastion.Queries("DuckhuntShot-s3")
                 q.create({
                     shotBy: duck.shotBy,
                     misses: duck.misses,
@@ -60,7 +60,7 @@ export default {
                     timestamp: duck.shotTimestamp
                 })
 
-                this.saveMisses(new bastion.Queries("Duckhunt-s2"), duck.misses)
+                this.saveMisses(new bastion.Queries("Duckhunt-s3"), duck.misses)
                 ducks[channelID] = null
                 onDone(duck)
             }, MISS_TIMER) 

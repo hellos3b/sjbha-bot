@@ -37,15 +37,6 @@ const baseConfig = {
 
 const SIX_HOURS = 1000 * 60 * 60 * 6
 const EIGHTEEN_HOURS = 1000 * 60 * 60 * 12
-const FIVE_MINUTES = 1000 * 60 * 5
-
-let nextDuck = {
-    start: 0,
-    end: 0
-}
-
-let isActive = false
-let activeTrack = {}
 
 let timeout = null
 
@@ -63,10 +54,10 @@ const getSecondsMinutes = (shotTime) => {
 
 export default function(bastion, opt={}) {
     const config = deepmerge(baseConfig, opt)
-    const q = new bastion.Queries("Duckhunt-s2")
-    const qShot = new bastion.Queries("DuckhuntShot-s2")
+    const q = new bastion.Queries("Duckhunt-s3")
+    const qShot = new bastion.Queries("DuckhuntShot-s3")
 
-    const an = Analyze(bastion)
+    const analyze = Analyze(bastion)
 
     async function saveBang(user, userID) {
         let player = await q.findOne({ userID })
@@ -81,62 +72,9 @@ export default function(bastion, opt={}) {
         }
     }
 
-    function startTrack() {
-        isActive = true
-        activeTrack = {}
-
-        for (var i = 0; i < config.channels.length; i++) {
-            activeTrack[config.channels[i]] = 1
-        }
-
-        setTimeout(() => {
-            sendDuck()
-        }, FIVE_MINUTES)
-    }
-
-    bastion.on('message', (context) => {
-        if (context.message.includes("🦆")) {
-            const msg_id = context.evt.d.id
-            
-            bastion.bot.deleteMessage({
-                channelID: context.channelID,
-                messageID: msg_id
-            })
-            return;
-        }
-
-        if (!isActive) return;
-        if (!activeTrack[context.channelID]) return;
-
-        activeTrack[context.channelID]++
-    })
-
-    async function sendDuck() {
-        console.log("activeTrack", activeTrack)
-        let activeChannels = Object.entries(activeTrack)
-            .map( ([k,v]) => ({ id: k, count: v }))
-            .sort( (a,b) => {
-                if (a.count > b.count) return -1
-                if (a.count < b.count) return 1
-                else return 0
-            })
-            .filter(n => n.count > 1)
-            .slice(0, 3)
-
-        console.log("ACTIVE CHANNELS", activeChannels)
-
-        if (!activeChannels.length) {
-            activeChannels = Object.entries(activeTrack).map( ([k,v]) => ({ id: k, count: v }))
-        }
-
-        isActive = false
-        activeTrack = {}
-
-        const i = Math.floor(Math.random()*activeChannels.length)
-        const id = activeChannels[i].id
-
-        const msg = await bastion.send(id, "\:duck:")
-        Ducks.create(id, msg.id)
+    async function sendDuck(channelID) {
+        const msg = await bastion.send(channelID, "\:duck:")
+        Ducks.create(channelID, msg.id)
     }
     
     function getRandomInt(min, max) {
@@ -144,20 +82,15 @@ export default function(bastion, opt={}) {
     }
 
     function startTimeout() {
+        console.log("**STARTING DUCKHUNT TIMIEOUT**")
         const time = getRandomInt(SIX_HOURS, EIGHTEEN_HOURS)
-        const d = new Date().getTime()
-
-        nextDuck = {
-            start: new Date(d + SIX_HOURS),
-            end: new Date(d + EIGHTEEN_HOURS)
-        }
 
         if (timeout) {
             clearTimeout(timeout)
         }
         
         timeout = setTimeout(() => {
-            startTrack()
+            analyze.monitor(sendDuck)
         }, time)
     }
 
@@ -175,6 +108,8 @@ export default function(bastion, opt={}) {
             messageID: duck.msgId,
             message: msg
         })
+
+        startTimeout()
     })
 
     function formatTime(date) {
@@ -189,19 +124,7 @@ export default function(bastion, opt={}) {
         return `${hours}:${minutes}${ampm}`
     }
 
-    function getSeason() {
-        const d = new Date()
-
-        return `Season 2 is over!`
-
-        if (d.getTime() < nextDuck.start) {
-            return `Next season: ${formatTime(nextDuck.start)} - ${formatTime(nextDuck.end)} `
-        } else {
-            return `It's hunting season till ${formatTime(nextDuck.end)} ! `
-        }
-    }
-
-    // startTimeout()
+    startTimeout()
 
     return [
 
@@ -301,7 +224,7 @@ export default function(bastion, opt={}) {
                     }).map( p => {
                         return `${padScore(p.score)} [${counter(p.count)}-${p.misses}] ${p.user}`
                     }).join("\n")
-                return `[season 2]\n` + getSeason() + bastion.helpers.code(msg, "ini")
+                return `[season 3]` + bastion.helpers.code(msg, "ini")
             }
         },
 
@@ -325,7 +248,7 @@ export default function(bastion, opt={}) {
 
                 msg = bastion.bot.fixMessage(msg)
 
-                return `[season 2 results]\n` + getSeason() + bastion.helpers.code(msg)
+                return `[season 3]` + bastion.helpers.code(msg)
             }
         },
 
@@ -354,8 +277,6 @@ export default function(bastion, opt={}) {
                 if (duck.newShot) {
                     saveBang(context.user, context.userID)
                 }
-
-                startTimeout()
             },
 
             methods: {
