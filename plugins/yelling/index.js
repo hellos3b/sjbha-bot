@@ -14,7 +14,7 @@ export default function(bastion, opt={}) {
   bastion.on("message", (context) => {
     if (timeoutActive) return;
 
-    if (context.message === context.message.toUpperCase()) {
+    if (context.message === context.message.toUpperCase() && context.message.length > 12) {
       bastion.send(context.channelID, "WHY ARE WE YELLING")
       startTimeout()
     }
