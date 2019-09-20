@@ -11,13 +11,13 @@ export default function(bastion, opt={}) {
     }, TIMEOUT_TIME)
 
   }
-  bastion.on("message", (context) => {
-    if (timeoutActive) return;
+  // bastion.on("message", (context) => {
+  //   if (timeoutActive) return;
 
-    if (context.message === context.message.toUpperCase() && context.message.length > 12) {
-      bastion.send(context.channelID, "WHY ARE WE YELLING")
-      startTimeout()
-    }
-  })
+  //   if (context.message === context.message.toUpperCase() && context.message.length > 12) {
+  //     bastion.send(context.channelID, "WHY ARE WE YELLING")
+  //     startTimeout()
+  //   }
+  // })
    return []
 }
