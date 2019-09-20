@@ -26,6 +26,7 @@ import Olympics from '../plugins/Olympics'
 import UrbanDictionary from '../plugins/UrbanDictionary'
 import Trading from '../plugins/Trading'
 import AskDiscussion from '../plugins/AskDiscussion'
+import Yelling from '../plugins/yelling'
 
 const subscriptions = {
     "photomeet": "486330820114513920",
@@ -104,7 +105,8 @@ export default bastion => ([
     Olympics,
     UrbanDictionary,
     Trading,
-    AskDiscussion
+    AskDiscussion,
+    Yelling
     // Fools(bastion, {
     //     listRestrict: ["shitpost", "430517752546197509"]
     // })
