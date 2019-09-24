@@ -194,6 +194,7 @@ export default function(bastion, opt={}) {
                     return val
                 }
 
+                const shots = await qShot.getAll()
                 const players = await q.getAll()
                 const playerScores = players.map(n => {
                     n.score = n.count*10 + n.misses*5
@@ -211,7 +212,7 @@ export default function(bastion, opt={}) {
                     }).map( p => {
                         return `${padScore(p.total)} [${counter(p.count)}-${p.misses}] ${p.user}`
                     }).join("\n")
-                return bastion.helpers.code(`# Season 3\n\n${msg}`, "ini")
+                return bastion.helpers.code(`# Season 3\nDucks Spawned: ${shots.length}\n\n${msg}`, "ini")
             }
         },
 
@@ -228,11 +229,8 @@ export default function(bastion, opt={}) {
                 let msg = shots.map( n => {
                     let msg = `${n.shotBy.user} in <#${n.channelID}> ${formatTime(n.timestamp)}`
                     if (n.misses.length) {
-                        msg += `\n> misses: ${n.misses.map(n => n.user).join(', ')}`
+                        msg += `\n  > ${n.misses.map(n => n.user).join(', ')}`
                     }
-                    // for (var i = 0; i < n.misses.length; i++) {
-                        // msg += `\n    > miss: ${n.misses[i].user}`
-                    // }
                     return msg
                 }).join("\n\n")
 
