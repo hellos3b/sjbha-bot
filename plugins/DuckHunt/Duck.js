@@ -48,7 +48,7 @@ export default {
         if (duck.active) {
             duck.active = false
             duck.shotTimestamp = ts
-            duck.shotBy = { userID, user }
+            duck.shotBy = { userID, user, shotTimestamp: ts }
             duck.shotTime = ts.getTime() - duck.timestamp.getTime()
 
             setTimeout(() => {
@@ -57,7 +57,8 @@ export default {
                     shotBy: duck.shotBy,
                     misses: duck.misses,
                     channelID: channelID,
-                    timestamp: duck.shotTimestamp
+                    timestamp: duck.shotTimestamp,
+                    spawnTimestamp: duck.timestamp
                 })
 
                 this.saveMisses(new bastion.Queries("Duckhunt-s3"), duck.misses)
@@ -71,7 +72,7 @@ export default {
         } else {
             // Check if it's not already in it
             if (userID !== duck.shotBy.userID && !duck.misses.filter(n => n.userID === userID).length) {
-                duck.misses.push({ user, userID })
+                duck.misses.push({ user, userID, shotTimestamp: new Date() })
             }
         }
 

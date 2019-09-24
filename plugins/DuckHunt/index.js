@@ -40,9 +40,9 @@ const EIGHTEEN_HOURS = 1000 * 60 * 60 * 12
 
 let timeout = null
 
-const getSecondsMinutes = (shotTime) => {
+const getSecondsMinutes = (shotTime, pad=100) => {
     let time = shotTime / 1000
-    time = Math.floor(time * 10) / 10
+    time = Math.floor(time * pad) / pad
 
     if (time < 60) {
         return time + "s"
@@ -100,7 +100,11 @@ export default function(bastion, opt={}) {
         let msg = `\:dog: *duck shot by ${duck.shotBy.user} in ${time}* `
 
         if (duck.misses.length) {
-            msg += ` \`[misses: ${duck.misses.map(n => n.user).join(",")}]\``
+            const misses = duck.misses.map(n => {
+                const ts = n.shotTimestamp - duck.timestamp
+                return `${n.user} (${getSecondsMinutes(ts)})`
+            }).join(", ")
+            msg += ` \`[misses: ${misses}]\``
         }
 
         bastion.bot.editMessage({
@@ -226,10 +230,25 @@ export default function(bastion, opt={}) {
                     .limit(5)
                     .exec()
 
+                console.log(shots)
+
                 let msg = shots.map( n => {
-                    let msg = `${n.shotBy.user} in <#${n.channelID}> ${formatTime(n.timestamp)}`
+                    let seconds = ""
+                    if (n.spawnTimestamp) {
+                        const ts = n.timestamp - n.spawnTimestamp
+                        seconds = ` (${getSecondsMinutes(ts)})`
+                    }
+                    let msg = `${formatTime(n.timestamp)} 🔫 ${n.shotBy.user}${seconds} in <#${n.channelID}>`
                     if (n.misses.length) {
-                        msg += `\n  > ${n.misses.map(n => n.user).join(', ')}`
+                        const misses = n.misses.map( m => {
+                            let seconds = ""
+                            if (n.spawnTimestamp && m.shotTimestamp) {
+                                const ts = m.shotTimestamp - n.spawnTimestamp
+                                seconds = ` (${getSecondsMinutes(ts)})`
+                            }
+                            return `  > ${m.user}${seconds}`
+                        }).join("\n")
+                        msg += `\n${misses}`
                     }
                     return msg
                 }).join("\n\n")
@@ -270,7 +289,7 @@ export default function(bastion, opt={}) {
             methods: {
                 getSecondsMinutes(shotTime) {
                     let time = shotTime / 1000
-                    time = Math.floor(time * 10) / 10
+                    time = Math.floor(time * 1000) / 1000
     
                     if (time < 60) {
                         return time + "s"
