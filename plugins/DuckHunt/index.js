@@ -246,9 +246,9 @@ export default function(bastion, opt={}) {
                                 const ts = m.shotTimestamp - n.spawnTimestamp
                                 seconds = ` (${getSecondsMinutes(ts)})`
                             }
-                            return `  > ${m.user}${seconds}`
-                        }).join("\n")
-                        msg += `\n${misses}`
+                            return `${m.user}${seconds}`
+                        }).join(", ")
+                        msg += `\n  > ${misses}`
                     }
                     return msg
                 }).join("\n\n")
