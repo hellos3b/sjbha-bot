@@ -113,15 +113,8 @@ export default function(bastion, opt={}) {
     })
 
     function formatTime(date) {
-        date = new moment(date).tz("America/Los_Angeles").toDate()
-        let hours = date.getHours()
-        let ampm = (hours > 12) ? "pm" : "am"
-        hours = (hours > 12) ? hours - 12 : hours
-        hours = (hours === 0) ? 12 : hours
-        let minutes = date.getMinutes()
-        minutes = minutes < 10 ? "0" + minutes : minutes
-
-        return `${hours}:${minutes}${ampm}`
+        date = new moment(date).tz("America/Los_Angeles")
+        return date.fromNow() + ' [' + date.format("h:mma") + ']'
     }
 
     startTimeout()
@@ -204,27 +197,21 @@ export default function(bastion, opt={}) {
                 const players = await q.getAll()
                 const playerScores = players.map(n => {
                     n.score = n.count*10 + n.misses*5
+                    n.total = n.count + n.misses
                     return n
                 })
                 console.log(playerScores)
                 const msg = playerScores
                     .sort( (a, b) => {
-                        return a.score > b.score ? -1 : 1;
-                        if (a.count > b.count) {
-                            return -1
-                        } else if (a.count < b.count) {
-                            return 1
-                        } else {
-                            if (a.misses > b.misses) {
-                                return -1
-                            } else {
-                                return 1
-                            }
-                        }
+                        if (a.total > b.total) return -1
+                        if (a.total < b.total) return 1
+                        if (a.misses < b.misses) return -1
+                        if (a.misses > b.misses) return 1
+                        return 0
                     }).map( p => {
-                        return `${padScore(p.score)} [${counter(p.count)}-${p.misses}] ${p.user}`
+                        return `${padScore(p.total)} [${counter(p.count)}-${p.misses}] ${p.user}`
                     }).join("\n")
-                return `[season 3]` + bastion.helpers.code(msg, "ini")
+                return bastion.helpers.code(`# Season 3\n\n${msg}`, "ini")
             }
         },
 
@@ -239,16 +226,19 @@ export default function(bastion, opt={}) {
                     .exec()
 
                 let msg = shots.map( n => {
-                    let msg = `${formatTime(n.timestamp)} by ${n.shotBy.user} in <#${n.channelID}>`
-                    for (var i = 0; i < n.misses.length; i++) {
-                        msg += `\n    > miss: ${n.misses[i].user}`
+                    let msg = `${n.shotBy.user} in <#${n.channelID}> ${formatTime(n.timestamp)}`
+                    if (n.misses.length) {
+                        msg += `\n> misses: ${n.misses.map(n => n.user).join(', ')}`
                     }
+                    // for (var i = 0; i < n.misses.length; i++) {
+                        // msg += `\n    > miss: ${n.misses[i].user}`
+                    // }
                     return msg
-                }).join("\n")
+                }).join("\n\n")
 
                 msg = bastion.bot.fixMessage(msg)
 
-                return `[season 3]` + bastion.helpers.code(msg)
+                return bastion.helpers.code('# Season 3\n\n' + msg, 'ini')
             }
         },
 
