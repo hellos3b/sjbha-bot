@@ -5,6 +5,7 @@ import './schema'
 import './shotSchema'
 import moment from 'moment'
 import Analyze from './Analyze'
+import Table from 'ascii-table'
 
 const baseConfig = {
     channels: [
@@ -145,6 +146,7 @@ export default function(bastion, opt={}) {
 
             resolve: async function(context, tag) {  
                 if (tag === "all") return this.route("all")
+                if (tag === "speed") return this.route("speed")
 
                 return this.route("log")
 
@@ -217,6 +219,59 @@ export default function(bastion, opt={}) {
                         return `${padScore(p.total)} [${counter(p.count)}-${p.misses}] ${p.user}`
                     }).join("\n")
                 return bastion.helpers.code(`# Season 3\nDucks Spawned: ${shots.length}\n\n${msg}`, "ini")
+            }
+        },
+
+        {
+            action: 'duckhunt:speed',
+
+            resolve: async function(context, tag) {  
+                const shots = await qShot.getAll()
+                const users = {}
+
+                const addScore = (user, time) => {
+                    if (!users.hasOwnProperty(user)) {
+                        users[user] = []
+                    }
+                    users[user].push(time)
+                }
+
+                // Get all shot speeds
+                for (var i = 0; i < shots.length; i++) {
+                    const shot = shots[i]
+                    if (!shot.spawnTimestamp) continue;
+
+                    addScore(shot.shotBy.user, shot.shotBy.shotTimestamp - shot.spawnTimestamp)
+                    for (var k = 0; k < shot.misses.length; k++) {
+                        addScore(shot.misses[k].user, shot.misses[k].shotTimestamp - shot.spawnTimestamp)
+                    }
+                }
+
+                const speederboard = new Table()
+                // PIck best one for each user
+                Object.keys(users)
+                    .map( n => {
+                        const score = users[n].reduce( (l, r) => l < r ? l : r, Number.MAX_VALUE)
+                        return {
+                            user: n,
+                            score: score
+                        }
+                    })
+                    .sort( (a, b) => a.score < b.score ? -1 : 1)
+                    .forEach( (entry, i) => {
+                        const rank = (i + 1).toString()
+                        const time = getSecondsMinutes(entry.score)
+                        speederboard.addRow(
+                            rank + '.',
+                            entry.user,
+                            time
+                        )
+                    })
+
+                speederboard.removeBorder()
+
+                const msg = ''
+                return bastion.helpers.code(`# Season 3\nSpeederboard\n\n${speederboard.toString()}`, "ini")
             }
         },
 
