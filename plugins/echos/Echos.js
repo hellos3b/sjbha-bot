@@ -57,11 +57,6 @@ export default function(bastion, config={}) {
         },
 
         {
-            command: "teams",
-            resolve: "Commands been changed to `!team list`"
-        },
-
-        {
             command: "wheres",
             options: bastion.parsers.args(["name"]),
             resolve(context, name) {

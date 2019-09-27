@@ -74,7 +74,8 @@ export default function(bastion, opt={}) {
                 if (cmd === "observers") return this.route("observe")
                 if (cmd === "guardians") return this.route("guardian")
                 if (cmd === "uprising") return this.route("uprising")
-                if (cmd === "list") return this.route("list")
+                // if (cmd === "list") return this.route("list")
+                
                 return this.route("assign")
             }
         },
