@@ -90,14 +90,14 @@ export default function(bastion, opt={}) {
                     log("Validating meetup")
                     let error = event.validate()
                     if (error) return error
-        
+                            
+                    log("Saving to database")
+                    q.createOrUpdate({ id: event.id()}, event.toJSON())
+
                     // Post the event in event announcements
                     log("Announcing Event")
                     await event.announce(bastion.bot)
                     await updateCompact()
-        
-                    log("Saving to database")
-                    q.createOrUpdate({ id: event.id()}, event.toJSON())
 
                     return `${config.name} added: \`${event.info()}\` Find it in <#${config.announcementChannel}>!`
                     // MeetupsPlaintext.update({bot})
