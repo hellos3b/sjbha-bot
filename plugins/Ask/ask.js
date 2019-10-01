@@ -19,10 +19,13 @@ export default {
         return new Promise( async (resolve, reject) => {
             let tries = 0
 
-            await bastion.send(channelID, question)
+            if (question) {
+                await bastion.send(channelID, question)
+            }
 
             queries.push({ userID, channelID, resolve,
-                exec: async (message) => {
+                exec: async (context) => {
+                    const message = context.message
                     if (message === "stop") {
                         resolve(null)
                         query.remove({userID, channelID})
@@ -39,7 +42,7 @@ export default {
                         }
                         await bastion.send(channelID, error)
                     } else {
-                        resolve(message)
+                        resolve(context)
                         query.remove({userID, channelID})
                     }
                 }
@@ -62,10 +65,11 @@ export default {
         }
     },
 
-    Test({ message, userID, channelID}) {
+    Test(context) {
+        const {userID, channelID} = context
         let query = queries.find(q => q.userID === userID && q.channelID === channelID)
         if (query) {
-            query.exec(message)
+            query.exec(context)
         }
     }
 }

@@ -229,7 +229,8 @@ export default function(bastion, opt = {}) {
 
         const holdings_list = holdings.map( (e, i) => `${i}: ${e.amt} ${e.ticker.toUpperCase()}`).join("\n")
 
-        const index = await bastion.Ask(`Which stock do you want to sell?\n${bastion.helpers.code(holdings_list)}`, context)    
+        const ctx = await bastion.Ask(`Which stock do you want to sell?\n${bastion.helpers.code(holdings_list)}`, context)    
+        const index = ctx.message
 
         const seller = holdings[index]
         if (!seller) return `'${index}' is not a valid option; Please pick an option from 0-${holdings.length}`
@@ -249,7 +250,7 @@ export default function(bastion, opt = {}) {
         const stockPrice = parseFloat(quote['05. price'])
         const sellPrice = Math.floor(seller.amt * stockPrice)
 
-        const confirm = await bastion.Ask(`Sell ${seller.amt} **${seller.ticker.toUpperCase()}** for **${sellPrice - FEE}** royroybucks? (y/n)\n<:bankbot:613855784996044826> *+${FEE}rrb Transaction Fee*`, context)   
+        const {message: confirm} = await bastion.Ask(`Sell ${seller.amt} **${seller.ticker.toUpperCase()}** for **${sellPrice - FEE}** royroybucks? (y/n)\n<:bankbot:613855784996044826> *+${FEE}rrb Transaction Fee*`, context)   
 
         if (confirm.toLowerCase() !== 'y') {
           return `Okay, cancelling transaction`
@@ -326,7 +327,7 @@ export default function(bastion, opt = {}) {
         if (user.bucks < (price + FEE)) return `You don't have enough royroybucks to execute the trade (Cost: ${price + FEE} Bucks: ${user.bucks})`
 
 
-        const confirm = await bastion.Ask(
+        const {message: confirm} = await bastion.Ask(
           `<@${context.userID}> Buy ${amt} shares of ${ticker} for ${price}rrb? (y/n)\n<:bankbot:613855784996044826> *+${FEE}rrb Transaction Fee*`, 
           context, 
           (val) => {}, 2)

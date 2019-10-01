@@ -97,10 +97,21 @@ export default function(bastion, opt={}) {
                     // Post the event in event announcements
                     log("Announcing Event")
                     await event.announce(bastion.bot)
-                    await updateCompact()
 
-                    return `${config.name} added: \`${event.info()}\` Find it in <#${config.announcementChannel}>!`
-                    // MeetupsPlaintext.update({bot})
+                    await bastion.bot.deleteMessage({
+                        channelID: context.channelID,
+                        messageID: context.evt.d.id
+                    })
+
+                    const embed = event.embed(false)
+                    await bastion.bot.sendMessage({
+                        to: context.channelID,
+                        message: `<@${context.userID}> Created a Meetup`,
+                        embed
+                    })
+
+                    // todo: This should be in an "event-update" event
+                    await updateCompact()
                 } catch (e) {
                     console.error(e)
                 }
@@ -147,7 +158,7 @@ export default function(bastion, opt={}) {
                 chooseEvent: async function(context, events) {
                     const event_list = events.map( (e, i) => `${i}: ${e.info()}`).join("\n")
 
-                    const index = await bastion.Ask(`Which ${config.name} do you want to cancel?\n${bastion.helpers.code(event_list)}`, 
+                    const ctx = await bastion.Ask(`Which ${config.name} do you want to cancel?\n${bastion.helpers.code(event_list)}`, 
                         context, 
                         (val) => {
                             if (isNaN(parseInt(val))) return `'${val}' is not a valid option; Please pick an option from 0-${events.length}`
@@ -155,7 +166,7 @@ export default function(bastion, opt={}) {
                         }, 2)
 
                     // Step 3: Cancel the meetup
-                    return events[index]
+                    return events[ctx.message]
                 }
             }
         },
@@ -231,7 +242,7 @@ export default function(bastion, opt={}) {
                 updateCompact()
 
                 if (changes.length) {
-                    return `You got it! The following has been updated:` + bastion.helpers.code(changes, 'diff')
+                    return `<@${context.userID}> Has updated **${newEvent.name}**\n\nThe following has been updated:` + bastion.helpers.code(changes, 'diff')
                 } else {
                     return `You didn't change anything :|`
                 }
@@ -241,26 +252,53 @@ export default function(bastion, opt={}) {
                 chooseEvent: async function(context, events) {
                     const event_list = events.map( (e, i) => `${i}: ${e.info()}`).join("\n")
 
-                    const index = await bastion.Ask(`Which ${config.name} do you want to edit?\n${bastion.helpers.code(event_list)}`, 
+                    const question = `Which ${config.name} do you want to edit?\n${bastion.helpers.code(event_list)}`
+                    const msg = await bastion.bot.sendMessage({
+                        to: context.channelID, 
+                        message: question
+                    })
+                    const ctx = await bastion.Ask(null,
                         context, 
                         val => {
                             if (isNaN(parseInt(val))) return `'${val}' is not a valid option; Please pick an option from 0-${events.length}`
                             if (val < 0 || val >= events.length) return `'${val}' is not a valid option; Please pick an option from 0-${events.length}`
-                        }, 2)
+                        }, 2, true)
 
+                    await bastion.bot.deleteMessage({
+                        channelID: context.channelID,
+                        messageID: msg.id
+                    })
+                    await bastion.bot.deleteMessage({
+                        channelID: context.channelID,
+                        messageID: ctx.evt.d.id
+                    })
                     // Step 3: Cancel the event
-                    return events[index]
+                    return events[ctx.message]
                 },
                 getUpdated: async function(context, event) {
-                    const val = await bastion.Ask(
-                        `Ok, editing '${event.info_str()}' - What do you want to change it to?\nYou can copy and paste this:\n${bastion.helpers.code(event.getMeetupString())}\nOr, use the UI: ${process.env.DOMAIN}/create-meetup?id=${event.id()}`,
+                    const question = `Ok, editing **${event.info_str()}**\nWhat do you want to change it to?\n\nYou can copy and paste this:\n${bastion.helpers.code(event.getMeetupString())}\nOr, use the UI: ${process.env.DOMAIN}/create-meetup?id=${event.id()}`
+                    const msg = await bastion.bot.sendMessage({
+                        to: context.channelID, 
+                        message: question
+                    })
+                    const ctx = await bastion.Ask(
+                        null,
                         context, 
                         val => {
                             const obj = utils.getOptions(val.split("|").map(n => n.trim()))
                             return event.validate(obj)
                         }, 2)
 
-                    return (val) ? utils.getOptions(val.split("|").map(n => n.trim())) : null
+                    await bastion.bot.deleteMessage({
+                        channelID: context.channelID,
+                        messageID: msg.id
+                    })
+                    await bastion.bot.deleteMessage({
+                        channelID: context.channelID,
+                        messageID: ctx.evt.d.id
+                    })
+
+                    return (ctx) ? utils.getOptions(ctx.message.split("|").map(n => n.trim())) : null
                 }
             }
         },   
@@ -282,8 +320,9 @@ export default function(bastion, opt={}) {
                 if (!event) return
 
                 this.type()
-                const update = await bastion.Ask(`What do you want to let everyone know?`, context)
-                if (!update) return
+                const ctx = await bastion.Ask(`What do you want to let everyone know?`, context)
+                if (!ctx) return
+                const update = ctx.message
 
                 this.type()
                 const reactions = await event.getReactions(bastion.bot)
@@ -301,7 +340,7 @@ export default function(bastion, opt={}) {
                 chooseEvent: async function(context, events) {
                     const event_list = events.map( (e, i) => `${i}: ${e.info()}`).join("\n")
 
-                    const index = await bastion.Ask(`Which ${config.name} do you want to mention?\n${bastion.helpers.code(event_list)}`, 
+                    const ctx = await bastion.Ask(`Which ${config.name} do you want to mention?\n${bastion.helpers.code(event_list)}`, 
                         context, 
                         (val) => {
                             if (isNaN(parseInt(val))) return `'${val}' is not a valid option; Please pick an option from 0-${events.length}`
@@ -309,7 +348,7 @@ export default function(bastion, opt={}) {
                         }, 2)
 
                     // Step 3: Cancel the meetup
-                    return events[index]
+                    return events[ctx.message]
                 },
                 getUpdateString: async function(context) {
                     return bastion.Ask(`What `, context)
@@ -452,26 +491,26 @@ export default function(bastion, opt={}) {
                 chooseEvent: async function(context, events) {
                     const event_list = events.map( (e, i) => `${i}: ${e.info()}`).join("\n")
 
-                    const index = await bastion.Ask(`Which ${config.name} do you want to transfer?\n${bastion.helpers.code(event_list)}`, 
+                    const ctx = await bastion.Ask(`Which ${config.name} do you want to transfer?\n${bastion.helpers.code(event_list)}`, 
                         context, 
                         (val) => {
                             if (isNaN(parseInt(val))) return `'${val}' is not a valid option; Please pick an option from 0-${events.length}`
                             if (val < 0 || val >= events.length) return `'${val}' is not a valid option; Please pick an option from 0-${events.length}`
                         }, 2)
 
-                    return events[index]
+                    return events[ctx.message]
                 },
                 chooseOwner: async function(context, owners) {
                     const choice = owners.map( (u, i) => `${i}: ${u.username}`).join("\n")
                     
-                    const index = await bastion.Ask(`Which user do you want to give ownership to?\n${bastion.helpers.code(choice)}`, 
+                    const ctx = await bastion.Ask(`Which user do you want to give ownership to?\n${bastion.helpers.code(choice)}`, 
                     context, 
                     (val) => {
                         if (isNaN(parseInt(val))) return `'${val}' is not a valid option; Please pick an option from 0-${events.length}`
                         if (val < 0 || val >= owners.length) return `'${val}' is not a valid option; Please pick an option from 0-${events.length}`
                     }, 2)
 
-                    return owners[index]
+                    return owners[ctx.message]
                 }
             }
         },

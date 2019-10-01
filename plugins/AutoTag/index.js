@@ -35,7 +35,7 @@ export default function(bastion, opt={}) {
         const yesses = new Set(['yes', 'y'])
         const nos = new Set(['no', 'n'])
         log(`Asking ${context.user} if they want to update their role`)
-        const confirm = await bastion.Ask(`<@${context.userID}>, do you want to update your location to '${role.name}'? (y/n)`, 
+        const {message: confirm} = await bastion.Ask(`<@${context.userID}>, do you want to update your location to '${role.name}'? (y/n)`, 
             context, 
             (val) => {
                 let input = val.toLowerCase()

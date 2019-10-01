@@ -139,7 +139,7 @@ export default function({
         });
     }
 
-    this.embed = function() {
+    this.embed = function(full=true) {
         
         let fields = [
             {
@@ -177,10 +177,12 @@ export default function({
             }
         }
 
-        fields.push({
-            name: "Channel",
-            value: `<#${sourceChannelID}>`
-        });
+        if (full) {
+            fields.push({
+                name: "Channel",
+                value: `<#${sourceChannelID}>`
+            });
+        }
 
         let embed = {
             "color": 123456,
@@ -189,12 +191,15 @@ export default function({
                 "icon_url": icon_url,
                 "url": utils.GCALLink(this.toJSON())
             },
-            "footer": {
-                "text": `Started by @${username}`,
-                "icon_url": "https://cdn.discordapp.com/embed/avatars/0.png"
-            },
             fields
         };
+
+        if (full) {
+            embed.footer = {
+                "text": `Started by @${username}`,
+                "icon_url": "https://cdn.discordapp.com/embed/avatars/0.png"
+            }
+        }
 
         if (options.description) {
             embed.description = options.description;
