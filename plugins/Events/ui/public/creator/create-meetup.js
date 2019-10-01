@@ -26,7 +26,8 @@ const inputs = {
   description   : $('textarea[name="description"]'),
   location      : $('input[name="location"]'),
   url           : $('input[name="url"]'),
-  type          : $('select[name="type"]')
+  type          : $('select[name="type"]'),
+  image         : $('input[name="image"]')
 }
 
 const resultArea = $('._result')
