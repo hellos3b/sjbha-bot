@@ -81,6 +81,7 @@ export default function(bastion, opt={}) {
     function getRandomInt(min, max) {
         return Math.floor(Math.random() * (max - min + 1)) + min;
     }
+    
 
     function startTimeout() {
         console.log("**STARTING DUCKHUNT TIMIEOUT**")
