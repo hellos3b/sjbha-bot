@@ -77,8 +77,7 @@ export default function(bastion, opt={}) {
         const msg = await bastion.send(channelID, "\:duck:")
         Ducks.create(channelID, msg.id)
     }
-    
-    
+
     function getRandomInt(min, max) {
         return Math.floor(Math.random() * (max - min + 1)) + min;
     }
