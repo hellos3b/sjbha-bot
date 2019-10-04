@@ -78,6 +78,7 @@ export default function(bastion, opt={}) {
         Ducks.create(channelID, msg.id)
     }
     
+    
     function getRandomInt(min, max) {
         return Math.floor(Math.random() * (max - min + 1)) + min;
     }
