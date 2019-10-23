@@ -67,7 +67,8 @@ export const AuthRouter = bastion => {
                     client_id: process.env.STRAVA_CLIENT_ID,
                     redirect_uri,
                     response_type: "code",
-                    state: userID
+                    state: userID,
+                    scope: 'read,activity:read'
                 })
 
                 const url = `${urls.auth}?${params}`
