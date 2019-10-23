@@ -14,34 +14,38 @@ const urls = {
     redirect_dev: 'http://localhost:3000/api/strava/accept'
 }
 
-export default bastion => {
-    const q = new bastion.Queries('stravaID')
+// ugh globals
+let q;
 
-    const Auth = {
-        saveOwnerID: async function(userID, code) {
-            console.log(chalk.blue("[Strava]"), chalk.gray(`Saving owner for user ${userID}`))
-            let client_id = process.env.STRAVA_CLIENT_ID;
-            let client_secret = process.env.STRAVA_CLIENT_SECRET;
-            // auth and get owner ID
-            const res = await Axios.post(urls.token, { client_id, client_secret, code })
-        
-            const owner_id = res.data.athlete.id
-            const access_token = res.data.access_token
+const Auth = {
+    saveOwnerID: async function(userID, code) {
+        console.log(chalk.blue("[Strava]"), chalk.gray(`Saving owner for user ${userID}`))
+        let client_id = process.env.STRAVA_CLIENT_ID;
+        let client_secret = process.env.STRAVA_CLIENT_SECRET;
+        // auth and get owner ID
+        const res = await Axios.post(urls.token, { client_id, client_secret, code })
 
-            console.log(chalk.blue("[Strava]"), chalk.gray(`Got access token for athlete id ${owner_id}`))
+        const owner_id = res.data.athlete.id
+        const expiresAt = new Date().getTime() + (res.data.expires_in * 1000)
+        console.log(chalk.blue("[Strava]"), chalk.gray(`Got access token for athlete id ${owner_id}`))
 
-            await q.update({ userID }, { 
-                stravaID: owner_id,
-                accessToken: access_token 
-            })
+        await q.update({ userID }, { 
+            stravaID: owner_id,
+            accessToken: res.data.access_token,
+            refreshToken: res.data.refresh_token,
+            tokenExpires: expiresAt
+        })
 
-            console.log(chalk.blue("[Strava]"), chalk.gray(`Saved access token!`))
-        },
+        console.log(chalk.blue("[Strava]"), chalk.gray(`Saved access token!`))
+    },
 
-        notifyCreate: async function() {
+    notifyCreate: async function() {
 
-        }
     }
+}
+
+export const AuthRouter = bastion => {
+    q = new bastion.Queries('stravaID')
 
     return {
 
@@ -70,7 +74,6 @@ export default bastion => {
                 res.redirect(url);
             })
 
-
             // Accept the token, save the user into the DB (username -> id match)
             router.get('/accept', function(req, res) {
                 console.log(chalk.blue("[Strava]"), chalk.gray(`Hitting /accept`))
@@ -89,4 +92,36 @@ export default bastion => {
         }
 
     }
+}
+
+export const getAccessToken = async (stravaUser) => {
+    console.log(chalk.blue("[Strava]"), chalk.gray(`Checking Access Token for ${stravaUser.user}`))
+    const diff = stravaUser.tokenExpires.getTime() - new Date().getTime()
+
+    const THIRTY_MINUTES = 30 * 60 * 1000
+    if (diff > THIRTY_MINUTES) {
+        console.log(chalk.blue("[Strava]"), chalk.gray(`Access token is fine!`))
+        return stravaUser.accessToken
+    }
+
+    let client_id = process.env.STRAVA_CLIENT_ID;
+    let client_secret = process.env.STRAVA_CLIENT_SECRET;
+
+    const res = await Axios.post(urls.token, { 
+        client_id, 
+        client_secret, 
+        grant_type: 'refresh_token',
+        refresh_token: stravaUser.refreshToken 
+    })
+
+    const expiresAt = new Date().getTime() + (res.data.expires_in * 1000)
+
+    console.log(chalk.blue("[Strava]"), chalk.gray(`Updated access token for athlete id ${stravaUser.user}`))
+
+    await q.update({ userID: stravaUser.userID }, { 
+        accessToken: res.data.access_token,
+        tokenExpires: expiresAt
+    })
+
+    return res.data.access_token
 }

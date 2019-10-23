@@ -5,7 +5,7 @@
 
 import deepmerge from 'deepmerge'
 
-import Auth from './Auth'
+import {AuthRouter} from './Auth'
 import Webhook from './webhook'
 import utils from './utils'
 import Api from './api'
@@ -33,7 +33,7 @@ export default function(bastion, opt={}) {
     "md")
 
     const q = new bastion.Queries('stravaID')
-    const auth = Auth(bastion)
+    const auth = AuthRouter(bastion)
     const api = Api(bastion)
 
     const webhook = new Webhook()

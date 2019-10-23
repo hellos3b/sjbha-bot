@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import {getAccessToken} from './Auth'
 
 const ChallengeSchema = mongoose.Schema({
     challenge: {
@@ -40,6 +41,14 @@ const Schema = mongoose.Schema({
         type: String,
         default: ""
     },
+    refreshToken: {
+        type: String,
+        default: ""
+    },
+    tokenExpires: {
+        type: Date,
+        default: Date.now
+    },
     level: {
         type: Number,
         default: 1
@@ -52,5 +61,11 @@ const Schema = mongoose.Schema({
     challenge: ChallengeSchema,
     lastRun: Date
 });
+
+Schema.methods.updateToken = async function() {
+    const token = await getAccessToken(this)
+    this.accessToken = token
+    return this
+}
 
 export default mongoose.model('stravaID', Schema);

@@ -3,6 +3,7 @@ import chalk from "chalk";
 import levels from "./levels";
 import utils from "./utils";
 import challenges from "./challenges";
+import {getAccessToken} from './Auth'
 
 const logPrefix = `    ` + chalk.blue("[Strava]");
 
@@ -35,7 +36,7 @@ export default bastion => {
     getUserInfo: async function(obj) {
       console.log(logPrefix, chalk.gray("getAthlete -> "), obj);
       const user = await $.findOne(obj);
-      if (!user.accessToken) return null;
+      if (!user.refreshToken) return null;
       return user;
     },
 
@@ -65,6 +66,8 @@ export default bastion => {
     getStats: async function(userID) {
       console.log(logPrefix, chalk.gray("getStats -> ", userID));
       const user = await this.getUserInfo({ userID });
+      await user.updateToken()
+
       if (!user) return null;
 
       const stats = await this.getAthleteStats(user.stravaID, user.accessToken);
@@ -145,9 +148,16 @@ export default bastion => {
       return user;
     },
 
+    getAllWithTokens: async function() {
+      let users = await $.getAll()
+      users = users.filter(u => !!u.refreshToken)
+      return Promise.all( users.map( u => u.updateToken() ))
+    },
+
     addActivity: async function({ owner_id, activity_id }) {
       console.log(logPrefix, chalk.gray("addActivity -> ", activity_id));
       const user = await this.getUserInfo({ stravaID: owner_id });
+      await user.updateToken()
 
       const ignoreList = new Set(["213248932078288896"]);
 
@@ -236,7 +246,7 @@ export default bastion => {
     },
 
     leaderboard: async function() {
-      const users = await $.getAll();
+      const users = await this.getAllWithTokens()
       const stats = await this.getBatchStats(users);
 
       return stats.map(s => {
@@ -247,12 +257,12 @@ export default bastion => {
     },
 
     getAllActivities: async function() {
-      const users = await $.getAll();
+      const users = await this.getAllWithTokens()
       return this.getBatchActivities(users);    
     },
 
     getAllAverages: async function() {
-      const users = await $.getAll();
+      const users = await this.getAllWithTokens()
       const stats = await this.getBatchStats(users);
 
       return stats.map(s => {
