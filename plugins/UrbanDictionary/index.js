@@ -10,6 +10,8 @@ const baseConfig = {
 
 let recentDefinitions = {}
 
+const replaceBrackets = (str) => str.replace(/\[|\]/g, "**")
+
 export default function(bastion, opt={}) {
 
    return [
@@ -32,14 +34,27 @@ export default function(bastion, opt={}) {
                 return `No definitions for **${word}**`
               }
 
-              const output = `**${word.toUpperCase()}:**\n\n`
-                  + `${first.definition}`
-                  + `\n\n`
-                  + bastion.helpers.code(first.example)
+              const embed = {
+                "color": 16201999,
+                "author": {
+                  "name": first.word,
+                  "icon_url": "https://imgur.com/0tEBa59.png"
+                },
+                "fields": [
+                  {
+                    "name": "Definition",
+                    "value": replaceBrackets(first.definition)
+                  },
+                  {
+                    "name": "Examples",
+                    "value": replaceBrackets(first.example)
+                  }
+                ]
+              }
 
               const msg = await bastion.bot.sendMessage({
                 to: context.channelID,
-                message: output
+                embed
               })
 
               recentDefinitions[context.userID] = [
