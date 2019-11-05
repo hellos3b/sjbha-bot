@@ -10,7 +10,7 @@ const baseConfig = {
 
 let recentDefinitions = {}
 
-const replaceBrackets = (str) => str.replace(/\[|\]/g, "**")
+const replaceBrackets = (str) => str.replace(/\[|\]/g, "*")
 
 export default function(bastion, opt={}) {
 
