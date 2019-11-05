@@ -24,7 +24,7 @@ export default {
             action: "TEMPLATE",
             text: event.info,
             dates: `${this.flatISO(d.toISOString())}/${this.flatISO(post.toISOString())}`,
-            details: event.options.description,
+            details: event.options.description.slice(0, 1000),
             location: event.location,
             sprop:"name"
         }

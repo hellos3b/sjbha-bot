@@ -108,6 +108,8 @@ export default function({
     this.announce = function(bot) {
         let embed = this.embed();
 
+        console.log("EMBED")
+        console.log(embed)
         return new Promise( async function(resolve, reject) {
             let response = await bot.sendMessage({
                 to: config.announcementChannel,
