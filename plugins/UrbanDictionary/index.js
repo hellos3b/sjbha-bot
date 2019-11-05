@@ -8,6 +8,8 @@ const baseConfig = {
    command: "ban"
 }
 
+let recentDefinitions = {}
+
 export default function(bastion, opt={}) {
 
    return [
@@ -18,7 +20,6 @@ export default function(bastion, opt={}) {
 
            // Core of the command
            resolve: async function(context) {
-             console.log("context", context.message)
               const [cmd, ...words] = context.message.split(" ")
               const word = words.join(' ')
 
@@ -31,10 +32,43 @@ export default function(bastion, opt={}) {
                 return `No definitions for **${word}**`
               }
 
-              return `**${word.toUpperCase()}:**\n\n`
-                + `${first.definition}`
-                + `\n\n`
-                + bastion.helpers.code(first.example)
+              const output = `**${word.toUpperCase()}:**\n\n`
+                  + `${first.definition}`
+                  + `\n\n`
+                  + bastion.helpers.code(first.example)
+
+              const msg = await bastion.bot.sendMessage({
+                to: context.channelID,
+                message: output
+              })
+
+              recentDefinitions[context.userID] = [
+                msg.id,
+                context.channelID
+              ]
+           }
+       },
+
+       {
+           // Command to start it
+           command: `undefine`, 
+
+           // Core of the command
+           resolve: async function(context) {
+             const userID = context.userID
+
+             if (!recentDefinitions[userID]) return;
+
+             const [msgId, channelID] = recentDefinitions[userID]
+
+            await bastion.bot.deleteMessage({
+                channelID: channelID,
+                messageID: msgId
+            })
+
+            recentDefinitions[userID] = null
+
+             return '<:shitfuck:555554433048510475>'
            }
        }
 
