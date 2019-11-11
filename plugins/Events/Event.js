@@ -10,6 +10,31 @@ const States = {
     CANCELLED: 2
 }
 
+const PDT_OFFSET = -420
+const PST_OFFSET = -480
+
+const isDaylightSavings = (date) => {
+    const dsStart = new Date(date.getFullYear(), 3, 10)
+    const dsEnd = new Date(date.getFullYear(), 11, 3)
+    return dsStart <= date && dsEnd >= date
+}
+
+const getParsedDate = (dateString) => {
+    let refDate = new moment()
+
+    // Parse the incoming date string to an ISO string
+    let parsed_date = chrono.parse(dateString, refDate)[0].start;
+    
+    // use a new date object to check if PST/PDT
+    const date = new Date(parsed_date.date())
+    const offset = isDaylightSavings(date) ? PDT_OFFSET : PST_OFFSET
+
+    console.log("parsed date?", offset)
+    parsed_date.assign('timezoneOffset', offset)
+
+    return parsed_date
+}
+
 export default function({ 
     id = GUID(), 
     date, 
@@ -22,10 +47,8 @@ export default function({
     info_id = null,
     rsvp_id = null
 }, config) {
-    let refDate = new moment()
     // Parse the incoming date string to an ISO string
-    let parsed_date = chrono.parse(date, refDate)[0].start
-    parsed_date.assign('timezoneOffset', -420)
+    let parsed_date = getParsedDate(date)
 
     // Create a moment instance
     let date_moment = new moment(parsed_date.date())
@@ -44,8 +67,7 @@ export default function({
 
     this.parseDate = function() {
         refDate = new moment()
-        parsed_date = chrono.parse(date, refDate)[0].start
-        parsed_date.assign('timezoneOffset', -420)
+        let parsed_date = getParsedDate(date)
         date_moment = new moment(parsed_date.date())
 
         date_str = date_moment.clone().tz("America/Los_Angeles").format("dddd M/D @ h:mma")
@@ -108,8 +130,6 @@ export default function({
     this.announce = function(bot) {
         let embed = this.embed();
 
-        console.log("EMBED")
-        console.log(embed)
         return new Promise( async function(resolve, reject) {
             let response = await bot.sendMessage({
                 to: config.announcementChannel,

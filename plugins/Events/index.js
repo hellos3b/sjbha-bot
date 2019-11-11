@@ -13,6 +13,7 @@ import compact from './compact'
 import path from 'path'
 import router from './ui/router'
 import createRouter from './ui/router-help'
+import adminRouter from './ui/router-admin'
 import express from 'express'
 
 export default function(bastion, opt={}) {
@@ -53,6 +54,7 @@ export default function(bastion, opt={}) {
     bastion.app.use('/public', express.static(path.join(__dirname, 'ui', 'public')))
     bastion.app.use('/calendar', router(bastion, config))
     bastion.app.use('/create-meetup', createRouter(bastion, config))
+    bastion.app.use('/meetup-admin', adminRouter(bastion, config))
 
     return [
 

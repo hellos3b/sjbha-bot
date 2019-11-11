@@ -11,7 +11,8 @@ const Schema = mongoose.Schema({
     sourceChannelID: String, 
     state: String, 
     info_id: String,
-    rsvp_id: String
+    rsvp_id: String,
+    approved: [String]
 }, { collection: 'meetups' })
 
 export default mongoose.model('Meetup', Schema)
