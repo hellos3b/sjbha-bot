@@ -14,9 +14,11 @@ const PDT_OFFSET = -420
 const PST_OFFSET = -480
 
 const isDaylightSavings = (date) => {
-    const dsStart = new Date(date.getFullYear(), 3, 10)
-    const dsEnd = new Date(date.getFullYear(), 11, 3)
-    return dsStart <= date && dsEnd >= date
+    const dsStart = new Date(date.getFullYear(), 2, 10)
+    const dsEnd = new Date(date.getFullYear(), 10, 3)
+    const isDS = date >= dsStart && date <= dsEnd
+    console.log("Is DS? ", isDS)
+    return isDS
 }
 
 const getParsedDate = (dateString) => {
@@ -66,7 +68,6 @@ export default function({
     let reactions = { yes: [], maybe: [] }
 
     this.parseDate = function() {
-        refDate = new moment()
         let parsed_date = getParsedDate(date)
         date_moment = new moment(parsed_date.date())
 
