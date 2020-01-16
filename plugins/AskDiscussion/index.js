@@ -35,6 +35,8 @@ export default function(bastion, opt = {}) {
       .map( n => n.data)
       .filter(n => !n.over_18)
       .filter(n => !n.title.toLowerCase().includes("reddit"))
+      .filter(n => !n.title.toLowerCase().includes("serious"))
+      .filter(n => n.link_flair_css_class !== "breaking-news")
 
     // use the top 5
     threads = threads.slice(0, 5)
@@ -64,13 +66,16 @@ export default function(bastion, opt = {}) {
   })
 
   return [
-    // {
-    //   command: "ask",
+    {
+      command: "ask",
 
-    //   resolve: async function(context, tag) {
-    //     const winner = await chooseThread()
-    //     sendEmbed(winner)
-    //   }
-    // }
+      resolve: async function(context, tag) {
+        // bot admin
+        if (context.channelID !== "430517752546197509") return;
+        
+        const winner = await chooseThread()
+        sendEmbed(winner)
+      }
+    }
   ];
 }

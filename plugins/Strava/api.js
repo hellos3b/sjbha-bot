@@ -145,6 +145,7 @@ export default bastion => {
     getUser: async function(userID) {
       console.log(logPrefix, chalk.gray("getUser -> ", userID));
       const user = await this.getUserInfo({ userID });
+      await user.updateToken()
       return user;
     },
 

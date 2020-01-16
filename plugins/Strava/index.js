@@ -12,6 +12,7 @@ import Api from './api'
 import levels from './levels'
 import Table from 'ascii-table'
 import challenges from './challenges'
+import router from './ui/router'
 
 const baseConfig = {
     command: "strava",
@@ -38,6 +39,7 @@ export default function(bastion, opt={}) {
 
     const webhook = new Webhook()
 
+    bastion.app.use('/strava', router(bastion))
     bastion.app.use(config.apiUrl, auth.router())
     bastion.app.use(config.apiUrl, webhook.router())
 

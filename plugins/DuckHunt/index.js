@@ -61,16 +61,16 @@ export default function(bastion, opt={}) {
     const analyze = Analyze(bastion)
 
     async function saveBang(user, userID) {
-        let player = await q.findOne({ userID })
-        if (!player) {
-            q.create({
-                user, userID,
-                count: 1
-            })
-        } else {
-            player.count++
-            q.update({ userID }, player)
-        }
+        // let player = await q.findOne({ userID })
+        // if (!player) {
+        //     q.create({
+        //         user, userID,
+        //         count: 1
+        //     })
+        // } else {
+        //     player.count++
+        //     q.update({ userID }, player)
+        // }
     }
 
     async function sendDuck(channelID) {
@@ -123,7 +123,8 @@ export default function(bastion, opt={}) {
         return date.fromNow() + ' [' + date.format("h:mma") + ']'
     }
 
-    startTimeout()
+    // startTimeout()
+    analyze.monitor(sendDuck)
 
     return [
 
