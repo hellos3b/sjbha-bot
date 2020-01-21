@@ -124,7 +124,8 @@ export default function(bastion, opt={}) {
     }
 
     // startTimeout()
-    analyze.monitor(sendDuck)
+
+    // analyze.monitor(sendDuck)
 
     return [
 
@@ -220,7 +221,7 @@ export default function(bastion, opt={}) {
                     }).map( p => {
                         return `${padScore(p.total)} [${counter(p.count)}-${p.misses}] ${p.user}`
                     }).join("\n")
-                return bastion.helpers.code(`# Season 3\nDucks Spawned: ${shots.length}\n\n${msg}`, "ini")
+                return bastion.helpers.code(`# Season 3 Results\nDucks Spawned: ${shots.length}\n\n${msg}`, "ini")
             }
         },
 
@@ -273,7 +274,7 @@ export default function(bastion, opt={}) {
                 speederboard.removeBorder()
 
                 const msg = ''
-                return bastion.helpers.code(`# Season 3\nSpeederboard\n\n${speederboard.toString()}`, "ini")
+                return bastion.helpers.code(`# Season 3 Results\nSpeederboard\n\n${speederboard.toString()}`, "ini")
             }
         },
 
@@ -312,51 +313,51 @@ export default function(bastion, opt={}) {
 
                 msg = bastion.bot.fixMessage(msg)
 
-                return bastion.helpers.code('# Season 3\n\n' + msg, 'ini')
+                return bastion.helpers.code('# Season 3 Results\n\n' + msg, 'ini')
             }
         },
 
-        {
-            command: "bang",
+        // {
+        //     command: "bang",
 
-            resolve: async function(context, tag) {
-                const msg_id = context.evt.d.id
+        //     resolve: async function(context, tag) {
+        //         const msg_id = context.evt.d.id
 
-                await bastion.bot.deleteMessage({
-                    channelID: context.channelID,
-                    messageID: msg_id
-                })
+        //         await bastion.bot.deleteMessage({
+        //             channelID: context.channelID,
+        //             messageID: msg_id
+        //         })
 
-                const duck = Ducks.bang(bastion, context.channelID, context.userID, context.user)
-                if (!duck) return;
+        //         const duck = Ducks.bang(bastion, context.channelID, context.userID, context.user)
+        //         if (!duck) return;
 
-                let msg = `🦆💥${duck.misses.map(n => `💥`)}`
+        //         let msg = `🦆💥${duck.misses.map(n => `💥`)}`
 
-                await bastion.bot.editMessage({
-                    channelID: context.channelID,
-                    messageID: duck.msgId,
-                    message: msg
-                })
+        //         await bastion.bot.editMessage({
+        //             channelID: context.channelID,
+        //             messageID: duck.msgId,
+        //             message: msg
+        //         })
 
-                if (duck.newShot) {
-                    saveBang(context.user, context.userID)
-                }
-            },
+        //         if (duck.newShot) {
+        //             saveBang(context.user, context.userID)
+        //         }
+        //     },
 
-            methods: {
-                getSecondsMinutes(shotTime) {
-                    let time = shotTime / 1000
-                    time = Math.floor(time * 1000) / 1000
+        //     methods: {
+        //         getSecondsMinutes(shotTime) {
+        //             let time = shotTime / 1000
+        //             time = Math.floor(time * 1000) / 1000
     
-                    if (time < 60) {
-                        return time + "s"
-                    }
+        //             if (time < 60) {
+        //                 return time + "s"
+        //             }
 
-                    time = Math.floor(time / 60)
-                    return time + "m"
-                }
-            }
-        }
+        //             time = Math.floor(time / 60)
+        //             return time + "m"
+        //         }
+        //     }
+        // }
 
     ]
 }
