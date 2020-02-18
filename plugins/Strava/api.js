@@ -208,7 +208,7 @@ export default bastion => {
     getActivityString({ activity, level, stats, user }) {
       console.log(logPrefix, chalk.gray("getActivityString -> "));
       const verb = activity.manual ? "logged" : "recorded";
-      let message = `👏 **${user.user}** just ${verb} a run! - *${
+      let message = `👏 **${unescape(user.user)}** just ${verb} a run! - *${
         activity.name
       }*\n\`\`\`📍${stats.distance} mi   🏃${stats.pace} pace   🕒${
         stats.time
