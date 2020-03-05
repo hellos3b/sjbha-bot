@@ -32,7 +32,8 @@
         "require-text": "0.0.1",
         "sillyid": "^0.2.2",
         "vanilla-js-calendar": "^1.0.10",
-        "winston": "^2.4.1"
+        "winston": "^2.4.1",
+        "wretch": "^1.7.1"
     },
     "devDependencies": {
         "@types/node": "^10.12.18"

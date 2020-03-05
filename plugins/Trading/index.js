@@ -8,6 +8,7 @@ import moment from "moment";
 import "./HoldingsSchema";
 import Axios from 'axios'
 import Table from 'ascii-table'
+import * as finnhub from './finnhub-client'
 
 const baseConfig = {};
 
@@ -16,7 +17,9 @@ const getPrice = (ticker) => {
 }
 
 const getBatchPrices = (tickers) => {
-  return Axios.get(`https://www.alphavantage.co/query?function=BATCH_STOCK_QUOTES&symbols=${tickers.join(",")}&apikey=${process.env.ALPHA_VANTAGE_KEY}`)
+  const url = `https://www.alphavantage.co/query?function=BATCH_STOCK_QUOTES&symbols=${tickers.join(",")}&apikey=${process.env.ALPHA_VANTAGE_KEY}`
+  console.log(`fetch`, url)
+  return Axios.get(url)
 }
 
 
@@ -70,7 +73,7 @@ export default function(bastion, opt = {}) {
     {
       command: `portfolio`,
 
-      restrict: ['363123179696422916'],
+      // restrict: ['363123179696422916'],
       restrictMessage: `RRB Trading is only for <#363123179696422916>`, 
 
       resolve: async function(context, message) {
@@ -80,31 +83,19 @@ export default function(bastion, opt = {}) {
 
         if (!holdings.length) return `You're not invested in anything! Use \`!buy\` to get started`
 
-        let currentPrices;
+        let quotes;
         
         try {
-          currentPrices = await getBatchPrices(holdings.map(n => n.ticker));
+          quotes = await finnhub.getQuotes(holdings.map(n => n.ticker));
         } catch (e) {
-          return 'Something went wrong trying to get the current stock prices'
+          return e.response ? `🚫 Error: \`${e.response.data}\`` : '🚫 Something went wrong trying to get the current stock prices'
         }
 
-        if (currentPrices.data['Note']) {
-          return `<:bankbot:613855784996044826> We are being rate limited by the API, try again later (5/min, 500/day)`
-        }
-
-        // Get current prices
-        const quotes = currentPrices.data['Stock Quotes']
-          .reduce( (l, c) => {
-              const symbol =  c['1. symbol']
-              const price = c['2. price']
-              return Object.assign({}, l, {
-                [symbol.toLowerCase()]: toFixed(price)
-              })
-            }, {})
+        console.log("quotess", quotes)
 
         // Attach current price to holdings
         holdings = holdings.map( h => {
-          const currentPrice = quotes[h.ticker.toLowerCase()]
+          const currentPrice = quotes[h.ticker.toUpperCase()]
           const original = Math.floor(h.amt * toFixed(h.buyPrice))
           const value =  Math.floor(h.amt * toFixed(currentPrice))
 
@@ -165,53 +156,6 @@ export default function(bastion, opt = {}) {
       }
     },
 
-    // #region stonks
-    // {
-    //   command: `stonks`,
-
-    //   restrict: ['363123179696422916'],
-    //   restrictMessage: `RRB Trading is only for <#363123179696422916>`, 
-
-    //   resolve: async function(context, message) {
-    //     let holdings = await q.find({ sold: false })
-
-    //     const total = holdings.reduce( (amt, r) => {
-    //       return amt + (r.buyPrice * r.amt)
-    //     }, 0)
-
-    //     const tickers = holdings.map( n => n.ticker )
-
-    //     let currentPrices;
-        
-    //     try {
-    //       currentPrices = await getBatchPrices(holdings.map(n => n.ticker));
-    //     } catch (e) {
-    //       return 'Something went wrong trying to get the current stock prices'
-    //     }
-
-    //     if (currentPrices.data['Note']) {
-    //       return `<:bankbot:613855784996044826> We are being rate limited by the API, try again later (5/min, 500/day)`
-    //     }
-
-    //     const quotes = currentPrices.data['Stock Quotes']
-    //       .reduce( (l, c) => {
-    //           const symbol =  c['1. symbol']
-    //           const price = c['2. price']
-    //           return Object.assign({}, l, {
-    //             [symbol.toLowerCase()]: parseFloat(price)
-    //           })
-    //         }, {})
-
-    //     let progress = holdings.reduce( (amt, holding) => {
-    //       const price = quotes[holding.ticker.toLowerCase()]
-    //       return amt + (quotes[holding.ticker.toLowerCase()]) * holding.amt
-    //     }, 0)
-
-    //     return `Total: ${total}, Progress: ${progress}`
-    //   }
-    // },
-    // #endregion
-
     {
       command: `sell`,
 
@@ -235,19 +179,14 @@ export default function(bastion, opt = {}) {
         const seller = holdings[index]
         if (!seller) return `'${index}' is not a valid option; Please pick an option from 0-${holdings.length}`
 
-        let response;
+        let quote;
         try {
-          response = await getPrice(seller.ticker)
+          quote = await finnhub.getQuote(seller.ticker)
         } catch (e) {
-          return 'Something went wrong trying to get the current stock prices'
+          return e.response ? `🚫 Error: \`${e.response.data}\`` : '🚫 Something went wrong trying to get the current stock prices'
         }
 
-        if (response.data['Note']) {
-          return `<:bankbot:613855784996044826> We are being rate limited by the API, try again later (5/min, 500/day)`
-        }
-
-        const quote = response.data['Global Quote']
-        const stockPrice = parseFloat(quote['05. price'])
+        const stockPrice = parseFloat(quote.current)
         const sellPrice = Math.floor(seller.amt * stockPrice)
 
         const {message: confirm} = await bastion.Ask(`Sell ${seller.amt} **${seller.ticker.toUpperCase()}** for **${sellPrice - FEE}** royroybucks? (y/n)\n<:bankbot:613855784996044826> *+${FEE}rrb Transaction Fee*`, context)   
@@ -295,27 +234,17 @@ export default function(bastion, opt = {}) {
 
         if (!Number.isInteger(amt)) return `'${amtInput}' is not a valid amount`
 
-        let response;
+        let quote;
         try {
-          response = await getPrice(ticker)
+          quote = await finnhub.getQuote(ticker)
         } catch (e) {
-          return 'Something went wrong trying to get the current stock prices'
+          return e.response ? `🚫 Error: \`${e.response.data}\`` : '🚫 Something went wrong trying to get the current stock prices'
         }
 
-        if (response.data['Note']) {
-          return `<:bankbot:613855784996044826> We are being rate limited by the API, try again later (5/min, 500/day)`
-        }
+        let stockPrice = toFixed(quote.current)
 
-        const err = response.data['Error Message']
-        if (err) {
-          return `Can't find stock **${ticker}**`
-        }
-
-        const quote = response.data['Global Quote']
-        let stockPrice = toFixed(quote['05. price'])
-
-        if (stockPrice < 10) {
-          return `<:bankbot:613855784996044826> Sorry, that stock is not on the RRB market (only stocks $10 or more can be traded)`
+        if (stockPrice < 1) {
+          return `<:bankbot:613855784996044826> Sorry, that stock is not on the RRB market (only stocks $1 or more can be traded)`
         }
 
         const user = await rrb.findOne({ userID: context.userID })
