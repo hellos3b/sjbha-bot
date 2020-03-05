@@ -63,7 +63,7 @@ export default function(bastion, opt = {}) {
     {
       command: `portfolio`,
 
-      // restrict: ['363123179696422916'],
+      restrict: ['363123179696422916'],
       restrictMessage: `RRB Trading is only for <#363123179696422916>`, 
 
       resolve: async function(context, message) {
