@@ -9,8 +9,6 @@ class Stock {
   }
 }
 
-const toFixed = (val) => Math.floor(parseFloat(val) * 100) / 100
-
 /**
  * 
  * @param {string} symbol 

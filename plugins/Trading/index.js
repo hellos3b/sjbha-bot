@@ -12,16 +12,6 @@ import * as finnhub from './finnhub-client'
 
 const baseConfig = {};
 
-const getPrice = (ticker) => {
-  return Axios.get(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${ticker}&apikey=${process.env.ALPHA_VANTAGE_KEY}`)
-}
-
-const getBatchPrices = (tickers) => {
-  const url = `https://www.alphavantage.co/query?function=BATCH_STOCK_QUOTES&symbols=${tickers.join(",")}&apikey=${process.env.ALPHA_VANTAGE_KEY}`
-  console.log(`fetch`, url)
-  return Axios.get(url)
-}
-
 
 const getPercentage = (original, current) => {
   if (original < current) {
