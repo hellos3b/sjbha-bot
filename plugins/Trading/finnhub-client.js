@@ -28,7 +28,7 @@ export const getQuotes = (symbols) => {
     .then( s => s.reduce( (result, stock) => 
       Object.assign(
         result, 
-        { [stock.symbol]: stock.current }
+        { [stock.symbol.toUpperCase()]: stock.current }
       ),
       {}
     ))
