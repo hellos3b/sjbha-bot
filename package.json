@@ -26,7 +26,7 @@
         "lodash": "^4.17.13",
         "moment": "^2.22.0",
         "moment-timezone": "^0.5.26",
-        "mongoose": "^5.0.12",
+        "mongoose": "^5.7.5",
         "mustache": "^2.3.0",
         "node-cron": "^1.2.1",
         "require-text": "0.0.1",
