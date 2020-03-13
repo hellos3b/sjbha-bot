@@ -30,9 +30,9 @@ export default function(bastion, opt={}) {
       if (infections.find(n => n.userID === context.userID)) return;
 
       for (var i = 0; i < mentions.length; i++) {
-        // If no infections, first to mention s3b gets it
-        if (!infections.length && mentions[i].id === '125829654421438464') {
-          return infectUser(context, "125829654421438464", "s3b")
+        // If no infections, first to mention jenn gets it
+        if (!infections.length && mentions[i].id === '145398757582700544') {
+          return infectUser(context, "145398757582700544", "jenny")
         }
 
         // If user mentions someone who's infected they get it
