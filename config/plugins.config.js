@@ -1,33 +1,34 @@
+import Ask from '../plugins/Ask'
+import AskDiscussion from '../plugins/AskDiscussion'
+import AutoTag from '../plugins/AutoTag'
+import Ban from '../plugins/Ban'
+import DuckHunt from '../plugins/DuckHunt'
+import Dungeon from '../plugins/Dungeon'
+import Echos from '../plugins/echos/Echos'
+import Events from '../plugins/Events'
+import Fools from '../plugins/Fools'
+import LaserTag from '../plugins/LaserTag'
+import Lotto from '../plugins/Lotto'
+import Modelo from '../plugins/Modelo'
+import Music from '../plugins/Music'
+import Olympics from '../plugins/Olympics'
+import Outbreak from '../plugins/Outbreak'
 // plugins
 import Ping from '../plugins/echos/Ping'
-import Echos from '../plugins/echos/Echos'
-import Subscribe from '../plugins/Subscribe'
 import Poll from '../plugins/Poll'
-import TLDR from '../plugins/Tldr'
-import Strava from '../plugins/Strava'
-import StockChart from '../plugins/StockChart'
-import Ban from '../plugins/Ban'
-import Events from '../plugins/Events'
-import Ask from '../plugins/Ask'
-import Stats from '../plugins/Stats'
-import db from '../plugins/db'
-import Teams from '../plugins/Teams'
-import Outbreak from '../plugins/Outbreak'
-import AutoTag from '../plugins/AutoTag'
-import Upvotes from '../plugins/Upvotes'
-import Dungeon from '../plugins/Dungeon'
 import Reddit from '../plugins/Reddit'
-import DuckHunt from '../plugins/DuckHunt'
 import RoyRoyBucks from '../plugins/RoyRoyBucks'
-import Lotto from '../plugins/Lotto'
-import Music from '../plugins/Music'
-import Fools from '../plugins/Fools'
-import Olympics from '../plugins/Olympics'
-import UrbanDictionary from '../plugins/UrbanDictionary'
+import Stats from '../plugins/Stats'
+import StockChart from '../plugins/StockChart'
+import Strava from '../plugins/Strava'
+import Subscribe from '../plugins/Subscribe'
+import TLDR from '../plugins/Tldr'
+import Teams from '../plugins/Teams'
 import Trading from '../plugins/Trading'
-import AskDiscussion from '../plugins/AskDiscussion'
+import Upvotes from '../plugins/Upvotes'
+import UrbanDictionary from '../plugins/UrbanDictionary'
 import Yelling from '../plugins/yelling'
-import LaserTag from '../plugins/LaserTag'
+import db from '../plugins/db'
 
 const subscriptions = {
     "photomeet": "486330820114513920",
@@ -108,7 +109,8 @@ export default bastion => ([
     Trading,
     AskDiscussion,
     Yelling,
-    LaserTag
+    LaserTag,
+    Modelo
     // Fools(bastion, {
     //     listRestrict: ["shitpost", "430517752546197509"]
     // })
