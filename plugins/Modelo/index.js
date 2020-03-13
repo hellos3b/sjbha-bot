@@ -3,7 +3,7 @@
  * 
  */
 
-import './Schema'
+import './schema'
 
 import deepmerge from 'deepmerge'
 
