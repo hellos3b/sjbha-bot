@@ -45,6 +45,7 @@ export default function(bastion, opt = {}) {
 
     threads = threads.map( n => Object.assign({}, {
       title: n.title,
+      permalink: n.permalink,
       award_score: n.all_awardings.reduce( (total, r) => (total + r.coin_price), 0)
     })).sort( (a, b) => {
       if (a.award_score > b.award_score) return -1
