@@ -14,7 +14,7 @@ import moment from 'moment'
 // import router from './ui/router'
 
 const baseConfig = {
-    command: "outbreak",
+    command: "",
     restrict: []
 }
 
@@ -25,7 +25,7 @@ export default function(bastion, opt={}) {
     const q = new bastion.Queries('ModeloVirus')
     const log = bastion.Logger("ModeloVirus").log
 
-    bastion.app.use('/modelo', express.static(path.join(__dirname, 'ui')))
+    bastion.app.use('/discord-tag', express.static(path.join(__dirname, 'ui')))
 
     q.getAll()
       .then( r => {
@@ -37,11 +37,11 @@ export default function(bastion, opt={}) {
 
     return [
       {
-        command: 'modelo',
+        command: 'tag',
 
         resolve: async function(context, option) {
           const data = dbCache[context.userID]
-          if (!data) return "You weren't infected, congratulation on surviving!"
+          if (!data) return "You weren't tagged, congratulation!"
 
           let prev = dbCache[data.infectedByID];
           let chain = []
@@ -59,9 +59,7 @@ export default function(bastion, opt={}) {
           const b = moment(data.timestamp)
           const diff = b.diff(a, 'hours')
 
-          console.log("DIFF", diff)
-
-          return  `\`PATIENT #${data.patientnum} (+${diff} HOURS)\`` 
+          return  `\`TAG #${data.patientnum} (+${diff} HOURS)\`` 
             + '\n' + chainString + ` → **${context.user}**`
             + `\n\`MESSAGE:\` ${bastion.bot.fixMessage(data.message)}`
         }

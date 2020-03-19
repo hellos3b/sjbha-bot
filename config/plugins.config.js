@@ -110,7 +110,7 @@ export default bastion => ([
     AskDiscussion,
     Yelling,
     LaserTag,
-    // Modelo
+    Modelo
     // Fools(bastion, {
     //     listRestrict: ["shitpost", "430517752546197509"]
     // })
