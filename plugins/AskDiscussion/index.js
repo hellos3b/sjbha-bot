@@ -1,6 +1,6 @@
-import deepmerge from "deepmerge";
-import chalk from "chalk";
 import Axios from "axios";
+import chalk from "chalk";
+import deepmerge from "deepmerge";
 import moment from "moment"
 
 const baseConfig = {
@@ -22,6 +22,7 @@ export default function(bastion, opt = {}) {
         },
         "author": {
           "name": thread.title,
+          "url": "https://www.reddit.com" + thread.permalink,
           "icon_url": "https://imgur.com/uhf6rG3.png"
         }
       }
@@ -37,6 +38,7 @@ export default function(bastion, opt = {}) {
       .filter(n => !n.title.toLowerCase().includes("reddit"))
       .filter(n => !n.title.toLowerCase().includes("serious"))
       .filter(n => n.link_flair_css_class !== "breaking-news")
+      .filter(n => n.distinguished !== 'moderator')
 
     // use the top 5
     threads = threads.slice(0, 5)
