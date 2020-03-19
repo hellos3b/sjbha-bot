@@ -5,7 +5,11 @@
 
 import './schema'
 
+import * as path from 'path'
+
 import deepmerge from 'deepmerge'
+import express from 'express'
+import moment from 'moment'
 
 // import router from './ui/router'
 
@@ -14,50 +18,53 @@ const baseConfig = {
     restrict: []
 }
 
+let dbCache = {}
+
 export default function(bastion, opt={}) {
     const config = deepmerge(baseConfig, opt)
     const q = new bastion.Queries('ModeloVirus')
     const log = bastion.Logger("ModeloVirus").log
 
-    bastion.on('message', checkInfection)
+    bastion.app.use('/modelo', express.static(path.join(__dirname, 'ui')))
 
-    async function checkInfection(context) {
-      const mentions = context.evt.d.mentions
-      if (!mentions.length) return;
+    q.getAll()
+      .then( r => {
+        r.forEach( (infection, idx) => {
+          infection.patientnum = idx
+          dbCache[infection.userID] = infection
+        })
+      })
 
-      const infections = await q.getAll();
+    return [
+      {
+        command: 'modelo',
 
-      if (infections.find(n => n.userID === context.userID)) return;
+        resolve: async function(context, option) {
+          const data = dbCache[context.userID]
+          if (!data) return "You weren't infected, congratulation on surviving!"
 
-      for (var i = 0; i < mentions.length; i++) {
-        // If no infections, first to mention jenn gets it
-        if (!infections.length && mentions[i].id === '145398757582700544') {
-          return infectUser(context, "145398757582700544", "jenny")
+          let prev = dbCache[data.infectedByID];
+          let chain = []
+          while (prev) {
+            chain.push(prev)
+            prev = dbCache[prev.infectedByID]
+          }
+
+          const chainString = chain
+            .map(n => n.user)
+            .reverse()
+            .join(" → ")
+          
+          const a = moment(dbCache['395275539444793344'].timestamp)
+          const b = moment(data.timestamp)
+          const diff = b.diff(a, 'hours')
+
+          console.log("DIFF", diff)
+
+          return  `\`PATIENT #${data.patientnum} (+${diff} HOURS)\`` 
+            + '\n' + chainString + ` → **${context.user}**`
+            + `\n\`MESSAGE:\` ${bastion.bot.fixMessage(data.message)}`
         }
-
-        // If user mentions someone who's infected they get it
-        const inf = infections.find(n => n.userID === mentions[i].id)
-
-        if (!inf) continue;
-
-        // Infected!
-        return infectUser(context, mentions[i].id, mentions[i].username)
       }
-    }
-
-    async function infectUser(context, fromId, fromName) {
-
-      const payload = {
-        user: context.user,
-        userID: context.userID,
-        infectedBy: fromName,
-        infectedByID: fromId,
-        message: context.message
-      }
-      
-      // Infected!
-      await q.create(payload)
-    }
-
-    return []
+    ]
 }

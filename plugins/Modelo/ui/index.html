@@ -1,0 +1,34 @@
+<html>
+  <head>
+    <title>Sponsored by Pacifico™</title>
+    <script type="text/javascript" src="https://unpkg.com/moment@latest"></script>
+    <script type="text/javascript" src="https://unpkg.com/vis-data@latest"></script>
+    <script type="text/javascript" src="https://unpkg.com/vis-network@latest/peer/umd/vis-network.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/vis-network/styles/vis-network.min.css" />
+
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+      }
+      #root {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+      }
+      #topology {
+        flex-grow: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <div id='root'>
+      <div id='topology'></div>
+      <div id='timeline'></div>
+    </div>
+
+    <script type="text/javascript" src="data.js"></script>
+    <script type="text/javascript" src="topology.js"></script>
+  </body>
+</html>
