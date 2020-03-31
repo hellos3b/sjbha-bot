@@ -1,5 +1,5 @@
-import mongoose from 'mongoose';
 import {getAccessToken} from './Auth'
+import mongoose from 'mongoose';
 
 const ChallengeSchema = mongoose.Schema({
     challenge: {
@@ -64,7 +64,9 @@ const Schema = mongoose.Schema({
 
 Schema.methods.updateToken = async function() {
     const token = await getAccessToken(this)
-    this.accessToken = token
+    if (token) {
+        this.accessToken = token
+    }
     return this
 }
 

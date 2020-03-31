@@ -1,9 +1,8 @@
 import Axios from "axios";
 import chalk from "chalk";
+import challenges from "./challenges";
 import levels from "./levels";
 import utils from "./utils";
-import challenges from "./challenges";
-import {getAccessToken} from './Auth'
 
 const logPrefix = `    ` + chalk.blue("[Strava]");
 

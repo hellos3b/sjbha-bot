@@ -3,16 +3,15 @@
  * 
  */
 
-import deepmerge from 'deepmerge'
-
-import {AuthRouter} from './Auth'
-import Webhook from './webhook'
-import utils from './utils'
 import Api from './api'
-import levels from './levels'
+import {AuthRouter} from './Auth'
 import Table from 'ascii-table'
+import Webhook from './webhook'
 import challenges from './challenges'
+import deepmerge from 'deepmerge'
+import levels from './levels'
 import router from './ui/router'
+import utils from './utils'
 
 const baseConfig = {
     command: "strava",
@@ -70,7 +69,7 @@ export default function(bastion, opt={}) {
         const msg = api.getActivityString(details)
         
         // for dev
-        // bastion.send("430517752546197509", msg)
+        // bastion.send("531745959449853997", msg)
         bastion.send(bastion.channels.strava, msg)
     })
 

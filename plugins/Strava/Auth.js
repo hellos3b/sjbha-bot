@@ -1,10 +1,11 @@
+// import StravaLevels from "./StravaLevels"
+import "./schema"
+
 import Axios from 'axios'
 import { Router } from 'express'
 import chalk from "chalk"
-// import StravaLevels from "./StravaLevels"
-import "./schema"
-import utils from './utils'
 import url from '../../utils/url'
+import utils from './utils'
 
 // For authenticating
 const urls = {
@@ -96,33 +97,40 @@ export const AuthRouter = bastion => {
 }
 
 export const getAccessToken = async (stravaUser) => {
-    console.log(chalk.blue("[Strava]"), chalk.gray(`Checking Access Token for ${stravaUser.user}`))
+    console.log(chalk.blue("[Strava]"), chalk.gray(`[${stravaUser.user}] Getting Access Token`))
     const diff = stravaUser.tokenExpires.getTime() - new Date().getTime()
 
     const THIRTY_MINUTES = 30 * 60 * 1000
     if (diff > THIRTY_MINUTES) {
-        console.log(chalk.blue("[Strava]"), chalk.gray(`Access token is fine!`))
+        console.log(chalk.blue("[Strava]"), chalk.gray(`[${stravaUser.user}] Access token still good`))
         return stravaUser.accessToken
     }
 
+    console.log(chalk.blue("[Strava]"), chalk.gray(`[${stravaUser.user}] Refreshing access token`))
     let client_id = process.env.STRAVA_CLIENT_ID;
     let client_secret = process.env.STRAVA_CLIENT_SECRET;
 
-    const res = await Axios.post(urls.token, { 
-        client_id, 
-        client_secret, 
-        grant_type: 'refresh_token',
-        refresh_token: stravaUser.refreshToken 
-    })
+    try {
+        const res = await Axios.post(urls.token, { 
+            client_id, 
+            client_secret, 
+            grant_type: 'refresh_token',
+            refresh_token: stravaUser.refreshToken 
+        })
 
-    const expiresAt = new Date().getTime() + (res.data.expires_in * 1000)
+        const expiresAt = new Date().getTime() + (res.data.expires_in * 1000)
 
-    console.log(chalk.blue("[Strava]"), chalk.gray(`Updated access token for athlete id ${stravaUser.user}`))
+        console.log(chalk.blue("[Strava]"), chalk.gray(`[${stravaUser.user}]  Updated access token`))
 
-    await q.update({ userID: stravaUser.userID }, { 
-        accessToken: res.data.access_token,
-        tokenExpires: expiresAt
-    })
+        await q.update({ userID: stravaUser.userID }, { 
+            accessToken: res.data.access_token,
+            tokenExpires: expiresAt
+        })
 
-    return res.data.access_token
+        return res.data.access_token
+    } catch(e) {
+        console.log(e.response.data)
+        console.log(chalk.blue("[Strava]"), chalk.red(`[${stravaUser.user}] Failed to get access token`))
+        return null;
+    }
 }
