@@ -3,18 +3,19 @@
  * 
  */
 
-import deepmerge from 'deepmerge'
 import './Schema'
-import Event from './Event'
-import baseConfig from './event.config'
-import utils from './utils'
+
 import Archive from './archive'
+import Event from './Event'
+import adminRouter from './ui/router-admin'
+import baseConfig from './event.config'
 import compact from './compact'
+import createRouter from './ui/router-help'
+import deepmerge from 'deepmerge'
+import express from 'express'
 import path from 'path'
 import router from './ui/router'
-import createRouter from './ui/router-help'
-import adminRouter from './ui/router-admin'
-import express from 'express'
+import utils from './utils'
 
 export default function(bastion, opt={}) {
     const config = deepmerge(baseConfig, opt)
@@ -45,10 +46,10 @@ export default function(bastion, opt={}) {
         await compact.update(bastion, config, events.map( e => new Event(e, config)))        
     }
 
-    bastion.on('schedule-hourly', async function() {
-        log("Updating compact events on schedule")
-        updateCompact()
-    })
+    // bastion.on('schedule-hourly', async function() {
+    //     log("Updating compact events on schedule")
+    //     updateCompact()
+    // })
 
     // Set up calendar UI
     bastion.app.use('/public', express.static(path.join(__dirname, 'ui', 'public')))
