@@ -28,8 +28,8 @@ import Trading from '../plugins/Trading'
 import Upvotes from '../plugins/Upvotes'
 import UrbanDictionary from '../plugins/UrbanDictionary'
 import Yelling from '../plugins/yelling'
-import db from '../plugins/db'
 import covid19 from '../plugins/covid19'
+import db from '../plugins/db'
 
 const subscriptions = {
     "photomeet": "486330820114513920",
@@ -111,7 +111,7 @@ export default bastion => ([
     AskDiscussion,
     Yelling,
     LaserTag,
-    Modelo
+    Modelo,
     // Fools(bastion, {
     //     listRestrict: ["shitpost", "430517752546197509"]
     // })
