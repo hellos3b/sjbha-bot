@@ -29,13 +29,18 @@ export default function(bastion, opt={}) {
 /* 				const jsonObj = require("./timeseries.json"); */
 
 				const url = "https://pomber.github.io/covid19/timeseries.json"
-				const jsonObj = await Axios.get(url).then(r => r.data)
-
-				
+				const jsonObj = await Axios.get(url).then(r => r.data)	
 				const jsonObjUS = jsonObj['US'];
+
 				const latest = jsonObjUS[jsonObjUS.length-1];
+				const yest = jsonObjUS[jsonObjUS.length-2];
 				
-                return "Currently in the US there are **"+latest.confirmed+"** cases of COVID19, with **"+latest.deaths+"** deaths, and **"+latest.recovered+"** recoveries as of **"+latest.date+"**."
+				const cdiff = latest.confirmed - yest.confirmed
+				const ddiff = latest.deaths - yest.deaths
+				const rdiff = latest.recovered - yest.recovered
+				
+				
+                return "Currently in the US there are **"+latest.confirmed+"** *"+"(+"+cdiff+")*"+" cases of COVID19, with **"+latest.deaths+"** *(+"+ddiff+")*"+" deaths, and **"+latest.recovered+"** *(+"+rdiff+")*"+" recoveries as of **"+latest.date+"**."
 
         }
 		}
