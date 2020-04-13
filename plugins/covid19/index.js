@@ -24,17 +24,23 @@ export default function(bastion, opt={}) {
 			
             // Core of the command
             resolve: async function(context, country, name) {
-					
+				
 				function isEmpty(str) {
 					return (!str || 0 === str.length);
+				}
+				
+				function capitalize_Words(str)
+				{
+				 return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
 				}
 				
 				const url = "https://pomber.github.io/covid19/timeseries.json"
 				const jsonObj = await Axios.get(url).then(r => r.data)	
 
-				const lower = country;
-				const upper = lower.charAt(0).toUpperCase() + lower.substring(1);
-
+				const countries = context.message.split(" ")
+				const countJ = countries.slice(1).join(' ')	
+				const upper = capitalize_Words(countJ);
+				
 				if (isEmpty(country)) {
 					
 					const jsonObjUS = jsonObj['US'];
