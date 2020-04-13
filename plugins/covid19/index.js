@@ -7,6 +7,7 @@ import deepmerge from 'deepmerge';
 import Axios from "axios";
 
 
+
 const baseConfig = {
     command: "covid19"
 }
@@ -14,35 +15,56 @@ const baseConfig = {
 export default function(bastion, opt={}) {
     const config = deepmerge(baseConfig, opt)
     const cmd = bastion.command(config.command)
-
-	
-
 	
     return [
-
         {
             // Command to start it
             command: config.command, 
-
+            options: bastion.parsers.args(["country"]),
+			
             // Core of the command
-            resolve: async function(context, name) {
-/* 				const jsonObj = require("./timeseries.json"); */
-
+            resolve: async function(context, country, name) {
+					
+				function isEmpty(str) {
+					return (!str || 0 === str.length);
+				}
+				
 				const url = "https://pomber.github.io/covid19/timeseries.json"
 				const jsonObj = await Axios.get(url).then(r => r.data)	
-				const jsonObjUS = jsonObj['US'];
 
-				const latest = jsonObjUS[jsonObjUS.length-1];
-				const yest = jsonObjUS[jsonObjUS.length-2];
-				
-				const cdiff = latest.confirmed - yest.confirmed
-				const ddiff = latest.deaths - yest.deaths
-				const rdiff = latest.recovered - yest.recovered
-				
-				
-                return "Currently in the US there are **"+latest.confirmed+"** *"+"(+"+cdiff+")*"+" cases of COVID19, with **"+latest.deaths+"** *(+"+ddiff+")*"+" deaths, and **"+latest.recovered+"** *(+"+rdiff+")*"+" recoveries as of **"+latest.date+"**."
+				const lower = country;
+				const upper = lower.charAt(0).toUpperCase() + lower.substring(1);
 
-        }
+				if (isEmpty(country)) {
+					
+					const jsonObjUS = jsonObj['US'];
+					
+					const latest = jsonObjUS[jsonObjUS.length-1];
+					const yest = jsonObjUS[jsonObjUS.length-2];
+					
+					const cdiff = latest.confirmed - yest.confirmed
+					const ddiff = latest.deaths - yest.deaths
+					const rdiff = latest.recovered - yest.recovered
+					
+					return "Currently in the US there are **"+latest.confirmed+"** *"+"(+"+cdiff+")*"+" cases of COVID19, with **"+latest.deaths+"** *(+"+ddiff+")*"+" deaths, and **"+latest.recovered+"** *(+"+rdiff+")*"+" recoveries as of **"+latest.date+"**."
+				
+				} else if (jsonObj.hasOwnProperty(upper)) {
+
+					const uCount = jsonObj[upper];
+					
+					const latest = uCount[uCount.length-1];
+					const yest = uCount[uCount.length-2];
+					
+					const cdiff = latest.confirmed - yest.confirmed
+					const ddiff = latest.deaths - yest.deaths
+					const rdiff = latest.recovered - yest.recovered
+
+					return ( "Currently in "+upper+" there are **"+latest.confirmed+"** *"+"(+"+cdiff+")*"+" cases of COVID19, with **"+latest.deaths+"** *(+"+ddiff+")*"+" deaths, and **"+latest.recovered+"** *(+"+rdiff+")*"+" recoveries as of **"+latest.date+"**." )	
+					
+				} else {
+					return "Country data not found in JHU database."
+				}
+			}
 		}
     ]
 }
