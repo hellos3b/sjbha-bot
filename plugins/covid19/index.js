@@ -6,22 +6,19 @@
 import Axios from "axios";
 import deepmerge from "deepmerge";
 
-function capitalizeWords(str) {
-  return str.replace(/\w\S*/g, function (txt) {
-    return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
-  });
-}
-
 async function getCountryStats(country) {
-  const {data} = await Axios.get('https://pomber.github.io/covid19/timeseries.json')
-  const countryData = data[country]
+  const json = await Axios.get('https://pomber.github.io/covid19/timeseries.json')
+  const search = Object.keys(json.data)
+    .find(i => i.toLowerCase() === country.toLowerCase())
 
-  if (!countryData) return null;
+  if (!search) return null;
+
+  const data = json.data[search]
 
   return {
-    full: countryData,
-    today: countryData[countryData.length - 1],
-    yesterday: countryData[countryData.length - 2]
+    full: data,
+    today: data[data.length - 1],
+    yesterday: data[data.length - 2]
   }
 }
 
@@ -41,7 +38,7 @@ export default function (bastion, opt = {}) {
       // Core of the command
       resolve: async function (context, country) {
         // Fetch data
-        const countryString = capitalizeWords(country) || 'US'
+        const countryString = country || 'US'
         const data = await getCountryStats(countryString)
 
         // If no data return
