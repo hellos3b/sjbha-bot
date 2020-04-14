@@ -36,7 +36,10 @@ export default function (bastion, opt = {}) {
       options: bastion.parsers.args(["country"]),
 
       // Core of the command
-      resolve: async function (context, country) {
+      resolve: async function (context) {
+        const [, ...args] = context.message.split(" ")
+        const country = args.join(" ")
+        
         // Fetch data
         const countryString = country || 'US'
         const data = await getCountryStats(countryString)
@@ -45,14 +48,16 @@ export default function (bastion, opt = {}) {
         if (!data) return `Country '${countryString}' data not found in JHU database.`;
 
         // get diffs
-        const cdiff = data.today.confirmed - data.yesterday.confirmed;
-        const ddiff = data.today.deaths - data.yesterday.deaths;
-        const rdiff = data.today.recovered - data.yesterday.recovered;
+        const diffs = {
+          confirmed: data.today.confirmed - data.yesterday.confirmed,
+          deaths: data.today.deaths - data.yesterday.deaths,
+          recovered: data.today.recovered - data.yesterday.recovered
+        }
 
         return (
-          `Currently in ${countryString} there are **${data.today.confirmed}** *(+${cdiff})* cases of COVID19, ` +
-          `with **${data.today.deaths}** *(+${ddiff})* deaths, ` +
-          `and **${data.today.recovered}** *(+${rdiff})* recoveries as of ${data.today.date}`
+          `Currently in ${countryString} there are **${data.today.confirmed}** *(+${diffs.confirmed})* cases of COVID19, ` +
+          `with **${data.today.deaths}** *(+${diffs.deaths})* deaths, ` +
+          `and **${data.today.recovered}** *(+${diffs.recovered})* recoveries as of **${data.today.date}**`
         );
       },
     },
