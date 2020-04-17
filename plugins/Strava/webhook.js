@@ -2,7 +2,7 @@ import { Router } from 'express'
 import { EventEmitter } from 'events'
 import chalk from 'chalk'
 
-export default class extends EventEmitter {
+class StravaWebhook extends EventEmitter {
 
     constructor() {
         super()
@@ -20,6 +20,7 @@ export default class extends EventEmitter {
         // Posted when a webhook is fired
         router.post('/webhook', (req, res) => {
             console.log(chalk.blue("[Strava]"), chalk.gray(`Webhook POST request`))
+            console.log(req.body)
             const body = req.body
             if (body.aspect_type === "create") { //&& body.object_type === "activity") {
                 this.emit("activity", {
@@ -33,3 +34,6 @@ export default class extends EventEmitter {
         return router
     }
 }
+
+
+export default new StravaWebhook()

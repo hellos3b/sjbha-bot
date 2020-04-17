@@ -36,7 +36,7 @@ export default function(bastion, opt={}) {
     const auth = AuthRouter(bastion)
     const api = Api(bastion)
 
-    const webhook = new Webhook()
+    const webhook = Webhook
 
     bastion.app.use('/strava', router(bastion))
     bastion.app.use(config.apiUrl, auth.router())
