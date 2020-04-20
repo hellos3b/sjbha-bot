@@ -16,6 +16,7 @@ class StravaWebhook extends EventEmitter {
             const challenge = req.query["hub.challenge"]
             res.send({"hub.challenge": challenge})
         })
+        
 
         // Posted when a webhook is fired
         router.post('/webhook', (req, res) => {
