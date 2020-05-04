@@ -32,16 +32,15 @@ import covid19 from '../plugins/covid19'
 import db from '../plugins/db'
 
 const subscriptions = {
-    "photomeet": "486330820114513920",
-    "carmeet": "486331665870749707",
     "drinks": "486331712645758996",
-    // "boombot": "486331751963164692",
     "overwatch": "488848900900388884",
     "dota": "488848948598145026",
     "food": "488849102243889152",
     "trivia": "519355421652156419",
     "apex": "558064314301546496",
-    "discgolf": "597852704227721216"
+    "discgolf": "597852704227721216",
+    "jackbox": "706723822228733972",
+    "league": "706723711373279262"
 }
 
 export default bastion => ([ 
