@@ -5,6 +5,16 @@ export default [
         roleId: "417872591471247360"
     },
     {
+        name: "Midtown",
+        keywords: ["midtown"],
+        roleId: "707009704416641024"
+    },
+    {
+        name: "Milpitas",
+        keywords: ["milpitas"],
+        roleId: "506372920478793736"
+    },
+    {
         name: "Downtown",
         keywords: ["dtsj", "dt", "downtown", "down town"],
         roleId: "418300739966992384"
@@ -21,7 +31,7 @@ export default [
     },
     {
         name: "East San Jose",
-        keywords: ["esj", "east san jose"],
+        keywords: ["esj", "east san jose", "essj", "east side"],
         roleId: "417872961413054484"
     },
     {
@@ -86,7 +96,7 @@ export default [
     },
     {
         name: "San Francisco",
-        keywords: ["san francisco", " sf"],
+        keywords: ["san francisco", "sf"],
         roleId: "417872508335685646"
     },
     {
