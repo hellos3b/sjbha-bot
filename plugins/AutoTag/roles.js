@@ -16,7 +16,7 @@ export default [
     },
     {
         name: "Downtown",
-        keywords: ["dtsj", "dt", "downtown", "down town"],
+        keywords: ["dtsj", "downtown", "down town"],
         roleId: "418300739966992384"
     },
     {
