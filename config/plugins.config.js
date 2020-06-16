@@ -13,6 +13,7 @@ import Modelo from '../plugins/Modelo'
 import Music from '../plugins/Music'
 import Olympics from '../plugins/Olympics'
 import Outbreak from '../plugins/Outbreak'
+import Dice from '../plugins/Dice'
 // plugins
 import Ping from '../plugins/echos/Ping'
 import Poll from '../plugins/Poll'
@@ -114,5 +115,6 @@ export default bastion => ([
     // Fools(bastion, {
     //     listRestrict: ["shitpost", "430517752546197509"]
     // })
-	covid19
+    covid19,
+    Dice
 ])
