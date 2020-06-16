@@ -23,14 +23,16 @@ function resolveDice(msg) {
     const numStr = msg.replace("d", "");
     const len = parseInt(numStr);
 
-    if (isNaN(len)) return null;
+    if (len > 2000) return "Max dice side is 2000";
+
+    if (isNaN(len)) return "Not a valid number. Usage: `!roll d6`, `!roll d20`, etc";
 
     return Array(len)
       .fill(null)
       .map( (n, i) => i+1)
   }
 
-  return null;
+  return "No point in rolling a dice with only one side";
 }
 
 export default function (bastion, config = {}) {
@@ -43,8 +45,8 @@ export default function (bastion, config = {}) {
       resolve(context, message) {
         const dice = resolveDice(message);
 
-        if (!dice) {
-          return `Couldn't resolve the dice, use !dice help if you have no idea what you're doing`
+        if (typeof dice === 'string') {
+          return `Couldn't roll dice: ${dice}`
         }
 
         const rng = Math.floor(Math.random()*dice.length);
