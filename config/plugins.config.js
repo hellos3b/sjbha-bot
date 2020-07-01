@@ -33,15 +33,8 @@ import covid19 from '../plugins/covid19'
 import db from '../plugins/db'
 
 const subscriptions = {
-    "drinks": "486331712645758996",
-    "overwatch": "488848900900388884",
-    "dota": "488848948598145026",
-    "food": "488849102243889152",
-    "trivia": "519355421652156419",
-    "apex": "558064314301546496",
-    "discgolf": "597852704227721216",
-    "jackbox": "706723822228733972",
-    "league": "706723711373279262"
+//    "jackbox": "706723822228733972",
+//    "league": "706723711373279262"
 }
 
 export default bastion => ([ 
@@ -56,9 +49,10 @@ export default bastion => ([
         listRestrict: ["shitpost", "admin"]
     }),
     Ban,
-    Stats(bastion, {
-        restrict: ["430517752546197509"]
-    }),
+//  Sports Stuff  
+//    Stats(bastion, {
+//        restrict: ["430517752546197509"]
+//    }),
     Teams(bastion, {
         listRestrict: ["shitpost", "admin"]
     }),
@@ -66,9 +60,9 @@ export default bastion => ([
         restrict: ["stocks"]
     }),
     Subscribe(bastion, { subscriptions }),
-    Strava(bastion, {
-        restrict: ["strava", "430517752546197509"]
-    }),
+//    Strava(bastion, {
+//        restrict: ["strava", "430517752546197509"]
+//    }),
     Events(bastion, {
         command: "meetup",
         announcementChannel: bastion.channels.announcement,

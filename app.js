@@ -8,11 +8,11 @@ import Boombot from './plugins/Boombot'
 
 const channels = {
     "admin": process.env.C_ADMIN,
-    "shitpost": "506911331257942027",
-    "strava": "450913008323919872",
-    "boombot": "432766496700235776",
-    "stocks": "363123179696422916",
-    "dungeon": "497505757865050112",
+    "shitpost": "639612405864726531",
+//    "strava": "450913008323919872",
+//    "boombot": "432766496700235776",
+//    "stocks": "363123179696422916",
+//    "dungeon": "497505757865050112",
     "announcement": process.env.C_ANNOUNCEMENT,
     "compact": process.env.C_COMPACT
 }
