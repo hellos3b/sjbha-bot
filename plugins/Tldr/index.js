@@ -49,7 +49,7 @@ export default function(bastion, opt={}) {
         {
             action: `${config.command}:show`,
             restrict: config.listRestrict,
-            restrictMessage: `You can only get the TLDR in <#506911331257942027>`, 
+            restrictMessage: `You can only get the TLDR in <#639612405864726531>`, 
 
             resolve: async function(context, message) {
                 const tldrs = await this.getRecent()
@@ -68,10 +68,10 @@ export default function(bastion, opt={}) {
 
                 formatTLDRs(tldrs) {
                     return tldrs.map( td => {
-                        let m = new moment(td.timestamp).tz("America/Los_Angeles");
+                        let m = new moment(td.timestamp).tz("America/Chicago");
                         let date = m.format('ddd M/D h:mma');
-                        let today = moment().tz("America/Los_Angeles")
-                        let yesterday = moment().tz("America/Los_Angeles").subtract(1, 'day')
+                        let today = moment().tz("America/Chicago")
+                        let yesterday = moment().tz("America/Chicago").subtract(1, 'day')
                         const time = m.format('h:mma')
                         let fromNow = m.fromNow()
 
