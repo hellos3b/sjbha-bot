@@ -57,7 +57,7 @@ export default {
 
     weekStart(offset) {
         if (typeof offset === 'number') {
-            return new moment().tz("America/Los_Angeles")
+            return new moment().tz("America/Chicago")
                 .add(offset, 'days')
                 .startOf("week")
         } else {
@@ -74,7 +74,7 @@ export default {
     },
 
     isToday(d) {
-        const today = new moment().tz("America/Los_Angeles")
+        const today = new moment().tz("America/Chicago")
         return this.isSameDayAndMonth(d, today)
     },
 
