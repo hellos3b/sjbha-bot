@@ -13,7 +13,7 @@ const Group = function(msg_id, title, date, isWeek) {
     }
 
     this.getTitle = function() {
-        let start = new moment(date).tz("America/Los_Angeles").format(dateFormat)
+        let start = new moment(date).tz("America/Chicago").format(dateFormat)
 
         if (!isWeek) {
             // If not week, just show the date the group points to
@@ -23,7 +23,7 @@ const Group = function(msg_id, title, date, isWeek) {
             // If date is before /today/, make the date today + 1
             if (date < new Date()) {
                 start = new moment(date)
-                    .tz("America/Los_Angeles")
+                    .tz("America/Chicago")
                     .add(1, 'days')
                     .format(dateFormat)
             }
@@ -39,11 +39,11 @@ const Group = function(msg_id, title, date, isWeek) {
     }
 
     this.getEventField = function(event) {
-        const url = `https://discordapp.com/channels/358442034790400000/430878436027006978/${event.info_id()}`;
+        const url = `https://discordapp.com/channels/639610822473154620/639612611385884682/${event.info_id()}`;
         const title = event.info_str();
 
         const fromNow = event.date_moment().fromNow();
-        const date = event.date_moment().tz("America/Los_Angeles").format("ddd, MMMM D @ h:mma");
+        const date = event.date_moment().tz("America/Chicago").format("ddd, MMMM D @ h:mma");
 
         console.log(`   - ${title}`)
         return {
