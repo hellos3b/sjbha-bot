@@ -42,6 +42,7 @@ export default function(bastion, opt={}) {
 
                 if (symbol.startsWith('/')) {
                     symbol = symbol.substr(1)
+
                     options = {
                         url: `https://elite.finviz.com/fut_chart.ashx?t=${symbol}&p=m5&f=1`, 
                         dest: `${__dirname}/chart.png`
@@ -51,7 +52,10 @@ export default function(bastion, opt={}) {
                 bastion.bot.simulateTyping(context.channelID)
 
                 try {
-                    await download.image(options)
+                    const file = await download.image(options)
+                    
+                    if (file.image.length === 0) return `Could not find "${symbol}"`
+
                     bastion.bot.uploadFile({
                         to: context.channelID,
                         file: options.dest
