@@ -34,12 +34,13 @@ const getParsedDate = (dateString) => {
     console.log("parsed date?", offset)
     parsed_date.assign('timezoneOffset', offset)
 
-    return parsed_date
+    return parsed_date.date()
 }
 
 export default function({ 
     id = GUID(), 
     date, 
+    timestamp = null,
     info, 
     options={},
     userID, 
@@ -49,11 +50,10 @@ export default function({
     info_id = null,
     rsvp_id = null
 }, config) {
-    // Parse the incoming date string to an ISO string
-    let parsed_date = getParsedDate(date)
+    const d = timestamp ? new Date(timestamp) : getParsedDate(date)
 
     // Create a moment instance
-    let date_moment = new moment(parsed_date.date())
+    let date_moment = new moment(d)
     // String for display in meetups/discord
     let date_str = date_moment.clone().tz("America/Los_Angeles").format("dddd M/D @ h:mma")
     // Formatted but just the date
@@ -68,8 +68,9 @@ export default function({
     let reactions = { yes: [], maybe: [] }
 
     this.parseDate = function() {
-        let parsed_date = getParsedDate(date)
-        date_moment = new moment(parsed_date.date())
+        const d = timestamp ? new Date(timestamp) : getParsedDate(date)
+
+        date_moment = new moment(d)
 
         date_str = date_moment.clone().tz("America/Los_Angeles").format("dddd M/D @ h:mma")
         date_date = date_moment.clone().tz("America/Los_Angeles").format("dddd M/D")
