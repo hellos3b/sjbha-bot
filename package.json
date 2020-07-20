@@ -23,7 +23,7 @@
         "dotenv": "^5.0.1",
         "express": "^4.16.3",
         "image-downloader": "^3.4.1",
-        "lodash": "^4.17.13",
+        "lodash": "^4.17.19",
         "moment": "^2.22.0",
         "moment-timezone": "^0.5.26",
         "mongoose": "^5.7.5",
