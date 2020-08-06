@@ -119,6 +119,8 @@ export default bastion => ([
     //     listRestrict: ["shitpost", "430517752546197509"]
     // })
     covid19,
-    Minecraft,
+    Minecraft(bastion, {
+        restrict: ["358916551744946177"]
+    }),
     Dice
 ])

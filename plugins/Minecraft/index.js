@@ -1,12 +1,18 @@
-const fetch = require('node-fetch');
+import deepmerge from 'deepmerge'
+import fetch from 'node-fetch'
+
+const baseConfig = {
+    command: "chart",
+    restrict: null
+}
 
 export default function (bastion, opt = {}) {
-    // const cmd = bastion.command("minecraft")
-    // const help = `${cmd} (description)`
+    const config = deepmerge(baseConfig, opt)
+
     return [{
             command: "mc_info",
             helpOnEmpty: false,
-            // restrict: [bastion.channels.gaming],
+            restrict: config.restrict,
             restrictMessage: "",
             options: "",
             validate(context, msg) {
