@@ -42,7 +42,8 @@ const subscriptions = {
     "apex": "558064314301546496",
     "discgolf": "597852704227721216",
     "jackbox": "706723822228733972",
-    "league": "706723711373279262"
+    "league": "706723711373279262",
+    "minecraft": "742590212554752022"
 }
 
 export default bastion => ([
