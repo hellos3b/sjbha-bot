@@ -13,8 +13,6 @@ export default function (bastion, opt = {}) {
             command: "mc_info",
             helpOnEmpty: false,
             restrict: config.restrict,
-            restrictMessage: "",
-            options: "",
             validate(context, msg) {
                 if (msg.includes(" ")) return 'Please just do the command'
             },
@@ -68,9 +66,7 @@ export default function (bastion, opt = {}) {
         {
             command: "mc_players",
             helpOnEmpty: false,
-            // restrict: [bastion.channels.gaming],
-            restrictMessage: "",
-            options: "",
+            restrict: [config.restrict],
 
             async resolve(context, msg) {
 

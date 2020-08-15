@@ -121,7 +121,7 @@ export default bastion => ([
     // })
     covid19,
     Minecraft(bastion, {
-        restrict: ["358916551744946177"]
+        restrict: ["743731120021045328"]
     }),
     Dice
 ])
