@@ -34,6 +34,14 @@ export default function(bastion, opt={}) {
                 return `No definitions for **${word}**`
               }
 
+              //test for existing values, if none, replace to avoid error
+              if(first.definition == ''){
+                first.definition = 'No definitions'
+              }
+              if(first.example == ''){
+                first.example = 'No examples'
+              }
+
               const embed = {
                 "color": 16201999,
                 "author": {
@@ -43,11 +51,11 @@ export default function(bastion, opt={}) {
                 "fields": [
                   {
                     "name": "Definition",
-                    "value": replaceBrackets(first.definition)
+                    "value": replaceBrackets(first.definition.substring(0,950)) //sliced to avoid character limit
                   },
                   {
                     "name": "Examples",
-                    "value": replaceBrackets(first.example)
+                    "value": replaceBrackets(first.example.substring(0,950)) //sliced to avoid character limit
                   }
                 ]
               }
