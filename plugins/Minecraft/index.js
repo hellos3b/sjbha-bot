@@ -108,8 +108,6 @@ export default function (bastion, opt = {}) {
                             serverStatus = "Offline"
                         }
                         if (jsonResponse.players.online > 0) {
-                            console.log("there are players!")  ///this is debug code ////
-                            console.log(jsonResponse.players.online)  ///this is debug code ////
 
                             var index;
                             var playersList = 'Total: ' + jsonResponse.players.online + '\n'
