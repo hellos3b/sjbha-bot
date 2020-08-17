@@ -23,7 +23,7 @@ export default function(bastion, config={}) {
 
         {
             command: "swirls",
-            resolve: "<:swirls:430968917540995072><:swirls:430968917540995072><:swirls:430968917540995072><:swirls:430968917540995072>\:laughing:\:rofl:  DID SOMEBODY SAY SWIRLS?! \:rofl:\:laughing:<:swirls:430968917540995072><:swirls:430968917540995072><:swirls:430968917540995072><:swirls:430968917540995072>"
+            resolve: "<:swirls:443185468348170240><:swirls:443185468348170240><:swirls:443185468348170240><:swirls:443185468348170240>\:laughing:\:rofl:  DID SOMEBODY SAY SWIRLS?! \:rofl:\:laughing:<:swirls:443185468348170240><:swirls:443185468348170240><:swirls:443185468348170240><:swirls:443185468348170240>"
         },
 
         {
@@ -38,7 +38,7 @@ export default function(bastion, config={}) {
 
         {
             command: "boba",
-            resolve: "\:black_circle: \:honey_pot: \:drops_milk:  \:black_circle: \:black_circle: BOBA TIME \:black_circle: \:black_circle: \:drops_milk: \:honey_pot: \:black_circle:"
+            resolve: "\:cup_with_straw:<:blobparty:443185468348170240>\:regional_indicator_b:\:regional_indicator_o:\:regional_indicator_b:\:regional_indicator_a:\:alarm_clock:\:regional_indicator_t:\:regional_indicator_i:\:regional_indicator_m:\:regional_indicator_e:<:blobgoodmorning:443185468348170240>\:confetti_ball:"
         },
 
         {
