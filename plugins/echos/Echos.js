@@ -37,6 +37,11 @@ export default function(bastion, config={}) {
         },
 
         {
+            command: "boba",
+            resolve: "\:black_circle: \:honey_pot: \:drops_milk:  \:black_circle: \:black_circle: BOBA TIME \:black_circle: \:black_circle: \:drops_milk: \:honey_pot: \:black_circle:"
+        },
+
+        {
             command: "help",
             resolve: "Commands been changed to `!meetup` or `!meetup help`"
         },
