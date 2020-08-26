@@ -11,6 +11,7 @@
     "admin": "NODE_ENV=admin node -r babel-core/register app.js"
   },
   "dependencies": {
+    "@shootismoke/convert": "^0.2.28",
     "ascii-table": "0.0.9",
     "axios": "^0.18.1",
     "babel-preset-node6": "^11.0.0",
