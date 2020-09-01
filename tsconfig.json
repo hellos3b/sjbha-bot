@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "declaration": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "target": "ES2019",
+    "outDir": "dist",
+    "baseUrl": ".",
+    "paths": {
+      "@sjbha/*": ["packages/*"]
+    }
+  },
+  "include": [
+    "@app/**/*"
+  ]
+}
