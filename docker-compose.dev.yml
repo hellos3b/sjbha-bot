@@ -1,0 +1,22 @@
+version: '2.0'
+services:
+  app:
+    image: node:12-alpine
+    working_dir: /app
+    volumes:
+      - .:/app
+
+    tty: true
+    environment:
+      NODE_ENV: "development"
+      DEBUG: "@services*,@app:*,@plugin:*,express*"
+      HOSTNAME: "http://localhost:5000"
+      VIRTUAL_PORT: 5000
+
+    ports:
+      - "5000:5000"
+
+    env_file:
+      - .env
+
+    command: npm run build:watch

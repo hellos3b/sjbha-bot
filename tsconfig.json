@@ -1,19 +1,27 @@
 {
   "compilerOptions": {
     "strict": true,
-    "declaration": true,
     "module": "commonjs",
     "moduleResolution": "node",
     "resolveJsonModule": true,
+    "esModuleInterop": true,
     "skipLibCheck": true,
     "target": "ES2019",
-    "outDir": "dist",
+    "outDir": "build",
     "baseUrl": ".",
     "paths": {
-      "@sjbha/*": ["packages/*"]
+      "@app/*": ["@app/*"],
+      "@services/*": ["@services/*"],
+      "@plugins/*": ["@plugins/*"]
     }
   },
   "include": [
-    "@app/**/*"
+    "@app/**/*",
+    "@plugins/**/*",
+    "@services/**/*", "frontend"
+  ],
+  "exclude": [
+    "**/*.tsx",
+    "**/*.test.ts"
   ]
 }
