@@ -1,4 +1,5 @@
 import {Options, useSettingsStore} from './store';
+import * as urls from "../urls";
 
 const submit = (hr: number) => {
   const token = localStorage.getItem("auth-token");
@@ -6,7 +7,7 @@ const submit = (hr: number) => {
 
   const payload = {discordId, hr};
 
-  return fetch('update-hr', {
+  return fetch(urls.UPDATE_HR, {
     method: "POST",
     headers: {
       "Authorization": token,

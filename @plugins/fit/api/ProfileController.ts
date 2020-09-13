@@ -1,7 +1,7 @@
 import bastion from "@services/bastion";
 import * as express from "express";
 import Debug from "debug";
-import {post_to_channel} from "../../config";
+import {post_to_channel} from "../config";
 import {NotConnected} from "../errors";
 
 import {createActivityEmbed} from "../bot/embeds/ActivityEmbed";

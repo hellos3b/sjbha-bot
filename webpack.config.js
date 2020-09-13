@@ -3,27 +3,19 @@ const HTMLPlugin = require("html-webpack-plugin");
 
 const __www = path.resolve(__dirname, "webpack")
 
-// Load the config, and create a hashmap of all the entry files 
-const frontends = require("./@app/webpack-bundle");
-const entry = {};
-frontends.forEach(module => {
-  entry[module.name] = module.entry;
-});
-
 // Webpack config
 module.exports = {
-  entry,
-  devtool: "cheap-source-map",
+  entry: path.resolve(__dirname, '@frontend/router.ts'),
+  devtool: "inline-source-map",
   
   output: {
-    path: path.resolve(__dirname, 'build/public'),
-    filename: '[id].js'
+    path: path.resolve(__dirname, 'public'),
+    publicPath: "/",
+    filename: '[name].js'
   },
 
   plugins: [
-    new HTMLPlugin({
-      template: path.resolve(__www, "index.html")
-    })
+    new HTMLPlugin()
   ],
 
   module: {

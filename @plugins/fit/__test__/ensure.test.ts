@@ -1,4 +1,4 @@
-import {weekly_post_time} from "../../config";
+import {weekly_post_time} from "../config";
 
 describe("Ensure", () => {
   // This ensures these properties are set to the expected time

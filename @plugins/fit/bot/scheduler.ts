@@ -1,6 +1,6 @@
 import schedule from "node-schedule";
 import {debug, weekly_post_time} from "@plugins/fit/config";
-import {postWeeklyProgress} from "./bot/controller";
+import {postWeeklyProgress} from "./controller";
 
 export default function scheduler() {
   // Now lets build the schedule rule dynamically, using the luxon date

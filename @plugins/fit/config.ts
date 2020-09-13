@@ -3,12 +3,13 @@ import Debug from "debug";
 import * as env from "@app/env";
 import channels from "@app/channels";
 import roles from "@app/roles";
+import {ActivityType} from "./domain/strava/Activity";
 
-import {ActivityType} from "./src/domain/strava/Activity";
 
 export const debug = Debug("@plugins:fit");
 
-export const basePath = env.HOSTNAME + "/fit";
+export const route = "/fit";
+export const basePath = env.HOSTNAME + route;
 export const client_id = env.required("STRAVA_CLIENT_ID");
 export const client_secret = env.required("STRAVA_CLIENT_SECRET");
 

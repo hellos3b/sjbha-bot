@@ -18,7 +18,7 @@
   "include": [
     "@app/**/*",
     "@plugins/**/*",
-    "@services/**/*", "frontend"
+    "@services/**/*", "frontend", "@frontend/frontend"
   ],
   "exclude": [
     "**/*.tsx",

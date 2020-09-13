@@ -2,7 +2,7 @@ import "./help.css";
 
 import showdown from "showdown";
 //@ts-ignore don't feel like writing a type for one spot. it's text
-import README from "../../../../README.md";
+import README from "../../../@plugins/fit/README.md";
 
 const converter = new showdown.Converter({
   tables: true

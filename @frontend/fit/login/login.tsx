@@ -1,10 +1,11 @@
 import { useEffect } from "preact/hooks";
+import * as urls from "../urls";
 
 const checkLogin = async () => {
   const urlParams = new URLSearchParams(window.location.search);
   const token = urlParams.get('token');
 
-  const res = await fetch(`login`, {
+  const res = await fetch(urls.LOGIN_API, {
     method: "POST",
     body: JSON.stringify({token}),
     headers: { "Content-Type": "application/json" }
@@ -18,7 +19,7 @@ const checkLogin = async () => {
       localStorage.setItem("auth-token", json.token);
 
       if (json.isConnected) {
-        window.location.href = "./settings";
+        window.location.href = urls.SETTINGS;
       } else {
         window.location.href = json.authUrl;
       }
