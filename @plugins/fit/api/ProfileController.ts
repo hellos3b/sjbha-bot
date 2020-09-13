@@ -1,7 +1,6 @@
 import bastion from "@services/bastion";
 import * as express from "express";
-import Debug from "debug";
-import {post_to_channel} from "../config";
+import {debug, post_to_channel} from "../config";
 import {NotConnected} from "../errors";
 
 import {createActivityEmbed} from "../bot/embeds/ActivityEmbed";
@@ -10,8 +9,6 @@ import { getUserByStravaId, saveUser, getUser } from "../domain/user/UserReposit
 import { getActivityByStravaId } from "../domain/strava/ActivityRepository";
 import { insertWorkout } from "../domain/exp/WorkoutLogRepository";
 import Workout from "../domain/exp/WorkoutLog";
-
-const debug = Debug("c/fit:auth-web");
 
 // We extend request object for authorized requests
 interface AuthorizedRequest extends express.Request {
@@ -31,6 +28,10 @@ export async function postActivity(req: express.Request, res: express.Response) 
   const activityId = String(req.body["object_id"]);
   const eventType = <string>req.body["aspect_type"];
 
+  // We only care when an activity is created
+  if (eventType !== "create") return;
+
+  debug("Posting activity %o from %o", activityId, stravaId);
   try {
     const [user, activity] = await Promise.all([
       getUserByStravaId(stravaId),
@@ -88,9 +89,23 @@ export async function updateMaxHR(req: AuthorizedRequest, res: express.Response)
   }
 
   const user = await getUser(discordId);
-
   user.updateMaxHeatrate(maxHr);
   await saveUser(user);
 
-  res.send({success: true})
+  res.json({success: true})
+}
+
+/**
+ * Fetches the max heart rate for a user. Auth middleware is required
+ */
+export async function getMaxHR(req: AuthorizedRequest, res: express.Response) {
+  const discordId = req.discordId;
+
+  if (!discordId) {
+    res.status(401).json({message: `Missing discord ID`});
+    return;
+  }
+
+  const user = await getUser(discordId);
+  res.json({heartrate: user.serialize().maxHR})
 }

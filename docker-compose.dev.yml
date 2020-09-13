@@ -9,7 +9,7 @@ services:
     tty: true
     environment:
       NODE_ENV: "development"
-      DEBUG: "@services*,@app:*,@plugin:*,express*"
+      DEBUG: "@services*,@app:*,@plugins:*"
       HOSTNAME: "http://localhost:5000"
       VIRTUAL_PORT: 5000
 

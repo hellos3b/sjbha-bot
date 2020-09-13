@@ -2,7 +2,7 @@ import randomstring from "randomstring";
 import querystring from "querystring";
 import Debug from "debug";
 
-import {basePath, client_id, auth_scopes} from "@plugins/fit/config";
+import {basePath, client_id, auth_scopes, url_accept} from "@plugins/fit/config";
 import { UserSchema } from "../../db/UserCollection";
 
 const debug = Debug("c/fit:user-auth")
@@ -41,7 +41,7 @@ export default class Auth {
   get authUrl() {
     const authParams = querystring.stringify({
       client_id       : client_id, 
-      redirect_uri    : basePath + "/accept", 
+      redirect_uri    : basePath + url_accept,
       scope           : auth_scopes, 
       state           : this.id + "." + this.password,
       response_type   : 'code',

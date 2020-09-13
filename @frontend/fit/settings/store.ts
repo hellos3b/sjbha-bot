@@ -1,25 +1,24 @@
 import { useReducer } from 'preact/hooks';
 
-export const Options = {
-  AGE: "age",
-  MANUAL: "manual",
-  IGNORE: "ignore"
+export const States = {
+  EDIT: "edit",
+  LOADING: "loading",
+  SUCCESS: "success",
+  ERROR: "error"
 };
 
 export const initialState = {
-  state: "edit",
+  state: States.LOADING,
   error: "",
-  option: Options.AGE,
-  age: 30,
-  heartrate: 190
+  opt_out: false,
+  heartrate: 0
 }
 
 export type State = typeof initialState;
 
 export type Actions = |
-  {type: "SELECT_OPTION", option: string} |
-  {type: "OPT_OUT"} |
-  {type: "INPUT_AGE", age: number} |
+  {type: "ON_FETCH_SETTINGS", hr: number} |
+  {type: "TOGGLE_OPT_OUT", isChecked: boolean} |
   {type: "INPUT_HR", hr: number} |
   {type: "DISPLAY_ERROR", error: string} |
   {type: "REQUEST_START"} |
@@ -28,48 +27,40 @@ export type Actions = |
 export const useSettingsStore = () => useReducer<State, Actions>((state: State, action: Actions): State => {
     switch (action.type) {
 
-    case "SELECT_OPTION": return {
+    case "ON_FETCH_SETTINGS": return {
       ...state,
-      option: action.option,
-      state: "edit"
+      state: States.EDIT,
+      opt_out: action.hr === 0,
+      heartrate: action.hr
     };
   
-    case "OPT_OUT": return {
+    case "TOGGLE_OPT_OUT": return {
       ...state,
-      option: Options.IGNORE,
-      heartrate: 0,
-      state: "edit"
-    };
-  
-    case "INPUT_AGE": return {
-      ...state,
-      age: action.age,
-      heartrate: 220 - action.age,
-      error: "",
-      state: "edit"
+      opt_out: action.isChecked,
+      state: States.EDIT
     };
   
     case "INPUT_HR": return {
       ...state,
       heartrate: action.hr,
       error: "",
-      state: "edit"
+      state: States.EDIT
     };
   
     case "DISPLAY_ERROR": return {
       ...state,
       error: action.error,
-      state: "error"
+      state: States.ERROR
     };
 
     case "REQUEST_START": return {
       ...state,
-      state: "loading"
+      state: States.LOADING
     };
 
     case "REQUEST_SAVED": return {
       ...state,
-      state: "success"
+      state: States.SUCCESS
     };
 
     default: return state;

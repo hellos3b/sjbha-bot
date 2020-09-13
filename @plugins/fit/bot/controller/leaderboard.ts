@@ -4,13 +4,6 @@ import {Request} from "@services/bastion";
 import LeaderboardEmbed from "../embeds/LeaderboardEmbed";
 import {getAllUsers} from "../../domain/user/UserRepository";
 
-
-// 
-// Display an over view of stats 
-//
-// import ProfileEmbed from "./ProfileEmbed";
-// import {getActivitySummary} from "../domain/strava/ActivitySummaryRepository";
-
 export async function leaderboard(req: Request) {
   const users = await getAllUsers();
 

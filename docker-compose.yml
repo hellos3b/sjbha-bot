@@ -5,7 +5,7 @@ services:
     build: .
     environment:
       NODE_ENV: "production"
-      DEBUG: "@sjbha*"
+      DEBUG: "@services*,@app:*,@plugins:*"
       HOSTNAME: "https://sjbha.s3bby.com"
 
       VIRTUAL_HOST: "sjbha.s3bby.com"

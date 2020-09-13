@@ -26,7 +26,8 @@ const checkLogin = async () => {
       break;
 
     case 401:
-      console.log("unauthorized", res.json());
+      document.body.innerHTML = `<p>Something went wrong when validating your token. Try doing <b>!fit auth</b> to get a new link, otherwise let @s3b know something might be broken</p>`
+      res.json().then(json => console.error("401 code Unauthorized:", json))
       break;
 
     default:

@@ -1,13 +1,10 @@
 import * as express from "express";
-import Debug from "debug";
-
 import { NotConnected, Unauthorized } from "../errors";
 
 import { getAuthorizedUser, saveAuth } from "../domain/auth/AuthRepository";
 import { getUser, saveUser } from "../domain/user/UserRepository";
 import { getAuthInfo } from "../strava-client";
-
-const debug = Debug("c/fit:auth-web");
+import { debug, url_settings } from "../config";
 
 // We extend request object for authorized requests
 interface AuthorizedRequest extends express.Request {
@@ -90,6 +87,7 @@ export async function authAccept(req: express.Request, res: express.Response) {
   if (!code || !connectHash) return res.send("Invalid token");
 
   const [discordId, password] = connectHash.split(".");
+  debug("Accepting token for %o", discordId);
 
   try {
     const [auth, profile, strava] = await Promise.all([
@@ -103,9 +101,7 @@ export async function authAccept(req: express.Request, res: express.Response) {
 
     await Promise.all([saveAuth(auth), saveUser(profile)])
 
-    // todo: redirect to webpage
-    res.send("You are now connected to the strava bot!")
-
+    res.redirect(url_settings);
   } catch (e) {
     switch (e.name) {
     case NotConnected.type: return res.send(`Something went wrong when trying to authorize your acount. Try using !strava auth once again`)

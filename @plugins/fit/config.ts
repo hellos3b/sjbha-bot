@@ -8,8 +8,14 @@ import {ActivityType} from "./domain/strava/Activity";
 
 export const debug = Debug("@plugins:fit");
 
-export const route = "/fit";
-export const basePath = env.HOSTNAME + route;
+export const basePath = env.HOSTNAME;
+
+// URLS
+export const url_help = "/fit/help";
+export const url_login = "/fit/login";
+export const url_settings = "/fit/settings";
+export const url_accept = "/fit/accept";
+
 export const client_id = env.required("STRAVA_CLIENT_ID");
 export const client_secret = env.required("STRAVA_CLIENT_SECRET");
 
