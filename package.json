@@ -30,7 +30,7 @@
     "mongoose": "^5.7.5",
     "mustache": "^2.3.0",
     "node-cron": "^1.2.1",
-    "node-fetch": "^2.6.0",
+    "node-fetch": "^2.6.1",
     "require-text": "0.0.1",
     "sillyid": "^0.2.2",
     "vanilla-js-calendar": "^1.0.10",
