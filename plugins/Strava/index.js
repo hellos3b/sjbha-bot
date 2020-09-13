@@ -22,15 +22,15 @@ const baseConfig = {
 export default function(bastion, opt={}) {
     const config = deepmerge(baseConfig, opt)
     const cmd = bastion.command(config.command)
-    const help = bastion.helpers.code(
-        `< ${cmd} auth > Authenticate the bot to your strava account\n`+
-        `< ${cmd} stats @user > View strava stats\n` +
-        `< ${cmd} level > View your XP and Level\n` +
-        `< ${cmd} leaders > View who ran the most in the last 4 weeks\n` +
-        `< ${cmd} calendar > View your 4 weeks calendar\n` +
-        `< ${cmd} avg > View your 4 weeks average stats\n` +
-        `< ${cmd} challenges > View this week's challenges\n`,
-    "md")
+    const help = "Note: !strava command has been updated to !fit. This command will be removed at some point" + "\n"
+        + bastion.helpers.code(
+            `< ${cmd} stats @user > View strava stats\n` +
+            `< ${cmd} level > View your XP and Level\n` +
+            `< ${cmd} leaders > View who ran the most in the last 4 weeks\n` +
+            `< ${cmd} calendar > View your 4 weeks calendar\n` +
+            `< ${cmd} avg > View your 4 weeks average stats\n` +
+            `< ${cmd} challenges > View this week's challenges\n`,
+        "md")
 
     const q = new bastion.Queries('stravaID')
     const auth = AuthRouter(bastion)
@@ -38,46 +38,46 @@ export default function(bastion, opt={}) {
 
     const webhook = Webhook
 
-    bastion.app.use('/strava', router(bastion))
-    bastion.app.use(config.apiUrl, auth.router())
-    bastion.app.use(config.apiUrl, webhook.router())
+    // bastion.app.use('/strava', router(bastion))
+    // bastion.app.use(config.apiUrl, auth.router())
+    // bastion.app.use(config.apiUrl, webhook.router())
 
-    async function sendRundayMessage() {
-        const users = await q.getAll()
-        const challengers = users.filter(n => n.challenge)
+    // async function sendRundayMessage() {
+    //     const users = await q.getAll()
+    //     const challengers = users.filter(n => n.challenge)
 
-        let msg = "**<:kudos:477927260826107904> Runday Monday!**\n\nHere's this weeks challenges:\n"
-        msg += bastion.helpers.code( utils.challengeTable(challengers), "md") 
-        msg += "\n*Good luck!*"
+    //     let msg = "**<:kudos:477927260826107904> Runday Monday!**\n\nHere's this weeks challenges:\n"
+    //     msg += bastion.helpers.code( utils.challengeTable(challengers), "md") 
+    //     msg += "\n*Good luck!*"
 
-        bastion.send(bastion.channels.strava, msg)
-    }
+    //     bastion.send(bastion.channels.strava, msg)
+    // }
 
-    const delay = ms => new Promise((resolve, reject) => {
-        setTimeout(() => resolve(), ms)
-    })
+    // const delay = ms => new Promise((resolve, reject) => {
+    //     setTimeout(() => resolve(), ms)
+    // })
 
-    webhook.on('activity', async (data) => {
-        // Give candinavian some time to edit the title
-        await delay(5*60*1000); // 5 minutes
+    // webhook.on('activity', async (data) => {
+    //     // Give candinavian some time to edit the title
+    //     await delay(5*60*1000); // 5 minutes
     
-        const details = await api.addActivity(data)
-        if (!details) {
-            return
-        }
+    //     const details = await api.addActivity(data)
+    //     if (!details) {
+    //         return
+    //     }
 
-        const msg = api.getActivityString(details)
+    //     const msg = api.getActivityString(details)
         
-        // for dev
-        // bastion.send("531745959449853997", msg)
-        bastion.send(bastion.channels.strava, msg)
-    })
+    //     // for dev
+    //     // bastion.send("531745959449853997", msg)
+    //     bastion.send(bastion.channels.strava, msg)
+    // })
 
-    bastion.on('schedule-weekly', async () => {
-        await api.resetChallenges()
-        await api.saveTrends()
-        sendRundayMessage()
-    })
+    // bastion.on('schedule-weekly', async () => {
+    //     await api.resetChallenges()
+    //     await api.saveTrends()
+    //     sendRundayMessage()
+    // })
 
     return [
 
@@ -99,11 +99,11 @@ export default function(bastion, opt={}) {
             action: `${config.command}:auth`,
 
             resolve: async function(context) {
-                bastion.bot.simulateTyping(context.channelID)
-                const url = auth.createAuthUrl(context.userID, context.user, config.apiUrl)
-                await this.send(context.userID, `Hello! To auth the discord bot to post your strava times, just click on this link and accept the authorization\n${url}`)
+                // bastion.bot.simulateTyping(context.channelID)
+                // const url = auth.createAuthUrl(context.userID, context.user, config.apiUrl)
+                // await this.send(context.userID, `Hello! To auth the discord bot to post your strava times, just click on this link and accept the authorization\n${url}`)
 
-                return `DM'd you your authorization link!`
+                return `Command has been changed to \`!fit auth\``
             }
         },
 
