@@ -1,4 +1,4 @@
-import {weekly_exp_goal} from "../../../../config";
+import {weekly_exp_goal} from "../../../config";
 import WeeklyProgress, { ProgressReport, PromotionType } from "../WeeklyProgress";
 
 import User from "../../user/User";

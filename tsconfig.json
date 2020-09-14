@@ -16,6 +16,7 @@
     }
   },
   "include": [
+    "local-dev.ts",
     "@app/**/*",
     "@plugins/**/*",
     "@services/**/*", "frontend", "@frontend/frontend"

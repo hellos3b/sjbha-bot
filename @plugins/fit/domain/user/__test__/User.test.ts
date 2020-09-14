@@ -4,7 +4,7 @@ import Level from "../Level";
 import FitScore from "../FitScore";
 import ExperiencePoints from "../ExperiencePoints";
 
-import config from "../../../../config";
+import {points_per_goal, weekly_exp_goal} from "../../../config";
 import * as Activity from "../../strava/__test__/createActivity";
 
 
@@ -148,8 +148,8 @@ describe("User", () => {
   
 
   describe("Fit Score", () => {
-    const PT_PER_GOAL = config.points_per_goal;
-    const EXP_GOAL = config.weekly_exp_goal;
+    const PT_PER_GOAL = points_per_goal;
+    const EXP_GOAL = weekly_exp_goal;
 
     const expectDiff = () => expect(user.serialize().fitScore - initial_user.fitScore);
 

@@ -3,7 +3,6 @@ import Debug from "debug";
 import * as env from "@app/env";
 import channels from "@app/channels";
 import roles from "@app/roles";
-import {ActivityType} from "./domain/strava/Activity";
 
 
 export const debug = Debug("@plugins:fit");
@@ -38,10 +37,12 @@ export const post_to_channel = channels.bot_admin;
 /** How much time to give someone to edit title before posting */
 export const post_delay_ms = 5 * 60 * 1000;
 
+export const weekly_post_hour = 8;
+export const wekely_post_weekday = 1;
 /** The time when the weekly update gets posted */
 export const weekly_post_time = DateTime.local()
   .setZone(timezone)
-  .set({ weekday: 1, hour: 8, minute: 0, second: 0 })
+  .set({ weekday: wekely_post_weekday, hour: weekly_post_hour, minute: 0, second: 0 })
   .toLocal();
 
 /** Role ID for reward getting to best rank */
@@ -68,6 +69,16 @@ export const weekly_exp_goal = 150;
 
 /** How many fit score you get when you hit the goal */
 export const points_per_goal = 5;
+
+export const ActivityType = {
+  RIDE: "Ride",
+  RUN: "Run",
+  YOGA: "Yoga",
+  CROSSFIT: "Crossfit",
+  HIKE: "Hike",
+  WALK: "Walk",
+  default: ""
+}
 
 /** Emojis for each activity type. As a tuple where `[male emoji, female emoji]` */
 export const activity_emojis = {

@@ -20,16 +20,6 @@ export interface Streams {
   time: number[];
 }
 
-export const ActivityType = {
-  RIDE: "Ride",
-  RUN: "Run",
-  YOGA: "Yoga",
-  CROSSFIT: "Crossfit",
-  HIKE: "Hike",
-  WALK: "Walk",
-  default: ""
-}
-
 /**
  * A wrapper for activity data from strava, maps multiple fields into value objects
  * and ensures immutability

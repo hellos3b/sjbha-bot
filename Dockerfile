@@ -11,6 +11,9 @@ COPY @plugins/ ./@plugins/
 COPY @frontend ./@frontend/
 
 RUN npm install && npm run build
+
+RUN npm test
+
 RUN npm prune --production
 
 # Build for production
