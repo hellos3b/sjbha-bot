@@ -27,6 +27,17 @@ export function createActivityEmbed({member, user, exp, activity}: CreateProps) 
 
   const emoji = new ActivityEmoji(activity.type, user.gender);
 
+  function addHeartrate() {
+    // Check if user is opt-out
+    if (user.optedOutHR) return;
+
+    // Check if activity has HR data
+    if (!activity.hasHeartrate) return;
+
+    embed.addField("Avg HR", Math.round(activity.avgHeartrate), true);
+    embed.addField("Max HR", Math.round(activity.maxHeartrate), true);    
+  }
+
   // Fill out activity-specific fields
   switch (activity.type) {
 
@@ -53,11 +64,7 @@ export function createActivityEmbed({member, user, exp, activity}: CreateProps) 
 
   case "Crossfit": {
     embed.setAuthor(`${emoji.toString()} ${nickname} just did crossfit`);
-    activity.avgHeartrate && 
-      embed.addField("Avg HR", Math.round(activity.avgHeartrate), true);
-
-    activity.maxHeartrate &&
-      embed.addField("Max HR", Math.round(activity.maxHeartrate), true);    
+    addHeartrate();
 
     break;
   }
@@ -79,11 +86,7 @@ export function createActivityEmbed({member, user, exp, activity}: CreateProps) 
 
   default: {
     embed.setAuthor(`${emoji.toString()} ${nickname} just did a workout`);
-    activity.avgHeartrate && 
-      embed.addField("Avg HR", Math.round(activity.avgHeartrate), true);
-
-    activity.maxHeartrate &&
-      embed.addField("Max HR", Math.round(activity.maxHeartrate), true);    
+    addHeartrate(); 
 
     break;
   }

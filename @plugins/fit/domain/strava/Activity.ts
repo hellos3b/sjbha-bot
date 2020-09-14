@@ -4,7 +4,7 @@ import type {ActivityResponse} from "../../strava-client";
 import Seconds from "./Seconds";
 import Meters from "./Meters";
 
-import {timezone} from "@plugins/fit/config";
+import {debug, timezone} from "@plugins/fit/config";
 
 /** Normalized % of HR to be in this zone */
 const MODERATE_HR = 0.5;

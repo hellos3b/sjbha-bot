@@ -11,6 +11,7 @@ export interface UserProfile {
   exp     : number;
   gender  : string;
   fitScore: FitScoreDetails;
+  optedOutHR: boolean;
 }
 
 export interface SerializedUser {
@@ -66,7 +67,8 @@ export default class User {
       level     : this.level.level,
       exp       : this.level.exp,
       gender    : this.profile.gender,
-      fitScore  : this.fitScore.getDetails()
+      fitScore  : this.fitScore.getDetails(),
+      optedOutHR: !this.level.hasMaxHeartrate
     }
   }
 

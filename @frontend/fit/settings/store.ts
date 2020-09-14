@@ -8,7 +8,7 @@ export const States = {
 };
 
 export const initialState = {
-  state: States.LOADING,
+  state: States.EDIT,
   error: "",
   opt_out: false,
   heartrate: 0
@@ -17,23 +17,15 @@ export const initialState = {
 export type State = typeof initialState;
 
 export type Actions = |
-  {type: "ON_FETCH_SETTINGS", hr: number} |
   {type: "TOGGLE_OPT_OUT", isChecked: boolean} |
   {type: "INPUT_HR", hr: number} |
   {type: "DISPLAY_ERROR", error: string} |
   {type: "REQUEST_START"} |
   {type: "REQUEST_SAVED"};
 
-export const useSettingsStore = () => useReducer<State, Actions>((state: State, action: Actions): State => {
+export const useSettingsStore = (state: Partial<State> = {}) => useReducer<State, Actions>((state: State, action: Actions): State => {
     switch (action.type) {
 
-    case "ON_FETCH_SETTINGS": return {
-      ...state,
-      state: States.EDIT,
-      opt_out: action.hr === 0,
-      heartrate: action.hr
-    };
-  
     case "TOGGLE_OPT_OUT": return {
       ...state,
       opt_out: action.isChecked,
@@ -66,4 +58,4 @@ export const useSettingsStore = () => useReducer<State, Actions>((state: State, 
     default: return state;
   
     }
-}, initialState);
+}, {...initialState, ...state});

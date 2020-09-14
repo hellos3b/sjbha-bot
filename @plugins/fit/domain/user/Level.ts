@@ -45,13 +45,15 @@ export default class Level {
 
   public gainExperience(activity: Activity) {
     let exp: ExperiencePoints;
+
+    debug("Calculating experience points. User has heartrate: %o, Activity has heartrate: %o", this.hasMaxHeartrate, activity.hasHeartrate);
     
     if (this.hasMaxHeartrate && activity.hasHeartrate) {
-      debug("calculating EXP with max HR %o", this._maxHR);
+      debug("Using max HR %o", this._maxHR);
       const effort = activity.getEffort(this.maxHR);
       exp = ExperiencePoints.createFromSeconds(effort.moderate, effort.vigorous);
     } else {
-      debug("calculating EXP from elapsed time");
+      debug("Using elapsed time");
       exp = ExperiencePoints.createFromSeconds(activity.elapsedTime.value, 0);
     }
 

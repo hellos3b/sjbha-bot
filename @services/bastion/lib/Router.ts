@@ -1,9 +1,8 @@
-import {map} from "lodash";
 import Request from "./Request";
 import Debug from "debug";
 import shortid from "shortid";
 
-const debug = Debug("bastion");
+const debug = Debug("@services:bastion");
 
 export default class Router {
   private routes = new Map<string, Middleware[]>();

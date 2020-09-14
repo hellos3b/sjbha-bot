@@ -4,7 +4,7 @@ import Router from "./Router";
 import Request from "./Request";
 import Debug from "debug";
 
-const debug = Debug("bastion");
+const debug = Debug("@services:bastion");
 
 export default class Bastion extends Router {
   /** Reference to the `discord.js` library client */

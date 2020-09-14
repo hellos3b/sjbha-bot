@@ -33,6 +33,11 @@ export async function validateToken(req: AuthorizedRequest, res: express.Respons
       break;
     };
 
+    case NotConnected.type: {
+      res.status(401).send({message: e.message})
+      break;
+    };
+
     default: {
       console.error(e);
       res.status(500)

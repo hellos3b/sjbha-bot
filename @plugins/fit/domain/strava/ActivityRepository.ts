@@ -7,9 +7,11 @@ export const getActivity = async (discordId: string, activityId: string) => {
   const [activity, streams] = await Promise.all([
     client.getActivity(activityId),
     client.getActivityStreams(activityId)
+      .then(getStreams)
+      .catch(() => undefined)
   ]);
 
-  return Activity.fromAPI(activity, getStreams(streams));
+  return Activity.fromAPI(activity, streams);
 };
 
 

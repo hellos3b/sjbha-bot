@@ -1,5 +1,6 @@
-import bastion from "@services/bastion";
 import * as express from "express";
+import {IS_PRODUCTION} from "@app/env";
+import bastion from "@services/bastion";
 import {debug, post_delay_ms, post_to_channel} from "../config";
 import {NotConnected} from "../errors";
 
@@ -33,12 +34,14 @@ export async function postActivity(req: express.Request, res: express.Response) 
 
   debug("webhook request, activityId: %o eventType: %o", activityId, eventType);
 
+  res.status(200).send("Thanks!");
+
   // We only care when an activity is created
   if (eventType !== "create") return;
 
   try {
-    //
-    await wait(post_delay_ms);
+    // Only wait if in production
+    IS_PRODUCTION && await wait(post_delay_ms);
 
     const [user, activity] = await Promise.all([
       getUserByStravaId(stravaId),
@@ -68,9 +71,6 @@ export async function postActivity(req: express.Request, res: express.Response) 
 
     // finally lets send the embed
     await bastion.sendTo(post_to_channel, embed);
-
-    res.status(200).send("Posted");
-    
   } catch (e) {
     if (e.name === NotConnected.type) {
       debug("Could not post activity: %o", e.message);
@@ -89,6 +89,8 @@ export async function postActivity(req: express.Request, res: express.Response) 
 export async function updateMaxHR(req: AuthorizedRequest, res: express.Response) {
   const maxHr = Number(req.body["hr"]);
   const discordId = req.discordId;
+
+  debug("Request to update HR to %o (from %o)", maxHr, discordId);
 
   if (!discordId) {
     res.status(401).json({message: `Missing discord ID`});

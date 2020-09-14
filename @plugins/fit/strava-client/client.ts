@@ -74,11 +74,8 @@ export default class StravaClient {
   */
  
   getActivityStreams(activityId: string) {
-    const url = `/activities/${activityId}/streams`;
-    debug('GET %o', url);
-    
     return this.api
-      .url(url)
+      .url(`activities/${activityId}/streams`)
       .query({
         keys: "heartrate,time",
         key_by_type: true
