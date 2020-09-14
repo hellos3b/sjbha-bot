@@ -4,7 +4,9 @@ FROM node:12-alpine as builder
 WORKDIR /app
 
 # Copy files required to build
-COPY package*.json tsconfig.json webpack.config.js .babelrc jest.config.js ./
+COPY package*.json tsconfig.json ./ 
+COPY webpack.config.js .babelrc jest.config.js ./
+COPY .env ./
 COPY @app/ ./@app/
 COPY @services/ ./@services/
 COPY @plugins/ ./@plugins/

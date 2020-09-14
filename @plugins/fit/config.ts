@@ -32,7 +32,7 @@ export const auth_scopes = "read,activity:read,profile:read_all";
 export const timezone = "America/Los_Angeles";
 
 /** The channel ID to post new activities to */
-export const post_to_channel = channels.bot_admin;
+export const post_to_channel = channels.strava;
 
 /** How much time to give someone to edit title before posting */
 export const post_delay_ms = 5 * 60 * 1000;
