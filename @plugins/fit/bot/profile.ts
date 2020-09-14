@@ -1,10 +1,10 @@
 import {Request} from "@services/bastion";
 import {debug} from "@plugins/fit/config";
 
-import {getUser} from "../../domain/user/UserRepository";
-import {getActivitySummary} from "../../domain/strava/ActivitySummaryRepository";
+import {getUser} from "../domain/user/UserRepository";
+import {getActivitySummary} from "../domain/strava/ActivitySummaryRepository";
 
-import ProfileEmbed from "../embeds/ProfileEmbed";
+import ProfileEmbed from "./embeds/ProfileEmbed";
 
 // 
 // Display an over view of stats 

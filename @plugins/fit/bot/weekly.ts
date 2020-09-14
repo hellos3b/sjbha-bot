@@ -1,26 +1,45 @@
+import schedule from "node-schedule";
+
 import bastion from "@services/bastion";
 import {
   debug, 
+  weekly_post_time,
   post_to_channel, 
   role_rank_1, 
   role_rank_2, 
   role_rank_3
 } from "@plugins/fit/config";
 
-import Week from "../../domain/exp/Week";
-import Rank from "../../domain/user/Rank";
-import { getProgressForWeek, saveProgress } from "../../domain/exp/WeeklyProgressRepository";
-import { getActivity } from "../../domain/strava/ActivityRepository";
-import { SerializedUser } from "../../domain/user/User";
+import Week from "../domain/exp/Week";
+import Rank from "../domain/user/Rank";
+import { getProgressForWeek, saveProgress } from "../domain/exp/WeeklyProgressRepository";
+import { getActivity } from "../domain/strava/ActivityRepository";
+import { SerializedUser } from "../domain/user/User";
 
-import { createWeeklyEmbed } from "../embeds/WeeklyEmbed";
+import { createWeeklyEmbed } from "./embeds/WeeklyEmbed";
+
+
+
+// Now lets build the schedule rule dynamically, using the luxon date
+// so we can configure it timezone independent
+// see https://github.com/node-schedule/node-schedule#recurrence-rule-scheduling
+const rule = {
+  dayOfWeek : weekly_post_time.weekday,
+  hour      : weekly_post_time.hour,
+  minute    : weekly_post_time.minute,
+  second    : weekly_post_time.second
+};
+
+schedule.scheduleJob(rule, () => {
+  debug("Beginning weekly schedule update")
+  postWeeklyProgress()
+});
 
 
 //
 // Displays an overview of stats including averages and current level
 //
-
-export async function postWeeklyProgress() {
+async function postWeeklyProgress() {
   // const week = Week.previous();
   const week = Week.current();
   

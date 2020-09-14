@@ -2,7 +2,7 @@ import {Request} from "@services/bastion";
 import * as querystring from "querystring";
 
 import {debug, basePath, url_login, url_help} from "@plugins/fit/config";
-import {getOrInitializeUser} from "../../domain/auth/AuthRepository";
+import {getOrInitializeUser} from "../domain/auth/AuthRepository";
 
 
 /**
@@ -18,13 +18,11 @@ export async function auth(req: Request) {
 
   // todo: update welcome command
   req.author.send(`
-**Your authorization url:** ${url}
+**Welcome to the fitness channel!**
 
-Welcome to the fitness channel! 
-The bot works by listening for activities that get posted to Strava. If you don't have an account, you can sign up here: https://www.strava.com/. 
-
-Once you accept, you'll be asked to set your max heart rate. It's optional, but you can get bonus EXP! 
-For more information here: ${helpUrl}
+Click here to authorize the bot: ${url}
+If you don't have a Strava Account: <https://www.strava.com/>
+For information on how the bot works: ${helpUrl}
 `);
   
   req.reply("Hello! I've DM'd you instructions on how to connect your account");

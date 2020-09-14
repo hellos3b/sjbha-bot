@@ -1,5 +1,5 @@
 import bastion from "@services/bastion";
 
-bastion.use("ping", req => {
-  req.reply("Pong!")
+bastion.use("pong", req => {
+  req.reply("...ping?")
 });
