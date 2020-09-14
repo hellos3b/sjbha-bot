@@ -1,6 +1,6 @@
 import bastion from "@services/bastion";
 import * as express from "express";
-import {debug, post_to_channel} from "../config";
+import {debug, post_delay_ms, post_to_channel} from "../config";
 import {NotConnected} from "../errors";
 
 import {createActivityEmbed} from "../bot/embeds/ActivityEmbed";
@@ -15,6 +15,9 @@ interface AuthorizedRequest extends express.Request {
   discordId?: string;
 }
 
+// mini util to await a certain milliseconds
+const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
 /** 
  * When an athlete posts an activity, this webhook is called with the owner ID and activity ID.
  * We need to add it to the profile data, and then send the embed to the channel
@@ -28,11 +31,15 @@ export async function postActivity(req: express.Request, res: express.Response) 
   const activityId = String(req.body["object_id"]);
   const eventType = <string>req.body["aspect_type"];
 
+  debug("webhook request, activityId: %o eventType: %o", activityId, eventType);
+
   // We only care when an activity is created
   if (eventType !== "create") return;
 
-  debug("Posting activity %o from %o", activityId, stravaId);
   try {
+    //
+    await wait(post_delay_ms);
+
     const [user, activity] = await Promise.all([
       getUserByStravaId(stravaId),
       getActivityByStravaId(stravaId, activityId)

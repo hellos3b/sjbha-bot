@@ -1,7 +1,7 @@
 import bastion from "@services/bastion";
 import app from "@services/express";
-import {paramRouter} from "@services/bastion/middleware";
-
+import channels from "@app/channels";
+import {restrict, paramRouter} from "@services/bastion/middleware";
 import * as bot from "./bot";
 
 const botRouter = bastion.Router();
@@ -11,7 +11,7 @@ botRouter.use("auth", bot.auth);
 botRouter.use("profile", bot.profile);
 botRouter.use("leaderboard", bot.leaderboard);
 
-bastion.use("fit", paramRouter(botRouter, {default: "help"}));
+bastion.use("fit", restrict(channels.strava), paramRouter(botRouter, {default: "help"}));
 
 import * as auth from "./api/AuthController";
 import * as profile from "./api/ProfileController";

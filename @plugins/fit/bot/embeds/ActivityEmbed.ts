@@ -22,7 +22,7 @@ export function createActivityEmbed({member, user, exp, activity}: CreateProps) 
   embed.setDescription(activity.description || "");
 
   embed.setThumbnail(member.avatar);
-  embed.setFooter(`Gained ${exp.total} experience points (${exp.moderate}+ ${exp.vigorous}++)`);
+  embed.setFooter(`Gained ${exp.total} experience points (${exp.moderateRounded}+ ${exp.vigorousRounded}++)`);
   embed.addField("Time", activity.elapsedTime.hhmmss, true);
 
   const emoji = new ActivityEmoji(activity.type, user.gender);

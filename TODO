@@ -1,0 +1,3 @@
+☐ Pull out common vendor packages into their own bundle 
+  vendor-fit.js is 400kb some reason
+☐ Add minifier plugin to webpack for production mode 
