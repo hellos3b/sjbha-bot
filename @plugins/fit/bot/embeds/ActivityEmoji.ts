@@ -1,6 +1,6 @@
 import {activity_emojis} from "@plugins/fit/config";
 
-import {ActivityType} from "../../domain/strava/Activity";
+import {ActivityType} from "../../config";
 
 export default class ActivityEmoji {
   private readonly activityType: string;
