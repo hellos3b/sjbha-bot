@@ -4,6 +4,7 @@ import UserCollection from "../../db/UserCollection";
 import Week from "./Week";
 import WeeklyProgress from "./WeeklyProgress";
 import { SerializedUser } from "../user/User";
+import WorkoutLogs from "./WorkoutLogs";
 
 export async function getProgressForWeek(week: Week) {
   const [users, workouts] = await Promise.all([

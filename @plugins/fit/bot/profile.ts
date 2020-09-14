@@ -1,6 +1,4 @@
 import {Request} from "@services/bastion";
-import {debug} from "@plugins/fit/config";
-
 import {getUser} from "../domain/user/UserRepository";
 import {getActivitySummary} from "../domain/strava/ActivitySummaryRepository";
 

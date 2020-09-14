@@ -7,5 +7,5 @@ describe("Ensure", () => {
   it("weekly post is set to the right time", () => {
     expect(weekly_post_hour).toEqual(8);
     expect(wekely_post_weekday).toEqual(1);
-  })
+  });
 });

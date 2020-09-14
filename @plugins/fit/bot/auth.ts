@@ -1,7 +1,7 @@
 import {Request} from "@services/bastion";
 import * as querystring from "querystring";
 
-import {debug, basePath, url_login, url_help} from "@plugins/fit/config";
+import {basePath, url_login, url_help} from "@plugins/fit/config";
 import {getOrInitializeUser} from "../domain/auth/AuthRepository";
 
 

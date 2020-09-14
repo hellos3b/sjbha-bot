@@ -18,9 +18,10 @@ You will be redirected to a page to set your heart rate, if you workout with a h
 
 Other commands you can use
 
-- **!fit help** - displays help
-- **!fit profile** - your stats
-- **!fit leaderboard** - shows everyone ranked by their fit score
+- **!fit help** - Displays help
+- **!fit profile** - View your level, recent activity and an overview of your last 30 days
+- **!fit exp** - Gets your weekly exp
+- **!fit leaderboard** - Shows everyone ranked by their fit score
 
 ## Experience Points
 

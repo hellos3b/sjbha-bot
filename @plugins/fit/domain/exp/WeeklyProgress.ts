@@ -1,4 +1,4 @@
-import {chain, map} from "lodash";
+import {chain, map, reduce} from "lodash";
 import { UserSchema } from "../../db/UserCollection";
 import WorkoutLogs from "../exp/WorkoutLogs";
 import User, { SerializedUser } from "../user/User";

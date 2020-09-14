@@ -1,6 +1,5 @@
 import {reduce} from "lodash";
 import {Request} from "@services/bastion";
-// import {debug} from "@plugins/fit/config";
 import LeaderboardEmbed from "./embeds/LeaderboardEmbed";
 import {getAllUsers} from "../domain/user/UserRepository";
 

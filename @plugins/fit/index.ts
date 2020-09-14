@@ -4,22 +4,23 @@ import channels from "@app/channels";
 import {restrict, paramRouter} from "@services/bastion/middleware";
 import * as bot from "./bot";
 
-const botRouter = bastion.Router();
+const router = bastion.Router();
 
-botRouter.use("help", bot.help);
-botRouter.use("auth", bot.auth);
-botRouter.use("profile", bot.profile);
-botRouter.use("leaderboard", bot.leaderboard);
+router.use("help", bot.help);
+router.use("auth", bot.auth);
+router.use("profile", bot.profile);
+router.use("exp", bot.exp);
+router.use("leaderboard", bot.leaderboard);
 
-bastion.use("fit", restrict(channels.strava), paramRouter(botRouter, {default: "help"}));
+bastion.use("fit", restrict(channels.strava), paramRouter(router, {default: "help"}));
 
 import * as auth from "./api/AuthController";
 import * as profile from "./api/ProfileController";
 import { url_accept } from "./config";
 
 // strava authentication
-app.get(url_accept, auth.authAccept);
 app.post("/fit/api/login", auth.authLogin);
+app.get(url_accept, auth.authAccept);
 
 // fit web API
 app.get("/fit/api/webhook", auth.verifyHook);
