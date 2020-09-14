@@ -12,7 +12,7 @@ export default class ExperiencePoints {
 
   get total() {
     // We round the total because of floating point precision
-    return round(this.moderate + this.vigorous);
+    return this.moderate + this.vigorous;
   }
 
   get moderateRounded() {
@@ -24,7 +24,7 @@ export default class ExperiencePoints {
   }
 
   public static createFromDb(exp: ExpSchema) {
-    return ExperiencePoints.createFromSeconds(exp.moderate, exp.vigorous)
+    return ExperiencePoints.create(exp.moderate, exp.vigorous)
   }
 
   public static createFromSeconds(moderateSeconds: number, vigorousSeconds: number) {
