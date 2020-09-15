@@ -12,9 +12,10 @@ interface CreateProps {
   user: UserProfile;
   exp: ExperiencePoints;
   activity: Activity;
+  weeklyExp: number;
 }
 
-export function createActivityEmbed({member, user, exp, activity}: CreateProps) {
+export function createActivityEmbed({member, user, exp, activity, weeklyExp}: CreateProps) {
   const nickname = member.member.displayName;
   let embed = new MessageEmbed().setColor("FC4C02");
   
@@ -22,7 +23,7 @@ export function createActivityEmbed({member, user, exp, activity}: CreateProps) 
   embed.setDescription(activity.description || "");
 
   embed.setThumbnail(member.avatar);
-  embed.setFooter(`Gained ${exp.total} experience points (${exp.moderateRounded}+ ${exp.vigorousRounded}++)`);
+  embed.setFooter(`Gained ${exp.total.toFixed(1)} exp (${exp.moderate.toFixed(1)}+ ${exp.vigorous.toFixed(1)}++) | ${weeklyExp.toFixed(1)} exp this week`);
   embed.addField("Time", activity.elapsedTime.hhmmss, true);
 
   const emoji = new ActivityEmoji(activity.type, user.gender);

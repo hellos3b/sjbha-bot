@@ -15,6 +15,10 @@ export default class ExperiencePoints {
     return this.moderate + this.vigorous;
   }
 
+  get totalRounded() {
+    return round(this.total);
+  }
+
   get moderateRounded() {
     return round(this.moderate);
   }

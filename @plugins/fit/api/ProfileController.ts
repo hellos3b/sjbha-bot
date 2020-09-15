@@ -2,13 +2,13 @@ import * as express from "express";
 import {IS_PRODUCTION} from "@app/env";
 import bastion from "@services/bastion";
 import {debug, post_delay_ms, post_to_channel} from "../config";
-import {NotConnected} from "../errors";
+import {NotConnected, Unauthorized} from "../errors";
 
 import {createActivityEmbed} from "../bot/embeds/ActivityEmbed";
 
 import { getUserByStravaId, saveUser, getUser } from "../domain/user/UserRepository";
 import { getActivityByStravaId } from "../domain/strava/ActivityRepository";
-import { insertWorkout } from "../domain/exp/WorkoutLogRepository";
+import { getCurrentLogsForUser, insertWorkout } from "../domain/exp/WorkoutLogRepository";
 import Workout from "../domain/exp/WorkoutLog";
 
 // We extend request object for authorized requests
@@ -60,24 +60,25 @@ export async function postActivity(req: express.Request, res: express.Response) 
 
     // Now lets send off an embed
     const discordUser = bastion.getMember(user.id);
+    const weekly = await getCurrentLogsForUser(user.id);
 
     // Create embed
     const embed = createActivityEmbed({
       member  : discordUser,
       user    : user.getProfile(), 
       exp     : workout.exp, 
-      activity
+      activity,
+      weeklyExp: weekly.totalExp
     })
 
     // finally lets send the embed
     await bastion.sendTo(post_to_channel, embed);
   } catch (e) {
-    if (e.name === NotConnected.type) {
+    if (e.name === NotConnected.type || e.name === Unauthorized.type) {
       debug("Could not post activity: %o", e.message);
-      res.status(401).send("Hasn't been authorized ")
     } else {
+      debug("Activity posting failed to uknown error")
       console.error(e);
-      res.status(500).send("Messed something up")
     }
   }
 }
