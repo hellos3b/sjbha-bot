@@ -1,7 +1,7 @@
 import bastion from "@services/bastion";
 import getDays from "./src/days-till-christmas";
 
-const festivize = (msg: string) => `🎄🎄🎅🏻  ${msg} 🎅🏻🎄🎄`;
+const festivize = (msg: string) => `🎄☃️☃️🎄🎁 ${msg} 🎁🎄☃️☃️🎄`;
 
 bastion.use("christmas", req => {
   const days = getDays();
