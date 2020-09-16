@@ -77,6 +77,7 @@ export const ActivityType = {
   CROSSFIT: "Crossfit",
   HIKE: "Hike",
   WALK: "Walk",
+  WEIGHT_TRAIN: "WeightTraining",
   default: ""
 }
 
@@ -88,6 +89,7 @@ export const activity_emojis = {
   [ActivityType.HIKE] : ["⛰️", "⛰️"],
   [ActivityType.WALK] : ["🚶‍♂️", "🚶‍♀️"],
   [ActivityType.CROSSFIT]: ["🏋️‍♂️", "🏋️‍♀️"],
+  [ActivityType.WEIGHT_TRAIN]: ["🏋️‍♂️", "🏋️‍♀️"],
   [ActivityType.default]: ["🤸‍♂️", "🤸‍♀️"]
 };
 

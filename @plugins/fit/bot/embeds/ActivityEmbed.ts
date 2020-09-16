@@ -6,6 +6,7 @@ import ActivityEmoji from "./ActivityEmoji";
 import ExperiencePoints from "../../domain/user/ExperiencePoints";
 import Activity from "../../domain/strava/Activity";
 import { UserProfile } from "../../domain/user/User";
+import {ActivityType} from "../../config";
 
 interface CreateProps {
   member: DiscordMember;
@@ -42,7 +43,7 @@ export function createActivityEmbed({member, user, exp, activity, weeklyExp}: Cr
   // Fill out activity-specific fields
   switch (activity.type) {
 
-  case "Ride": {
+  case ActivityType.RIDE: {
     embed.setAuthor(`${emoji.toString()} ${nickname} just went for a ride`);
     embed.addField("Distance", activity.distance.toMiles.toFixed(2) + "mi", true);
     embed.addField("Elevation", Math.floor(activity.elevation.toFeet) + "ft", true);
@@ -50,7 +51,7 @@ export function createActivityEmbed({member, user, exp, activity, weeklyExp}: Cr
     break;
   }
 
-  case "Run": {
+  case ActivityType.RUN: {
     embed.setAuthor(`${emoji.toString()} ${nickname} just went for a run`);
     embed.addField("Distance", activity.distance.toMiles.toFixed(2) + "mi", true);
     embed.addField("Pace", activity.speed.toPace.hhmmss + "m/mi", true);
@@ -58,19 +59,26 @@ export function createActivityEmbed({member, user, exp, activity, weeklyExp}: Cr
     break;
   }
 
-  case "Yoga": {
+  case ActivityType.YOGA: {
     embed.setAuthor(`${emoji.toString()} ${nickname} just did some yoga`);
     break;
   }
 
-  case "Crossfit": {
+  case ActivityType.CROSSFIT: {
     embed.setAuthor(`${emoji.toString()} ${nickname} just did crossfit`);
     addHeartrate();
 
     break;
   }
 
-  case "Hike": {
+  case ActivityType.WEIGHT_TRAIN: {
+    embed.setAuthor(`${emoji.toString()} ${nickname} just lifted some weights`);
+    addHeartrate();
+
+    break;
+  }
+
+  case ActivityType.HIKE: {
     embed.setAuthor(`${emoji.toString()} ${nickname} just did a hike`);
     embed.addField("Distance", activity.distance.toMiles.toFixed(2) + "mi", true);
     embed.addField("Elevation", Math.floor(activity.elevation.toFeet) + "ft", true);
@@ -78,7 +86,7 @@ export function createActivityEmbed({member, user, exp, activity, weeklyExp}: Cr
     break;
   }
 
-  case "Walk": {
+  case ActivityType.WALK: {
     embed.setAuthor(`${emoji.toString()} ${nickname} just went for a walk`);
     embed.addField("Distance", activity.distance.toMiles.toFixed(2) + "mi", true);
 
