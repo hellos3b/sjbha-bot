@@ -1,10 +1,10 @@
 import bastion from "@services/bastion";
-import getDays from "./src/days-till-christmas";
+import getDaysUntilChristmas from "./src/days-till-christmas";
 
 const festivize = (msg: string) => `🎄☃️☃️🎄🎁 ${msg} 🎁🎄☃️☃️🎄`;
 
 bastion.use("christmas", req => {
-  const days = getDays();
+  const days = getDaysUntilChristmas();
 
   if (days === 0) {
     req.reply(festivize(`!!TODAY IS CHRISTMAS!!`));
