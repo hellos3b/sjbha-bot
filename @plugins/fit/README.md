@@ -1,4 +1,4 @@
-# @commands/fit
+# !fit
 
 The fit command lets users connect their [Strava](https://www.strava.com) accounts to the bot.
 

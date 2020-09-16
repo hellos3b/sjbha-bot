@@ -1,5 +1,5 @@
 import {DateTime} from "luxon";
-import {timezone} from "@plugins/fit/config";
+import {TIME_ZONE} from "@app/env";
 
 /**
  * Represents a week, in local timezone
@@ -27,7 +27,7 @@ export default class Week {
   public static current() {
     const timestamp = DateTime
       .local()
-      .setZone(timezone);
+      .setZone(TIME_ZONE);
 
     return Week.createFromDate(timestamp);
   }
@@ -36,7 +36,7 @@ export default class Week {
   public static previous() {
     const timestamp = DateTime
       .local()
-      .setZone(timezone)
+      .setZone(TIME_ZONE)
       .minus({week: 1});
 
     return Week.createFromDate(timestamp);

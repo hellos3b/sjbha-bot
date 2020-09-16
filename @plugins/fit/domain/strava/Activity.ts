@@ -4,7 +4,7 @@ import type {ActivityResponse} from "../../strava-client";
 import Seconds from "./Seconds";
 import Meters from "./Meters";
 
-import {debug, timezone} from "@plugins/fit/config";
+import {TIME_ZONE} from "@app/env";
 
 /** Normalized % of HR to be in this zone */
 const MODERATE_HR = 0.5;
@@ -80,7 +80,7 @@ export default class Activity {
   }
 
   get localTimestamp() {
-    return this.timestamp.setZone(timezone);
+    return this.timestamp.setZone(TIME_ZONE);
   }
 
   get speed() {

@@ -28,9 +28,6 @@ export const client_secret = env.required("STRAVA_CLIENT_SECRET");
  **/
 export const auth_scopes = "read,activity:read,profile:read_all";
 
-/** Timezone for all date related operations */
-export const timezone = "America/Los_Angeles";
-
 /** The channel ID to post new activities to */
 export const post_to_channel = channels.strava;
 
@@ -41,7 +38,7 @@ export const weekly_post_hour = 8;
 export const wekely_post_weekday = 1;
 /** The time when the weekly update gets posted */
 export const weekly_post_time = DateTime.local()
-  .setZone(timezone)
+  .setZone(env.TIME_ZONE)
   .set({ weekday: wekely_post_weekday, hour: weekly_post_hour, minute: 0, second: 0 })
   .toLocal();
 
