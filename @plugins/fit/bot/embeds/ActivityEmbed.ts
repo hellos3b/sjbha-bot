@@ -25,7 +25,7 @@ export function createActivityEmbed({member, user, exp, activity, weeklyExp}: Cr
 
   embed.setThumbnail(member.avatar);
   embed.setFooter(`Gained ${exp.total.toFixed(1)} exp (${exp.moderate.toFixed(1)}+ ${exp.vigorous.toFixed(1)}++) | ${weeklyExp.toFixed(1)} exp this week`);
-  embed.addField("Time", activity.elapsedTime.hhmmss, true);
+  embed.addField("Time", activity.elapsedTime.toString(), true);
 
   const emoji = new ActivityEmoji(activity.type, user.gender);
 
