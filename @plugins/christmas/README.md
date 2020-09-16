@@ -4,5 +4,6 @@ The `christmas` command is a simple echo command that returns how many days ther
 
 ```
 !christmas
-:partyparrot: 100 DAYS LEFT UNTIL CHRISTMAS!!! :partyparrot:
+
+🎄🎄🎅🏻 100 DAYS LEFT UNTIL CHRISTMAS!!! 🎅🏻🎄🎄
 ```
