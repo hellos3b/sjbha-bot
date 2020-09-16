@@ -93,6 +93,13 @@ export function createActivityEmbed({member, user, exp, activity, weeklyExp}: Cr
     break;
   }
 
+  case ActivityType.ROCK_CLIMB: {
+    embed.setAuthor(`${emoji.toString()} ${nickname} just went rock climbing`);
+    addHeartrate();
+
+    break;
+  }
+
   default: {
     embed.setAuthor(`${emoji.toString()} ${nickname} just did a workout`);
     addHeartrate(); 
