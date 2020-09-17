@@ -26,7 +26,7 @@ export const client_secret = env.required("STRAVA_CLIENT_SECRET");
  * `activity:read` 
  * `profile:read_all` lets us get HR zones
  **/
-export const auth_scopes = "read,activity:read,profile:read_all";
+export const auth_scopes = "read,activity:read_all,profile:read_all";
 
 /** The channel ID to post new activities to */
 export const post_to_channel = channels.strava;
