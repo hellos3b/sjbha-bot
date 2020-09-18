@@ -11,7 +11,7 @@ import {toMiles, toTime, toPace, toTenths} from "./conversions";
 import {ActivityType} from "../../config";
 
 import {Field, asField} from "./embed";
-import {getEmoji} from "./emoji";
+import {GenderedEmoji, getEmoji} from "./emoji";
 import { ActivityResponse } from "@plugins/fit/strava-client";
 
 // todo: make move this interface to some kind of mapping FN
@@ -23,11 +23,11 @@ interface CreateProps {
   weeklyExp: number;
 }
 
-const heading = (gender: string, displayName: string, activityType: string) => 
-  format('{1} {2} {3}', [
-    getEmoji(gender)(activityType), 
+const heading = (emoji: string, displayName: string, activityType: string) => format(
+  '{1} {2} just {3}', [
+    emoji, 
     displayName,
-    getVerb(activityType)
+    activityVerb(activityType)
   ])
 
 /** For the fields we pick specific stats per activity, and then format it */
@@ -39,8 +39,8 @@ const statFields = (activity: ActivityResponse, showHeartrate: boolean) => pipe(
 )(activity.type);
 
 /** The slightly muted text at the bottom of the embed. Lets show experience pt progress */
-const footerText = (exp: ExperiencePoints, weeklyExp: number) => 
-  format('Gained {1} exp ({2}+ {3}++) | {4} exp this week', [
+const footerText = (exp: ExperiencePoints, weeklyExp: number) => format(
+  'Gained {1} exp ({2}+ {3}++) | {4} exp this week', [
     toTenths(exp.total),
     toTenths(exp.moderate),
     toTenths(exp.vigorous),
@@ -98,24 +98,22 @@ const activityFields = (activityType: string) => pipe(
 )(activityType);
 
 /** The action that the user just did, in english */
-const getVerb = (activityType: string) => pipe(
+const activityVerb = (activityType: string) => pipe(
   switchcase({
-    [ActivityType.RIDE]   : "just went for a ride",
-    [ActivityType.RUN]    : "just went for a run",
-    [ActivityType.YOGA]   : "just did some yoga",
-    [ActivityType.CROSSFIT]: "just did crossfit",
-    [ActivityType.WEIGHT_TRAIN]: "just lifted some weights",
-    [ActivityType.HIKE]   : "just went on a hike",
-    [ActivityType.WALK]   : "just went on a walk",
-    [ActivityType.ROCK_CLIMB]: "just went rock climbing"
+    [ActivityType.RIDE]       : "went for a ride",
+    [ActivityType.RUN]        : "went for a run",
+    [ActivityType.YOGA]       : "did some yoga",
+    [ActivityType.CROSSFIT]   : "did crossfit",
+    [ActivityType.WEIGHT_TRAIN]: "lifted some weights",
+    [ActivityType.HIKE]       : "went on a hike",
+    [ActivityType.WALK]       : "went on a walk",
+    [ActivityType.ROCK_CLIMB] : "went rock climbing"
   }),
-  defaultTo("just did a workout")
+  defaultTo("did a workout")
 )(activityType)
 
 /** If user has Opted out of HR, we filter out the HR related fields */
-const filterHRIf = (filterHR: boolean) => reject(
-  (field: Field) => filterHR && includes(field.name, "HR")
-);
+const filterHRIf = (filterHR: boolean) => reject((field: Field) => filterHR && includes(field.name, "HR"));
 
 export const createActivityEmbed = ({member, user, exp, activity, weeklyExp}: CreateProps): MessageOptions["embed"] => ({
   title       : activity.name,
@@ -126,8 +124,8 @@ export const createActivityEmbed = ({member, user, exp, activity, weeklyExp}: Cr
   },
   author: { 
     name: heading(
+      getEmoji(user.gender)(activity.type),
       member.member.displayName, 
-      user.gender, 
       activity.type
     ) 
   },

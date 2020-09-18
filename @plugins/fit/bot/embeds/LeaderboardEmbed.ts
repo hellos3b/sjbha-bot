@@ -17,10 +17,11 @@ export const createLeaderboardEmbed = ({nicknames, users}: LeaderboardData): Mes
     icon_url: "https://imgur.com/Wj9X4s0.png"
   },
 
-  description: users.map((user, i) => 
-    format('{0}. **{1}** • {2}', [
+  description: users.map((user, i) => format(
+    '{0}. **{1}** • {2}', [
       inc(i), 
       prop(user.discordId, nicknames),
       Math.floor(user.fitScore)
-    ])).join("\n")
+    ]))
+    .join("\n")
 })

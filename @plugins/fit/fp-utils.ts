@@ -1,4 +1,4 @@
-import {prop as RProp, pipe, defaultTo} from "ramda";
+import {prop as RProp, pipe, defaultTo, sort, negate} from "ramda";
 
 // Additional FP functions I find help out when working with Ramda
 // especially with typings in Typescript
@@ -14,3 +14,7 @@ export const switchcase = <T>(lookupObj: Record<string, T>) => (key: string): T 
 
 /** Filters null values out of an array. `reject(isNil)` isn't typed well enough */
 export const filterNil = <T>(arr: (T|null)[]) => arr.filter((value): value is T => !!value);
+
+/** Sort an array of objects by a prop */
+export const sortByProp = <T extends Record<string, any>>(propName: keyof T, descend = -1) => 
+  sort((a: T, b: T) => a[propName] > b[propName] ? negate(descend) : descend);
