@@ -1,5 +1,6 @@
 import type { DiscordMember } from "@services/bastion";
 import type { UserProfile } from "../../domain/user/User";
+import type {FitScoreDetails} from "@plugins/fit/domain/user/FitScore";
 import type { SummaryDetails, SummaryStats } from "../../domain/strava/ActivitySummary";
 import type Activity from "../../domain/strava/Activity";
 
@@ -31,34 +32,39 @@ export const createProfileEmbed = (data: ProfileData): MessageOptions["embed"] =
 })
 
 const level = ({user}: ProfileData) => field("Level", user.level);
-
 const exp = ({user}: ProfileData) => field("EXP", toTenths(user.exp));
 
-const fitScore = ({user}: ProfileData) => field(
-  "Fit Score",
-  `${user.fitScore.score} *(${user.fitScore.rankName})*`
-);
+const fitScore = ({user}: ProfileData) => pipe(
+  ({score, rankName}: FitScoreDetails) => `${score} *(${rankName})*`,
+  asField("Fit Score")
+)(user.fitScore);
 
 /** Show the last activity's title, otherwise let user know it's empty */
 const lastActivity = ({user, activities}: ProfileData) => pipe(
   ifElse(
     isEmpty,
     always("*No activities in last 30 days*"),
-    (activity: Activity) => lastActivityOverview(user, activity)
+    lastActivityOverview(user.gender)
   ),
-  asField(`Last Activity`)
+  asField(`Last Activity`, false)
 )(activities.lastActivity)
 
-const lastActivityOverview = (user: UserProfile, activity: Activity) => join(" ", [
-  getEmoji(user.gender)(activity.type),
+const lastActivityOverview = (gender: string) => (activity: Activity) => join(" ", [
+  getEmoji(gender)(activity.type),
   activity.name,
-  fromNow(activity.timestamp.toString(), {suffix: true, max: 1}),
+  fromNow(
+    activity.timestamp.toString(), 
+    {suffix: true, max: 1}
+  ),
 ])
 
 /** Display totals of each workout type, along with count + time */
 const activityTotals = ({activities}: ProfileData) => pipe(
   sort<SummaryStats>((a, b) => a.count > b.count ? -1 : 1),
-  map(summary => `**${summary.type}** • ${summary.count} activities (${summary.totalTime.toString()})`),
+  map(activityTotalSummary),
   join("\n"),
   asField(`30 Day Totals *(${activities.count} Activities)*`)
 )(activities.stats)
+
+const activityTotalSummary = (summary: SummaryStats) => 
+  `**${summary.type}** • ${summary.count} activities (${summary.totalTime.toString()})`
