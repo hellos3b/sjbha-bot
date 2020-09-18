@@ -30,7 +30,7 @@ export default class Request {
   }
 
   /** Reply directly to the incoming message */
-  reply = (msg: string|Discord.MessageEmbed) => this.message.channel.send(msg);
+  reply = (msg: string|Discord.MessageEmbed|Discord.MessageOptions) => this.message.channel.send(msg);
 
   getMember = (discordId?: string) => {
     discordId = discordId || this.message.author.id;

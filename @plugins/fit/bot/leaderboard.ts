@@ -1,6 +1,6 @@
 import {reduce} from "lodash";
 import {Request} from "@services/bastion";
-import LeaderboardEmbed from "./embeds/LeaderboardEmbed";
+import {createLeaderboardEmbed} from "./embeds/LeaderboardEmbed";
 import {getAllUsers} from "../domain/user/UserRepository";
 
 export async function leaderboard(req: Request) {
@@ -23,10 +23,10 @@ export async function leaderboard(req: Request) {
     {} as Record<string, string>
   )
 
-  const embed = LeaderboardEmbed({
+  const embed = createLeaderboardEmbed({
     users: leaderboard,
     nicknames
   });
 
-  await req.reply(embed);
+  await req.reply({embed});
 }

@@ -1,5 +1,5 @@
-import {map} from "lodash";
-import {MessageEmbed} from "discord.js";
+import {inc, always, pipe} from "ramda";
+import {MessageEmbed, MessageOptions} from "discord.js";
 
 import { SerializedUser } from "../../domain/user/User";
 
@@ -8,22 +8,18 @@ interface LeaderboardData {
   users: SerializedUser[];
 }
 
-export default function LeaderboardEmbed({nicknames, users}: LeaderboardData) {
-  const embed = new MessageEmbed().setColor("#4ba7d1");
+export const createLeaderboardEmbed = ({nicknames, users}: LeaderboardData): MessageOptions["embed"] => ({
+  color: 0x4ba7d1,
 
-  embed.setAuthor("Fit Score Leaderboard", "https://imgur.com/Wj9X4s0.png");
-  // embed.setTitle("Fit score leaderboard");
+  author: {
+    name: "Fit Score Leaderboard",
+    icon_url: "https://imgur.com/Wj9X4s0.png"
+  },
 
-  let leaderboard = map(
-    users,
-    (user, i) => {
-      const nickname = nicknames[user.discordId];
-      const rank = (i + 1).toString().padStart(2, "0");
-      return `${rank}.   **${nickname}** • ${Math.floor(user.fitScore)}`; 
-    }
-  ).join("\n");
+  description: users.map((user, i) => 
+    row(inc(i), nicknames[user.discordId], Math.floor(user.fitScore))
+  ).join("\n")
+})
 
-  embed.setDescription(leaderboard);
-
-  return embed;
-}
+const row = (rank: number, name: string, fitScore: number) => 
+  `${rank}. **${name}** • ${fitScore}`;
