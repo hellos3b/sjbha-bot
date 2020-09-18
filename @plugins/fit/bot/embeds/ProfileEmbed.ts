@@ -35,12 +35,12 @@ const lastActivity = ({user, activities}: ProfileData) => pipe(
   ifElse(
     isEmpty,
     always("*No activities in last 30 days*"),
-    lastActivityOverview(getEmoji(user.gender))
+    activityLog(getEmoji(user.gender))
   ),
   asField(`Last Activity`, false)
 )(activities.lastActivity)
 
-const lastActivityOverview = (emoji: GenderedEmoji) => (activity: Activity) => format(
+const activityLog = (emoji: GenderedEmoji) => (activity: Activity) => format(
   '{1} {2} {3}', [
     emoji(activity.type),
     activity.name,
