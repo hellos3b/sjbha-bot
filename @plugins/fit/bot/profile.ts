@@ -2,7 +2,7 @@ import {Request} from "@services/bastion";
 import {getUser} from "../domain/user/UserRepository";
 import {getActivitySummary} from "../domain/strava/ActivitySummaryRepository";
 
-import ProfileEmbed from "./embeds/ProfileEmbed";
+import {createProfileEmbed} from "./embeds/ProfileEmbed";
 
 // 
 // Display an over view of stats 
@@ -15,12 +15,12 @@ export async function profile(req: Request) {
     getActivitySummary(req.author.id)
   ]);
 
-  const embed = ProfileEmbed({
+  const embed = createProfileEmbed({
     member    : req.getMember(),
     user      : user.getProfile(),
     activities: summary.getDetails()
   });
 
   message.delete();
-  await req.reply(embed);
+  await req.reply({embed});
 }

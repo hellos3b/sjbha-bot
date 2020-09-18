@@ -4,9 +4,14 @@ import type ExperiencePoints from "../../domain/user/ExperiencePoints";
 import type Activity from "../../domain/strava/Activity";
 import type { UserProfile } from "../../domain/user/User";
 
-import {map, reject, applyTo, prop as RProp, pipe, prepend, defaultTo, includes, join} from "ramda";
+import {map, reject, applyTo, pipe, prepend, defaultTo, includes, join} from "ramda";
+import {prop, propOr, switchcase, filterNil} from "../../fp-utils";
 import {toMiles, toTime, toPace, toTenths} from "./conversions";
-import {ActivityType, activity_emojis} from "../../config";
+import {ActivityType} from "../../config";
+
+import {Field, asField} from "./embed";
+import {getEmoji} from "./emoji";
+import { ActivityResponse } from "@plugins/fit/strava-client";
 
 // todo: make move this interface to some kind of mapping FN
 interface CreateProps {
@@ -24,57 +29,44 @@ export const createActivityEmbed = ({member, user, exp, activity, weeklyExp}: Cr
   thumbnail   : { 
     url: member.avatar 
   },
-
-  author: {
-    name: join(" ", [
-      getEmoji(user.gender)(activity.type), 
-      member.member.displayName,
-      getVerb(activity.type)
-    ])
+  author: { 
+    name: heading(
+      member.member.displayName, 
+      user.gender, 
+      activity.type
+    ) 
   },
-  
-  fields: pipe(
-    activityFields,
-    map(applyTo(activity.getRaw())),
-    filterHRIf(user.optedOutHR || !activity.hasHeartrate),
-    filterNil
-  )(activity.type),
-
-  footer: {
-    text: join(" ", [
-      `Gained ${toTenths(exp.total)} exp`,
-      `(${toTenths(exp.moderate)}+ ${toTenths(exp.vigorous)}++) |`,
-      `${toTenths(weeklyExp)} exp this week`
-    ])
+  fields: statFields(
+    activity.getRaw(), 
+    user.optedOutHR || !activity.hasHeartrate
+  ),
+  footer: { 
+    text: footerText(exp, weeklyExp)
   }
 })
 
-type Field = {
-  name: string;
-  value: string;
-  inline?: boolean;
-};
+const heading = (gender: string, displayName: string, activityType: string) => join(" ", [
+  getEmoji(gender)(activityType), 
+  displayName,
+  getVerb(activityType)
+])
 
-// utils
+/** For the fields we pick specific stats per activity, and then format it */
+const statFields = (activity: ActivityResponse, showHeartrate: boolean) => pipe(
+  activityFields,
+  map(applyTo(activity)),
+  filterHRIf(showHeartrate),
+  filterNil
+)(activity.type);
 
-/** Filters null values out of an array. `reject(isNil)` isn't typed well enough */
-const filterNil = <T>(arr: (T|null)[]) => arr.filter((value): value is T => !!value);
+/** The slightly muted text at the bottom of the embed. Lets show experience pt progress */
+const footerText = (exp: ExperiencePoints, weeklyExp: number) => join(" ", [
+  `Gained ${toTenths(exp.total)} exp`,
+  `(${toTenths(exp.moderate)}+ ${toTenths(exp.vigorous)}++) |`,
+  `${toTenths(weeklyExp)} exp this week`
+]);
 
-/** Creates a field */
-const asField = (name: string) => (value: string|number): Field => ({
-  name, 
-  value: String(value),
-  inline: true
-})
-
-// utils
-const prop = <T>(key: string) => (obj: Record<string, any>): T => obj[key];
-const propOr = <T>(key: string, defaultVal: T) => pipe(prop<T>(key), defaultTo(defaultVal));
-
-/** Looks up a hash table */
-const switchcase = <T>(lookupObj: Record<string, T>) => (key: string): T => RProp(key, lookupObj);
-
-// Converts (string|number) into an embed field
+// Conversions for all the fields
 const time = pipe(
   prop("elapsed_time"),
   toTime, 
@@ -143,10 +135,3 @@ const getVerb = (activityType: string) => pipe(
 const filterHRIf = (filterHR: boolean) => reject(
   (field: Field) => filterHR && includes(field.name, "HR")
 );
-
-/** Gets the emoji from the config */
-const getEmoji = (gender: string) => (activityType: string) => pipe(
-  switchcase(activity_emojis),
-  defaultTo(activity_emojis["default"]),
-  ([male, female]) => gender === "M" ? male : female
-)(activityType);
