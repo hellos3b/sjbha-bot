@@ -7,15 +7,22 @@ import {multiply, pipe} from "ramda";
 export const toTenths = (value: number) => value.toFixed(1);
 
 /** Converts meters to miles */
-export const toMiles = (meters: number) => pipe(
+export const toMiles = pipe(
   multiply(0.000621371192),
   toTenths,
-  val => val + 'mi'
-)(meters)
+  val => format('{0}mi', val)
+)
 
-/** Converts meters to a pace mm:ss/mi */
-export const toPace = (seconds: number) => {
-  let secs = seconds;
+export const toFeet = pipe(
+  multiply(3.2808399),
+  Math.floor,
+  val => format('{0}ft', val.toString())
+)
+
+// todo: lets make these time ones a little more functional
+/** Converts seconds to a pace mm:ss/mi */
+export const toPace = (meters: number) => {
+  let secs = (26.8224 / meters)*60;
 
   let minutes = Math.floor(secs / 60);
   secs = Math.floor(secs%60);
@@ -35,6 +42,8 @@ export const toPace = (seconds: number) => {
   return result + "/mi";
 }
 
+const pad = (value: number) => value.toString().padStart(2, "0");
+
 /** Converts seconds to a time string, example "43m 20s" */
 export const toTime = (seconds: number) => {
   const hours = Math.floor(seconds / (60 * 60));
@@ -46,11 +55,11 @@ export const toTime = (seconds: number) => {
   const sec = Math.ceil(divisor_for_seconds);
 
   if (hours > 0) {
-    return format('{1}h {2}m', [hours, pad(minutes)]);
+    return format('{0}h {1}m', hours.toString(), pad(minutes));
   }
 
   if (minutes > 0) {
-    return format('{1}m {2}s', [minutes, pad(sec)]);
+    return format('{0}m {1}s', minutes.toString(), pad(sec));
   }
 
   return `${sec}s`;
@@ -58,5 +67,3 @@ export const toTime = (seconds: number) => {
 
 /** Turn a luxon dateTime into a "from now" time */
 export const toRelative = (time: DateTime) => fromNow(time.toString(), {suffix: true, max: 1})
-
-const pad = (value: number) => value.toString().padStart(2, "0");

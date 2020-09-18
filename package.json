@@ -34,6 +34,7 @@
     "ramda": "^0.27.1",
     "randomstring": "^1.1.5",
     "regenerator-runtime": "^0.13.7",
+    "rxjs": "^6.6.3",
     "shortid": "^2.2.15",
     "showdown": "^1.9.1",
     "string-format": "^2.0.0",

@@ -18,10 +18,10 @@ export const createLeaderboardEmbed = ({nicknames, users}: LeaderboardData): Mes
   },
 
   description: users.map((user, i) => format(
-    '{0}. **{1}** • {2}', [
-      inc(i), 
+    '{0}. **{1}** • {2}',
+      String(inc(i)),
       prop(user.discordId, nicknames),
-      Math.floor(user.fitScore)
-    ]))
+      String(Math.floor(user.fitScore))
+    ))
     .join("\n")
 })

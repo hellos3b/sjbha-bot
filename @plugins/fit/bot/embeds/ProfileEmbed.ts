@@ -23,15 +23,15 @@ const exp = ({user}: ProfileData) => field("EXP", toTenths(user.exp));
 
 const fitScore = ({user}: ProfileData) => pipe(() => 
   format(
-    '{1} *({2})*', [
-      user.fitScore.score, 
+    '{0} *({1})*',
+      user.fitScore.score.toString(), 
       user.fitScore.rankName
-    ]),
+    ),
   asField("Fit Score")
 )();
 
 /** Show the last activity's title, otherwise let user know it's empty */
-const lastActivity = ({user, activities}: ProfileData) => pipe(
+const recent = ({user, activities}: ProfileData) => pipe(
   ifElse(
     isEmpty,
     always("*No activities in last 30 days*"),
@@ -41,26 +41,26 @@ const lastActivity = ({user, activities}: ProfileData) => pipe(
 )(activities.lastActivity)
 
 const activityLog = (emoji: GenderedEmoji) => (activity: Activity) => format(
-  '{1} {2} {3}', [
+  '{0} {1} {2}',
     emoji(activity.type),
     activity.name,
     toRelative(activity.timestamp)
-  ])
+  )
 
 /** Display totals of each workout type, along with count + time */
-const activityTotals = ({activities}: ProfileData) => pipe(
+const totals = ({activities}: ProfileData) => pipe(
   sortByProp<SummaryStats>("count"),
-  map(activityTotalSummary),
+  map(totalSummary),
   join("\n"),
   asField(`30 Day Totals *(${activities.count} Activities)*`)
 )(activities.stats)
 
-const activityTotalSummary = (summary: SummaryStats) => format(
-  '**{1}** • {2} activities ({3})', [
+const totalSummary = (summary: SummaryStats) => format(
+  '**{0}** • {1} activities ({2})',
     summary.type,
-    summary.count,
+    summary.count.toString(),
     summary.totalTime.toString()
-  ])
+  )
 
 export const createProfileEmbed = (data: ProfileData): MessageOptions["embed"] => ({
   color: 0x4ba7d1,
@@ -70,6 +70,6 @@ export const createProfileEmbed = (data: ProfileData): MessageOptions["embed"] =
     icon_url: data.member.avatar
   },
 
-  fields: [level, exp, fitScore, lastActivity, activityTotals]
+  fields: [level, exp, fitScore, recent, totals]
     .map(applyTo(data))
 })

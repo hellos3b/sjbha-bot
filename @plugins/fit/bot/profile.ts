@@ -22,5 +22,8 @@ export async function profile(req: Request) {
   });
 
   message.delete();
+
+  console.log(embed);
+  
   await req.reply({embed});
 }

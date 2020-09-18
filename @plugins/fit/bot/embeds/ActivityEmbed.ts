@@ -4,10 +4,10 @@ import type ExperiencePoints from "../../domain/user/ExperiencePoints";
 import type Activity from "../../domain/strava/Activity";
 import type { UserProfile } from "../../domain/user/User";
 
-import {map, reject, applyTo, pipe, prepend, defaultTo, includes, join} from "ramda";
+import {map, reject, applyTo, pipe, prepend, defaultTo, includes, prop} from "ramda";
 import format from 'string-format';
-import {prop, propOr, switchcase, filterNil} from "../../fp-utils";
-import {toMiles, toTime, toPace, toTenths} from "./conversions";
+import {propOr, switchcase, filterNil} from "../../fp-utils";
+import {toMiles, toTime, toPace, toTenths, toFeet} from "./conversions";
 import {ActivityType} from "../../config";
 
 import {Field, asField} from "./embed";
@@ -23,12 +23,18 @@ interface CreateProps {
   weeklyExp: number;
 }
 
+/** If user has Opted out of HR, we filter out the HR related fields */
+const filterHRIf = (filterHR: boolean) => reject((field: Field) => filterHR && includes(field.name, "HR"));
+/** Typecast `prop` to ActivityResponse */
+const activityProp = <K extends keyof ActivityResponse>(key: K) => (obj: ActivityResponse) => prop(key, obj);
+
+
 const heading = (emoji: string, displayName: string, activityType: string) => format(
-  '{1} {2} just {3}', [
+  '{0} {1} just {2}',
     emoji, 
     displayName,
     activityVerb(activityType)
-  ])
+  )
 
 /** For the fields we pick specific stats per activity, and then format it */
 const statFields = (activity: ActivityResponse, showHeartrate: boolean) => pipe(
@@ -40,47 +46,49 @@ const statFields = (activity: ActivityResponse, showHeartrate: boolean) => pipe(
 
 /** The slightly muted text at the bottom of the embed. Lets show experience pt progress */
 const footerText = (exp: ExperiencePoints, weeklyExp: number) => format(
-  'Gained {1} exp ({2}+ {3}++) | {4} exp this week', [
+  'Gained {0} exp ({1}+ {2}++) | {3} exp this week',
     toTenths(exp.total),
     toTenths(exp.moderate),
     toTenths(exp.vigorous),
     toTenths(weeklyExp)
-  ]);
+  );
 
 // Conversions for all the fields
 const time = pipe(
-  prop("elapsed_time"),
+  activityProp("elapsed_time"),
   toTime, 
   asField("Time")
 );
 
 const pace = pipe(
-  prop("speed"),
+  activityProp("average_speed"),
   toPace, 
   asField("Pace")
 );
 
 const distance = pipe(
-  prop("distance"),
+  activityProp("distance"),
   toMiles, 
   asField("Distance")
 );
 
 const averageHeartrate = pipe(
-  propOr<number>("average_heartrate", 0),
+  activityProp("average_heartrate"),
+  defaultTo(0),
   Math.round,
   asField("Avg HR")
 );
 
 const maxHeartrate = pipe(
-  propOr<number>("max_heartrate", 0),
+  activityProp("max_heartrate"),
+  defaultTo(0),
   Math.round,
   asField("Max HR")
 );
 
 const elevation = pipe(
-  prop("total_elevation_gained"),
-  toMiles, 
+  activityProp("total_elevation_gain"),
+  toFeet, 
   asField("Elevation")
 );
 
@@ -111,9 +119,6 @@ const activityVerb = (activityType: string) => pipe(
   }),
   defaultTo("did a workout")
 )(activityType)
-
-/** If user has Opted out of HR, we filter out the HR related fields */
-const filterHRIf = (filterHR: boolean) => reject((field: Field) => filterHR && includes(field.name, "HR"));
 
 export const createActivityEmbed = ({member, user, exp, activity, weeklyExp}: CreateProps): MessageOptions["embed"] => ({
   title       : activity.name,
