@@ -23,29 +23,6 @@ interface CreateProps {
   weeklyExp: number;
 }
 
-export const createActivityEmbed = ({member, user, exp, activity, weeklyExp}: CreateProps): MessageOptions["embed"] => ({
-  title       : activity.name,
-  description : activity.description || "",
-  color       : 0xFC4C02,
-  thumbnail   : { 
-    url: member.avatar 
-  },
-  author: { 
-    name: heading(
-      member.member.displayName, 
-      user.gender, 
-      activity.type
-    ) 
-  },
-  fields: statFields(
-    activity.getRaw(), 
-    user.optedOutHR || !activity.hasHeartrate
-  ),
-  footer: { 
-    text: footerText(exp, weeklyExp)
-  }
-})
-
 const heading = (gender: string, displayName: string, activityType: string) => 
   format('{1} {2} {3}', [
     getEmoji(gender)(activityType), 
@@ -139,3 +116,26 @@ const getVerb = (activityType: string) => pipe(
 const filterHRIf = (filterHR: boolean) => reject(
   (field: Field) => filterHR && includes(field.name, "HR")
 );
+
+export const createActivityEmbed = ({member, user, exp, activity, weeklyExp}: CreateProps): MessageOptions["embed"] => ({
+  title       : activity.name,
+  description : activity.description || "",
+  color       : 0xFC4C02,
+  thumbnail   : { 
+    url: member.avatar 
+  },
+  author: { 
+    name: heading(
+      member.member.displayName, 
+      user.gender, 
+      activity.type
+    ) 
+  },
+  fields: statFields(
+    activity.getRaw(), 
+    user.optedOutHR || !activity.hasHeartrate
+  ),
+  footer: { 
+    text: footerText(exp, weeklyExp)
+  }
+})

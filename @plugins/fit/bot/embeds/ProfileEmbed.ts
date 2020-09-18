@@ -18,19 +18,6 @@ interface ProfileData {
   activities: SummaryDetails  
 }
 
-export const createProfileEmbed = (data: ProfileData): MessageOptions["embed"] => ({
-  color: 0x4ba7d1,
-  author: {
-    name: data.member.member.displayName,
-    icon_url: data.member.avatar
-  },
-
-  fields: map(
-    applyTo(data), 
-    [level, exp, fitScore, lastActivity, activityTotals]
-  )
-})
-
 const level = ({user}: ProfileData) => field("Level", user.level);
 const exp = ({user}: ProfileData) => field("EXP", toTenths(user.exp));
 
@@ -73,3 +60,15 @@ const activityTotalSummary = (summary: SummaryStats) =>
     summary.count,
     summary.totalTime.toString()
   ])
+
+export const createProfileEmbed = (data: ProfileData): MessageOptions["embed"] => ({
+  color: 0x4ba7d1,
+  
+  author: {
+    name: data.member.member.displayName,
+    icon_url: data.member.avatar
+  },
+
+  fields: [level, exp, fitScore, lastActivity, activityTotals]
+    .map(applyTo(data))
+})
