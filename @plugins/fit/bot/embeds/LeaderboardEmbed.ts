@@ -1,7 +1,7 @@
-import {inc, always, pipe} from "ramda";
-import {MessageEmbed, MessageOptions} from "discord.js";
+import type {MessageOptions} from "discord.js";
+import type { SerializedUser } from "../../domain/user/User";
 
-import { SerializedUser } from "../../domain/user/User";
+import {inc} from "ramda";
 
 interface LeaderboardData {
   nicknames: Record<string, string>;

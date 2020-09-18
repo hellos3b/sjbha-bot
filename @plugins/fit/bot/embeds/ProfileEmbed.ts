@@ -1,11 +1,11 @@
-import {map, isEmpty, always, pipe, join, ifElse, sort, applyTo} from "ramda";
-import {MessageOptions} from "discord.js";
-import fromNow from "fromnow";
-
 import type { DiscordMember } from "@services/bastion";
 import type { UserProfile } from "../../domain/user/User";
 import type { SummaryDetails, SummaryStats } from "../../domain/strava/ActivitySummary";
 import type Activity from "../../domain/strava/Activity";
+
+import {map, isEmpty, always, pipe, join, ifElse, sort, applyTo} from "ramda";
+import {MessageOptions} from "discord.js";
+import fromNow from "fromnow";
 
 import {toTenths} from "./conversions";
 import {getEmoji} from "./emoji";
@@ -31,7 +31,9 @@ export const createProfileEmbed = (data: ProfileData): MessageOptions["embed"] =
 })
 
 const level = ({user}: ProfileData) => field("Level", user.level);
+
 const exp = ({user}: ProfileData) => field("EXP", toTenths(user.exp));
+
 const fitScore = ({user}: ProfileData) => field(
   "Fit Score",
   `${user.fitScore.score} *(${user.fitScore.rankName})*`
