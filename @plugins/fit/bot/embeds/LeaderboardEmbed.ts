@@ -1,7 +1,8 @@
 import type {MessageOptions} from "discord.js";
 import type { SerializedUser } from "../../domain/user/User";
 
-import {inc} from "ramda";
+import format from 'string-format';
+import {inc, prop} from "ramda";
 
 interface LeaderboardData {
   nicknames: Record<string, string>;
@@ -17,9 +18,9 @@ export const createLeaderboardEmbed = ({nicknames, users}: LeaderboardData): Mes
   },
 
   description: users.map((user, i) => 
-    row(inc(i), nicknames[user.discordId], Math.floor(user.fitScore))
-  ).join("\n")
+    format('{0}. **{1}** • {2}', [
+      inc(i), 
+      prop(user.discordId, nicknames),
+      Math.floor(user.fitScore)
+    ])).join("\n")
 })
-
-const row = (rank: number, name: string, fitScore: number) => 
-  `${rank}. **${name}** • ${fitScore}`;

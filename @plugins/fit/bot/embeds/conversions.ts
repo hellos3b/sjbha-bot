@@ -1,3 +1,6 @@
+import type { DateTime } from "luxon";
+import format from 'string-format';
+import fromNow from "fromnow";
 import {multiply, pipe} from "ramda";
 
 /** Format a number to the first decimal place `(1.423 => 1.4)` */
@@ -43,12 +46,17 @@ export const toTime = (seconds: number) => {
   const sec = Math.ceil(divisor_for_seconds);
 
   if (hours > 0) {
-    return `${hours}h ${minutes.toString().padStart(2, "0")}m`;
+    return format('{1}h {2}m', [hours, pad(minutes)]);
   }
 
   if (minutes > 0) {
-    return `${minutes}m ${sec.toString().padStart(2, "0")}s`;
+    return format('{1}m {2}s', [minutes, pad(sec)]);
   }
 
   return `${sec}s`;
 }
+
+/** Turn a luxon dateTime into a "from now" time */
+export const toRelative = (time: DateTime) => fromNow(time.toString(), {suffix: true, max: 1})
+
+const pad = (value: number) => value.toString().padStart(2, "0");
