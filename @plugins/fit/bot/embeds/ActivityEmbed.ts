@@ -1,13 +1,14 @@
-import { MessageEmbed } from "discord.js";
-import { DiscordMember } from "@services/bastion";
+import type { MessageOptions } from "discord.js";
+import type { DiscordMember } from "@services/bastion";
+import type ExperiencePoints from "../../domain/user/ExperiencePoints";
+import type Activity from "../../domain/strava/Activity";
+import type { UserProfile } from "../../domain/user/User";
 
-import ActivityEmoji from "./ActivityEmoji";
+import {map, reject, applyTo, prop as RProp, pipe, prepend, defaultTo, includes, join} from "ramda";
+import {toMiles, toTime, toPace, toTenths} from "./conversions";
+import {ActivityType, activity_emojis} from "../../config";
 
-import ExperiencePoints from "../../domain/user/ExperiencePoints";
-import Activity from "../../domain/strava/Activity";
-import { UserProfile } from "../../domain/user/User";
-import {ActivityType} from "../../config";
-
+// todo: make move this interface to some kind of mapping FN
 interface CreateProps {
   member: DiscordMember;
   user: UserProfile;
@@ -16,98 +17,136 @@ interface CreateProps {
   weeklyExp: number;
 }
 
-export function createActivityEmbed({member, user, exp, activity, weeklyExp}: CreateProps) {
-  const nickname = member.member.displayName;
-  let embed = new MessageEmbed().setColor("FC4C02");
+export const createActivityEmbed = ({member, user, exp, activity, weeklyExp}: CreateProps): MessageOptions["embed"] => ({
+  title       : activity.name,
+  description : activity.description || "",
+  color       : 0xFC4C02,
+  thumbnail   : { 
+    url: member.avatar 
+  },
+
+  author: {
+    name: join(" ", [
+      getEmoji(user.gender)(activity.type), 
+      member.member.displayName,
+      getVerb(activity.type)
+    ])
+  },
   
-  embed.setTitle(activity.name);
-  embed.setDescription(activity.description || "");
+  fields: pipe(
+    activityFields,
+    map(applyTo(activity.getRaw())),
+    filterHRIf(user.optedOutHR || !activity.hasHeartrate),
+    filterNil
+  )(activity.type),
 
-  embed.setThumbnail(member.avatar);
-  embed.setFooter(`Gained ${exp.total.toFixed(1)} exp (${exp.moderate.toFixed(1)}+ ${exp.vigorous.toFixed(1)}++) | ${weeklyExp.toFixed(1)} exp this week`);
-  embed.addField("Time", activity.elapsedTime.toString(), true);
-
-  const emoji = new ActivityEmoji(activity.type, user.gender);
-
-  function addHeartrate() {
-    // Check if user is opt-out
-    if (user.optedOutHR) return;
-
-    // Check if activity has HR data
-    if (!activity.hasHeartrate) return;
-
-    embed.addField("Avg HR", Math.round(activity.avgHeartrate), true);
-    embed.addField("Max HR", Math.round(activity.maxHeartrate), true);    
+  footer: {
+    text: join(" ", [
+      `Gained ${toTenths(exp.total)} exp`,
+      `(${toTenths(exp.moderate)}+ ${toTenths(exp.vigorous)}++) |`,
+      `${toTenths(weeklyExp)} exp this week`
+    ])
   }
+})
 
-  // Fill out activity-specific fields
-  switch (activity.type) {
+type Field = {
+  name: string;
+  value: string;
+  inline?: boolean;
+};
 
-  case ActivityType.RIDE: {
-    embed.setAuthor(`${emoji.toString()} ${nickname} just went for a ride`);
-    embed.addField("Distance", activity.distance.toMiles.toFixed(2) + "mi", true);
-    embed.addField("Elevation", Math.floor(activity.elevation.toFeet) + "ft", true);
+// utils
 
-    break;
-  }
+/** Filters null values out of an array. `reject(isNil)` isn't typed well enough */
+const filterNil = <T>(arr: (T|null)[]) => arr.filter((value): value is T => !!value);
 
-  case ActivityType.RUN: {
-    embed.setAuthor(`${emoji.toString()} ${nickname} just went for a run`);
-    embed.addField("Distance", activity.distance.toMiles.toFixed(2) + "mi", true);
-    embed.addField("Pace", activity.speed.toPace.hhmmss + "m/mi", true);
+/** Creates a field */
+const asField = (name: string) => (value: string|number): Field => ({
+  name, 
+  value: String(value),
+  inline: true
+})
 
-    break;
-  }
+// utils
+const prop = <T>(key: string) => (obj: Record<string, any>): T => obj[key];
+const propOr = <T>(key: string, defaultVal: T) => pipe(prop<T>(key), defaultTo(defaultVal));
 
-  case ActivityType.YOGA: {
-    embed.setAuthor(`${emoji.toString()} ${nickname} just did some yoga`);
-    break;
-  }
+/** Looks up a hash table */
+const switchcase = <T>(lookupObj: Record<string, T>) => (key: string): T => RProp(key, lookupObj);
 
-  case ActivityType.CROSSFIT: {
-    embed.setAuthor(`${emoji.toString()} ${nickname} just did crossfit`);
-    addHeartrate();
+// Converts (string|number) into an embed field
+const time = pipe(
+  prop("elapsed_time"),
+  toTime, 
+  asField("Time")
+);
 
-    break;
-  }
+const pace = pipe(
+  prop("speed"),
+  toPace, 
+  asField("Pace")
+);
 
-  case ActivityType.WEIGHT_TRAIN: {
-    embed.setAuthor(`${emoji.toString()} ${nickname} just lifted some weights`);
-    addHeartrate();
+const distance = pipe(
+  prop("distance"),
+  toMiles, 
+  asField("Distance")
+);
 
-    break;
-  }
+const averageHeartrate = pipe(
+  propOr<number>("average_heartrate", 0),
+  Math.round,
+  asField("Avg HR")
+);
 
-  case ActivityType.HIKE: {
-    embed.setAuthor(`${emoji.toString()} ${nickname} just did a hike`);
-    embed.addField("Distance", activity.distance.toMiles.toFixed(2) + "mi", true);
-    embed.addField("Elevation", Math.floor(activity.elevation.toFeet) + "ft", true);
+const maxHeartrate = pipe(
+  propOr<number>("max_heartrate", 0),
+  Math.round,
+  asField("Max HR")
+);
 
-    break;
-  }
+const elevation = pipe(
+  prop("total_elevation_gained"),
+  toMiles, 
+  asField("Elevation")
+);
 
-  case ActivityType.WALK: {
-    embed.setAuthor(`${emoji.toString()} ${nickname} just went for a walk`);
-    embed.addField("Distance", activity.distance.toMiles.toFixed(2) + "mi", true);
+/** Get the fields for the specific type of activity */
+const activityFields = (activityType: string) => pipe(
+  switchcase({
+    [ActivityType.RIDE] : [distance, elevation],
+    [ActivityType.RUN]  : [distance, pace],
+    [ActivityType.HIKE] : [distance, elevation],
+    [ActivityType.WALK] : [distance],
+    [ActivityType.YOGA] : []
+  }),
+  defaultTo([averageHeartrate, maxHeartrate]),
+  prepend(time)
+)(activityType);
 
-    break;
-  }
+/** The action that the user just did, in english */
+const getVerb = (activityType: string) => pipe(
+  switchcase({
+    [ActivityType.RIDE]   : "just went for a ride",
+    [ActivityType.RUN]    : "just went for a run",
+    [ActivityType.YOGA]   : "just did some yoga",
+    [ActivityType.CROSSFIT]: "just did crossfit",
+    [ActivityType.WEIGHT_TRAIN]: "just lifted some weights",
+    [ActivityType.HIKE]   : "just went on a hike",
+    [ActivityType.WALK]   : "just went on a walk",
+    [ActivityType.ROCK_CLIMB]: "just went rock climbing"
+  }),
+  defaultTo("just did a workout")
+)(activityType)
 
-  case ActivityType.ROCK_CLIMB: {
-    embed.setAuthor(`${emoji.toString()} ${nickname} just went rock climbing`);
-    addHeartrate();
+/** If user has Opted out of HR, we filter out the HR related fields */
+const filterHRIf = (filterHR: boolean) => reject(
+  (field: Field) => filterHR && includes(field.name, "HR")
+);
 
-    break;
-  }
-
-  default: {
-    embed.setAuthor(`${emoji.toString()} ${nickname} just did a workout`);
-    addHeartrate(); 
-
-    break;
-  }
-
-  }
-
-  return embed;
-}
+/** Gets the emoji from the config */
+const getEmoji = (gender: string) => (activityType: string) => pipe(
+  switchcase(activity_emojis),
+  defaultTo(activity_emojis["default"]),
+  ([male, female]) => gender === "M" ? male : female
+)(activityType);

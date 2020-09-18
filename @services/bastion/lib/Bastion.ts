@@ -63,7 +63,7 @@ export default class Bastion extends Router {
     return new Router()
   }
 
-  public sendTo(channelId: string, message: string|Discord.MessageEmbed) {
+  public sendTo(channelId: string, message: string|Discord.MessageEmbed|Discord.MessageOptions) {
     const channel = this.client.channels.cache.get(channelId) as TextChannel;
     if (!channel) throw new Error(`Can't get channel with id ${channelId}`);
     return channel.send(message);

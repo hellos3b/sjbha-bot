@@ -33,6 +33,10 @@ export default class Activity {
     this._streams = streams;
   }
 
+  getRaw() {
+    return JSON.parse(JSON.stringify(this._data));
+  }
+
   get id() {
     return this._data.id;
   }

@@ -76,6 +76,7 @@ export const ActivityType = {
   WALK: "Walk",
   WEIGHT_TRAIN: "WeightTraining",
   ROCK_CLIMB: "RockClimbing",
+  // todo: deprecate 'default'
   default: ""
 }
 
@@ -89,7 +90,9 @@ export const activity_emojis = {
   [ActivityType.CROSSFIT]: ["🏋️‍♂️", "🏋️‍♀️"],
   [ActivityType.WEIGHT_TRAIN]: ["🏋️‍♂️", "🏋️‍♀️"],
   [ActivityType.ROCK_CLIMB]: ["🧗‍♂️", "🧗‍♀️"],
-  [ActivityType.default]: ["🤸‍♂️", "🤸‍♀️"]
+  // todo: deprecate the default type
+  [ActivityType.default]: ["🤸‍♂️", "🤸‍♀️"],
+  default: ["🤸‍♂️", "🤸‍♀️"]
 };
 
 /** The names of ranks */
