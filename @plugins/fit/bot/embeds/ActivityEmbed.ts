@@ -4,7 +4,7 @@ import type ExperiencePoints from "../../domain/user/ExperiencePoints";
 import type Activity from "../../domain/strava/Activity";
 import type { UserProfile } from "../../domain/user/User";
 
-import {map, reject, applyTo, pipe, prepend, defaultTo, includes, prop} from "ramda";
+import {map, reject, applyTo, pipe, prepend, join, defaultTo, includes, prop} from "ramda";
 import format from 'string-format';
 import {propOr, switchcase, filterNil} from "../../fp-utils";
 import {toMiles, toTime, toPace, toTenths, toFeet} from "./conversions";
@@ -45,13 +45,11 @@ const statFields = (activity: ActivityResponse, showHeartrate: boolean) => pipe(
 )(activity.type);
 
 /** The slightly muted text at the bottom of the embed. Lets show experience pt progress */
-const footerText = (exp: ExperiencePoints, weeklyExp: number) => format(
-  'Gained {0} exp ({1}+ {2}++) | {3} exp this week',
-    toTenths(exp.total),
-    toTenths(exp.moderate),
-    toTenths(exp.vigorous),
-    toTenths(weeklyExp)
-  );
+const footerText = (exp: ExperiencePoints, weeklyExp: number, hasHR: boolean) => join(" ", [
+  format('Gained {0} exp', toTenths(exp.total)),
+  hasHR ? format('({0}+ {1}++)', toTenths(exp.moderate), toTenths(exp.vigorous)) : '',
+  format('| {0} exp this week', toTenths(weeklyExp))
+]);
 
 // Conversions for all the fields
 const time = pipe(
@@ -139,6 +137,6 @@ export const createActivityEmbed = ({member, user, exp, activity, weeklyExp}: Cr
     user.optedOutHR || !activity.hasHeartrate
   ),
   footer: { 
-    text: footerText(exp, weeklyExp)
+    text: footerText(exp, weeklyExp, (!user.optedOutHR && activity.hasHeartrate))
   }
 })
