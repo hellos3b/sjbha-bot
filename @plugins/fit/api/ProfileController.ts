@@ -71,8 +71,6 @@ export async function postActivity(req: express.Request, res: express.Response) 
       weeklyExp: weekly.totalExp
     })
 
-    console.log(JSON.stringify(embed, null, 2));
-
     // finally lets send the embed
     await bastion.sendTo(post_to_channel, {embed});
   } catch (e) {

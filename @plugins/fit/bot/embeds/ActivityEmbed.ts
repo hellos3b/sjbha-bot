@@ -117,7 +117,7 @@ const activityVerb = (activityType: string) => pipe(
     [ActivityType.WALK]       : "went on a walk",
     [ActivityType.ROCK_CLIMB] : "went rock climbing"
   }),
-  defaultTo("did a workout")
+  defaultTo(`did a workout [${activityType}]`)
 )(activityType)
 
 export const createActivityEmbed = ({member, user, exp, activity, weeklyExp}: CreateProps): MessageOptions["embed"] => ({
