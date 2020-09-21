@@ -11,14 +11,11 @@ export default class Router {
     this.routes.set(route, mw);
   }
 
-  async handle(route: string, req: Request) {
-    const middlewares = this.routes.get(route);
+  async handle(req: Request) {
+    const middlewares = this.routes.get(req.route);
 
     // If no route, exit out
-    if (!middlewares) {
-      debug("route missing: %o", route);
-      return;
-    }
+    if (!middlewares) return;
 
     const exec = async (idx: number) => {
       const callback = middlewares[idx];

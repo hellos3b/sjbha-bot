@@ -55,7 +55,7 @@ async function postWeeklyProgress() {
   // Convert user IDs to hash map of nicknames
   const userNameMap = report.users
     .reduce<Record<string, string>>((map, user) => {
-      const {member} = bastion.getMember(user.discordId);
+      const member = bastion.getMember(user.discordId);
       map[user.discordId] = member.displayName;
       return map;
     }, {});
@@ -85,7 +85,7 @@ async function updateRankRoles(users: SerializedUser[]) {
   debug("Updating roles for users")
 
   for (var i = 0; i < users.length; i++) {
-    const {member} = bastion.getMember(users[i].discordId);
+    const member = bastion.getMember(users[i].discordId);
     const rank = new Rank(users[i].fitScore);
 
     switch (rank.rank) {

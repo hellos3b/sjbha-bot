@@ -36,13 +36,11 @@ export const restrict = (channels: string|string[]): Middleware => (req, next) =
  * 
  */
 export const paramRouter = (router: Router, opt: RouteParamOptions={}): Middleware => req => {
-  let [, route] = req.content.split(" ");
-
-  if (!route && !!opt.default) {
-    route = opt.default;
+  if (!req.route && !!opt.default) {
+    // route = opt.default;
   }
 
-  router.handle(route, req);
+  router.handle(req);
 }
 
 type RouteParamOptions = {

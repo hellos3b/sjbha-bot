@@ -128,7 +128,7 @@ export const createActivityEmbed = ({member, user, exp, activity, weeklyExp}: Cr
   author: { 
     name: heading(
       getEmoji(user.gender)(activity.type),
-      member.member.displayName, 
+      member.displayName, 
       activity.type
     ) 
   },

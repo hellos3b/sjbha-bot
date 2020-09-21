@@ -3,6 +3,7 @@ import {TextChannel} from "discord.js";
 import Router from "./Router";
 import Request from "./Request";
 import Debug from "debug";
+import {Subject} from "rxjs";
 
 const debug = Debug("@services:bastion");
 
@@ -15,6 +16,9 @@ export default class Bastion extends Router {
   private token: string;
   /** The character used to initiate a command */
   public instigator: string;
+
+  private onMessageSubject = new Subject<Request>();
+  public message$ = this.onMessageSubject.asObservable();
 
   constructor(opt: BastionOptions) {
     super()
@@ -29,19 +33,17 @@ export default class Bastion extends Router {
     // ignore self
     if (msg.author.bot) return;
 
-    const [command] = msg.content.split(" ");
-    if (!command.startsWith(this.instigator)) return;
-
-    debug(`%o`, msg.content);
-
-    const route = command.substr(
-      this.instigator.length,
-      command.length
-    )
+    if (!msg.content.startsWith(this.instigator)) return;
 
     const req = new Request(this, msg);
 
-    this.handle(route, req);
+    debug(`%o`, msg.content);
+
+    this.handle(req);
+
+    // Stream version
+    // todo: swap everything over to this instead of router
+    this.onMessageSubject.next(req);
   }
 
   /** Connects the bot to the server */
@@ -75,16 +77,15 @@ export default class Bastion extends Router {
 
     if (!member || !user) throw new MissingUser(`Could not get user with id ${discordId}`);
 
-    return {
-      member,
+    return Object.assign(member, {
       avatar: user.avatarURL() || "https://cdn.discordapp.com/embed/avatars/0.png"
-    }
+    });
   }
   
 }
 
-export interface DiscordMember {
-  member: Discord.GuildMember;
+// todo: deprecate the final & `member`
+export type DiscordMember = Discord.GuildMember & {
   avatar: string;
 }
 

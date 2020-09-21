@@ -66,7 +66,7 @@ export const createProfileEmbed = (data: ProfileData): MessageOptions["embed"] =
   color: 0x4ba7d1,
 
   author: {
-    name: data.member.member.displayName,
+    name: data.member.displayName,
     icon_url: data.member.avatar
   },
 

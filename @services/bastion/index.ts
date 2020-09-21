@@ -14,7 +14,10 @@ bastion.start(client => debug(`Connected to discord %o`, client.user!.tag));
 
 export default bastion;
 
+export {request, echo, pre, bold} from "./lib/helpers";
+
 // Expose types
+export type {ErrorHandler, ErrorHandlers} from "./lib/helpers"
 export type {default as Request} from "./lib/Request"
 export type {default as Router} from "./lib/Router";
 export type {Middleware} from "./lib/Router";

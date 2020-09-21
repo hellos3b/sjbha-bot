@@ -17,7 +17,7 @@ export async function leaderboard(req: Request) {
     leaderboard,
     (map, user) => {
       const member = req.getMember(user.discordId);
-      map[user.discordId] = member.member.displayName;
+      map[user.discordId] = member.displayName;
       return map;
     },
     {} as Record<string, string>
