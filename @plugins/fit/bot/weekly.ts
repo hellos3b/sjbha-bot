@@ -39,9 +39,8 @@ schedule.scheduleJob(rule, () => {
 //
 // Displays an overview of stats including averages and current level
 //
-async function postWeeklyProgress() {
-  // const week = Week.previous();
-  const week = Week.current();
+export async function postWeeklyProgress() {
+  const week = Week.previous();
   
   const progress = await getProgressForWeek(week);
   progress.applyPromotions();

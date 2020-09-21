@@ -12,6 +12,9 @@ router.use("profile", bot.profile);
 router.use("exp", bot.exp);
 router.use("leaderboard", bot.leaderboard);
 
+import {postWeeklyProgress} from "./bot/weekly";
+router.use("post-week", restrict(channels.bot_admin), postWeeklyProgress)
+
 bastion.use("fit", restrict(channels.strava), paramRouter(router, {default: "help"}));
 
 import * as auth from "./api/AuthController";
