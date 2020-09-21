@@ -1,8 +1,11 @@
+import Debug from "debug";
 import format from "string-format";
 import { DiscordMember, ErrorHandlers, request, echo } from "@services/bastion";
 import { MissingSub } from "./errors";
 import { map, pipe, join } from "ramda";
 import { getAll, getByName, Subscription } from "./db";
+
+const debug = Debug("@plugins/subscribe");
 
 const getSubscriptions = () => getAll().then(pipe(
   map((sub: Subscription) => sub.name),
@@ -28,6 +31,7 @@ export const add = request(async req => {
   if (userHasRole(req.member, tag.id)) return req.reply("You're already subscribed to '{0}'", tag.name);
   await req.member.roles.add(tag.id);
 
+  debug(`Added role '${tag.name}' to ${req.member.displayName}`)
   return req.reply("You have been subscribed to '{0}'", tag.name);
 }, errorHandlers);
 
@@ -40,7 +44,8 @@ export const remove = request(async req => {
 
   if (!userHasRole(req.member, tag.id)) return req.reply("You're already subscribed to '{0}'", tag.name);
   await req.member.roles.remove(tag.id);
-
+  
+  debug(`Removed role '${tag.name}' from ${req.member.displayName}`)
   return req.reply("You have been unsubscribed from '{0}'", tag.name);
 });
 

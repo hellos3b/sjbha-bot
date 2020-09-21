@@ -1,8 +1,11 @@
+import Debug from "debug";
 import { ErrorHandlers, request, echo, pre, bold } from "@services/bastion";
 import { map, join } from "ramda";
 import { deleteSub, getAll, save } from "./db";
 import { BadArgs, SubConflict } from "./errors";
 import format from "string-format";
+
+const debug = Debug("@plugins/subscribe");
 
 const helpStr = join("\n",[
   bold("Add a new tag:"),
@@ -30,21 +33,25 @@ const getSub = (args: string[]) => {
  */
 export const add = request(async req => {
   const {name, id} = getSub(req.args);
+
   await save(name, id);
 
-  req.reply(`Added '${name}' to list of subscriptions!`);
-
+  debug(`[admin] Added role ${name} ${id}`);
+  return req.reply(`Added '${name}' to list of subscriptions!`);
 }, errorHandler);
 
 /**
  * Remove a subscription from the database
- * `!subscribe-admin rm among-us 123456`
+ * `!subscribe-admin rm among-us`
  */
 export const remove = request(async req => {
-  const {name, id} = getSub(req.args);
+  const name = req.args[1];
+  if (!name) throw new BadArgs(`Need to provide a name`);
+
   await deleteSub(name);
 
-  req.reply(`Removed '${name}' from the list of subscriptions!`);
+  debug(`[admin] Remove role '${name}' from subscriptions`)
+  return req.reply(`Removed '${name}' from the list of subscriptions!`);
 }, errorHandler);
 
 /**
@@ -58,7 +65,7 @@ export const list = request(async req => {
     subs
   ).join("\n");
 
-  await req.reply(msg);
+  return req.reply(msg);
 })
 
 export const help = echo(helpStr);

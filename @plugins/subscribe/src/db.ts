@@ -24,7 +24,7 @@ export const getByName = async (name: string) => {
 }
 
 export const save = async (name: string, id: string) => {
-  const name_exists = await getByName(name);
+  const name_exists = await getCollection().findOne({name});
   if (!!name_exists) {
     throw new SubConflict(`Subscription with name '${name}' already exists`)
   }
