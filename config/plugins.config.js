@@ -23,7 +23,6 @@ import RoyRoyBucks from '../plugins/RoyRoyBucks'
 import Stats from '../plugins/Stats'
 import StockChart from '../plugins/StockChart'
 import Strava from '../plugins/Strava'
-import Subscribe from '../plugins/Subscribe'
 import TLDR from '../plugins/Tldr'
 import Teams from '../plugins/Teams'
 import Trading from '../plugins/Trading'
@@ -33,11 +32,6 @@ import Yelling from '../plugins/yelling'
 import covid19 from '../plugins/covid19'
 import AQI from '../plugins/AQI'
 import db from '../plugins/db'
-
-const subscriptions = {
-    "apex": "629820902694977537",
-    "test": "748387914089496596"
-}
 
 export default bastion => ([
     db(bastion, {
@@ -59,9 +53,6 @@ export default bastion => ([
     }),
     StockChart(bastion, {
         restrict: ["stocks"]
-    }),
-    Subscribe(bastion, {
-        subscriptions
     }),
     Strava(bastion, {
         restrict: ["strava", "430517752546197509"]
