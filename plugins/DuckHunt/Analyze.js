@@ -81,27 +81,27 @@ export default (bastion) => {
     return msgs * (damperThingy*Math.pow(unique, 2))
   }
 
-  bastion.on("message", ({userID, channelID, message}) => {
-    if (message.startsWith("!s") && channelID === ADMIN_CHANNEL) {
-      const [cmd, CID] = message.split(" ")
-      if (!CID) return bastion.send(channelID, "Need a channel ID")
-      const history = scoreHistory[CID]
+  // bastion.on("message", ({userID, channelID, message}) => {
+  //   if (message.startsWith("!s") && channelID === ADMIN_CHANNEL) {
+  //     const [cmd, CID] = message.split(" ")
+  //     if (!CID) return bastion.send(channelID, "Need a channel ID")
+  //     const history = scoreHistory[CID]
 
-      const output = history.map( n => `S: ${n.score} | C: ${n.msgCount} | U: ${n.userIDS.size}`).join('\n')
-      bastion.send(channelID, bastion.helpers.code(output))
-      return;
-    }
+  //     const output = history.map( n => `S: ${n.score} | C: ${n.msgCount} | U: ${n.userIDS.size}`).join('\n')
+  //     bastion.send(channelID, bastion.helpers.code(output))
+  //     return;
+  //   }
 
-    if ( (listenChannels.indexOf(channelID) === -1) ) return;
+  //   if ( (listenChannels.indexOf(channelID) === -1) ) return;
 
-    const derp = analyze[channelID]
-    derp.msgCount++
-    derp.userIDS.add(userID)
+  //   const derp = analyze[channelID]
+  //   derp.msgCount++
+  //   derp.userIDS.add(userID)
 
-    // const score = getScore(channelID)
-    // console.log("SCORE", score)
-    // console.log(message, userID, channelID)
-  })
+  //   // const score = getScore(channelID)
+  //   // console.log("SCORE", score)
+  //   // console.log(message, userID, channelID)
+  // })
 
   resetCounts()
 
