@@ -97,7 +97,7 @@ const activityFields = (activityType: string) => pipe(
     [ActivityType.RUN]  : [distance, pace],
     [ActivityType.HIKE] : [distance, elevation],
     [ActivityType.WALK] : [distance],
-    [ActivityType.YOGA] : []
+    [ActivityType.YOGA] : [averageHeartrate]
   }),
   defaultTo([averageHeartrate, maxHeartrate]),
   prepend(time)
