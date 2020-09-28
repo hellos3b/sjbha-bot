@@ -4,10 +4,13 @@ import channels from "@app/channels";
 import {message$, cmd, noParam, param, restrict} from "@services/bastion/stream";
 // import {restrict, paramRouter} from "@services/bastion/middleware";
 import * as bot from "./bot";
+import { share } from "rxjs/operators";
 
 const fit$ = message$.pipe(cmd("fit"));
-const strava$ = fit$.pipe(restrict(channels.strava));
-const admin$ = fit$.pipe(restrict(channels.bot_admin));
+const strava$ = fit$.pipe(
+  restrict(channels.strava), 
+  share()
+);
 
 strava$.pipe(noParam())
   .subscribe(bot.help)

@@ -75,7 +75,8 @@ export const ActivityType = {
   HIKE: "Hike",
   WALK: "Walk",
   WEIGHT_TRAIN: "WeightTraining",
-  ROCK_CLIMB: "RockClimbing",
+  ROCK_CLIMB: "Climb",
+  WORKOUT: "Workout",
   // todo: deprecate 'default'
   default: ""
 }

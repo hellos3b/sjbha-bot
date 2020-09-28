@@ -16,6 +16,9 @@ export interface Promotion {
   discordId: string;
   type: string;
   rank: Rank;
+  points: number;
+  newScore: number;
+  exp: number;
 }
 
 export interface ProgressReport {
@@ -53,23 +56,28 @@ export default class WeeklyProgress {
     this.promotions = chain(this.users)
       .map(user => {
         const logs = this.workouts.getWorkoutsFor(user.id);
-        const prevRank = user.rank;
+        // const prevRank = user.rank;
 
-        user.updateFitScore(logs.totalExp);
+        const update = user.updateFitScore(logs.totalExp);
 
         let type = PromotionType.SAME;
-        if (user.rank.rank > prevRank.rank) {
+        if (update.newRank.rank > update.prevRank.rank) {
           type = PromotionType.PROMOTED;
         }
-        if (user.rank.rank < prevRank.rank) {
+        if (update.newRank.rank < update.prevRank.rank) {
           type = PromotionType.DEMOTED;
         }
 
-        return {
+        const progress: Promotion = {
           discordId: user.id,
+          points: update.points,
+          newScore: update.newScore,
           type,
-          rank: user.rank
-        }
+          rank: user.rank,
+          exp: logs.totalExp
+        };
+
+        return progress;
       })
       .value();
   }

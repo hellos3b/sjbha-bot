@@ -17,6 +17,7 @@ import { getActivity } from "../domain/strava/ActivityRepository";
 import { SerializedUser } from "../domain/user/User";
 
 import { createWeeklyEmbed } from "./embeds/WeeklyEmbed";
+import { createProgress } from "./embeds/Progress";
 
 
 
@@ -72,12 +73,18 @@ export async function postWeeklyProgress() {
     };
   }
 
-  // Build the embed
+  // Build the main embed
   const embed = createWeeklyEmbed({
-    week, userNameMap,report, biggestActivity
+    week, userNameMap, report, biggestActivity
+  });
+
+  // Now just the progress
+  const progressReport = createProgress({
+    userNameMap, report
   });
 
   await bastion.sendTo(post_to_channel, embed);
+  await bastion.sendTo(post_to_channel, progressReport);
 }
 
 async function updateRankRoles(users: SerializedUser[]) {

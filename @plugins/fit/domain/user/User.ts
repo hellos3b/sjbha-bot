@@ -58,7 +58,7 @@ export default class User {
 
   updateFitScore(exp: number) {
     debug("%o update fit score with %o exp", this.id, exp);
-    this.fitScore.updateFitScore(exp);
+    return this.fitScore.updateFitScore(exp);
   }
 
   // exposed properties

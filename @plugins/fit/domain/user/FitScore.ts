@@ -1,9 +1,6 @@
-import Debug from "debug";
-import {weekly_exp_goal, points_per_goal} from "@plugins/fit/config";
+import {debug, weekly_exp_goal, points_per_goal} from "@plugins/fit/config";
 import Rank from "./Rank";
 import { UserSchema } from "../../db/UserCollection";
-
-const debug = Debug("c/fit:fit-score");
 
 const MIN_SCORE = 0;
 const MAX_SCORE = 100;
@@ -35,15 +32,16 @@ export default class FitScore {
 
   public updateFitScore(exp: number): FitUpdate {
     const prevRank = this.rank;
+    let preScore = this._score;
 
     // If you reached the goal, you get points
     if (exp >= weekly_exp_goal) {
       this._score += points_per_goal;
 
-      debug("goal reached! +%o", weekly_exp_goal);
+      debug("gained +%o points", weekly_exp_goal);
     } else {
       const pointsLost = lerp(5, 0, exp / weekly_exp_goal);
-      this._score -= pointsLost;
+     this._score -= pointsLost;
 
       debug("lost %o points", pointsLost);
     }
@@ -53,7 +51,9 @@ export default class FitScore {
 
     return {
       prevRank,
-      newRank: this.rank
+      newRank: this.rank,
+      newScore: this._score,
+      points: this._score - preScore
     };
   }
 
@@ -75,6 +75,8 @@ export interface FitScoreDetails {
 export interface FitUpdate {
   prevRank: Rank;
   newRank: Rank;
+  points: number;
+  newScore: number;
 }
 
 // quick helper method

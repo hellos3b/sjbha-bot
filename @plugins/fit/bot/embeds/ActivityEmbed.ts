@@ -113,7 +113,8 @@ const activityVerb = (activityType: string) => pipe(
     [ActivityType.WEIGHT_TRAIN]: "lifted some weights",
     [ActivityType.HIKE]       : "went on a hike",
     [ActivityType.WALK]       : "went on a walk",
-    [ActivityType.ROCK_CLIMB] : "went rock climbing"
+    [ActivityType.ROCK_CLIMB] : "went rock climbing",
+    [ActivityType.WORKOUT]    : "just did a workout"
   }),
   defaultTo(`did a workout [${activityType}]`)
 )(activityType)
