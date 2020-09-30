@@ -1,3 +1,11 @@
+export interface TError {
+  name: string;
+}
+
+export const NotAuthorized = (): TError => ({
+  name: "Not Authorized"
+});
+
 /**
  * When a user tries to use the command but has never done `!strava auth`
  */
