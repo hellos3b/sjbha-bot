@@ -11,9 +11,13 @@ MongoClient
   .then(r => client = r)
   .then(() => debug("Connected to mongodb"));
 
-export default {
-  getCollection(collection: string) {
-    if (!client) throw new Error(`Trying to call 'getCollection' on @services/mongodb, but the database hasn't finished connecting`)
-    return client.db().collection(collection);
-  }
+ 
+export const db = () => client.db();
+
+export const getCollection = (collection: string) => {
+  if (!client) throw new Error(`Trying to call 'getCollection' on @services/mongodb, but the database hasn't finished connecting`)
+  return db().collection(collection);
 };
+
+// back compat cuz i changed things
+export default {getCollection};

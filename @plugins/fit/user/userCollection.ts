@@ -46,7 +46,6 @@ const collection = new Collection<User>('fit-users');
 
 export const insertNewUser = (id: string) => {
   const user = newUser(id);
-
   return R.pipe(
     collection.insertOne,
     F.map (R.always (user))

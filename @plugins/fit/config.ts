@@ -7,10 +7,12 @@ import roles from "@app/roles";
 
 export const debug = Debug("@plugins:fit");
 
+/** The hostname that this instance of the bot is running on */
 export const basePath = env.HOSTNAME;
 
-// URLS
+/** A page that shows the README for help with the command */
 export const url_help = "/fit/help";
+/** This page checks auth status and either sends you to strava's authorization page, or settings */
 export const url_login = "/fit/login";
 export const url_settings = "/fit/settings";
 export const url_accept = "/fit/accept";
