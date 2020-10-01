@@ -19,7 +19,13 @@ export const decodeToken = (token: string): Auth => {
 export const getStravaUrl = (user: Auth) => 
   loginUrl + "?" + querystring({ token: toToken(user) });
 
-export const setStravaData = ({refresh_token, athlete}: AuthResponse) => R.pipe(
-  u.setStravaAuth(athlete.id, refresh_token),
+const setStravaAuth = (stravaId: number, refreshToken: string) => (user: AuthorizedUser): AuthorizedUser => ({
+  ...user,
+  stravaId: String(stravaId),
+  refreshToken
+})
+
+export const linkStravaAccount = ({refresh_token, athlete}: AuthResponse) => R.pipe(
+  setStravaAuth(athlete.id, refresh_token),
   u.setGender(athlete.sex)
 );

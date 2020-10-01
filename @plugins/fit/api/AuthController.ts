@@ -111,7 +111,7 @@ const fetchAccounts = (body: AcceptT) => F.both
   (strava.getRefreshTokenF (body.code));
 
 const linkUserAccount = (authUser: uc.AuthorizedUser, stravaAuth: AuthResponse) => R.pipe(
-  userAuth.setStravaData(stravaAuth),
+  userAuth.linkStravaAccount(stravaAuth),
   uc.update
 )(authUser);
 
@@ -125,7 +125,8 @@ export async function authAccept(req: express.Request, res: express.Response) {
     F.fork (Error) (Redirect)
   );
 
-  Either.encase(() => Accept.check(req.query))
+  Either
+    .encase(() => Accept.check(req.query))
     .ifLeft(Error)
     .ifRight(accept);
 }
