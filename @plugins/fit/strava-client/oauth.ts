@@ -2,6 +2,8 @@ import wretch from "@services/node-wretch";
 import {client_id, client_secret} from "@plugins/fit/config";
 import {AuthResponse} from "./types";
 
+import * as F from "fluture";
+
 const api = wretch().url('https://www.strava.com')
 
 /**
@@ -38,3 +40,5 @@ export async function getAccessToken(refreshToken: string) {
 
   return res.access_token;
 }
+
+export const getRefreshTokenF = F.encaseP(getRefreshToken);

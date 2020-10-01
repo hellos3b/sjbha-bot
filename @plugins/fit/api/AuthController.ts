@@ -1,15 +1,28 @@
 import * as express from "express";
+
+import * as t from "runtypes";
+import {Either} from "purify-ts";
+
+import * as strava from "../strava-client/oauth";
+import * as userAuth from "../user/auth";
+import * as uc from "../user/collection";
+import * as R from "ramda";
+import * as F from "fluture";
+
 import { NotConnected, Unauthorized } from "../errors";
 
 import { getAuthorizedUser, saveAuth } from "../domain/auth/AuthRepository";
 import { getUser, saveUser } from "../domain/user/UserRepository";
 import { getAuthInfo } from "../strava-client";
 import { debug, url_settings } from "../config";
+import { AuthResponse } from "../strava-client/types";
 
 // We extend request object for authorized requests
 interface AuthorizedRequest extends express.Request {
   discordId?: string;
 }
+
+const apply = <T extends (...args: any[])=>any>(fn: T) => (data: Parameters<T>): ReturnType<T> => fn.apply(null, data);
 
 /**
  * Middleware that checks the authorization header for a valid token 
@@ -85,42 +98,37 @@ export async function authLogin(req: AuthorizedRequest, res: express.Response) {
  * @query `code`
  * @query `state`
  */
+
+const Accept = t.Record({
+  code: t.String,
+  state: t.String
+});
+
+type AcceptT = t.Static<typeof Accept>;
+
+const fetchAccounts = (body: AcceptT) => F.both 
+  (uc.getAuthorized (userAuth.decodeToken (body.state)))
+  (strava.getRefreshTokenF (body.code));
+
+const linkUserAccount = (authUser: uc.AuthorizedUser, stravaAuth: AuthResponse) => R.pipe(
+  userAuth.setStravaData(stravaAuth),
+  uc.update
+)(authUser);
+
 export async function authAccept(req: express.Request, res: express.Response) {
-  const code = <string>req.query.code;
-  const connectHash = <string>req.query.state;
+  const Redirect = () => res.redirect(url_settings);
+  const Error = (d?: any) =>  res.status(401).send("Something failed");
 
-  if (!code || !connectHash) return res.send("Invalid token");
+  const accept = R.pipe(
+    fetchAccounts,
+    F.chain (apply (linkUserAccount)), 
+    F.fork (Error) (Redirect)
+  );
 
-  const [discordId, password] = connectHash.split(".");
-  debug("Accepting token for %o", discordId);
-
-  try {
-    const [auth, profile, strava] = await Promise.all([
-      getAuthorizedUser(discordId, password),
-      getUser(discordId),
-      getAuthInfo(code)
-    ]);
-
-    auth.linkToStrava(String(strava.athlete.id), strava.refresh_token);
-    profile.updateGender(strava.athlete.sex);
-
-    await Promise.all([saveAuth(auth), saveUser(profile)])
-
-    res.redirect(url_settings);
-  } catch (e) {
-    switch (e.name) {
-    case NotConnected.type: return res.send(`Something went wrong when trying to authorize your acount. Try using !strava auth once again`)
-
-    default:
-      debug("Token acceptance failed");
-      console.error(e);
-
-      return res.send("Something unexpected went wrong and your account couldn't be connected");
-
-    }
-  }
+  Either.encase(() => Accept.check(req.query))
+    .ifLeft(Error)
+    .ifRight(accept);
 }
-
 
 /**
  * In order to sign up for a webhook for strava, you need to accept the "hub challenge"

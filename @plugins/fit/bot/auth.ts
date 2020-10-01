@@ -2,12 +2,13 @@ import * as R from "ramda";
 import * as F from "fluture";
 import {Request} from "@services/bastion";
 
-import * as uc from "../user/userCollection";
+import * as uc from "../user/collection";
 import * as uauth from "../user/auth";
 import {debug, basePath, url_help} from "@plugins/fit/config";
 
 const helpUrl = basePath + url_help;
 
+/** The message that gets sent privately to a user to join the !fit command */
 export const welcomeMsg = (authUrl: string) => `
   **Welcome to the fitness channel!**
 
@@ -16,14 +17,13 @@ export const welcomeMsg = (authUrl: string) => `
   For information on how the bot works: ${helpUrl}
 `;
 
+/** Create a message to send to users  */
 export const createWelcomeMessage = R.pipe(
   uauth.getStravaUrl,
   welcomeMsg
 );
 
-/**
- * Sets up a new User
- */
+/** Sets up a new User */
 export const auth = (req: Request) => {
   const onboarding = (privateMessage: string) => {
     req.author.send(privateMessage);
