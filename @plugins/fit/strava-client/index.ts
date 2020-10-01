@@ -3,7 +3,7 @@ import memoize from "memoizee";
 import StravaClient from "./client";
 import {getAccessToken, getRefreshToken} from "./oauth";
 import UserCollection from "../db/UserCollection";
-import { NotConnected } from "../errors";
+import { NotConnected } from "../utils/errors";
 
 interface Query {
   discordId?: string;

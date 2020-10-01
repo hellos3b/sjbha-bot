@@ -3,6 +3,9 @@ import {prop as RProp, pipe, defaultTo, sort, negate} from "ramda";
 // Additional FP functions I find help out when working with Ramda
 // especially with typings in Typescript
 
+/** Apply an array of arguments onto a method, but curried */
+export const apply = <T extends (...args: any[])=>any>(fn: T) => (data: Parameters<T>): ReturnType<T> => fn.apply(null, data);
+
 /** Get the prop of the object. `<T>` can be explicitely set to define return value */
 export const prop = <T>(key: string) => (obj: Record<string, any>): T => obj[key];
 

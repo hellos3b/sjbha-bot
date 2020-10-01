@@ -2,7 +2,7 @@ import * as express from "express";
 import {IS_PRODUCTION} from "@app/env";
 import bastion from "@services/bastion";
 import {debug, post_delay_ms, post_to_channel} from "../config";
-import {NotConnected, Unauthorized} from "../errors";
+import {NotConnected, Unauthorized} from "../utils/errors";
 
 import {createActivityEmbed} from "../bot/embeds/ActivityEmbed";
 

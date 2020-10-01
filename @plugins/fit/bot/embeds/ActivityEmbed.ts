@@ -6,7 +6,7 @@ import type { UserProfile } from "../../domain/user/User";
 
 import {map, reject, applyTo, pipe, prepend, join, defaultTo, includes, prop} from "ramda";
 import format from 'string-format';
-import {propOr, switchcase, filterNil} from "../../fp-utils";
+import {propOr, switchcase, filterNil} from "../../utils/fp-utils";
 import {toMiles, toTime, toPace, toTenths, toFeet} from "./conversions";
 import {ActivityType} from "../../config";
 

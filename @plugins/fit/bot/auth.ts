@@ -3,7 +3,7 @@ import * as F from "fluture";
 import {Request} from "@services/bastion";
 
 import * as uc from "../user/collection";
-import * as uauth from "../user/auth";
+import * as uauth from "../user";
 import {debug, basePath, url_help} from "@plugins/fit/config";
 
 const helpUrl = basePath + url_help;
@@ -19,7 +19,7 @@ export const welcomeMsg = (authUrl: string) => `
 
 /** Create a message to send to users  */
 export const createWelcomeMessage = R.pipe(
-  uauth.getStravaUrl,
+  uauth.getAuthLink,
   welcomeMsg
 );
 

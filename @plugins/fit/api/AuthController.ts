@@ -4,12 +4,12 @@ import * as t from "runtypes";
 import {Either} from "purify-ts";
 
 import * as strava from "../strava-client/oauth";
-import * as userAuth from "../user/auth";
-import * as uc from "../user/collection";
+import * as User from "../user";
 import * as R from "ramda";
 import * as F from "fluture";
+import * as FP from "../utils/fp-utils";
 
-import { NotConnected, Unauthorized } from "../errors";
+import { NotConnected, Unauthorized } from "../utils/errors";
 
 import { getAuthorizedUser, saveAuth } from "../domain/auth/AuthRepository";
 import { getUser, saveUser } from "../domain/user/UserRepository";
@@ -21,8 +21,6 @@ import { AuthResponse } from "../strava-client/types";
 interface AuthorizedRequest extends express.Request {
   discordId?: string;
 }
-
-const apply = <T extends (...args: any[])=>any>(fn: T) => (data: Parameters<T>): ReturnType<T> => fn.apply(null, data);
 
 /**
  * Middleware that checks the authorization header for a valid token 
@@ -107,12 +105,12 @@ const Accept = t.Record({
 type AcceptT = t.Static<typeof Accept>;
 
 const fetchAccounts = (body: AcceptT) => F.both 
-  (uc.getAuthorized (userAuth.decodeToken (body.state)))
+  (User.getAuthorized (User.decodeToken (body.state)))
   (strava.getRefreshTokenF (body.code));
 
-const linkUserAccount = (authUser: uc.AuthorizedUser, stravaAuth: AuthResponse) => R.pipe(
-  userAuth.linkStravaAccount(stravaAuth),
-  uc.update
+const linkUserAccount = (authUser: User.AuthorizedUser, stravaAuth: AuthResponse) => R.pipe(
+  User.linkStravaAccount(stravaAuth),
+  User.update
 )(authUser);
 
 export async function authAccept(req: express.Request, res: express.Response) {
@@ -121,7 +119,7 @@ export async function authAccept(req: express.Request, res: express.Response) {
 
   const accept = R.pipe(
     fetchAccounts,
-    F.chain (apply (linkUserAccount)), 
+    F.chain (FP.apply (linkUserAccount)), 
     F.fork (Error) (Redirect)
   );
 

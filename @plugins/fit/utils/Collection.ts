@@ -1,7 +1,7 @@
 import {db} from '@services/mongodb';
 import { FilterQuery, OptionalId, UpdateQuery } from "mongodb";
 
-import * as Error from "../errors";
+import * as Error from "./errors";
 import * as R from "ramda";
 import * as Future from "fluture";
 

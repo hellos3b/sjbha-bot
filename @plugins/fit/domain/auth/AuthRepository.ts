@@ -1,5 +1,5 @@
 import UserCollection from "../../db/UserCollection";
-import { Unauthorized, NotConnected } from "../../errors";
+import { Unauthorized, NotConnected } from "../../utils/errors";
 import Auth from "./Auth";
 
 /** Get a user by their Discord ID */

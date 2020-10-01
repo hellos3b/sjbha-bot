@@ -1,5 +1,5 @@
 import UserCollection from "../../db/UserCollection";
-import { NotConnected } from "../../errors";
+import { NotConnected } from "../../utils/errors";
 import User, { SerializedUser } from './User';
 import Users from "./Users";
 

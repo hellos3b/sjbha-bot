@@ -10,7 +10,7 @@ import {MessageOptions} from "discord.js";
 import {toTenths, toRelative} from "./conversions";
 import {GenderedEmoji, getEmoji} from "./emoji";
 import { asField, field } from "./embed";
-import { sortByProp } from "@plugins/fit/fp-utils";
+import { sortByProp } from "@plugins/fit/utils/fp-utils";
 
 interface ProfileData {
   member: DiscordMember, 
