@@ -1,7 +1,7 @@
 import type { DiscordMember } from "@services/bastion";
-import type { UserProfile } from "../../domain/user/User";
-import type { SummaryDetails, SummaryStats } from "../../domain/strava/ActivitySummary";
-import type Activity from "../../domain/strava/Activity";
+import type { UserProfile } from "../../../domain/user/User";
+import type { SummaryDetails, SummaryStats } from "../../../domain/strava/ActivitySummary";
+import type Activity from "../../../domain/strava/Activity";
 
 import {map, isEmpty, always, pipe, join, ifElse, applyTo} from "ramda";
 import format from 'string-format';

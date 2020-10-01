@@ -1,9 +1,9 @@
 import _ from "lodash";
 import {MessageEmbed} from "discord.js";
 
-import { ProgressReport, Promotion, LeaderboardEntry, PromotionType } from "../../domain/exp/WeeklyProgress";
-import Week from "../../domain/exp/Week";
-import Rank from "../../domain/user/Rank";
+import { ProgressReport, Promotion, LeaderboardEntry, PromotionType } from "../../../domain/exp/WeeklyProgress";
+import Week from "../../../domain/exp/Week";
+import Rank from "../../../domain/user/Rank";
 
 interface WeeklyProps {
   week: Week;

@@ -1,7 +1,7 @@
 import {reduce} from "lodash";
 import {Request} from "@services/bastion";
 import {createLeaderboardEmbed} from "./embeds/LeaderboardEmbed";
-import {getAllUsers} from "../domain/user/UserRepository";
+import {getAllUsers} from "../../domain/user/UserRepository";
 
 export async function leaderboard(req: Request) {
   const users = await getAllUsers();

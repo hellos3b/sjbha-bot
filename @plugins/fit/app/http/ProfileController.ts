@@ -1,15 +1,15 @@
 import * as express from "express";
 import {IS_PRODUCTION} from "@app/env";
 import bastion from "@services/bastion";
-import {debug, post_delay_ms, post_to_channel} from "../config";
-import {NotConnected, Unauthorized} from "../utils/errors";
+import {debug, post_delay_ms, post_to_channel} from "../../config";
+import {NotConnected, Unauthorized} from "../../utils/errors";
 
 import {createActivityEmbed} from "../bot/embeds/ActivityEmbed";
 
-import { getUserByStravaId, saveUser, getUser } from "../domain/user/UserRepository";
-import { getActivityByStravaId } from "../domain/strava/ActivityRepository";
-import { getCurrentLogsForUser, insertWorkout } from "../domain/exp/WorkoutLogRepository";
-import Workout from "../domain/exp/WorkoutLog";
+import { getUserByStravaId, saveUser, getUser } from "../../domain/user/UserRepository";
+import { getActivityByStravaId } from "../../domain/strava/ActivityRepository";
+import { getCurrentLogsForUser, insertWorkout } from "../../domain/exp/WorkoutLogRepository";
+import Workout from "../../domain/exp/WorkoutLog";
 
 // We extend request object for authorized requests
 interface AuthorizedRequest extends express.Request {

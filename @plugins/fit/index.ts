@@ -3,7 +3,7 @@ import app from "@services/express";
 import channels from "@app/channels";
 import {message$, cmd, noParam, param, restrict} from "@services/bastion/stream";
 // import {restrict, paramRouter} from "@services/bastion/middleware";
-import * as bot from "./bot";
+import * as bot from "./app/bot";
 import { share } from "rxjs/operators";
 
 const fit$ = message$.pipe(cmd("fit"));
@@ -30,15 +30,15 @@ strava$.pipe(param("exp"))
 strava$.pipe(param("leaderboard"))
   .subscribe(bot.leaderboard);
 
-import {postWeeklyProgress} from "./bot/weekly";
+import {postWeeklyProgress} from "./app/bot/weekly";
 
 fit$.pipe(
   param("post-week"),
   restrict(channels.bot_admin)
 ).subscribe(postWeeklyProgress);
 
-import * as auth from "./api/AuthController";
-import * as profile from "./api/ProfileController";
+import * as auth from "./app/http/AuthController";
+import * as profile from "./app/http/ProfileController";
 import { url_accept } from "./config";
 
 // strava authentication

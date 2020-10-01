@@ -1,14 +1,14 @@
 import type { MessageOptions } from "discord.js";
 import type { DiscordMember } from "@services/bastion";
-import type ExperiencePoints from "../../domain/user/ExperiencePoints";
-import type Activity from "../../domain/strava/Activity";
-import type { UserProfile } from "../../domain/user/User";
+import type ExperiencePoints from "../../../domain/user/ExperiencePoints";
+import type Activity from "../../../domain/strava/Activity";
+import type { UserProfile } from "../../../domain/user/User";
 
 import {map, reject, applyTo, pipe, prepend, join, defaultTo, includes, prop} from "ramda";
 import format from 'string-format';
-import {propOr, switchcase, filterNil} from "../../utils/fp-utils";
+import {propOr, switchcase, filterNil} from "../../../utils/fp-utils";
 import {toMiles, toTime, toPace, toTenths, toFeet} from "./conversions";
-import {ActivityType} from "../../config";
+import {ActivityType} from "../../../config";
 
 import {Field, asField} from "./embed";
 import {GenderedEmoji, getEmoji} from "./emoji";

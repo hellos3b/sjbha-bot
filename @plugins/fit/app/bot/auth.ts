@@ -2,14 +2,14 @@ import * as R from "ramda";
 import * as F from "fluture";
 import {Request} from "@services/bastion";
 
-import * as uc from "../user/collection";
-import * as uauth from "../user";
-import {debug, basePath, url_help} from "@plugins/fit/config";
+import * as User from "../../models/user";
+import {debug, basePath, url_help, url_login} from "@plugins/fit/config";
+import {stringify} from "querystring";
 
 const helpUrl = basePath + url_help;
 
 /** The message that gets sent privately to a user to join the !fit command */
-export const welcomeMsg = (authUrl: string) => `
+const welcomeMsg = (authUrl: string) => `
   **Welcome to the fitness channel!**
 
   Click here to authorize the bot: ${authUrl}
@@ -17,11 +17,13 @@ export const welcomeMsg = (authUrl: string) => `
   For information on how the bot works: ${helpUrl}
 `;
 
-/** Create a message to send to users  */
-export const createWelcomeMessage = R.pipe(
-  uauth.getAuthLink,
-  welcomeMsg
+const authLink = R.pipe(
+  User.toToken,
+  token => basePath + url_login + "?" + stringify({token})
 );
+
+/** Create a message to send to users  */
+const createWelcomeMessage = R.pipe(authLink, welcomeMsg);
 
 /** Sets up a new User */
 export const auth = (req: Request) => {
@@ -37,7 +39,7 @@ export const auth = (req: Request) => {
   };
   
   R.pipe(
-    uc.getOrCreate,
+    User.initializeUser,
     F.map (createWelcomeMessage),
     F.fork (sendError) (onboarding) 
   )(req.author.id);

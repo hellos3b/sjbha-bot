@@ -3,19 +3,17 @@ import * as express from "express";
 import * as t from "runtypes";
 import {Either} from "purify-ts";
 
-import * as strava from "../strava-client/oauth";
-import * as User from "../user";
+import * as User from "../../models/user";
 import * as R from "ramda";
 import * as F from "fluture";
-import * as FP from "../utils/fp-utils";
 
-import { NotConnected, Unauthorized } from "../utils/errors";
+import { NotConnected, Unauthorized } from "../../utils/errors";
 
-import { getAuthorizedUser, saveAuth } from "../domain/auth/AuthRepository";
-import { getUser, saveUser } from "../domain/user/UserRepository";
-import { getAuthInfo } from "../strava-client";
-import { debug, url_settings } from "../config";
-import { AuthResponse } from "../strava-client/types";
+import { getAuthorizedUser, saveAuth } from "../../domain/auth/AuthRepository";
+import { getUser, saveUser } from "../../domain/user/UserRepository";
+import { getAuthInfo } from "../../strava-client";
+import { debug, url_settings } from "../../config";
+import { AuthResponse } from "../../strava-client/types";
 
 // We extend request object for authorized requests
 interface AuthorizedRequest extends express.Request {
@@ -104,29 +102,19 @@ const Accept = t.Record({
 
 type AcceptT = t.Static<typeof Accept>;
 
-const fetchAccounts = (body: AcceptT) => F.both 
-  (User.getAuthorized (User.decodeToken (body.state)))
-  (strava.getRefreshTokenF (body.code));
-
-const linkUserAccount = (authUser: User.AuthorizedUser, stravaAuth: AuthResponse) => R.pipe(
-  User.linkStravaAccount(stravaAuth),
-  User.update
-)(authUser);
-
 export async function authAccept(req: express.Request, res: express.Response) {
   const Redirect = () => res.redirect(url_settings);
   const Error = (d?: any) =>  res.status(401).send("Something failed");
 
-  const accept = R.pipe(
-    fetchAccounts,
-    F.chain (FP.apply (linkUserAccount)), 
-    F.fork (Error) (Redirect)
-  );
+  const accept = ({state, code}: AcceptT) => User.acceptStravaAuth(state, code);
 
   Either
     .encase(() => Accept.check(req.query))
     .ifLeft(Error)
-    .ifRight(accept);
+    .ifRight(R.pipe(
+      accept,
+      F.fork (Error) (Redirect)
+    ));
 }
 
 /**

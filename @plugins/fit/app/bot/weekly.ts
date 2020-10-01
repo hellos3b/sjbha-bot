@@ -10,11 +10,11 @@ import {
   role_rank_3
 } from "@plugins/fit/config";
 
-import Week from "../domain/exp/Week";
-import Rank from "../domain/user/Rank";
-import { getProgressForWeek, saveProgress } from "../domain/exp/WeeklyProgressRepository";
-import { getActivity } from "../domain/strava/ActivityRepository";
-import { SerializedUser } from "../domain/user/User";
+import Week from "../../domain/exp/Week";
+import Rank from "../../domain/user/Rank";
+import { getProgressForWeek, saveProgress } from "../../domain/exp/WeeklyProgressRepository";
+import { getActivity } from "../../domain/strava/ActivityRepository";
+import { SerializedUser } from "../../domain/user/User";
 
 import { createWeeklyEmbed } from "./embeds/WeeklyEmbed";
 import { createProgress } from "./embeds/Progress";

@@ -1,10 +1,9 @@
 import * as R from "ramda";
 import * as F from "fluture";
-import { number } from "purify-ts";
-
-import Collection from "../utils/Collection";
-import * as Error from "../utils/errors";
 import randomstring from "randomstring";
+
+import * as Error from "../utils/errors";
+import Collection from "../utils/Collection";
 
 export type Auth = {
   discordId: string;
@@ -26,7 +25,9 @@ export type User = Auth & {
 
 export interface Authorized extends User {};
 
-export const withDefaults = (user: Partial<User>): User => 
+const collection = new Collection<User>('fit-users');
+
+const withDefaults = (user: Partial<User>): User => 
   R.mergeLeft<Partial<User>, User>(user, {
     discordId   : "",
     stravaId    : "",
@@ -38,28 +39,27 @@ export const withDefaults = (user: Partial<User>): User =>
     fitScore    : 0
   });
 
-export const newUser = (id: string) => withDefaults({
+const newUser = (id: string) => withDefaults({
   discordId   : id,
   password    : randomstring.generate()
 });
 
-const collection = new Collection<User>('fit-users');
-
-const getById = (id: string) => collection.findOne({discordId: id});
+const findById = (id: string) => collection.findOne({discordId: id});
 
 const asAuthorized = (password: string) => (user: User) =>
   user.password === password ? F.resolve(<Authorized>user) : F.reject(Error.InvalidCredentials);
 
 export const insertNewUser = R.pipe(newUser, collection.insertOne);
-export const fetch = R.pipe(getById, F.map (withDefaults));
+
+export const getById = R.pipe(findById, F.map (withDefaults));
 
 export const getOrCreate = (id: string) => R.pipe(
-  fetch,
+  getById,
   F.chainRej (() => insertNewUser(id)) 
 )(id)
 
 export const getAuthorized = (auth: Auth) =>
-  fetch (auth.discordId)
+  getById (auth.discordId)
     .pipe (F.chain (asAuthorized (auth.password)))
 
 export const update = (user: Authorized) => 

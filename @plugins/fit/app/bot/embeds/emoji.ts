@@ -1,6 +1,6 @@
 import {pipe, defaultTo} from "ramda";
-import {activity_emojis} from "../../config";
-import {switchcase} from "../../utils/fp-utils";
+import {activity_emojis} from "../../../config";
+import {switchcase} from "../../../utils/fp-utils";
 
 export type GenderedEmoji = (activityType: string) => string;
 

@@ -1,6 +1,6 @@
 import {Request} from "@services/bastion";
-import { getCurrentLogsForUser } from "../domain/exp/WorkoutLogRepository";
-import {weekly_exp_goal} from "../config";
+import { getCurrentLogsForUser } from "../../domain/exp/WorkoutLogRepository";
+import {weekly_exp_goal} from "../../config";
 
 //
 // Provide a list of the available commands
