@@ -30,7 +30,6 @@ import Upvotes from '../plugins/Upvotes'
 import UrbanDictionary from '../plugins/UrbanDictionary'
 import Yelling from '../plugins/yelling'
 import covid19 from '../plugins/covid19'
-import AQI from '../plugins/AQI'
 import db from '../plugins/db'
 
 export default bastion => ([
@@ -107,6 +106,5 @@ export default bastion => ([
     Minecraft(bastion, {
         restrict: ["743731120021045328"]
     }),
-    Dice,
-    AQI
+    Dice
 ])
