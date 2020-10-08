@@ -1,30 +1,31 @@
+import * as R from "ramda";
+import * as F from "fluture";
+
 import {Request} from "@services/bastion";
 import * as User from "../../models/user";
-import {getUser} from "../../domain/user/UserRepository";
-import {getActivitySummary} from "../../domain/strava/ActivitySummaryRepository";
 
-import {createProfileEmbed} from "./embeds/ProfileEmbed";
+import {MessageOptions} from "discord.js";
+import { createProfileEmbed } from "./profile-embed";
+
+type Embed = MessageOptions["embed"];
 
 // 
 // Display an over view of stats 
 //
-export async function profile(req: Request) {
+export const profile = async (req: Request) => {
   const message = await req.reply("One second, let me get that for you");
 
-  const [user, summary] = await Promise.all([
-    getUser(req.author.id),
-    getActivitySummary(req.author.id)
-  ]);
+  const reply = (embed: Embed) => {
+    message.delete();
+    req.reply({embed});
+  }
 
-  const embed = createProfileEmbed({
-    member    : req.getMember(),
-    user      : user.getProfile(),
-    activities: summary.getDetails()
-  });
+  const errorHandle = (data: any) => req.reply("oops");
 
-  message.delete();
-
-  console.log(embed);
-  
-  await req.reply({embed});
+  R.pipe(
+    User.getById,
+    F.chain (User.toPublicUser),
+    F.map   (createProfileEmbed),
+    F.fork  (errorHandle) (reply)
+  )(req.author.id)
 }

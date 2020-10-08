@@ -1,9 +1,19 @@
 import {db} from '@services/mongodb';
 import { FilterQuery, OptionalId, UpdateQuery } from "mongodb";
 
-import * as Error from "./errors";
+import {error, UNEXPECTED} from "./errors";
 import * as R from "ramda";
-import * as Future from "fluture";
+import * as F from "fluture";
+
+const mongoFail = (err: any) => {
+  console.error(`UNEXEPECTD: MongoDB Error`)
+  console.error(err);
+
+  return error(UNEXPECTED)("MongoDB threw an error");
+}
+
+// This casts any thrown errors as an `errorT`
+const catchError = F.mapRej (mongoFail);
 
 /**
  * Wraps mongoDB calls with `Futures` so that it interops better
@@ -20,24 +30,21 @@ export default class Collection<T> {
     this.CollectionName = collectionName;
   }
 
-  public find = (filter?: FilterQuery<T>) => Future.attemptP(async () => 
+  public find = (filter?: FilterQuery<T>) => F.attemptP(() => 
     this.collection.find(filter).toArray()
-  );
+  ).pipe (catchError);
   
-  public findOne = (filter: FilterQuery<T>) => Future.attemptP(async () => {
-    const res = await this.collection.findOne(filter);
-    if (!res) throw Error.NotAuthorized();
-    
-    return res;
-  });
+  public findOne = (filter: FilterQuery<T>) => F.attemptP(() => 
+    this.collection.findOne(filter)
+  ).pipe (catchError);
 
-  public insertOne = (obj: OptionalId<T>) => Future.attemptP(async () => 
+  public insertOne = (obj: OptionalId<T>) => F.attemptP(() => 
     this.collection.insertOne(obj)
       .then (R.always (obj))
-  );
+  ).pipe (catchError);
 
-  public replaceOne = (filter: FilterQuery<T>) => (obj: T) => Future.attemptP(async () =>
+  public replaceOne = (filter: FilterQuery<T>) => (obj: T) => F.attemptP(() =>
     this.collection.replaceOne(filter, obj)
       .then (R.always (obj))
-  );
+  ).pipe (catchError);
 }

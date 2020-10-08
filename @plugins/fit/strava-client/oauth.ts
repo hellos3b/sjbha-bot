@@ -3,8 +3,10 @@ import {client_id, client_secret} from "@plugins/fit/config";
 import {AuthResponse} from "./types";
 
 import * as F from "fluture";
+import { error, UNEXPECTED } from "../utils/errors";
 
 const api = wretch().url('https://www.strava.com')
+const failedRequest = () => error(UNEXPECTED)("Unable to fetch from Strava")
 
 /**
  * Get refresh token, use it for a user's first time in authenticating
@@ -41,4 +43,6 @@ export async function getAccessToken(refreshToken: string) {
   return res.access_token;
 }
 
-export const getRefreshTokenF = F.encaseP(getRefreshToken);
+export const getRefreshTokenF = (code: string) => 
+  F.attemptP(() => getRefreshToken(code))
+    .pipe (F.mapRej (failedRequest));
