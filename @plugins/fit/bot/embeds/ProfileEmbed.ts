@@ -3,7 +3,7 @@ import type { UserProfile } from "../../domain/user/User";
 import type { SummaryDetails, SummaryStats } from "../../domain/strava/ActivitySummary";
 import type Activity from "../../domain/strava/Activity";
 
-import {map, isEmpty, always, pipe, join, ifElse, applyTo} from "ramda";
+import * as R from "ramda";
 import format from 'string-format';
 import {MessageOptions} from "discord.js";
 
@@ -27,7 +27,7 @@ const shortened = (num: number) => {
 const level = ({user}: ProfileData) => field("Level", user.level);
 const exp = ({user}: ProfileData) => field("EXP", shortened(user.exp));
 
-const fitScore = ({user}: ProfileData) => pipe(() => 
+const fitScore = ({user}: ProfileData) => R.pipe(() => 
   format(
     '{0} *({1})*',
     toTenths(user.fitScore.score),
@@ -37,10 +37,10 @@ const fitScore = ({user}: ProfileData) => pipe(() =>
 )();
 
 /** Show the last activity's title, otherwise let user know it's empty */
-const recent = ({user, activities}: ProfileData) => pipe(
-  ifElse(
-    isEmpty,
-    always("*No activities in last 30 days*"),
+const recent = ({user, activities}: ProfileData) => R.pipe(
+  R.ifElse(
+    activity => !activity,
+    R.always("*No activities in last 30 days*"),
     activityLog(getEmoji(user.gender))
   ),
   asField(`Last Activity`, false)
@@ -54,10 +54,10 @@ const activityLog = (emoji: GenderedEmoji) => (activity: Activity) => format(
   )
 
 /** Display totals of each workout type, along with count + time */
-const totals = ({activities}: ProfileData) => pipe(
+const totals = ({activities}: ProfileData) => R.pipe(
   sortByProp<SummaryStats>("count"),
-  map(totalSummary),
-  join("\n"),
+  R.map(totalSummary),
+  R.join("\n"),
   asField(`30 Day Totals *(${activities.count} Activities)*`)
 )(activities.stats)
 
@@ -77,5 +77,5 @@ export const createProfileEmbed = (data: ProfileData): MessageOptions["embed"] =
   },
 
   fields: [level, exp, fitScore, recent, totals]
-    .map(applyTo(data))
+    .map(R.applyTo(data))
 })

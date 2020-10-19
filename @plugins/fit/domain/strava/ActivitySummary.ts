@@ -70,7 +70,6 @@ export default class ActivitySummary {
 
 export interface SummaryDetails {
   count: number;
-  // todo: this should come from Activity for sure
   lastActivity?: Activity;
   stats: SummaryStats[];
 }
