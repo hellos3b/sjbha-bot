@@ -18,15 +18,21 @@ interface ProfileData {
   activities: SummaryDetails  
 }
 
+/** Takes a number, and if large shortens it to "1.4k" etc */
+const shortened = (num: number) => {
+  if (num < 1000) return Math.floor(num);
+  return (num/1000).toFixed(1) + "k"; // todo: expand this when close to.... one million lol 
+}
+
 const level = ({user}: ProfileData) => field("Level", user.level);
-const exp = ({user}: ProfileData) => field("EXP", toTenths(user.exp));
+const exp = ({user}: ProfileData) => field("EXP", shortened(user.exp));
 
 const fitScore = ({user}: ProfileData) => pipe(() => 
   format(
     '{0} *({1})*',
-      user.fitScore.score.toString(), 
-      user.fitScore.rankName
-    ),
+    toTenths(user.fitScore.score),
+    user.fitScore.rankName
+  ),
   asField("Fit Score")
 )();
 
