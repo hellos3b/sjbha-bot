@@ -1,5 +1,5 @@
 import bastion from "@services/bastion";
-import getDaysUntilChristmas from "./src/days-till-christmas";
+import getDaysUntilChristmas from "./days-till-christmas";
 
 const festivize = (msg: string) => `🎄☃️☃️🎄🎁 ${msg} 🎁🎄☃️☃️🎄`;
 
