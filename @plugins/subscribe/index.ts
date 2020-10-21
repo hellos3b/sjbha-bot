@@ -1,6 +1,6 @@
 import channels from "@app/channels";
 import {Request} from "@services/bastion";
-import {message$, cmd, noParam, param, restrict} from "@services/bastion/stream";
+import {message$, cmd, noParam, param, restrict} from "@services/bastion/fp";
 import { filter, share } from "rxjs/operators";
 
 import * as subscription from "./src/subscription";

@@ -1,4 +1,6 @@
-import {prop as RProp, pipe, defaultTo, sort, negate} from "ramda";
+import { boolean } from "purify-ts";
+import * as R from "ramda";
+import {Maybe} from "purify-ts";
 
 // Additional FP functions I find help out when working with Ramda
 // especially with typings in Typescript
@@ -10,14 +12,24 @@ export const apply = <T extends (...args: any[])=>any>(fn: T) => (data: Paramete
 export const prop = <T>(key: string) => (obj: Record<string, any>): T => obj[key];
 
 /** Get or Else of props. `<T>` can be explicitly set to define return value */
-export const propOr = <T>(key: string, defaultVal: T) => pipe(prop<T>(key), defaultTo(defaultVal));
+export const propOr = <T>(key: string, defaultVal: T) => R.pipe(prop<T>(key), R.defaultTo(defaultVal));
 
 /** Looks up a hash table */
-export const switchcase = <T>(lookupObj: Record<string, T>) => (key: string): T => RProp(key, lookupObj);
+export const switchcase = <T>(lookupObj: Record<string|number, T>) => (key: string|number): T => R.prop(key, lookupObj);
 
 /** Filters null values out of an array. `reject(isNil)` isn't typed well enough */
 export const filterNil = <T>(arr: (T|null)[]) => arr.filter((value): value is T => !!value);
 
 /** Sort an array of objects by a prop */
 export const sortByProp = <T extends Record<string, any>>(propName: keyof T, descend = -1) => 
-  sort((a: T, b: T) => a[propName] > b[propName] ? negate(descend) : descend);
+  R.sort((a: T, b: T) => a[propName] > b[propName] ? R.negate(descend) : descend);
+
+/** A better typed version of `R.ifElse` */
+export const ifElse = <T, U>(
+  ifCond: (val: T)=>boolean, 
+  isTrue: (val: T)=>U,
+  isFalse: (val: T)=>U
+) => (val: T) => ifCond(val) ? isTrue(val) : isFalse(val);
+
+/** Wraps `R.last` in a maybe to account for undefined. Also typed a little more smooth */
+export const last = <T>(arr: T[]): Maybe<T> => Maybe.fromNullable (R.last (arr));

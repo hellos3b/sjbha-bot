@@ -1,4 +1,5 @@
 import { Maybe } from "purify-ts";
+import {debug} from "../config";
 
 export interface ErrorT {
   type: string;
@@ -9,6 +10,16 @@ export const error = (type: string) => (message?: string): ErrorT => ({
   type, 
   message: Maybe.fromNullable(message)
 })
+
+export const unexpected = (message?: string) => (err: any): ErrorT => {
+  debug("Unexpected error: %o", message);
+  console.error(err);
+
+  return {
+    type: UNEXPECTED,
+    message: Maybe.fromNullable(message)
+  }
+};
 
 /** When parsing IO and the schema doesn't match */
 export const RUNTYPE_FAILURE = "Runtype Failure";

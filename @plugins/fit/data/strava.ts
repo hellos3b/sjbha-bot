@@ -1,5 +1,9 @@
-import type {User} from "./user_collection";
+import type {User} from "./user-collection";
 import type { Wretcher } from "wretch";
+import type {
+  Authentication,
+  Activity
+} from "./strava-types";
 
 import wretch from "@services/node-wretch";
 import {client_id, client_secret} from "@plugins/fit/config";
@@ -7,14 +11,14 @@ import {client_id, client_secret} from "@plugins/fit/config";
 import * as R from "ramda";
 import * as F from "fluture";
 
-import { error, UNEXPECTED } from "../utils/errors";
+import { error, unexpected } from "../utils/errors";
 import Cache from "node-cache";
 
 // Wretch base to hit the strava API
 const api = wretch().url('https://www.strava.com')
 
 // Type any unexpected errors
-const failedRequest = () => error(UNEXPECTED)("Unable to fetch from Strava")
+const failedRequest = unexpected("Unable to fetch from Strava")
 const tokensCache = new Cache({ stdTTL: 50 * 60 });
 
 // Shorthand wrapper for attempting a request
@@ -36,11 +40,9 @@ const refreshToken = (code: string) =>
       grant_type: "authorization_code",
       code, client_id, client_secret
     })
-    .json<Strava.Authentication>();
+    .json<Authentication>();
 
 export const getRefreshToken = (code: string) => attemptP(() => refreshToken(code));
-
-
 
 /** If you already have gotten the refresh token, you can use this to get a temporary access token */
 const accessToken = async (refresh_token: string) => {
@@ -54,7 +56,7 @@ const accessToken = async (refresh_token: string) => {
 
   const {access_token} = await api.url('/oauth/token')
     .post(request)
-    .json<Strava.Authentication>()
+    .json<Authentication>()
 
   tokensCache.set(refresh_token, access_token);
   return access_token;
@@ -63,9 +65,9 @@ const accessToken = async (refresh_token: string) => {
 type WithClientFn<T> = (client: Wretcher) => Promise<T>;
 const withClient = <T>(fn: WithClientFn<T>) => (refreshToken: string) => attemptP(async () => {
   const token = await accessToken(refreshToken);
-  const client = api.headers({
-    Authorization: "Bearer " + token
-  });
+  const client = api
+    .headers({Authorization: "Bearer " + token})
+    .url("/api/v3");
 
   return fn(client);
 });
@@ -77,10 +79,11 @@ const withClient = <T>(fn: WithClientFn<T>) => (refreshToken: string) => attempt
  *                                                              *
  ****************************************************************/
 
-const activities = () => withClient(client =>
-  client.url('activities')
+export const activities = (query: object = {}) => withClient(client =>
+  client.url('/activities')
+    .query(query)
     .get()
-    .json<Strava.Activity[]>()
+    .json<Activity[]>()
 );
 
 // API calls
@@ -88,17 +91,6 @@ const activities = () => withClient(client =>
 //   .url('/authlete')
 //   .get()
 //   .json<Strava.Athlete>();
-
-/****************************************************************
- *                                                              *
- * Builders                                                     *
- *                                                              *
- ****************************************************************/
-
-export const activitiesSummary = (user: User) => R.pipe(
-  activities()
-)(user.refreshToken)
-
 
 /****************************************************************
  *                                                              *

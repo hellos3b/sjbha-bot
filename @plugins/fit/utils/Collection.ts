@@ -1,5 +1,5 @@
 import {db} from '@services/mongodb';
-import { FilterQuery, OptionalId, UpdateQuery } from "mongodb";
+import { FilterQuery, OptionalId } from "mongodb";
 
 import {error, UNEXPECTED} from "./errors";
 import * as R from "ramda";
@@ -16,8 +16,7 @@ const mongoFail = (err: any) => {
 const catchError = F.mapRej (mongoFail);
 
 /**
- * Wraps mongoDB calls with `Futures` so that it interops better
- * in a functional way
+ * Wraps mongoDB calls with `Futures` so that it interops better in a functional way
  */
 export default class Collection<T> {
   readonly CollectionName: string;

@@ -1,5 +1,5 @@
-import type { MessageOptions } from "discord.js";
 import type { DiscordMember } from "@services/bastion";
+import type { Embed, Field } from "@services/bastion/fp";
 import type ExperiencePoints from "../../../domain/user/ExperiencePoints";
 import type Activity from "../../../domain/strava/Activity";
 import type { UserProfile } from "../../../domain/user/User";
@@ -7,10 +7,10 @@ import type { UserProfile } from "../../../domain/user/User";
 import {map, reject, applyTo, pipe, prepend, join, defaultTo, includes, prop} from "ramda";
 import format from 'string-format';
 import {propOr, switchcase, filterNil} from "../../../utils/fp-utils";
-import {toMiles, toTime, toPace, toTenths, toFeet} from "./conversions";
+import {toMiles, toTime, toPace, toTenths, toFeet} from "../conversions";
 import {ActivityType} from "../../../config";
 
-import {Field, asField} from "./embed";
+import { asField } from "@services/bastion/fp";
 import {GenderedEmoji, getEmoji} from "./emoji";
 import { ActivityResponse } from "@plugins/fit/strava-client";
 
@@ -25,6 +25,7 @@ interface CreateProps {
 
 /** If user has Opted out of HR, we filter out the HR related fields */
 const filterHRIf = (filterHR: boolean) => reject((field: Field) => filterHR && includes(field.name, "HR"));
+
 /** Typecast `prop` to ActivityResponse */
 const activityProp = <K extends keyof ActivityResponse>(key: K) => (obj: ActivityResponse) => prop(key, obj);
 
@@ -119,7 +120,7 @@ const activityVerb = (activityType: string) => pipe(
   defaultTo(`did a workout [${activityType}]`)
 )(activityType)
 
-export const createActivityEmbed = ({member, user, exp, activity, weeklyExp}: CreateProps): MessageOptions["embed"] => ({
+export const createActivityEmbed = ({member, user, exp, activity, weeklyExp}: CreateProps): Embed => ({
   title       : activity.name,
   description : activity.description || "",
   color       : 0xFC4C02,

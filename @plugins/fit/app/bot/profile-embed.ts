@@ -1,94 +1,21 @@
-import type { DiscordMember } from "@services/bastion";
-import type { UserProfile } from "../../domain/user/User";
-import type { SummaryDetails, SummaryStats } from "../../domain/strava/ActivitySummary";
-import type Activity from "../../domain/strava/Activity";
+import { asField, Embed } from "@services/bastion/fp";
 
 import * as R from "ramda";
+import * as FP from "../../utils/fp-utils";
 import * as User from "../../models/user";
+import * as Activity from "../../models/activity";
 
 import format from 'string-format';
-import {MessageOptions} from "discord.js";
 
-import {toTenths, toRelative} from "./embeds/conversions";
-import {GenderedEmoji, getEmoji} from "./embeds/emoji";
-import { asField, field } from "./embeds/embed";
-import { sortByProp } from "@plugins/fit/utils/fp-utils";
-import { PublicUser } from "@plugins/fit/models/user";
+import {toRelative, toTime} from "./conversions";
+import { Maybe } from "purify-ts";
 
-interface ProfileData {
-  member: DiscordMember, 
-  user: UserProfile,
-  activities: SummaryDetails  
+export interface Data {
+  user: User.PublicUser,
+  activities: Activity.Model[]
 }
 
-// const level = ({user}: ProfileData) => field("Level", user.level);
-// const exp = ({user}: ProfileData) => field("EXP", toTenths(user.exp));
-
-// const fitScore = ({user}: ProfileData) => pipe(() => 
-//   format(
-//     '{0} *({1})*',
-//       user.fitScore.score.toString(), 
-//       user.fitScore.rankName
-//     ),
-//   asField("Fit Score")
-// )();
-
-// /** Show the last activity's title, otherwise let user know it's empty */
-// const recent = ({user, activities}: ProfileData) => pipe(
-//   ifElse(
-//     isEmpty,
-//     always("*No activities in last 30 days*"),
-//     activityLog(getEmoji(user.gender))
-//   ),
-//   asField(`Last Activity`, false)
-// )(activities.lastActivity)
-
-// const activityLog = (emoji: GenderedEmoji) => (activity: Activity) => format(
-//   '{0} {1} {2}',
-//     emoji(activity.type),
-//     activity.name,
-//     toRelative(activity.timestamp)
-//   )
-
-// /** Display totals of each workout type, along with count + time */
-// const totals = ({activities}: ProfileData) => pipe(
-//   sortByProp<SummaryStats>("count"),
-//   map(totalSummary),
-//   join("\n"),
-//   asField(`30 Day Totals *(${activities.count} Activities)*`)
-// )(activities.stats)
-
-// const totalSummary = (summary: SummaryStats) => format(
-//   '**{0}** • {1} activities ({2})',
-//     summary.type,
-//     summary.count.toString(),
-//     summary.totalTime.toString()
-//   )
-
-// export const createProfileEmbed = (data: ProfileData): MessageOptions["embed"] => ({
-//   color: 0x4ba7d1,
-
-//   author: {
-//     name: data.member.displayName,
-//     icon_url: data.member.avatar
-//   },
-
-//   fields: [level, exp, fitScore, recent, totals]
-//     .map(applyTo(data))
-// })
-
-const level = R.pipe(
-  User.level,
-  asField("Level")
-);
-
-const exp = R.pipe(
-  toTenths,
-  asField("EXP")
-);
-
-
-export const createProfileEmbed = (user: PublicUser): MessageOptions["embed"] => ({
+export const embed = ({user, activities}: Data): Embed => ({
   color: 0x4ba7d1,
 
   author: {
@@ -97,7 +24,72 @@ export const createProfileEmbed = (user: PublicUser): MessageOptions["embed"] =>
   },
 
   fields: [
-    level(user.xp),
-    exp(user.xp),
+    R.compose 
+      (asField("Level"), User.level) 
+      (user.xp),
+
+    R.compose 
+      (asField("EXP"), shortenNum) 
+      (user.xp),
+
+    R.compose
+      (asField("Fit Score"), formatScore)
+      (user.fitScore),
+
+    R.compose
+      (asField("Last Activity", false), recent)
+      (Activity.mostRecent (activities)),
+
+    R.compose
+      (asField(`30 Day Totals *(${activities.length} Activities)*`), totals)
+      (activities)
   ]
-})
+});
+
+const formatSummary = (summary: Activity.Summary) => format(
+  '**{0}** • {1} activities ({2})',
+    summary.type,
+    String(summary.count),
+    toTime(summary.totalTime)
+  )
+  
+const formatScore = (score: number) => format(
+  '{0} *({1})*',
+  R.pipe(Math.floor, String)(score),
+  User.rankName(score)
+)
+
+const formatRecentActivity = (activity: Activity.Model) => format(
+  '{0} {1} *{2}*',
+    " ",
+    // emoji(activity.type),
+    activity.name,
+    R.pipe(Activity.started, toRelative)(activity)
+  )
+
+
+/** Summarizes individual activity types */
+const summarizeTypes = R.pipe(
+  Activity.groupByType,
+  R.mapObjIndexed (Activity.summary),
+  Object.values
+);
+
+/** Display totals of each workout type, along with count + time */
+const totals = R.pipe(
+  summarizeTypes,
+  FP.sortByProp ("count", 1),
+  R.map (formatSummary),
+  R.join ("\n")
+)
+
+/** If a number is over 1,000, shorten it to "1k" format */
+const shortenNum = (num: number) => {
+  if (num >= 1000) return Math.floor(num / 100)/10 + "k";
+  return Math.floor(num);
+}
+
+const recent = (activity: Maybe<Activity.Model>) => 
+  activity
+    .map(formatRecentActivity)
+    .orDefault("*No activities in last 30 days*")

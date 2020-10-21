@@ -1,7 +1,7 @@
 import bastion from "@services/bastion";
 import app from "@services/express";
 import channels from "@app/channels";
-import {message$, cmd, noParam, param, restrict} from "@services/bastion/stream";
+import {message$, cmd, noParam, param, restrict} from "@services/bastion/fp";
 // import {restrict, paramRouter} from "@services/bastion/middleware";
 import * as bot from "./app/bot";
 import { share } from "rxjs/operators";

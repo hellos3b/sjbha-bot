@@ -2,13 +2,17 @@ import type {
   User,
   Auth,
   Authorized
-} from "../data/user_collection";
+} from "../data/user-collection";
+
+import type {
+  Authentication
+} from "../data/strava-types";
 
 import * as R from "ramda";
 import * as F from "fluture";
 import * as FP from "../utils/fp-utils";
 import * as strava from "../data/strava";
-import * as db from "../data/user_collection";
+import * as db from "../data/user-collection";
 
 import bastion from "@services/bastion";
 import * as Config from "../config";
@@ -30,7 +34,7 @@ export type PublicUser = User & {
 
 export const getById = (discordId: string) => db.getById(discordId);
 
-export const toPublicUser = (user: User) => F.attempt(() => {
+export const toPublicUser = (user: User) => F.attempt((): PublicUser => {
   const member = bastion.getMember(user.discordId);
 
   return {
@@ -39,6 +43,11 @@ export const toPublicUser = (user: User) => F.attempt(() => {
     avatar: member.avatar
   };
 })
+
+export const getAsPublicUser = R.pipe(
+  getById, 
+  F.chain(toPublicUser)
+);
 
 /** Get an authorized user from a string token */
 const authorizedUserFromToken = (token: string) => R.pipe(
@@ -100,7 +109,35 @@ export const setGender = (gender: string) =>
   });
 
 /** When a user first links to strava, update the model */
-export const linkStravaAccount = (user: Authorized, res: Strava.Authentication) => R.pipe(
+export const linkStravaAccount = (user: Authorized, res: Authentication) => R.pipe(
   setStravaAuth(res.athlete.id, res.refresh_token),
   setGender(res.athlete.sex)
 )(user);
+
+const lt = R.flip(R.lt);
+
+/** Convert fit score to rank */
+export const rank = R.cond<number, number>([
+  [R.equals(0), R.always(0)],
+  [lt(20),      R.always(1)],
+  [lt(40),      R.always(2)],
+  [lt(60),      R.always(3)],
+  [lt(80),      R.always(4)],
+  [lt(100),     R.always(5)],
+  [R.equals(100), R.always(6)]
+]);
+
+/** Convert fit score to rank name */
+export const rankName = R.pipe(
+  rank,
+  FP.switchcase({
+    0: 'Bushtit',
+    1: 'Hummingbird',
+    2: 'Goldfinch',
+    3: 'Thrasher',
+    4: 'Kingfisher',
+    5: 'Falcon',
+    6: 'Golden Eagle'
+  }),
+  R.defaultTo('Bushtit')
+);

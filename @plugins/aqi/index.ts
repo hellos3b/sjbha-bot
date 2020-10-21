@@ -1,7 +1,7 @@
 import type {Request} from "@services/bastion";
 import type {MessageOptions} from "discord.js";
 
-import {message$, cmd, noParam, param} from "@services/bastion/stream";
+import {message$, cmd, noParam, param} from "@services/bastion/fp";
 import * as R from "ramda";
 import * as F from "fluture";
 
