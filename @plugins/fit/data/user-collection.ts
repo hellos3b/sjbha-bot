@@ -9,7 +9,7 @@ import {
   INVALID_CREDENTIALS,
   UNEXPECTED
 } from "../utils/errors";
-import Collection from "../utils/Collection";
+import {Collection} from "@services/mongodb";
 
 export type Auth = {
   discordId: string;

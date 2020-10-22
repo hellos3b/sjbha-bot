@@ -1,4 +1,8 @@
+import type {Request} from "@services/bastion";
 import { Maybe } from "purify-ts";
+
+import * as R from "ramda";
+import * as FP from "./fp-utils";
 import {debug} from "../config";
 
 export interface ErrorT {
@@ -30,7 +34,24 @@ export const INVALID_CREDENTIALS = "Invalid Credentials";
 /** When you have no idea what happened */
 export const UNEXPECTED = "Unexpected";
 
+export const getErrorMessage = (err: any) => FP.switchcase({
+  [HASNT_AUTHORIZED]    : "You need to connect Strava to the bot first. Use `!fit auth` to get started",
+  [RUNTYPE_FAILURE]     : "\//todo",
+  [INVALID_CREDENTIALS] : "\//todo"
+})
 
+export const unknownMessage = R.pipe(
+  R.tap (console.error),
+  R.always (
+    "An unexpected error just happened, which... shouldn't. *PSSST*, hey <@125829654421438464>, someone found a bug."
+  )
+)
+
+export const handleError = (req: Request) => R.pipe(
+  getErrorMessage,
+  FP.defaultToLazy (unknownMessage),
+  req.text
+)
 
 
 // DEPRECATED Vvvvvvvvv

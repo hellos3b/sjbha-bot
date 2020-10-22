@@ -7,16 +7,16 @@ import * as User from "../../models/user";
 import * as Activity from "../../models/activity";
 
 import { asField, Embed } from "@services/bastion/fp";
-import {handleError} from "./errorHandler";
+import {handleError} from "../../utils/errors";
 
 import format from 'string-format';
 
-import {toRelative, toTime, shortenNum} from "./conversions";
+import {toRelative, toTime, shortenNum} from "../../utils/units";
 import { Maybe } from "purify-ts";
 
 /****************************************************************
  *                                                              *
- * Profile                                                      *
+ * Command                                                      *
  *                                                              *
  ****************************************************************/
 
@@ -73,8 +73,7 @@ const createEmbed = ({user, activities}: EmbedProps): Embed => {
         (asField("EXP"), shortenNum) 
         (user.xp),
 
-      R.compose
-        (asField("Fit Score"), formatScore)
+      R.compose (asField("Fit Score"), formatScore)
         (user.fitScore),
 
       R.compose
@@ -97,7 +96,7 @@ const formatSummary = (summary: Activity.Summary) => format(
   
 const formatScore = (score: number) => format(
   '{0} *({1})*',
-  R.pipe (Math.floor, String) (score),
+  score.toFixed(0),
   User.rankName(score)
 )
 

@@ -1,23 +1,6 @@
-import Debug from "debug";
-import {MONGO_URL} from "@app/env";
-import {MongoClient} from "mongodb";
+export {default as Collection} from "./Collection"
 
-const debug = Debug("@services/mongodb");
-
-let client: MongoClient;
-
-MongoClient
-  .connect(MONGO_URL, { useUnifiedTopology: true })
-  .then(r => client = r)
-  .then(() => debug("Connected to mongodb"));
-
- 
-export const db = () => client.db();
-
-export const getCollection = (collection: string) => {
-  if (!client) throw new Error(`Trying to call 'getCollection' on @services/mongodb, but the database hasn't finished connecting`)
-  return db().collection(collection);
-};
-
+import {getCollection, db} from "./connection";
+export {getCollection, db};
 // back compat cuz i changed things
 export default {getCollection};

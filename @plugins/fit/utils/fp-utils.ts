@@ -29,6 +29,10 @@ export const falsy = <T>(val: T): boolean => !!val;
 /** Checks if an array has items */
 export const isEmpty = <T>(val: T[]): boolean => !val.length;
 
+export const defaultToLazy = <T>(fn: (val: T)=>T) => (val: any) => !val ? fn(val) : val;
+
+export const fixed = (count: number) => (value: number) => value.toFixed(count);
+
 /** A better typed version of `R.ifElse` */
 export const ifElse = <T, U>(ifCond: (val: T)=>boolean) => (
   isTrue: (val?: T)=>U,

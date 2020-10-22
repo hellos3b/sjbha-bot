@@ -4,7 +4,7 @@ import bastion from "@services/bastion";
 import {debug, post_delay_ms, post_to_channel} from "../../config";
 import {NotConnected, Unauthorized} from "../../utils/errors";
 
-import {createActivityEmbed} from "../bot/embeds/ActivityEmbed";
+import {createActivityEmbed} from "../bot/activity";
 
 import { getUserByStravaId, saveUser, getUser } from "../../domain/user/UserRepository";
 import { getActivityByStravaId } from "../../domain/strava/ActivityRepository";

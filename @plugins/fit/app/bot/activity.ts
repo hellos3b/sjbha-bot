@@ -1,18 +1,18 @@
 import type { DiscordMember } from "@services/bastion";
 import type { Embed, Field } from "@services/bastion/fp";
-import type ExperiencePoints from "../../../domain/user/ExperiencePoints";
-import type Activity from "../../../domain/strava/Activity";
-import type { UserProfile } from "../../../domain/user/User";
+import type ExperiencePoints from "../../domain/user/ExperiencePoints";
+import type { UserProfile } from "../../domain/user/User";
+import type Activity from "../../domain/strava/Activity";
 
 import {map, reject, applyTo, pipe, prepend, join, defaultTo, includes, prop} from "ramda";
 import format from 'string-format';
-import {propOr, switchcase, filterNil} from "../../../utils/fp-utils";
-import {toMiles, toTime, toPace, toTenths, toFeet} from "../conversions";
-import {ActivityType} from "../../../config";
+import {propOr, switchcase, filterNil} from "../../utils/fp-utils";
+import {toMiles, toTime, toPace, toTenths, toFeet} from "../../utils/units";
+import {ActivityType} from "../../config";
 
 import { asField } from "@services/bastion/fp";
-import {GenderedEmoji, getEmoji} from "../emoji";
 import { ActivityResponse } from "@plugins/fit/strava-client";
+import * as ActivityModel from "../../models/activity";
 
 // todo: make move this interface to some kind of mapping FN
 interface CreateProps {
@@ -129,7 +129,7 @@ export const createActivityEmbed = ({member, user, exp, activity, weeklyExp}: Cr
   },
   author: { 
     name: heading(
-      getEmoji(user.gender)(activity.type),
+      ActivityModel.genderedEmoji(user.gender)(activity.type),
       member.displayName, 
       activity.type
     ) 

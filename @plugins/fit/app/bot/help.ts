@@ -1,11 +1,13 @@
 import {Request} from "@services/bastion";
 import {basePath} from "@plugins/fit/config";
 
+import * as R from "ramda";
+
 // Provide a list of the available commands
-export const help = (req: Request) => {
-  const msg = helpMsg(basePath + "/fit/help");
-  req.text(msg);
-}
+export const help = (req: Request) => R.pipe(
+  () => helpMsg(basePath + "/fit/help"),
+  req.text
+)()
 
 export const helpMsg = (helpLink: string) => `
 How it works: <${helpLink}>

@@ -1,7 +1,8 @@
-import {db} from '@services/mongodb';
-import { FilterQuery, OptionalId } from "mongodb";
+import type { FilterQuery, OptionalId } from "mongodb";
+import {db} from './connection';
 
-import {error, UNEXPECTED} from "./errors";
+// todo: eh
+import {error, UNEXPECTED} from "../../@plugins/fit/utils/errors";
 import * as R from "ramda";
 import * as F from "fluture";
 

@@ -8,7 +8,13 @@ import * as FP from "../../utils/fp-utils";
 import * as User from "../../models/user";
 
 import format from 'string-format';
-import {handleError} from "./errorHandler";
+import {handleError} from "../../utils/errors";
+
+/****************************************************************
+ *                                                              *
+ * Command                                                      *
+ *                                                              *
+ ****************************************************************/
 
 export const leaderboard = (req: Request) => {
   const empty = () => req.text("Nobody has a fit score :(");
@@ -21,6 +27,12 @@ export const leaderboard = (req: Request) => {
     F.fork (handleError(req)) (sendLeaderboard)
   )()
 }
+
+/****************************************************************
+ *                                                              *
+ * Embed                                                        *
+ *                                                              *
+ ****************************************************************/
 
 const createEmbed = (users: PublicUser[]): Embed => ({
   color: 0x4ba7d1,
