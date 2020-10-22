@@ -1,5 +1,5 @@
 import type {MessageOptions} from "discord.js";
-import type { SerializedUser } from "../../../domain/user/User";
+import type { SerializedUser } from "../../domain/user/User";
 
 import format from 'string-format';
 import {inc, prop} from "ramda";

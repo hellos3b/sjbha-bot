@@ -69,6 +69,7 @@ export const weekly_exp_goal = 150;
 /** How many fit score you get when you hit the goal */
 export const points_per_goal = 5;
 
+// todo: deprecate
 export const ActivityType = {
   RIDE: "Ride",
   RUN: "Run",
@@ -83,6 +84,7 @@ export const ActivityType = {
   default: ""
 }
 
+// todo: deprecate
 /** Emojis for each activity type. As a tuple where `[male emoji, female emoji]` */
 export const activity_emojis = {
   [ActivityType.RIDE] : ["🚴", "🚴‍♀️"],
@@ -98,6 +100,31 @@ export const activity_emojis = {
   default: ["🤸‍♂️", "🤸‍♀️"]
 };
 
+export const male_emojis = {
+  [ActivityType.RIDE] : "🚴",
+  [ActivityType.RUN]  : "🏃",
+  [ActivityType.YOGA] : "🧘‍♂️",
+  [ActivityType.HIKE] : "⛰️",
+  [ActivityType.WALK] : "🚶‍♂️",
+  [ActivityType.CROSSFIT]: "🏋️‍♂️",
+  [ActivityType.WEIGHT_TRAIN]: "🏋️‍♂️",
+  [ActivityType.ROCK_CLIMB]: "🧗‍♂️",
+  default: "🤸‍♂️"
+};
+
+export const female_emojis = {
+  [ActivityType.RIDE] : "🚴",
+  [ActivityType.RUN]  : "🏃",
+  [ActivityType.YOGA] : "🧘‍♂️",
+  [ActivityType.HIKE] : "⛰️",
+  [ActivityType.WALK] : "🚶‍♂️",
+  [ActivityType.CROSSFIT]: "🏋️‍♂️",
+  [ActivityType.WEIGHT_TRAIN]: "🏋️‍♂️",
+  [ActivityType.ROCK_CLIMB]: "🧗‍♂️",
+  default: "🤸‍♂️"
+}
+
+// todo: deprecate
 /** The names of ranks */
 export const rank_names: Record<number, string> = {
   [0]: 'Bushtit',

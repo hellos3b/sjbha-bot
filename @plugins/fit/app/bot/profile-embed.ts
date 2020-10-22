@@ -9,42 +9,48 @@ import format from 'string-format';
 
 import {toRelative, toTime} from "./conversions";
 import { Maybe } from "purify-ts";
+import emojis from "@app/emojis";
 
 export interface Data {
   user: User.PublicUser,
   activities: Activity.Model[]
 }
 
-export const embed = ({user, activities}: Data): Embed => ({
-  color: 0x4ba7d1,
+export const embed = ({user, activities}: Data): Embed => {
+  const emojis = Activity.genderedEmoji (user.gender);
+  const recent = recentActivity (emojis);
 
-  author: {
-    name    : user.displayName,
-    icon_url: user.avatar
-  },
+  return {
+    color: 0x4ba7d1,
 
-  fields: [
-    R.compose 
-      (asField("Level"), User.level) 
-      (user.xp),
+    author: {
+      name    : user.displayName,
+      icon_url: user.avatar
+    },
 
-    R.compose 
-      (asField("EXP"), shortenNum) 
-      (user.xp),
+    fields: [
+      R.compose 
+        (asField("Level"), User.level) 
+        (user.xp),
 
-    R.compose
-      (asField("Fit Score"), formatScore)
-      (user.fitScore),
+      R.compose 
+        (asField("EXP"), shortenNum) 
+        (user.xp),
 
-    R.compose
-      (asField("Last Activity", false), recent)
-      (Activity.mostRecent (activities)),
+      R.compose
+        (asField("Fit Score"), formatScore)
+        (user.fitScore),
 
-    R.compose
-      (asField(`30 Day Totals *(${activities.length} Activities)*`), totals)
-      (activities)
-  ]
-});
+      R.compose
+        (asField("Last Activity", false), recent)
+        (Activity.mostRecent (activities)),
+
+      R.compose
+        (asField(`30 Day Totals *(${activities.length} Activities)*`), totals)
+        (activities)
+    ]
+  }
+};
 
 const formatSummary = (summary: Activity.Summary) => format(
   '**{0}** • {1} activities ({2})',
@@ -59,10 +65,9 @@ const formatScore = (score: number) => format(
   User.rankName(score)
 )
 
-const formatRecentActivity = (activity: Activity.Model) => format(
+const formatRecentActivity = (emoji: string, activity: Activity.Model) => format(
   '{0} {1} *{2}*',
-    " ",
-    // emoji(activity.type),
+    emoji,
     activity.name,
     R.pipe(Activity.started, toRelative)(activity)
   )
@@ -89,7 +94,7 @@ const shortenNum = (num: number) => {
   return Math.floor(num);
 }
 
-const recent = (activity: Maybe<Activity.Model>) => 
+const recentActivity = (emojis: Activity.GenderedEmojis) => (activity: Maybe<Activity.Model>) => 
   activity
-    .map(formatRecentActivity)
-    .orDefault("*No activities in last 30 days*")
+    .map (data => formatRecentActivity (emojis(data.type), data))
+    .orDefault ("*No activities in last 30 days*")

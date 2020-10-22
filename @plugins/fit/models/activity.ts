@@ -1,5 +1,6 @@
-import type {
-  Activity
+import {
+  Activity,
+  ActivityType
 } from "../data/strava-types";
 
 import * as R from "ramda";
@@ -38,6 +39,23 @@ export const getLastMonth = (user: User.Model) => R.pipe(
 /** Get the date for when the activity was started, as a Luxon time */
 export const started = (activity: Activity) => DateTime.fromISO(activity.start_date);
 
+export type GenderedEmojis = (activityType: string) => string;
+
+const maleEmojis: GenderedEmojis = R.pipe(
+  FP.switchcase(Config.male_emojis),
+  R.defaultTo(Config.male_emojis.default)
+);
+
+const femaleEmojis: GenderedEmojis = R.pipe(
+  FP.switchcase(Config.female_emojis),
+  R.defaultTo(Config.female_emojis.default)
+);
+
+/** Gets the emoji from the config */
+export const genderedEmoji = FP.switchcase({
+  "M": maleEmojis,
+  "F": femaleEmojis
+})
 
 /****************************************************************
  *                                                              *

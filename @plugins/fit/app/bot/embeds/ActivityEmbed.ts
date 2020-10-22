@@ -11,7 +11,7 @@ import {toMiles, toTime, toPace, toTenths, toFeet} from "../conversions";
 import {ActivityType} from "../../../config";
 
 import { asField } from "@services/bastion/fp";
-import {GenderedEmoji, getEmoji} from "./emoji";
+import {GenderedEmoji, getEmoji} from "../emoji";
 import { ActivityResponse } from "@plugins/fit/strava-client";
 
 // todo: make move this interface to some kind of mapping FN

@@ -8,16 +8,17 @@ export interface Authentication {
   }  
 }
 
-// interface ActivitiesQuery {
-//   /** Epoch time */
-//   before?: number;
-//   /** Epoch time */
-//   after?: number;
-//   /** Defaults to 1 */
-//   page?: number;
-//   /** Test */
-//   per_page?: number;
-// }
+export const ActivityType = {
+  RIDE: "Ride",
+  RUN: "Run",
+  YOGA: "Yoga",
+  CROSSFIT: "Crossfit",
+  HIKE: "Hike",
+  WALK: "Walk",
+  WEIGHT_TRAIN: "WeightTraining",
+  ROCK_CLIMB: "Climb",
+  WORKOUT: "Workout"
+}
 
 export interface Activity {
   /** Activity ID */
