@@ -55,6 +55,12 @@ export default class Request {
     return this.message.channel.send(msg);
   }
 
+  /** Reply with text */
+  text = (msg: string) => this.message.channel.send(msg);
+
+  /** Reply with an embed */
+  embed = (embed: Discord.MessageOptions["embed"]) => this.message.channel.send({embed});
+
   getMember = (discordId?: string) => {
     discordId = discordId || this.message.author.id;
     return this.bastion.getMember(discordId);

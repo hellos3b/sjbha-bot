@@ -1,4 +1,3 @@
-import { boolean } from "purify-ts";
 import * as R from "ramda";
 import {Maybe} from "purify-ts";
 
@@ -24,12 +23,19 @@ export const filterNil = <T>(arr: (T|null)[]) => arr.filter((value): value is T 
 export const sortByProp = <T extends Record<string, any>>(propName: keyof T, descend = -1) => 
   R.sort((a: T, b: T) => a[propName] > b[propName] ? R.negate(descend) : descend);
 
+/** Checks if a value is Falsy */
+export const falsy = <T>(val: T): boolean => !!val;
+
+/** Checks if an array has items */
+export const isEmpty = <T>(val: T[]): boolean => !val.length;
+
 /** A better typed version of `R.ifElse` */
-export const ifElse = <T, U>(
-  ifCond: (val: T)=>boolean, 
+export const ifElse = <T, U>(ifCond: (val: T)=>boolean) => (
   isTrue: (val: T)=>U,
   isFalse: (val: T)=>U
 ) => (val: T) => ifCond(val) ? isTrue(val) : isFalse(val);
 
 /** Wraps `R.last` in a maybe to account for undefined. Also typed a little more smooth */
 export const last = <T>(arr: T[]): Maybe<T> => Maybe.fromNullable (R.last (arr));
+
+export const mapIdx = <T, U>(fn: (a: T, b: number)=>U) => (arr: T[]) => arr.map(fn);

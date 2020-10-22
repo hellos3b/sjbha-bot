@@ -7,9 +7,8 @@ import * as Activity from "../../models/activity";
 
 import format from 'string-format';
 
-import {toRelative, toTime} from "./conversions";
+import {toRelative, toTime, shortenNum} from "./conversions";
 import { Maybe } from "purify-ts";
-import emojis from "@app/emojis";
 
 export interface Data {
   user: User.PublicUser,
@@ -61,7 +60,7 @@ const formatSummary = (summary: Activity.Summary) => format(
   
 const formatScore = (score: number) => format(
   '{0} *({1})*',
-  R.pipe(Math.floor, String)(score),
+  R.pipe (Math.floor, String) (score),
   User.rankName(score)
 )
 
@@ -69,7 +68,7 @@ const formatRecentActivity = (emoji: string, activity: Activity.Model) => format
   '{0} {1} *{2}*',
     emoji,
     activity.name,
-    R.pipe(Activity.started, toRelative)(activity)
+    R.pipe (Activity.started, toRelative) (activity)
   )
 
 
@@ -87,12 +86,6 @@ const totals = R.pipe(
   R.map (formatSummary),
   R.join ("\n")
 )
-
-/** If a number is over 1,000, shorten it to "1k" format */
-const shortenNum = (num: number) => {
-  if (num >= 1000) return Math.floor(num / 100)/10 + "k";
-  return Math.floor(num);
-}
 
 const recentActivity = (emojis: Activity.GenderedEmojis) => (activity: Maybe<Activity.Model>) => 
   activity

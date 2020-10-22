@@ -34,7 +34,9 @@ export type PublicUser = User & {
 
 export const getById = (discordId: string) => db.getById(discordId);
 
-export const toPublicUser = (user: User) => F.attempt((): PublicUser => {
+export const getAll = db.getAll;
+
+export const toPublicUser = (user: User): PublicUser => {
   const member = bastion.getMember(user.discordId);
 
   return {
@@ -42,11 +44,16 @@ export const toPublicUser = (user: User) => F.attempt((): PublicUser => {
     displayName: member.displayName,
     avatar: member.avatar
   };
-})
+}
 
 export const getAsPublicUser = R.pipe(
   getById, 
-  F.chain(toPublicUser)
+  F.map (toPublicUser)
+);
+
+export const getAllAsPublic = R.pipe(
+  getAll,
+  F.map (R.map (toPublicUser))
 );
 
 /** Get an authorized user from a string token */

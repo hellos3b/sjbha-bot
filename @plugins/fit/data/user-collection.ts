@@ -54,7 +54,7 @@ const newUser = (id: string) => withDefaults({
 const unauthorized = error(INVALID_CREDENTIALS);
 const missingUser = () => error(HASNT_AUTHORIZED)("User isn't authorized");
 
-const guaranteeUser = (user: User|null): F.FutureInstance<ErrorT, User> => 
+const guaranteeUserExists = (user: User|null): F.FutureInstance<ErrorT, User> => 
   !!user ? F.resolve(user) : F.reject(missingUser());
 
 const asAuthorized = (password: string) => (user: User) =>
@@ -69,8 +69,13 @@ export const insertNewUser = R.pipe(
 
 export const getById = (id: string) => R.pipe(
   () => collection.findOne({discordId: id}),
-  F.chain (guaranteeUser),
+  F.chain (guaranteeUserExists),
   F.map (withDefaults)
+)();
+
+export const getAll = () => R.pipe(
+  () => collection.find(),
+  F.map (R.map (withDefaults))
 )();
 
 export const getOrCreate = (id: string) => R.pipe(

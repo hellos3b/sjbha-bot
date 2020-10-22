@@ -1,32 +1,21 @@
-import {reduce} from "lodash";
-import {Request} from "@services/bastion";
-import {createLeaderboardEmbed} from "./LeaderboardEmbed";
-import {getAllUsers} from "../../domain/user/UserRepository";
+import type {Request} from "@services/bastion";
 
-export async function leaderboard(req: Request) {
-  const users = await getAllUsers();
+import * as R from "ramda";
+import * as F from "fluture";
+import * as FP from "../../utils/fp-utils";
+import * as User from "../../models/user";
 
-  const leaderboard = users.getFitscoreLeaderboard();
+import * as Leaderboard from "./leaderboard-embed";
+import {handleError} from "./errorHandler";
 
-  if (leaderboard.length === 0) {
-    await req.reply("Nobody has a fit score :(")
-    return;
-  }
+export const leaderboard = (req: Request) => {
+  const reply = (users: User.PublicUser[]) => 
+    FP.isEmpty (users)
+      ? req.text("Nobody has a fit score :(")
+      : R.compose (req.embed, Leaderboard.embed) (users);
 
-  const nicknames = reduce(
-    leaderboard,
-    (map, user) => {
-      const member = req.getMember(user.discordId);
-      map[user.discordId] = member.displayName;
-      return map;
-    },
-    {} as Record<string, string>
-  )
-
-  const embed = createLeaderboardEmbed({
-    users: leaderboard,
-    nicknames
-  });
-
-  await req.reply({embed});
+  R.pipe(
+    User.getAllAsPublic,
+    F.fork (handleError(req)) (reply)
+  )()
 }

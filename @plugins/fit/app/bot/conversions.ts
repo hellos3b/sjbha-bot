@@ -67,3 +67,9 @@ export const toTime = (seconds: number) => {
 
 /** Turn a luxon dateTime into a "from now" time */
 export const toRelative = (time: DateTime) => fromNow(time.toString(), {suffix: true, max: 1})
+
+/** If a number is over 1,000, shorten it to "1k" format */
+export const shortenNum = (num: number) => {
+  if (num >= 1000) return Math.floor(num / 100)/10 + "k";
+  return Math.floor(num);
+}
