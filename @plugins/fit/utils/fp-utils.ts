@@ -31,8 +31,8 @@ export const isEmpty = <T>(val: T[]): boolean => !val.length;
 
 /** A better typed version of `R.ifElse` */
 export const ifElse = <T, U>(ifCond: (val: T)=>boolean) => (
-  isTrue: (val: T)=>U,
-  isFalse: (val: T)=>U
+  isTrue: (val?: T)=>U,
+  isFalse: (val?: T)=>U
 ) => (val: T) => ifCond(val) ? isTrue(val) : isFalse(val);
 
 /** Wraps `R.last` in a maybe to account for undefined. Also typed a little more smooth */

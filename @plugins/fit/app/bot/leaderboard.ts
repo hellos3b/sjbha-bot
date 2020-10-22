@@ -9,13 +9,13 @@ import * as Leaderboard from "./leaderboard-embed";
 import {handleError} from "./errorHandler";
 
 export const leaderboard = (req: Request) => {
-  const reply = (users: User.PublicUser[]) => 
-    FP.isEmpty (users)
-      ? req.text("Nobody has a fit score :(")
-      : R.compose (req.embed, Leaderboard.embed) (users);
+  const empty = () => req.text("Nobody has a fit score :(");
+  const reply = R.pipe (Leaderboard.embed, req.embed);
+
+  const sendLeaderboard = R.ifElse (R.isEmpty, empty, reply);
 
   R.pipe(
     User.getAllAsPublic,
-    F.fork (handleError(req)) (reply)
+    F.fork (handleError(req)) (sendLeaderboard)
   )()
 }
