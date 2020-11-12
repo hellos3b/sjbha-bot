@@ -66,6 +66,11 @@ export default function(bastion, opt={}) {
                         .exec()
                 },
 
+                // wrap links with `<` and `>` so the thumbnail doesn't show up
+                wrapLinks(str) {
+                    return str.replace(/http(s?):\/\/[^\s\\]*/g, match => '<' + match + '>')
+                },
+
                 formatTLDRs(tldrs) {
                     return tldrs.map( td => {
                         let m = new moment(td.timestamp).tz("America/Los_Angeles");
@@ -92,8 +97,10 @@ export default function(bastion, opt={}) {
                                 fromNow = "Yesterday"
                             }
                         }
+
+                        const message = td.message.replace(/http(s?):\/\/[^\s\\]*/g, match => '<' + match + '>')
                         const channel = td.channel? `<#${td.channelID}>` : ""
-                        return `> **${td.message}**\n*${fromNow} @ ${time} - ${td.from} - ${channel}*\n`;
+                        return `> **${message}**\n*${fromNow} @ ${time} - ${td.from} - ${channel}*\n`;
                     }).join("\n")
                 }
             }
