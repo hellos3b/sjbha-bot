@@ -40,7 +40,6 @@ const list = [
     "Ghosting Stacy",
     "Oops wrong person",
     "Posting an old meme (please keep up)",
-    "Agreeing with Milo",
     "Tried to ford the river but died of dystenary first",
     "admitting that american peach gummies are better than canadian peach gummies",
     "RSVP'd to a meetup and ghosted it",
