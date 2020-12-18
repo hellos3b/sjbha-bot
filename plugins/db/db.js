@@ -1,7 +1,6 @@
 import mongoose from 'mongoose';
 import chalk from 'chalk'
 
-
 export default {
     connect(config) {
         mongoose.connect(config.mongoUrl)
@@ -14,5 +13,10 @@ export default {
                 console.log(chalk.green("✓"), "Connected to MongoDB", chalk.magenta("[DEV SERVER]"))
             }
         })
+    },
+
+    disconnect() {
+        console.log("Closing connection to MongoDB")
+        mongoose.connection.close();
     }
 }
