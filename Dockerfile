@@ -8,7 +8,7 @@ COPY package*.json tsconfig.json ./
 COPY webpack.config.js .babelrc jest.config.js ./
 COPY .env ./
 COPY @app/ ./@app/
-COPY @services/ ./@services/
+COPY @shared/ ./@shared/
 COPY @plugins/ ./@plugins/
 COPY @frontend ./@frontend/
 

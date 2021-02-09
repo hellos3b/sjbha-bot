@@ -8,19 +8,20 @@
     "skipLibCheck": true,
     "target": "ES2019",
     "outDir": "build",
-    "baseUrl": ".",
+    "baseUrl": "src",
     "paths": {
-      "@app/*": ["@app/*"],
-      "@services/*": ["@services/*"],
-      "@plugins/*": ["@plugins/*"]
+      "@app/*": ["./app/*"],
+      "@shared/*": ["./shared/*"],
+      "@plugins/*": ["./plugins/*"],
+      "@packages/*": ["./packages/*"]
     }
   },
   "include": [
-    "local-dev.ts",
-    "@app/**/*",
-    "@plugins/**/*",
-    "@services/**/*", "frontend", "@frontend/frontend"
+    "src/index.ts"
   ],
+  // "include": [
+  //   "src/**/*"
+  // ],
   "exclude": [
     "**/*.tsx",
     "**/*.test.ts"

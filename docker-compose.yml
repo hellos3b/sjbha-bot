@@ -6,7 +6,7 @@ services:
     env_file: /etc/sjbha.s3bby.env
     environment:
       NODE_ENV: "production"
-      DEBUG: "@services*,@app:*,@plugins:*"
+      DEBUG: "@shared*,@app:*,@plugins:*"
       HOSTNAME: "https://sjbha.s3bby.com"
       VIRTUAL_HOST: "sjbha.s3bby.com"
       VIRTUAL_PORT: 5000

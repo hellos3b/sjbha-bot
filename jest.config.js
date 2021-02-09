@@ -3,7 +3,7 @@ module.exports = {
   testEnvironment: 'node',
   roots: ["@plugins/"],
   moduleNameMapper: {
-    "^@services/(.+)$": "<rootDir>/@services/$1",
+    "^@shared/(.+)$": "<rootDir>/@shared/$1",
     "^@app/(.+)$": "<rootDir>/@app/$1",
     "^@plugins/(.+)$": "<rootDir>/@plugins/$1"
   }
