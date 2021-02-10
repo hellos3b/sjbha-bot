@@ -2,12 +2,13 @@ import * as Discord from "discord.js";
 import {Args} from "./Args";
 import {Server} from "./Server";
 import {DiscordUser} from "./DiscordUser";
+import {Channel} from "./Channel";
 
 type MessageDetails = {
   readonly args: Args;
   readonly author: DiscordUser;
   readonly content: string;
-  readonly channel: Discord.TextChannel;
+  readonly channel: Channel;
 };
 
 export type ServerMessage = MessageDetails & {
@@ -26,7 +27,7 @@ export const Message = (message: Discord.Message): Message => {
     args: Args(message.content),
     author: DiscordUser(message.author),
     content: message.content,
-    channel: message.channel as Discord.TextChannel
+    channel: Channel(message.channel as Discord.TextChannel)
   };
 
   if (!message.guild) {

@@ -1,12 +1,12 @@
 import path from "path";
-import Debug from "debug";
 import express from "express";
+import logger from "@packages/logger";
 
-import {HOSTNAME, HTTP_PORT} from "@app/env";
+import {HOSTNAME, HTTP_PORT} from "./env";
 
 const PUBLIC_DIR = path.join(__dirname, "..", "..", "..", "public");
 
-const debug = Debug("@shared:express");
+const log = logger("express");
 
 const app = express();
 const api = express.Router();
@@ -19,6 +19,6 @@ app.use("/*", (req, res) => {
   res.sendFile("index.html", {root: PUBLIC_DIR})
 });
 
-app.listen(HTTP_PORT, () => debug("Web Server running on %o port %o", HOSTNAME, HTTP_PORT));
+app.listen(HTTP_PORT, () => log.info("Web Server running on %o port %o", HOSTNAME, HTTP_PORT));
 
 export default api;

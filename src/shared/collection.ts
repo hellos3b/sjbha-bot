@@ -1,55 +1,62 @@
-import {FilterQuery, OptionalId} from "mongodb";
 import * as R from "ramda";
-import {Maybe} from "purify-ts";
+import * as t from "io-ts";
+import * as A from "fp-ts/Array";
+import * as E from "fp-ts/Either";
+import * as TE from "fp-ts/TaskEither";
+import {pipe, flow} from "fp-ts/function";
+import {FilterQuery, OptionalId} from "mongodb";
 import mongodb from "@app/mongodb";
-import {decodeError, mongoDbError} from "@shared/errors";
-import {Codec} from "purify-ts";
+import {DecodeError, MongoDbError, NotFound} from "@packages/common-errors";
 
 export interface Collection<T> {
-  find(filter?: FilterQuery<T>): Promise<T[]>;
-  findOne(filter: FilterQuery<T>): Promise<Maybe<T>>;
-  insert(obj: T): Promise<boolean>;
-  update(filter: FilterQuery<T>, obj: Partial<T>): Promise<boolean>;
+  find(filter?: FilterQuery<T>): TE.TaskEither<Error, T[]>;
+  findOne(filter: FilterQuery<T>): TE.TaskEither<Error, T>;
+  insert(obj: T): TE.TaskEither<Error, boolean>;
+  update(filter: FilterQuery<T>, obj: Partial<T>): TE.TaskEither<Error, boolean>;
 }
 
-export function collection<T>(collectionName: string, codec: Codec<T>): Collection<T> {
+export function collection<T>(collectionName: string, codec: t.Type<T>): Collection<T> {
   const db = () => mongodb().collection<T>(collectionName);
-
-  const mongoError = (err: any) => {
-    throw mongoDbError(err.message || "MongoDB failed from an unknown error");
-  }
-
-  const decode = (input: T) =>
-    codec.decode(input)
-      .either(
-        err => {throw decodeError(err)}, 
-        R.identity
-      );
+  const decode = flow(
+    codec.decode, 
+    E.mapLeft(DecodeError.lazy("Didn't work")),
+    TE.fromEither
+  );
 
   return {
-    find: filter => db()
-      .find(filter)
-      .toArray()
-      .then(R.map(decode)),
+    find: filter => pipe(
+      TE.tryCatch (() => db().find(filter).toArray(), MongoDbError.fromError), 
+      TE.chain (
+        flow(R.map(decode), A.sequence(TE.taskEither))
+      )
+    ),
     
-    findOne: filter => db()
-      .findOne(filter)
-      .catch(mongoError)
-      .then(Maybe.fromNullable)
-      .then(_ => _.map(decode)),
+    findOne: filter => pipe(
+      TE.tryCatch(() => db().findOne(filter), MongoDbError.fromError),
+      TE.chain(res =>
+        !res ? TE.left(NotFound.create('')) : decode(res)
+      )
+    ),
 
     insert: obj => {
-      const model = decode(obj);
-
-      return db()
-        .insertOne(model as OptionalId<T>)
-        .then(R.T)
-        .catch(mongoError)
+      const insert = (obj: T) => TE.tryCatch(
+        () => db().insertOne(obj as OptionalId<T>),
+        MongoDbError.fromError
+      );
+      
+      return pipe(
+        decode(obj),
+        TE.chain(insert),
+        TE.map(R.T)
+      );
     },
 
-    update: (filter, obj) => db()
-      .updateOne(filter, {$set: obj})
-      .then(R.T)
-      .catch(mongoError)
+    update: (filter, obj) => pipe(
+      TE.tryCatch(
+        () => db().updateOne(filter, {$set: obj}), 
+        MongoDbError.fromError
+      ),
+      TE.map(R.T)
+    )
   };
 }

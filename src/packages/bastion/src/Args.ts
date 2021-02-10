@@ -1,29 +1,31 @@
 import minimist from "minimist";
-import {Left, Maybe, Right, Either} from "purify-ts";
-import {decodeError, ErrorT, notFound} from "@shared/errors";
+import {left, right, Either} from "fp-ts/Either";
+import * as O from "fp-ts/Option";
 
+import {DecodeError, NotFound} from "@packages/common-errors";
+
+// TODO: Fill in error messages
 export interface Args {
-  nth(idx: number): Maybe<string>;
-  get(key: string): Maybe<string>;
-  getNumber(key: string): Either<ErrorT, number>;
+  nth(idx: number): O.Option<string>;
+  get(key: string): O.Option<string>;
+  getNumber(key: string): Either<Error, number>;
 }
 
 export function Args(message: string): Args {
   const parsed = minimist(message.split(" "));
 
   return {
-    nth: idx => Maybe.fromNullable(parsed._[idx]),
-    get: key => Maybe.fromNullable(parsed[key]),
-    getNumber: key => Maybe
-      .fromNullable(parsed[key])
-      .toEither(notFound())
-      .chain(castToNumber)
+    nth: idx => O.fromNullable(parsed._[idx]),
+    get: key => O.fromNullable(parsed[key]),
+    getNumber: key => (!parsed[key])
+      ? left(NotFound.create("Error"))
+      : castToNumber(parsed[key])
   }
 }
 
-function castToNumber(value: any): Either<ErrorT, number> {
+function castToNumber(value: any): Either<Error, number> {
   const val = parseInt(value);
   return (isNaN(val)) 
-    ? Left(decodeError(""))
-    : Right(val);
+    ? left(DecodeError.create(value + " is not a valid number"))
+    : right(val);
 }

@@ -1,7 +1,8 @@
+import {MessageEmbedOptions, MessageOptions} from "discord.js";
 import type {Message} from "@packages/bastion";
-
+import "./strava/client";
 import * as R from "ramda";
-import * as F from "fluture";
+// import * as F from "fluture";
 // import * as FP from "../../utils/fp-utils";
 // import * as User from "../../models-old/user";
 // import * as Activity from "../../models-old/activity";
@@ -10,19 +11,44 @@ import * as F from "fluture";
 // import {handleError} from "../../utils/errors";
 
 import format from 'string-format';
+import {
+  either as E,
+  taskEither as TE,
+  task as T
+} from "fp-ts";
+import {pipe, flow} from "fp-ts/function";
 
-// import {toRelative, toTime, shortenNum} from "../../utils/units";
-import { Maybe } from "purify-ts";
-import {Users} from "./db/user";
+import {embed, color, author, field} from "@packages/embed";
+
+import {UserDTO, loadUser} from "./db/db-user";
+import { getActivites } from "./strava/client";
+import { Activity } from "./strava/responses";
+import { errorResponse } from "./errors";
+
+const recentActivities = getActivites({});
+const fold = flow(E.fold, T.map);
 
 // Display an over view of stats 
 export async function profile(message: Message) {
-  const user = await Users
-    .findOne({discordId: message.author.id})
-    .then(_ => _.extractNullable());
+  const pipeline = pipe(
+    TE.bindTo('user')(loadUser({discordId: message.author.id})),
+    TE.bind('activities', ({user}) => recentActivities(user)),
+    fold(
+      errorResponse, 
+      data => createEmbed(data.user, data.activities)
+    )
+  )
 
-  message.channel.send("profile for " + user?.discordId);
+  pipeline()
+    .then(message.channel.send)
+    .catch(console.error);
 }
+
+const createEmbed = (user: UserDTO, activities: Activity[]) => embed([
+  color(0x4ba7d1),
+  author(user.discordId, "https://cdn.discordapp.com/embed/avatars/0.png"),
+  field("activity", activities[0].name)
+]);
 
 /** Combines user data with activities */
 // const withActivities = (user: User.PublicUser) => R.pipe(
@@ -122,3 +148,5 @@ export async function profile(message: Message) {
 //   activity
 //     .map (data => formatRecentActivity (emojis(data.type), data))
 //     .orDefault ("*No activities in last 30 days*")
+
+

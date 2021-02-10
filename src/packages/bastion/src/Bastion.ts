@@ -1,12 +1,12 @@
 import * as Discord from "discord.js";
 import {TextChannel} from "discord.js";
 import {Message} from "./Message";
-import Debug from "debug";
+import logger from "@packages/logger";
 import {commander} from "./Command";
 import {Subject} from "rxjs";
 import { DiscordUser } from "./DiscordUser";
 
-const debug = Debug("@shared:bastion");
+const log = logger("bastion");
 
 interface BastionOptions {
   /** This is used to get a guild instance */
@@ -39,7 +39,7 @@ export class Bastion {
     // ignore self
     if (msg.author.bot) return;
     if (!msg.content.startsWith(this.instigator)) return;
-    debug(`%o`, msg.content);
+    log.debug("Trigger: " + msg.content);
 
     const message = Message(msg);
     this.onMessageSubject.next(message);

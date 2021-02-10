@@ -2,6 +2,8 @@ import {Message} from "./Message";
 import {Observable, MonoTypeOperatorFunction} from "rxjs";
 import {filter} from "rxjs/operators";
 import * as R from "ramda";
+import * as O from "fp-ts/Option";
+import {pipe} from "fp-ts/function";
 
 export interface Command {
   stream: Observable<Message>;
@@ -33,10 +35,12 @@ export const Command = (stream: Observable<Message>): Command => {
   };
 };
 
-const route = (routeName: string) => filter<Message>(req => 
-  req.args.nth(0)
-    .map(R.equals(routeName))
-    .orDefault(false)
+const route = (routeName: string) => filter<Message>(
+  req => pipe(
+    req.args.nth(0),
+    O.map(R.equals(routeName)),
+    O.getOrElse(R.F)
+  )
 );
 
 const restrict = (...channelIds: string[]) => filter<Message>(req => {
@@ -47,8 +51,9 @@ const restrict = (...channelIds: string[]) => filter<Message>(req => {
 });
 
 const subcommand = (name: string) => filter<Message>(
-  req => req.args
-    .nth(1)
-    .map(R.equals(name))
-    .orDefault(false)
+  req => pipe(
+    req.args.nth(1),
+    O.map(R.equals(name)),
+    O.getOrElse(R.F)
+  )
 );

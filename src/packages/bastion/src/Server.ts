@@ -1,5 +1,4 @@
 import * as Discord from "discord.js";
-import {Maybe} from "purify-ts";
 import {DiscordUser} from "./DiscordUser";
 
 export interface Server {

@@ -1,4 +1,6 @@
 import bastion from "@app/bastion";
+import "./src/errors"; // todo: remove this once using it
+
 import {profile} from "./src/profile";
 
 const fit$ = bastion.command("!fit");

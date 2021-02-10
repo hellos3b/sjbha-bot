@@ -1,8 +1,8 @@
 import {Bastion} from "@packages/bastion";
-import Debug from "debug";
+import logger from "@packages/logger";
 import {SERVER_ID, DISCORD_TOKEN} from "./env";
 
-const debug = Debug("@shared:bastion");
+const log = logger("bastion");
 
 const bastion = new Bastion({
   serverId: SERVER_ID,
@@ -10,6 +10,6 @@ const bastion = new Bastion({
   instigator: "!"
 });
 
-bastion.start(client => debug(`Connected to discord %o`, client.user!.tag));
+bastion.start(client => log.info(`Connected to discord %o`, client.user!.tag));
 
 export default bastion;
