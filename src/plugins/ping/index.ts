@@ -1,5 +1,4 @@
-import bastion from "@app/bastion";
+import {command} from "@app/bastion";
 
-bastion
-  .command("!pong")
+command("pong")
   .subscribe(req => req.channel.message("...ping? (COMMAND)"));

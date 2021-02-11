@@ -6,19 +6,25 @@ import {pipe, flow} from "fp-ts/function";
 import type {Authentication, Activity} from "./responses";
 import {client_id, client_secret} from "../../config";
 import {AsyncClient} from "@packages/async-client";
-import {Unauthorized} from "@packages/common-errors";
-import { UserDTO } from "../db/db-user";
 
-const StravaClient = (token: string): AsyncClient => AsyncClient({
-  baseURL: 'https://www.strava.com/api/v3',
-  headers: {"Authorization": "Bearer " + token}
-});
+const StravaClient = (token: string) => {
+  const client = AsyncClient({
+    baseURL: 'https://www.strava.com/api/v3',
+    headers: {"Authorization": "Bearer " + token}
+  });
+
+  return {
+    activities: (q: Pageable) => client.get<Activity[]>('/activities', q)
+  }
+}
+
+export type StravaClient = ReturnType<typeof StravaClient>;
 
 /**
  * Creates an authorized Strava client for a user
  * @param refresh_token The token for an authorized user
  */
-export const createClient = (user: UserDTO) => {
+export const createClient = (token: string) => {
   const auth = (token: string) => AsyncClient()
     .post<Authentication>('https://www.strava.com/oauth/token', {
       grant_type    : "refresh_token",
@@ -27,19 +33,12 @@ export const createClient = (user: UserDTO) => {
     });
 
   return pipe(
-    TE.fromEither(getToken(user)),
-    TE.chain(auth),
+    auth(token),
     TE.map(res => StravaClient(res.access_token))
   );
 }
 
-// todo: User concern
-const getToken = (user: UserDTO) => pipe(
-  O.fromNullable(user.refreshToken),
-  E.fromOption(Unauthorized.lazy("User does not have a refresh token"))
-);
-
-type ActivityQuery = {
+type Pageable = {
   /** Epoch time */
   before?: number;
   /** Epoch time */
@@ -48,11 +47,6 @@ type ActivityQuery = {
   page?: number;
   per_page?: number;  
 }
-
-export const getActivites = (params: ActivityQuery) => flow(
-  createClient,
-  TE.chain(_ => _.get<Activity[]>('/activities', params))
-)
 
 
 

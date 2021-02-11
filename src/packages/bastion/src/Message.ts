@@ -1,12 +1,13 @@
 import * as Discord from "discord.js";
 import {Args} from "./Args";
-import {Server} from "./Server";
-import {DiscordUser} from "./DiscordUser";
-import {Channel} from "./Channel";
+import {Server, server} from "./Server";
+import {Member, fromMember, fromUser} from "./Member";
+import {Channel, channel} from "./Channel";
+import {pipe} from "fp-ts/function";
 
 type MessageDetails = {
   readonly args: Args;
-  readonly author: DiscordUser;
+  readonly author: Member;
   readonly content: string;
   readonly channel: Channel;
 };
@@ -25,22 +26,22 @@ export type Message = ServerMessage | DirectMessage;
 export const Message = (message: Discord.Message): Message => {
   const msg: MessageDetails = {
     args: Args(message.content),
-    author: DiscordUser(message.author),
+    author: fromUser(message.author),
     content: message.content,
-    channel: Channel(message.channel as Discord.TextChannel)
+    channel: channel(message.channel as Discord.TextChannel)
   };
 
   if (!message.guild) {
     return {...msg, type: "direct"};
   }
 
-  const server = Server(message.guild);
-  const member = message.guild.member(message.author.id);
-
   return {
     ...msg,
     type: "message",
-    server: server,
-    author: DiscordUser(message.author, member || undefined)
+    server: server(message.guild),
+    author: pipe(
+      message.guild.member(message.author.id)!, // I hate this, but this library is weird
+      fromMember
+    )
   };
 };

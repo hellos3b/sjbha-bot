@@ -1,77 +1,41 @@
 import * as Discord from "discord.js";
-import {TextChannel} from "discord.js";
 import {Message} from "./Message";
 import logger from "@packages/logger";
-import {commander} from "./Command";
-import {Subject} from "rxjs";
-import { DiscordUser } from "./DiscordUser";
+import {Commander, commander} from "./Command";
+import {Observable, Subject} from "rxjs";
 
 const log = logger("bastion");
 
-interface BastionOptions {
-  /** This is used to get a guild instance */
-  serverId: string;
-  token: string;
-  instigator: string;
+export interface Bastion {
+  readonly client: Discord.Client;
+  readonly message$: Observable<Message>;
+  readonly commander: Commander;
 }
 
-export class Bastion {
-  /** Reference to the `discord.js` library client */
-  public readonly client = new Discord.Client();
+export const createBastion = (token: string): Bastion => {
+  const client = new Discord.Client();
+  const message$ = messageEmitter(client);
 
-  private readonly serverId: string;
-  /** Discord API token */
-  private token: string;
-  /** The character used to initiate a command */
-  public instigator: string;
+  client.on("ready", () => log.info(`Bastion connected as '${client.user?.tag}'`));
+  client.login(token);
 
-  private onMessageSubject = new Subject<Message>();
-  public command = commander(this.onMessageSubject.asObservable());
+  return {
+    client,
+    message$,
+    commander: commander(message$)
+  };
+}
 
-  constructor(opt: BastionOptions) {
-    this.serverId = opt.serverId;
-    this.token = opt.token;
-    this.instigator = opt.instigator;
-  }
+const messageEmitter = (client: Discord.Client) => {
+  const message$ = new Subject<Message>();
 
-  /** Event handler for when a message comes in */
-  private onMessage = async (msg: Discord.Message) => {
+  client.on("message", (msg: Discord.Message) => {
     // ignore self
     if (msg.author.bot) return;
-    if (!msg.content.startsWith(this.instigator)) return;
-    log.debug("Trigger: " + msg.content);
 
     const message = Message(msg);
-    this.onMessageSubject.next(message);
-  }
+    message$.next(message);
+  });
 
-  /** Connects the bot to the server */
-  public start = (onConnect=(client: Discord.Client)=>{}) => {
-    this.client.on("ready", () => onConnect(this.client));
-    this.client.on('message', this.onMessage);
-    this.client.login(this.token)
-  }
-
-  // Here lets add some... `fixes` to an ugly API
-  public get guild() {
-    const guild = this.client.guilds.cache.get(this.serverId);
-    if (!guild) throw new Error("Cannot get `guild` on Bastion; ServerID config may be incorrect")
-    
-    return guild;
-  }
-
-  public channel(channelId: string) {
-    const channel = this.client.channels.cache.get(channelId) as TextChannel;
-    if (!channel) throw new Error(`Can't get channel with id ${channelId}`);
-    return channel;
-  }
-
-  public member(discordId: string): DiscordUser {
-    const user = this.client.users.cache.get(discordId);
-    if (!user) throw new Error(`Could not get user with id ${discordId}`);
-
-    const member = this.guild.member(discordId);
-    return DiscordUser(user, member);
-  }
-  
+  return message$.asObservable();
 }

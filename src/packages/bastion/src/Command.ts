@@ -1,9 +1,12 @@
 import {Message} from "./Message";
 import {Observable, MonoTypeOperatorFunction} from "rxjs";
-import {filter} from "rxjs/operators";
+import {filter, share} from "rxjs/operators";
 import * as R from "ramda";
 import * as O from "fp-ts/Option";
 import {pipe} from "fp-ts/function";
+import logger from "@packages/logger";
+
+const log = logger("Command");
 
 export interface Command {
   stream: Observable<Message>;
@@ -12,9 +15,24 @@ export interface Command {
   subcommand(name: string): Command;
 }
 
-export const commander = (stream: Observable<Message>) => (routeName: string) => {
-  const r = stream.pipe(route(routeName));
-  return Command(r);
+export type Commander = (instigator: string) => (routeName: string) => Command;
+
+export const commander = (stream: Observable<Message>) => (instigator: string) => {
+  const command$ = stream.pipe(
+    filter(msg =>
+      msg.content
+        .toLowerCase()
+        .startsWith(instigator)
+    ),
+    share()
+  )
+
+  command$.subscribe(msg => log.debug({content: msg.content}, "Incoming command"));
+
+  return (routeName: string) => {
+    const r = command$.pipe(route(instigator + routeName));
+    return Command(r);
+  }
 }
 
 export const Command = (stream: Observable<Message>): Command => {

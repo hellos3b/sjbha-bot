@@ -1,6 +1,6 @@
 import {MessageEmbedOptions, MessageOptions} from "discord.js";
-import type {Message} from "@packages/bastion";
-import "./strava/client";
+import type {Message, DiscordUser} from "@packages/bastion";
+import "./io/strava-client";
 import * as R from "ramda";
 // import * as F from "fluture";
 // import * as FP from "../../utils/fp-utils";
@@ -20,22 +20,30 @@ import {pipe, flow} from "fp-ts/function";
 
 import {embed, color, author, field} from "@packages/embed";
 
-import {UserDTO, loadUser} from "./db/db-user";
-import { getActivites } from "./strava/client";
+import {getUserById} from "./user/User";
+import { getActivites } from "./io/strava-client";
 import { Activity } from "./strava/responses";
 import { errorResponse } from "./errors";
 
 const recentActivities = getActivites({});
-const fold = flow(E.fold, T.map);
 
 // Display an over view of stats 
 export async function profile(message: Message) {
+  const user = getUserById(message.author.id);
+
   const pipeline = pipe(
-    TE.bindTo('user')(loadUser({discordId: message.author.id})),
-    TE.bind('activities', ({user}) => recentActivities(user)),
-    fold(
-      errorResponse, 
-      data => createEmbed(data.user, data.activities)
+    TE.bindTo('user')(user),
+    TE.bind(
+      'member',
+      ({user}) => TE.fromEither(user.member()),
+    ),
+    TE.bind(
+      'activities', 
+      ({user}) => recentActivities(user)
+    ),
+    TE.fold(
+      err => T.of(errorResponse(err)),
+      data => T.of(createEmbed(message.author, data.user, data.activities))
     )
   )
 
@@ -44,10 +52,10 @@ export async function profile(message: Message) {
     .catch(console.error);
 }
 
-const createEmbed = (user: UserDTO, activities: Activity[]) => embed([
+const createEmbed = (props: {member: Member, activities: Activity[]}) => embed([
   color(0x4ba7d1),
-  author(user.discordId, "https://cdn.discordapp.com/embed/avatars/0.png"),
-  field("activity", activities[0].name)
+  author(props.member.name, props.member.avatar),
+  field("activity", props.activities[0].name)
 ]);
 
 /** Combines user data with activities */

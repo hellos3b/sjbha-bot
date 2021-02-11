@@ -15,7 +15,4 @@ export const UserDTO = t.interface({
 })
 
 export type UserDTO = t.TypeOf<typeof UserDTO>;
-
-const Users = collection('fit-users', UserDTO);
-
-export const loadUser = (q: Partial<UserDTO>) => Users.findOne(q);
+export const Users = collection('fit-users', UserDTO);
