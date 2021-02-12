@@ -16,14 +16,14 @@ export const fromMember = (m: Discord.GuildMember): Member => ({
   _tag: "member",
   id: m.id,
   name: m.nickname || m.user.username,
-  avatar: m.user.avatar || DEFAULT_AVATAR  
+  avatar: m.user.avatarURL() || DEFAULT_AVATAR  
 })
 
 export const fromUser = (user: Discord.User): Member => ({
   _tag: "member",
   id: user.id,
   name: user.username,
-  avatar: user.avatar || DEFAULT_AVATAR    
+  avatar: user.avatarURL() || DEFAULT_AVATAR    
 })
 
 export const fetchById = (guild: Discord.Guild) => (id: string): TE.TaskEither<Error, Member> => pipe(

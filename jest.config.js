@@ -1,10 +1,12 @@
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
-  roots: ["@plugins/"],
+  roots: ["src/"],
+  setupFilesAfterEnv: ["@relmify/jest-fp-ts"],
   moduleNameMapper: {
-    "^@shared/(.+)$": "<rootDir>/@shared/$1",
-    "^@app/(.+)$": "<rootDir>/@app/$1",
-    "^@plugins/(.+)$": "<rootDir>/@plugins/$1"
+    "^@shared/(.+)$": "<rootDir>/src/shared/$1",
+    "^@app/(.+)$": "<rootDir>/src/app/$1",
+    "^@plugins/(.+)$": "<rootDir>/src/plugins/$1",
+    "^@packages/(.+)$": "<rootDir>/src/packages/$1"
   }
 };

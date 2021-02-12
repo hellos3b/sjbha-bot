@@ -1,5 +1,5 @@
 import {MessageEmbedOptions, MessageOptions} from "discord.js";
-import type {Message, DiscordUser} from "@packages/bastion";
+import type {Message, Member} from "@packages/bastion";
 import "./io/strava-client";
 import * as R from "ramda";
 // import * as F from "fluture";
@@ -20,43 +20,47 @@ import {pipe, flow} from "fp-ts/function";
 
 import {embed, color, author, field} from "@packages/embed";
 
-import {getUserById} from "./user/User";
-import { getActivites } from "./io/strava-client";
-import { Activity } from "./strava/responses";
+// import {getUserById} from "./user/User";
+// import { getActivites } from "./io/strava-client";
+// import { Activity } from "./strava/responses";
 import { errorResponse } from "./errors";
 
-const recentActivities = getActivites({});
+// const recentActivities = getActivites({});
 
-// Display an over view of stats 
-export async function profile(message: Message) {
-  const user = getUserById(message.author.id);
-
-  const pipeline = pipe(
-    TE.bindTo('user')(user),
-    TE.bind(
-      'member',
-      ({user}) => TE.fromEither(user.member()),
-    ),
-    TE.bind(
-      'activities', 
-      ({user}) => recentActivities(user)
-    ),
-    TE.fold(
-      err => T.of(errorResponse(err)),
-      data => T.of(createEmbed(message.author, data.user, data.activities))
-    )
-  )
-
-  pipeline()
-    .then(message.channel.send)
-    .catch(console.error);
+export function profile(message: Message) {
+  message.channel.send("Hello!");
 }
 
-const createEmbed = (props: {member: Member, activities: Activity[]}) => embed([
-  color(0x4ba7d1),
-  author(props.member.name, props.member.avatar),
-  field("activity", props.activities[0].name)
-]);
+// // Display an over view of stats 
+// export async function profile(message: Message) {
+//   const user = getUserById(message.author.id);
+
+//   const pipeline = pipe(
+//     TE.bindTo('user')(user),
+//     TE.bind(
+//       'member',
+//       ({user}) => TE.fromEither(user.member()),
+//     ),
+//     TE.bind(
+//       'activities', 
+//       ({user}) => recentActivities(user)
+//     ),
+//     TE.fold(
+//       err => T.of(errorResponse(err)),
+//       data => T.of(createEmbed(message.author, data.user, data.activities))
+//     )
+//   )
+
+//   pipeline()
+//     .then(message.channel.send)
+//     .catch(console.error);
+// }
+
+// const createEmbed = (props: {member: Member, activities: Activity[]}) => embed([
+//   color(0x4ba7d1),
+//   author(props.member.name, props.member.avatar),
+//   field("activity", props.activities[0].name)
+// ]);
 
 /** Combines user data with activities */
 // const withActivities = (user: User.PublicUser) => R.pipe(

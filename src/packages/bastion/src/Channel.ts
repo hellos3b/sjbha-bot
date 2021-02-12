@@ -4,17 +4,20 @@ import * as TE from "fp-ts/TaskEither";
 import {NotFound} from "@packages/common-errors";
 export interface Channel {
   id: string;
-  send: (message: Discord.MessageOptions) => void;
-  message: (message: string) => void;
+  send: (message: string|Discord.MessageOptions) => void;
 }
 
 export const channel = (channel: Discord.TextChannel): Channel => ({
   id: channel.id,
   send: message => {
-    channel.send(message)
-  },
-  message: message => {
-    channel.send(message);
+    // This is the dumbest bug ever, 
+    // but the Discord library types need me to typecast the message 
+    // otherwise we get a type error
+    if (typeof message === 'string') {
+      channel.send(message);
+    } else {
+      channel.send(message);
+    }
   }
 });
 

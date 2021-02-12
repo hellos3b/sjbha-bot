@@ -16,3 +16,23 @@ export const UserDTO = t.interface({
 
 export type UserDTO = t.TypeOf<typeof UserDTO>;
 export const Users = collection('fit-users', UserDTO);
+
+// const user = (dto: UserDTO) => pipe(
+//   server.getMember(dto.discordId),
+//   TE.map((member): User => {
+//     if (!dto.refreshToken) return unauthorizedUser(dto);
+//     return connectedUser(dto, member);
+//   })
+// )
+
+
+
+// const getClient = fold(
+//   () => TE.left(NotConnected.create("")),
+//   user => createClient(user.refreshToken)
+// );
+
+// export const getUserById = (id: string) => pipe(
+//   Users.findOne({discordId: id}),
+//   TE.chain(user)
+// );

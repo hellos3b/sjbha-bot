@@ -3,6 +3,7 @@ import {Message} from "./Message";
 import logger from "@packages/logger";
 import {Commander, commander} from "./Command";
 import {Observable, Subject} from "rxjs";
+import { fetchById } from "./Server";
 
 const log = logger("bastion");
 
@@ -10,6 +11,7 @@ export interface Bastion {
   readonly client: Discord.Client;
   readonly message$: Observable<Message>;
   readonly commander: Commander;
+  readonly server: ReturnType<typeof fetchById>;
 }
 
 export const createBastion = (token: string): Bastion => {
@@ -22,7 +24,8 @@ export const createBastion = (token: string): Bastion => {
   return {
     client,
     message$,
-    commander: commander(message$)
+    commander: commander(message$),
+    server: fetchById(client)
   };
 }
 

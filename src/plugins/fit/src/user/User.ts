@@ -1,4 +1,4 @@
-import bastion from "@app/bastion";
+import {server} from "@app/bastion";
 import type { Member } from "@packages/bastion";
 import {UserDTO, Users} from "../io/user-db";
 import * as TE from "fp-ts/TaskEither";
@@ -8,13 +8,17 @@ import { createClient, StravaClient } from "../io/strava-client";
 import { NotConnected } from "../errors";
 import { Unauthorized } from "@packages/common-errors";
 
+interface UserData {
+  dto: UserDTO;
+  member: Member;
+}
 export interface UnauthorizedUser {
-  readonly _tag: "unauthorized";
+  readonly _tag: "unauthorized user";
   readonly id: string;
 };
 
 export interface ConnectedUser {
-  readonly _tag: "connected";
+  readonly _tag: "connected user";
   readonly id: string;
   readonly refreshToken: string;
   readonly member: Member;
@@ -22,45 +26,26 @@ export interface ConnectedUser {
 
 export type User = UnauthorizedUser | ConnectedUser;
 
-export const isUnauthorized = (user: User): user is UnauthorizedUser => user._tag === "unauthorized";
-export const isConnected = (user: User): user is ConnectedUser => user._tag === "connected";
+export const isUnauthorized = (user: User): user is UnauthorizedUser => user._tag === "unauthorized user";
+export const isConnected = (user: User): user is ConnectedUser => user._tag === "connected user";
 
 export const unauthorizedUser = (dto: UserDTO): User => ({
-  _tag: "unauthorized",
+  _tag: "unauthorized user",
   id: dto.discordId
 });
 
-export const connectedUser = (dto: UserDTO): User => ({
-  _tag: "connected",
+export const connectedUser = (dto: UserDTO, member: Member): User => ({
+  _tag: "connected user",
   id: dto.discordId,
   refreshToken: dto.refreshToken,
-  member: member(dto)
+  member
 })
-
-export const fromDTO = (dto: UserDTO) => 
-  (!dto.refreshToken) ? unauthorizedUser(dto) : connectedUser(dto);
 
 const fold = <T>(notConnected: (user: UnauthorizedUser) => T, connected: (user: ConnectedUser) => T) => {
   return (user: User) => isUnauthorized(user) ? notConnected(user) : connected(user);
 }
-
-const getClient = fold(
-  () => TE.left(NotConnected.create("")),
-  user => createClient(user.refreshToken)
-);
-
-const member = (dto: UserDTO) => bastion.server.member(dto.discordId);
-
-export const getUserById = (id: string) => pipe(
-  Users.findOne({discordId: id}),
-  TE.bindTo("dto"),
-  TE.bind("member", )
-  TE.map(fromDTO)
-);
-
-
-// // todo: User concern
-// const getToken = (user: UserDTO) => pipe(
-//   O.fromNullable(user.refreshToken),
-//   E.fromOption(Unauthorized.lazy("User does not have a refresh token"))
-// );
+  // // todo: User concern
+  // const getToken = (user: UserDTO) => pipe(
+  //   O.fromNullable(user.refreshToken),
+  //   E.fromOption(Unauthorized.lazy("User does not have a refresh token"))
+  // );

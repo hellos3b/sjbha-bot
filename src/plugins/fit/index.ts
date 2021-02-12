@@ -1,9 +1,10 @@
-import bastion from "@app/bastion";
-import "./src/errors"; // todo: remove this once using it
-
+import {command} from "@app/bastion";
 import {profile} from "./src/profile";
 
-const fit$ = bastion.command("!fit");
+// todo remove, tmp for compiler errors
+import "./src/workout/Units";
+
+const fit$ = command("fit");
 
 fit$
   .subcommand("profile")
