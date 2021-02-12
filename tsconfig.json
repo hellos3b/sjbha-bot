@@ -17,7 +17,7 @@
     }
   },
   "include": [
-    "src/index.ts"
+    "src/**/*"
   ],
   // "include": [
   //   "src/**/*"

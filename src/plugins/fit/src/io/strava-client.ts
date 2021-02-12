@@ -3,7 +3,7 @@ import * as TE from "fp-ts/TaskEither";
 import * as E from "fp-ts/Either";
 import {pipe, flow} from "fp-ts/function";
 
-import type {ActivityResponse, AuthResponse} from "./strava-types";
+import type {Activity, Auth} from "./strava-types";
 import {client_id, client_secret} from "../../config";
 import {AsyncClient} from "@packages/async-client";
 
@@ -14,7 +14,7 @@ const StravaClient = (token: string) => {
   });
 
   return {
-    activities: (q: Pageable) => client.get<ActivityResponse[]>('/activities', q)
+    activities: (q: Pageable) => client.get<Activity[]>('/activities', q)
   }
 }
 
@@ -26,7 +26,7 @@ export type StravaClient = ReturnType<typeof StravaClient>;
  */
 export const createClient = (token: string) => {
   const auth = (token: string) => AsyncClient()
-    .post<AuthResponse>('https://www.strava.com/oauth/token', {
+    .post<Auth>('https://www.strava.com/oauth/token', {
       grant_type    : "refresh_token",
       refresh_token : token,
       client_id, client_secret    

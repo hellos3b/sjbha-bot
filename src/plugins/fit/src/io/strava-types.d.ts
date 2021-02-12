@@ -1,5 +1,5 @@
 
-export interface AuthResponse {
+export interface Auth {
   readonly refresh_token: string;
   readonly access_token: string;
   readonly athlete: { 
@@ -16,13 +16,12 @@ export type ActivityType = "AlpineSki" | "BackcountrySki" | "Canoeing" | "Crossf
 /**
  * @see https://developers.strava.com/docs/reference/#api-models-DetailedActivity
  */
-export type ActivityResponse = {
+export type Activity = {
   readonly id: number;
   readonly athlete: {id: number;}
   readonly start_date: string;
   readonly distance: number;
   readonly moving_time: number;
-  readonly elapsed_time: number;
   readonly average_speed: number;
   readonly total_elevation_gain: number;
   readonly type: string;
@@ -33,7 +32,7 @@ export type ActivityResponse = {
   readonly has_heartrate: boolean;
 }
 
-export type ActivityResponseWithHR = ActivityResponse & {
+export type ActivityWithHR = Activity & {
   readonly has_heartrate: true;
   readonly average_heartrate: number;
   readonly max_heartrate: number;
@@ -50,7 +49,7 @@ export type ActivityResponseWithHR = ActivityResponse & {
 /**
  * @see https://developers.strava.com/docs/reference/#api-Streams-getActivityStreams
  */
-export type StreamsResponse = Array<{
+export type Streams = Array<{
   readonly type: "heartrate" | "time" | string;
   readonly data: number[];
 }>;
