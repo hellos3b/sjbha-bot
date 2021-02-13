@@ -22,3 +22,9 @@ export const user_authorized = extend({
   stravaId: "some-id",
   refreshToken: "some-token"
 });
+
+export const user_with_max_hr = (maxHR: number) => extend({
+  stravaId: 'some-id',
+  refreshToken: 'some-token',
+  maxHR
+});

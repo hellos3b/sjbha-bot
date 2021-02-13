@@ -8,7 +8,7 @@
     "build": "tsc && webpack --mode=production",
     "dev:ui": "webpack --mode=development --watch",
     "test": "jest --setupFiles dotenv/config",
-    "test:watch": "jest --setupFiles dotenv/config --verbose --watch"
+    "test:watch": "jest --setupFiles dotenv/config --watch"
   },
   "keywords": [],
   "author": "",
@@ -27,6 +27,7 @@
     "minimist": "^1.2.5",
     "module-alias": "^2.2.2",
     "mongodb": "^3.6.2",
+    "monocle-ts": "^2.3.5",
     "nanoevents": "^5.1.8",
     "navigo": "^7.1.2",
     "node-cache": "^5.1.2",

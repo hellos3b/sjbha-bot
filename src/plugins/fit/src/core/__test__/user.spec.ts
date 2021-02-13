@@ -1,13 +1,13 @@
 import '@relmify/jest-fp-ts';
-import {pipe} from "fp-ts/function";
+import {constant, pipe} from "fp-ts/function";
 import * as E from "fp-ts/Either";
 import * as O from "fp-ts/Option";
 
 import {fromDatabase} from "../User";
-import UserBuilder from "./_UserBuilder";
-import WorkoutBuilder from './_WorkoutBuilder';
+import UserBuilder from "./_UserBuilder_";
+import WorkoutBuilder from './_WorkoutBuilder_';
 
-import {logWorkout} from "../User";
+import {FitUser, logWorkout} from "../User";
 import * as hr from "../Heartrate";
 import * as db from "../../io/__mock__/user_rows";
 
@@ -22,39 +22,59 @@ describe("User", () => {
       const user = fromDatabase(db.user_authorized);
       expect(user).toBeRight();
     });
+
+    it("honors HR privacy when it's set to 0", () => {
+      const user = pipe(
+        fromDatabase(db.user_authorized),
+        E.getOrElseW(() => {throw new Error('User mapped to ')})
+      )
+
+      expect(user.zones).toBeNone();
+    });
+
+    it("initializes user HR zones when HR != 0", () => {
+      const user = pipe(
+        fromDatabase(db.user_with_max_hr(200)),
+        E.getOrElseW(() => {throw new Error('User mapped to ')})
+      )
+
+      expect(user.zones).toBeSome();
+    })
   });
 
   describe("Adding a Workout", () => {
-    const authedUser = UserBuilder().authorized();
-
     it("1exp/min when there is no heartrate", () => {
-      const user = authedUser.build();
+      const user = UserBuilder()
+        .build();
+
       const workout = WorkoutBuilder()
         .setDuration(100)
         .build();
 
-      const result = logWorkout(workout)(user);
+      const [, exp] = logWorkout(workout)(user);
 
-      expect(result.exp.value).toEqual(100);
+      expect(exp.value).toEqual(100);
     });
 
     it("1exp/min when user has no max heartrate", () => {
-      const user = authedUser.build();
+      const user = UserBuilder()
+        .build();
+
       const workout = WorkoutBuilder()
         .setDuration(100)
         .withHR(160, 160)
         .addHRSample(140, 100)
         .build();
 
-      const result = logWorkout(workout)(user);
+      const [,exp] = logWorkout(workout)(user);
 
-      expect(result.exp).toEqual(100);
+      expect(exp.value).toEqual(100);
     });
 
     it("uses HR zones to calculate XP", () => {
       const zones = hr.zones(200);
       
-      const user = authedUser
+      const user = UserBuilder()
         .withMaxHR(zones.max)
         .build();
 
@@ -65,9 +85,22 @@ describe("User", () => {
         .addHRSample(zones.vigorous + 1, 90)
         .build();
 
-      const result = logWorkout(workout)(user);
+      const [,exp] = logWorkout(workout)(user);
 
-      expect(result.exp).toEqual(60 + (90 * 2));
+      expect(exp.value).toEqual(60 + (90 * 2));
     });
+
+    it("user's exp gets updated", () => {
+      const user = UserBuilder()
+        .build();
+
+      const workout = WorkoutBuilder()
+        .setDuration(100)
+        .build();
+
+      const [u] = logWorkout(workout)(user);
+
+      expect(u.exp.value).toEqual(100);      
+    })
   });
 });

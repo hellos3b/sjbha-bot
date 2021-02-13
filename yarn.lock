@@ -5209,6 +5209,11 @@ mongodb@^3.6.2:
   optionalDependencies:
     saslprep "^1.0.0"
 
+monocle-ts@^2.3.5:
+  version "2.3.5"
+  resolved "https://registry.yarnpkg.com/monocle-ts/-/monocle-ts-2.3.5.tgz#1ff90b08616254b887e4c2bc5b2a9764fed16723"
+  integrity sha512-Xm9jdWvqFrlV0k965eY5AlCpWIIUBY2ExzGbEG+byMs+mZI4J7zvaUOLpQ8MTFgkpgyEnu4qUhuZT/Or3QeRiA==
+
 move-concurrently@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/move-concurrently/-/move-concurrently-1.0.1.tgz#be2c005fda32e0b29af1f05d7c4b33214c701f92"

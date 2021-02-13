@@ -1,13 +1,13 @@
 import '@relmify/jest-fp-ts';
 import * as O from "fp-ts/Option";
 
-import WorkoutBuilder from "./_WorkoutBuilder";
+import WorkoutBuilder from "./_WorkoutBuilder_";
 import * as hr from "../Heartrate";
 
 describe("Heartrate", () => {
   describe("Mapping Streams", () => {
     const stream: hr.Stream = hr.streamFromResponse([
-      {type: "heartrate", data: [70, 100, 100, 180]},
+      {type: "heartrate", data: [70, 100, 180, 100]},
       {type: "time",      data: [0,   5,   20,  21]}
     ]);
 
@@ -17,7 +17,7 @@ describe("Heartrate", () => {
 
     it("correctly counts duration", () => {
       const seconds = stream.map(_ => _.seconds);
-      expect(seconds).toEqual([0, 5, 15, 1]);
+      expect(seconds).toEqual([5, 15, 1, 0]);
     });
 
     it("returns empty if a zone is missing", () => {
