@@ -1,34 +1,45 @@
-import {MessageEmbedOptions, MessageOptions} from "discord.js";
+import {Activity, MessageEmbedOptions, MessageOptions} from "discord.js";
 import type {Message, Member} from "@packages/bastion";
-import "./io/strava-client";
+import "../io/strava-client";
 import * as R from "ramda";
-// import * as F from "fluture";
-// import * as FP from "../../utils/fp-utils";
-// import * as User from "../../models-old/user";
-// import * as Activity from "../../models-old/activity";
+import * as UserDB from "../io/user-db";
+import * as Strava from "../io/strava-client";
+import * as User from "../core/User";
+import * as xp from "../core/Exp";
 
-// import { asField, Embed } from "@shared/bastion/fp";
-// import {handleError} from "../../utils/errors";
-
-import format from 'string-format';
-import {
-  either as E,
-  taskEither as TE,
-  task as T
-} from "fp-ts";
+import * as E from "fp-ts/Either";
+import * as TE from "fp-ts/TaskEither";
 import {pipe, flow} from "fp-ts/function";
 
 import {embed, color, author, field} from "@packages/embed";
+import { Workout } from "../core/Workout";
 
-// import {getUserById} from "./user/User";
-// import { getActivites } from "./io/strava-client";
-// import { Activity } from "./strava/responses";
-import { errorResponse } from "./errors";
+const fetchUser = flow(UserDB.fetchUser, TE.chainEitherK(User.asAuthorized));
+const fetchWorkouts = Strava.fetchWorkouts({});
 
-// const recentActivities = getActivites({});
+const profileData = flow(
+  fetchUser, TE.bindTo('user'),
+  TE.bind('workouts', _ => fetchWorkouts(_.user))
+);
 
-export function profile(message: Message) {
-  message.channel.send("Hello!");
+const createEmbed = (activities: Workout[], user: User.FitUser) => embed([
+  color(0x4ba7d1),
+  author(user.member.name, user.member.avatar),
+  field("EXP", user.exp, true),
+  field("Fit score", user.score, true)
+]);
+
+export async function profile(req: Message) {
+  const pipeline = pipe(
+    profileData({discordId: req.author.id}),
+    TE.map(_ => createEmbed(_.workouts, _.user)),
+    TE.map(req.channel.send)
+  )
+
+  return pipeline()
+    .then(E.mapLeft((error: Error) => {
+      console.error(error);
+    }));
 }
 
 // // Display an over view of stats 
@@ -87,7 +98,7 @@ export function profile(message: Message) {
 
 // const createEmbed = ({user, activities}: EmbedProps): Embed => {
 //   const emojis = Activity.genderedEmoji (user.gender);
-//   const recent = recentActivity (emojis);
+//    const recent = recentActivity (emojis);
 
 //   return {
 //     color: 0x4ba7d1,

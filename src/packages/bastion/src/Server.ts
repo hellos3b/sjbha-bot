@@ -1,7 +1,7 @@
 import * as Discord from "discord.js";
 import * as TE from "fp-ts/TaskEither";
 import {pipe} from "fp-ts/function";
-import {NotFound} from "@packages/common-errors";
+import {NotFound} from "@packages/common/errors";
 import * as Member from "./Member";
 
 export interface Server {

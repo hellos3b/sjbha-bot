@@ -16,12 +16,12 @@
       "@packages/*": ["./packages/*"]
     }
   },
-  "include": [
-    "src/**/*"
-  ],
   // "include": [
   //   "src/**/*"
   // ],
+  "include": [
+    "src/index.ts"
+  ],
   "exclude": [
     "**/*.tsx",
     "**/*.test.ts"

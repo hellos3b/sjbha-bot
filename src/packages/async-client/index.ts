@@ -1,7 +1,7 @@
 import axios, {AxiosRequestConfig} from "axios";
 import * as R from "ramda";
 import * as TE from "fp-ts/TaskEither";
-import {HTTPError} from "@packages/common-errors";
+import {HTTPError} from "@packages/common/errors";
 
 /**
  * Wraps a custom AxiosInstance with method calls that auto-lift to an `EitherAsync`

@@ -27,8 +27,8 @@ export const author = R.curry((name: string, icon_url: string): EmbedProperty =>
   return obj => ({...obj, author: {name, icon_url}});
 });
 
-export const field = R.curry((name: string, value: string, inline: boolean = false): EmbedProperty => {
-  const field = {name, value, inline};
+export const field = R.curry((name: string, value: any, inline: boolean = false): EmbedProperty => {
+  const field = {name, value: String(value), inline};
 
   return obj => {
     const fields = (obj.fields || []).concat(field);

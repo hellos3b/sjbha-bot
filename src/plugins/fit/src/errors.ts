@@ -1,4 +1,4 @@
-import {CustomError} from "@packages/common-errors";
+import {CustomError} from "@packages/common/errors";
 import { MessageOptions } from "discord.js";
 
 export const errorResponse = (err: Error): MessageOptions => {

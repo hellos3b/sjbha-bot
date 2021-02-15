@@ -65,7 +65,8 @@ export const streamFromResponse = (stream: strava.Streams): Stream => {
  */
 export const timeInZone = (zones: Zones) => {
   const zone = getZone(zones);
-
+  const time: TimeInZones = {rest: 0, moderate: 0, vigorous: 0};
+  
   return (stream: Stream) => stream.reduce((res: TimeInZones, sample) => {
     switch (zone(sample.bpm)) {
       case "vigorous": 
@@ -75,7 +76,7 @@ export const timeInZone = (zones: Zones) => {
       default: 
         return R.mergeRight(res, {rest: res.rest + sample.seconds});
     }
-  }, {rest: 0, moderate: 0, vigorous: 0});
+  }, time);
 };
 
 /**

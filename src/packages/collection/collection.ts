@@ -6,7 +6,7 @@ import * as TE from "fp-ts/TaskEither";
 import {pipe, flow} from "fp-ts/function";
 import {FilterQuery, OptionalId} from "mongodb";
 import mongodb from "@app/mongodb";
-import {DecodeError, MongoDbError, NotFound} from "@packages/common-errors";
+import {DecodeError, MongoDbError, NotFound} from "@packages/common/errors";
 
 export interface Collection<T> {
   find(filter?: FilterQuery<T>): TE.TaskEither<Error, T[]>;

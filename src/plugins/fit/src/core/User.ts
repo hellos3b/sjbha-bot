@@ -1,27 +1,23 @@
+import type { Member } from "@packages/bastion";
+
 import * as R from "ramda";
-import * as TE from "fp-ts/TaskEither";
 import * as O from "fp-ts/Option";
 import * as E from "fp-ts/Either";
-import {pipe, flow, constant} from "fp-ts/function";
+import {pipe, flow, constant, identity} from "fp-ts/function";
+import {Lens} from "monocle-ts";
 
 import {server} from "@app/bastion";
-import type { Member } from "@packages/bastion";
 import * as db from "../io/user-db";
 import * as hr from "./Heartrate";
-import * as p from "./Progression";
+import * as xp from "./Exp";
 
 import {auth, Authentication} from "./Authentication";
-import { createClient, StravaClient } from "../io/strava-client";
-import { NotConnected } from "../errors";
-import { Unauthorized } from "@packages/common-errors";
 import { Workout } from "./Workout";
-import { Lens } from 'monocle-ts'
-import { sequenceT } from "fp-ts/lib/Apply";
+import { Unauthorized } from "@packages/common/errors";
 
 export type UnauthorizedUser = {
   readonly _tag: "UnauthorizedUser";
-  readonly id: string;
-  // readonly member: TE.TaskEither<Error, Member>;
+  readonly member: Member;
 };
 
 /**
@@ -29,42 +25,102 @@ export type UnauthorizedUser = {
  */
 export type FitUser = {
   readonly _tag: "FitUser";
+  readonly member: Member;
+  readonly refreshToken: string;
   readonly gender: string;
   readonly zones: O.Option<hr.Zones>;
-  readonly exp: p.EXP;
-  readonly score: p.FitScore;
+  readonly exp: xp.EXP;
+  readonly score: xp.FitScore;
 };
 
-export const fromDatabase = (user: db.User): E.Either<UnauthorizedUser, FitUser> => {
-  if (!user.refreshToken) return E.left({
-    _tag: "UnauthorizedUser", 
-    id: user.discordId,
-    password: user.password
-  });
+export type User = UnauthorizedUser | FitUser;
 
-  return E.right({
-    _tag: "FitUser",
-    auth: auth(user),
-    gender: user.gender,
-    zones: pipe(
-      // Only create zones if HR > 0
-      O.fromPredicate(R.lt(0))(user.maxHR),
-      O.map(hr.zones)
-    ),
-    exp: p.exp(user.xp),
-    score: p.fitScore(user.fitScore)
-  });
-}
-
-// Lenses
 const lens = Lens.fromProp<FitUser>();
-const exp = lens('exp');
 
-export const logWorkout = (workout: Workout) => {
-  return (user: FitUser): [FitUser, p.EXP] => {
-    const expGained = p.expFromWorkout(workout)(user.zones);
-    const update = exp.modify(p.addExp(expGained))(user);
+export const fromDatabase = (user: db.User) => (member: Member): User => {
+  if (!user.refreshToken) return {
+    _tag: "UnauthorizedUser", 
+    member
+  };
 
-    return [update, expGained];
+  return {
+    _tag: "FitUser",
+    member,
+    refreshToken: user.refreshToken,
+    // auth: auth(user),
+    gender: user.gender,
+    zones: zones(user.maxHR),
+    exp: xp.exp(user.xp),
+    score: xp.fitScore(user.fitScore)
+  };
+};
+
+export const toDatabase = (user: FitUser): Partial<db.User> => ({
+  discordId: user.member.id,
+  gender: user.gender,
+  maxHR: pipe(
+    user.zones,
+    O.fold(constant (0), R.prop ("max"))
+  ),
+  xp: user.exp.value,
+  fitScore: user.score.value
+});
+
+export const isAuthorized = (user: User): user is FitUser => user._tag === "FitUser";
+
+/**
+ * Update user gender
+ */
+export const setGender = (gender: string) => 
+  lens('gender').modify(() => gender);
+
+/**
+ * 
+ */
+export const zones = (max: number) =>
+  (max === 0) ? O.none : O.some(hr.zones(max));
+
+export const setHeartrate = (max: number) => 
+  lens('zones').modify(() => zones(max));
+
+export const addWorkout = (user: FitUser) => {
+  return (workout: Workout): [FitUser, xp.EXP] => {
+    const hrStream = pipe(
+      workout.heartrate, 
+      O.map(_ => _.stream)
+    );
+
+    const gained = pipe(
+      user.zones,
+      O.map(xp.expFromZones), 
+      O.ap(hrStream),
+      O.getOrElse(() => xp.expFromTime(workout.elapsed))
+    )
+
+    const updated: FitUser = {
+      ...user,
+      exp: xp.addExp(gained)(user.exp)
+    };
+
+    return [updated, gained];
   }
 };
+
+/**
+ * At the end of a week, we take all EXP events from the week
+ * and either increase or decrease a user's fit score
+ */
+export const promote = (weekExp: xp.EXP[]) => {
+  const update = pipe(
+    xp.sum(weekExp),
+    xp.levelUpScore
+  );
+
+  return lens('score').modify(update);
+};
+
+/**
+ * Casts the user object to the authorized version.
+ */
+export const asAuthorized = (user: User): E.Either<Error, FitUser> => 
+  isAuthorized(user) ? E.right(user) : E.left(Unauthorized.create("User not authorized"));

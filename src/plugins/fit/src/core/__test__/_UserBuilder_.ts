@@ -1,11 +1,11 @@
 import * as O from "fp-ts/Option";
 import {FitUser} from "../User";
-import * as auth from "../Authentication";
 import * as hr from "../Heartrate";
-import * as p from "../Progression";
+import * as p from "../Exp";
 
 const base: FitUser = {
   _tag: "FitUser",
+  id: "user1",
   // auth: {
   //   discordId: "some-id",
   //   password: "some-pass",

@@ -2,7 +2,7 @@ import minimist from "minimist";
 import {left, right, Either} from "fp-ts/Either";
 import * as O from "fp-ts/Option";
 
-import {DecodeError, NotFound} from "@packages/common-errors";
+import {DecodeError, NotFound} from "@packages/common/errors";
 
 // TODO: Fill in error messages
 export interface Args {

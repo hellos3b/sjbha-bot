@@ -1,8 +1,5 @@
 import {command} from "@app/bastion";
-import {profile} from "./src/profile";
-
-// todo remove, tmp for compiler errors
-import "./src/workout/Units";
+import {profile} from "./src/controllers/profile";
 
 const fit$ = command("fit");
 

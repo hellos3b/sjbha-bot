@@ -1,7 +1,15 @@
 // import {Codec, string, number, GetType} from "purify-ts";
 import * as t from "io-ts";
+import * as TE from "fp-ts/TaskEither";
+import {sequenceT} from "fp-ts/Apply";
+import {flow} from "fp-ts/function";
 
-import {collection} from "@shared/collection";
+import {server} from "@app/bastion";
+import type {Member} from "@packages/bastion";
+import {collection} from "@packages/collection/collection";
+
+import * as U from "../core/User";
+import { pipe } from "fp-ts/lib/pipeable";
 
 export const UserCodec = t.interface({
   discordId: t.string,
@@ -12,25 +20,21 @@ export const UserCodec = t.interface({
   maxHR: t.number,
   xp: t.number,
   fitScore: t.number
-})
+});
 
 export type User = t.TypeOf<typeof UserCodec>;
-export const Users = collection('fit-users', UserCodec);
+const Users = collection('fit-users', UserCodec);
 
-// const user = (dto: UserDTO) => pipe(
-//   server.getMember(dto.discordId),
-//   TE.map((member): User => {
-//     if (!dto.refreshToken) return unauthorizedUser(dto);
-//     return connectedUser(dto, member);
-//   })
-// )
+const mapToModel = (user: User) => pipe(
+  server.getMember(user.discordId),
+  TE.map(U.fromDatabase(user))
+)
 
-// const getClient = fold(
-//   () => TE.left(NotConnected.create("")),
-//   user => createClient(user.refreshToken)
-// );
+export const fetchUser = flow(Users.findOne, TE.chain(mapToModel));
 
-// export const getUserById = (id: string) => pipe(
-//   Users.findOne({discordId: id}),
-//   TE.chain(user)
-// );
+export const findOneAuthorized = flow(
+  fetchUser,
+  TE.chainEitherK(U.asAuthorized)
+);
+
+export const save = (user: U.User) => {};
