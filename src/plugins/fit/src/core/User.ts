@@ -11,9 +11,8 @@ import * as db from "../io/user-db";
 import * as hr from "./Heartrate";
 import * as xp from "./Exp";
 
-import {auth, Authentication} from "./Authentication";
 import { Workout } from "./Workout";
-import { Unauthorized } from "@packages/common/errors";
+import { Unauthorized } from "@packages/common-errors";
 
 export type UnauthorizedUser = {
   readonly _tag: "UnauthorizedUser";
@@ -123,4 +122,4 @@ export const promote = (weekExp: xp.EXP[]) => {
  * Casts the user object to the authorized version.
  */
 export const asAuthorized = (user: User): E.Either<Error, FitUser> => 
-  isAuthorized(user) ? E.right(user) : E.left(Unauthorized.create("User not authorized"));
+  isAuthorized(user) ? E.right(user) : E.left(Unauthorized.create(`Could not cast user as authorized: User '${user.member.id}' is not authorized`));

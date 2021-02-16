@@ -1,0 +1,42 @@
+version: '2.0'
+
+services:
+  app:
+    tty: true
+    image: node:12-alpine
+    container_name: bored_bot
+    command: yarn build:watch
+    env_file: .env
+    working_dir: /home/node/app
+    environment:
+      NODE_ENV: "development"
+      HOSTNAME: "http://localhost:5000"
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/home/node/app
+    
+  # Database
+  mongo:
+    image: mongo
+    container_name: bb_mongo
+    logging:
+      driver: none
+    volumes:
+      - bored_bot_db_data:/data/db
+
+  # provides a UI to edit things in mongodb
+  # just navigate to localhost:4321
+  mongo-gui:
+    image: ugleiton/mongo-gui
+    container_name: bb_mongo_gui
+    restart: always
+    logging:
+      driver: none
+    ports:
+      - "4321:4321"
+    environment:
+      - MONGO_URL=mongodb://mongo:27017
+
+volumes:
+  bored_bot_db_data:

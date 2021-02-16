@@ -52,6 +52,10 @@ export const fetchWorkouts = (q: Pageable) => flow(
   TE.map(R.map(Workout.fromActivity))
 )
 
+export const fetchActivity = (id: string) => flow(
+  withClient,
+  TE.chain(client => client.get<Activity>('/activity/' + id))
+);
 
 // /** Get refresh token, use it for a user's first time in authenticating */
 // const refreshToken = (code: string) => 

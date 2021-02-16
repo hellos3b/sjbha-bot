@@ -1,7 +1,7 @@
 import * as Discord from "discord.js";
 import {pipe} from "fp-ts/function";
 import * as TE from "fp-ts/TaskEither";
-import { NotFound } from "@packages/common/errors";
+import { NotFound } from "@packages/common-errors";
 
 const DEFAULT_AVATAR = "https://cdn.discordapp.com/embed/avatars/0.png";
 

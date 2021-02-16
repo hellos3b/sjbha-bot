@@ -5,12 +5,13 @@ WORKDIR /app
 
 # Copy files required to build
 COPY package*.json tsconfig.json ./ 
-COPY webpack.config.js .babelrc jest.config.js ./
+# COPY webpack.config.js .babelrc jest.config.js ./
 COPY .env ./
-COPY @app/ ./@app/
-COPY @shared/ ./@shared/
-COPY @plugins/ ./@plugins/
-COPY @frontend ./@frontend/
+COPY src/ ./src/
+# COPY @app/ ./@app/
+# COPY @shared/ ./@shared/
+# COPY @plugins/ ./@plugins/
+# COPY @frontend ./@frontend/
 
 RUN npm install && npm run build
 

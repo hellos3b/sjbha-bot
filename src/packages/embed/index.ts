@@ -23,15 +23,35 @@ export const color = (value: number): EmbedProperty => {
   return obj => ({...obj, color: value });
 };
 
-export const author = R.curry((name: string, icon_url: string): EmbedProperty => {
-  return obj => ({...obj, author: {name, icon_url}});
-});
+export const author = (name: string, icon_url?: string): EmbedProperty => {
+  const prop: {[key: string]: any} = {name};
 
-export const field = R.curry((name: string, value: any, inline: boolean = false): EmbedProperty => {
+  if (icon_url) {
+    prop.icon_url = icon_url;
+  }
+
+  return obj => ({...obj, author: prop});
+};
+
+export const field = (name: string, value: any, inline: boolean = false): EmbedProperty => {
   const field = {name, value: String(value), inline};
 
   return obj => {
     const fields = (obj.fields || []).concat(field);
     return {...obj, fields};
   };
-});
+};
+
+export const description = (content: string): EmbedProperty => {
+  return obj => ({
+    ...obj,
+    description: content
+  })
+}
+
+export const thumbnail = (url: string): EmbedProperty => {
+  return obj => ({
+    ...obj,
+    thumbnaill: {url}
+  });
+};

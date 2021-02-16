@@ -4,6 +4,7 @@ import * as O from "fp-ts/Option";
 import * as w from "./Workout";
 import * as hr from "./Heartrate";
 import * as units from "./Units";
+import { HistoricalWorkout } from "../io/history-db";
 
 export const weekly_exp_goal = 150;
 export const fit_score_raise_amount = 5;
@@ -82,7 +83,7 @@ export const expFromZones = (zones: hr.Zones) => {
  */
 export const fitScore = (value: number): FitScore => {
   const clamped = R.clamp(0, max_fit_score)(value);
-  const rank = (clamped === 0) ? no_rank : getRank(clamped);
+  const rank = (clamped === 0) ? no_rank : scoreToRank(clamped);
 
   return {
     _tag: "Score", 
@@ -94,7 +95,10 @@ export const fitScore = (value: number): FitScore => {
   };
 }
 
-const getRank = flow(
+/**
+ * Get the name of a rank, from a fit score value
+ */
+const scoreToRank = flow(
   R.divide(20),
   Math.floor,
   R.clamp(0, ranks.length),

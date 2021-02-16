@@ -6,7 +6,7 @@ import * as TE from "fp-ts/TaskEither";
 import {pipe, flow} from "fp-ts/function";
 import {FilterQuery, OptionalId} from "mongodb";
 import mongodb from "@app/mongodb";
-import {DecodeError, MongoDbError, NotFound} from "@packages/common/errors";
+import {DecodeError, MongoDbError, NotFound} from "@packages/common-errors";
 
 export interface Collection<T> {
   find(filter?: FilterQuery<T>): TE.TaskEither<Error, T[]>;
@@ -15,48 +15,39 @@ export interface Collection<T> {
   update(filter: FilterQuery<T>, obj: Partial<T>): TE.TaskEither<Error, boolean>;
 }
 
-export function collection<T>(collectionName: string, codec: t.Type<T>): Collection<T> {
-  const db = () => mongodb().collection<T>(collectionName);
-  const decode = flow(
-    codec.decode, 
-    E.mapLeft(DecodeError.lazy("Didn't work")),
-    TE.fromEither
-  );
+export function collection<T>(collectionName: string): Collection<T> {
+  const db = () => mongodb().collection(collectionName);
 
   return {
-    find: filter => pipe(
-      TE.tryCatch (() => db().find(filter).toArray(), MongoDbError.fromError), 
-      TE.chain (
-        flow(R.map(decode), A.sequence(TE.taskEither))
-      )
+    find: filter => TE.tryCatch (
+      () => db().find(filter).toArray(), 
+      MongoDbError.fromError
     ),
     
-    findOne: filter => pipe(
-      TE.tryCatch(() => db().findOne(filter), MongoDbError.fromError),
-      TE.chain(res =>
-        !res ? TE.left(NotFound.create('')) : decode(res)
-      )
+    findOne: filter => TE.tryCatch(
+      () => db().findOne(filter), 
+      MongoDbError.fromError
     ),
+    //   TE.chain(res =>
+    //     !res ? TE.left(NotFound.create('')) : decode(res)
+    //   )
+    // ),
 
-    insert: obj => {
-      const insert = (obj: T) => TE.tryCatch(
-        () => db().insertOne(obj as OptionalId<T>),
-        MongoDbError.fromError
-      );
+    insert: obj => TE.tryCatch(
+      () => db().insertOne(obj as OptionalId<T>).then(R.T),
+      MongoDbError.fromError
+    ),
       
-      return pipe(
-        decode(obj),
-        TE.chain(insert),
-        TE.map(R.T)
-      );
-    },
+    //   return pipe(
+    //     decode(obj),
+    //     TE.chain(insert),
+    //     TE.map(R.T)
+    //   );
+    // },
 
-    update: (filter, obj) => pipe(
-      TE.tryCatch(
-        () => db().updateOne(filter, {$set: obj}), 
-        MongoDbError.fromError
-      ),
-      TE.map(R.T)
+    update: (filter, obj) => TE.tryCatch(
+      () => db().updateOne(filter, {$set: obj}).then(R.T),
+      MongoDbError.fromError
     )
   };
 }
