@@ -1,7 +1,8 @@
 import {pipe} from "fp-ts/function";
 import * as O from "fp-ts/Option";
 import {HRData, Workout} from "../Workout";
-import * as Units from "../Units";
+import * as Time from "../Time";
+import * as Distance from "../Distance";
 
 const base: Workout = {
   id: 123,
@@ -10,7 +11,7 @@ const base: Workout = {
   description: "",
   private: false,
   started: "2021-02-12T19:46:33.319Z",
-  elapsed: Units.seconds(0),
+  elapsed: Time.seconds(0),
   gps: O.none,
   heartrate: O.none
 };
@@ -21,16 +22,16 @@ export default function WorkoutBuilder(workout = base) {
   return {
     setDuration(seconds: number) {
       return extend({
-        elapsed: Units.seconds(seconds)
+        elapsed: Time.seconds(seconds)
       })
     },
 
     withGPS(distance = 1000, elevation = 100, averageSpeed = 2.5) {
       return extend({
         gps: O.some({
-          distance: Units.meters(distance),
-          elevation: Units.meters(elevation),
-          averageSpeed: Units.metersPerSecond(averageSpeed)
+          distance: Distance.meters(distance),
+          elevation: Distance.meters(elevation),
+          averageSpeed: Distance.speed(averageSpeed)
         })
       })
     },

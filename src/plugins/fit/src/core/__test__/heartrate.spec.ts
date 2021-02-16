@@ -39,11 +39,9 @@ describe("Heartrate", () => {
       const heartrate = O.toNullable(workout.heartrate);
       const result = hr.timeInZone(zones)(heartrate!.stream);
 
-      expect(result).toEqual({
-        rest: 5,
-        moderate: 20,
-        vigorous: 10
-      });
+      expect(result.rest.as("seconds")).toEqual(5);
+      expect(result.moderate.as("seconds")).toEqual(20);
+      expect(result.vigorous.as("seconds")).toEqual(10);
     });
   });
 });

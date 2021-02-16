@@ -26,12 +26,6 @@ const weeklyExp = flow(
   xp.sum
 );
 
-const fetchProfile = flow(
-  UserDB.fetchUserAsAuthorized, 
-  TE.bindTo('user'),
-  TE.bind('history', _ => fetchExp({discordId: _.user.member.id}))
-);
-
 const createEmbed = (history: h.History, user: u.FitUser) => embed([
   color(0x4ba7d1),
   author(user.member.name, user.member.avatar),
@@ -41,16 +35,22 @@ const createEmbed = (history: h.History, user: u.FitUser) => embed([
 ]);
 
 export async function profile(req: Message) {
-  const profile = await fetchProfile({discordId: req.author.id})();
+  const pipeline = pipe(
+    UserDB.fetchUserAsAuthorized({discordId: req.author.id}), 
+    TE.bindTo('user'),
+    TE.bind('history', _ => fetchExp({discordId: _.user.member.id})),
+    TE.map(_ => createEmbed(_.history, _.user))
+  );
+
+  const result = await pipeline();
 
   pipe(
-    profile,
-    E.map(_ => createEmbed(_.history, _.user)),
+    result,
     Errors.match([
       [Errors.Unauthorized, "You are not connected"]
     ]),
     E.fold(errorReporter(req), req.channel.send)
-  )
+  );
 }
 
 // // Display an over view of stats 

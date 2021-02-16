@@ -1,17 +1,23 @@
 import * as IO from "fp-ts/IO";
 import {pipe} from "fp-ts/function";
-import { DateTime, Interval, Duration } from "luxon";
+import * as L from "luxon";
+
+import format from "@packages/string-format";
 import * as env from "@app/env";
 
-const now: IO.IO<DateTime> = () => DateTime.local().setZone(env.TIME_ZONE);
+export type Duration = L.Duration;
 
-export const weekFromDate = (date: DateTime) => Interval.after(
+export const seconds = (seconds: number): Duration => L.Duration.fromObject({seconds});
+
+const now: IO.IO<L.DateTime> = () => L.DateTime.local().setZone(env.TIME_ZONE);
+
+export const weekFromDate = (date: L.DateTime) => L.Interval.after(
   weekStart(date), 
-  Duration.fromObject({days: 7})
+  L.Duration.fromObject({days: 7})
 );
 
 export const thisWeek = pipe(now, IO.map(weekFromDate));
-export const isThisWeek = (date: DateTime) => date.equals(thisWeek().start);
+export const isThisWeek = (date: L.DateTime) => date.equals(thisWeek().start);
 
 export const lastWeek = pipe(
   now,
@@ -23,7 +29,7 @@ export const lastWeek = pipe(
  * A week is an interval that starts on Monday at 1am
  * This method is for finding that timestamp based on any date
  */
-const weekStart = (date: DateTime) => {
+const weekStart = (date: L.DateTime) => {
   // If the timestamp is on Sunday, use the previous monday
   if (date.weekday === 0) {
     return date
@@ -43,5 +49,22 @@ const weekStart = (date: DateTime) => {
 
 export const lastNDays = (days: number) => pipe(
   now,
-  IO.map(_ => Interval.before(_, {days}))
+  IO.map(_ => L.Interval.before(_, {days}))
 )
+
+// Formatting
+const pad = (v: number) => v.toString().padStart(2, "0");
+
+/**
+ * Formats `seconds` into a friendly format such as "15m 32s"
+ * Best used to describe elapsed time (hence the name)
+ */
+export const formatElapsed = (d: Duration): string => {
+  if (d.hours > 0) 
+    return format('{0}h {1}m')(d.toFormat("h"), d.toFormat("mm"));
+
+  if (d.minutes > 0) 
+    return format('{0}m {1}s')(d.toFormat("m"), d.toFormat("ss"));
+
+  return format('{0}s')(d.toFormat("ss"));
+};

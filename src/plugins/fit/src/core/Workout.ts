@@ -1,11 +1,10 @@
 import type {ActivityType, Activity, ActivityWithHR, Streams} from "../io/strava-types";
-import {DateTime} from "luxon";
 import {pipe} from "fp-ts/function";
 import * as R from "ramda";
 import * as O from "fp-ts/Option";
-import * as A from "fp-ts/Array";
 
-import * as Units from "./Units";
+import * as Time from "./Time";
+import * as Distance from "./Distance";
 import * as hr from "./Heartrate";
 
 export type Workout = {
@@ -23,7 +22,7 @@ export type Workout = {
   // todo: make an ISO datatype
   readonly started: string;
   /** How long the activity went for. In a GPS activity, this time will reflect time that was spent actually moving */
-  readonly elapsed: Units.Seconds;
+  readonly elapsed: Time.Duration;
   /** GPS data, if recorded outdoors */
   readonly gps: O.Option<GPS>;
   /** Heart rate data if recorded with a device */
@@ -31,9 +30,9 @@ export type Workout = {
 }
 
 export type GPS = {
-  readonly distance: Units.Meters;
-  readonly elevation: Units.Meters;
-  readonly averageSpeed: Units.MetersPerSecond;
+  readonly distance: Distance.Meters;
+  readonly elevation: Distance.Meters;
+  readonly averageSpeed: Distance.Speed;
 }
 
 /** If the user recorded with HR but never set their max heart rate, we can't detail the zones */
@@ -53,7 +52,7 @@ export const fromActivity = (res: Activity, stream?: Streams): Workout => ({
   description: res.description,
   private: res.private,
   started: res.start_date,
-  elapsed: Units.seconds(res.moving_time),
+  elapsed: Time.seconds(res.moving_time),
   gps: pipe(
     activityHasGPS(res),
     O.map(gps)
@@ -66,9 +65,9 @@ export const fromActivity = (res: Activity, stream?: Streams): Workout => ({
 });
 
 export const gps = (res: Activity): GPS => ({
-  distance:     Units.meters(res.distance),
-  elevation:    Units.meters(res.total_elevation_gain),
-  averageSpeed: Units.metersPerSecond(res.average_speed)
+  distance:     Distance.meters(res.distance),
+  elevation:    Distance.meters(res.total_elevation_gain),
+  averageSpeed: Distance.speed(res.average_speed)
 });
 
 export const heartrate = (res: ActivityWithHR): HRData => ({

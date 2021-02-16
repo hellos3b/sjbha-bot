@@ -16,11 +16,14 @@ export const errorReporter = (original: Message) => (error: any) => {
     field("From", `${original.author.name} in <#${original.channel.id}>`, true),
     field("Message", original.content, true),
     field("Args", "`" + original.args + "`"),
-    error.details && field("Details", "```" + error.details + "```"),
     error.stack && field("Stack", "```" + error.stack + "```")
   ]);
 
-  console.error("Command failed to execute: ", error, original);
+  console.error("Command failed to execute: ", {
+    args: original.args.toString(),
+    author: original.author,
+    content: original.content
+  }, error);
 
   if (NODE_ENV === 'production') {
     // todo: log it in #botadmin

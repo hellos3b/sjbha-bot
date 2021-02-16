@@ -34,6 +34,7 @@ export const error = (name: string) => ({
 export const NotFound = error("NotFound");
 export const Unauthorized = error("Unauthorized");
 export const MongoDbError = error("MongoDbError");
+export const InvalidArgs = error("InvalidArgs");
 
 export const HTTPError = {
   fromError(err: any): Error {

@@ -1,6 +1,6 @@
 import * as strava from "../io/strava-types";
-import * as R from "ramda";
 import * as A from "fp-ts/Array";
+import * as Time from "./Time";
 
 /**
  * Basic zone targets for working out
@@ -16,9 +16,9 @@ export type Zones = {
  * A breakdown of time spent in each zone
  */
 export type TimeInZones = {
-  readonly rest: number;
-  readonly moderate: number;
-  readonly vigorous: number;
+  readonly rest: Time.Duration;
+  readonly moderate: Time.Duration;
+  readonly vigorous: Time.Duration;
 }
 
 /**
@@ -65,18 +65,26 @@ export const streamFromResponse = (stream: strava.Streams): Stream => {
  */
 export const timeInZone = (zones: Zones) => {
   const zone = getZone(zones);
-  const time: TimeInZones = {rest: 0, moderate: 0, vigorous: 0};
+  const time = {rest: 0, moderate: 0, vigorous: 0};
   
-  return (stream: Stream) => stream.reduce((res: TimeInZones, sample) => {
-    switch (zone(sample.bpm)) {
-      case "vigorous": 
-        return R.mergeRight(res, {vigorous: res.vigorous + sample.seconds});
-      case "moderate": 
-        return R.mergeRight(res, {moderate: res.moderate + sample.seconds});
-      default: 
-        return R.mergeRight(res, {rest: res.rest + sample.seconds});
+  return (stream: Stream): TimeInZones => {
+    const t = stream.reduce((res, sample) => {
+      switch (zone(sample.bpm)) {
+        case "vigorous": 
+          return {...res, vigorous: res.vigorous + sample.seconds};
+        case "moderate": 
+          return {...res, moderate: res.moderate + sample.seconds};
+        default: 
+          return {...res, rest: res.rest + sample.seconds};
+      }
+    }, time);
+
+    return {
+      rest: Time.seconds(t.rest),
+      moderate: Time.seconds(t.moderate),
+      vigorous: Time.seconds(t.vigorous)
     }
-  }, time);
+  }
 };
 
 /**

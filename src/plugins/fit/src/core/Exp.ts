@@ -3,7 +3,7 @@ import {pipe, flow, constant} from "fp-ts/function";
 import * as O from "fp-ts/Option";
 import * as w from "./Workout";
 import * as hr from "./Heartrate";
-import * as units from "./Units";
+import * as Time from "./Time";
 import { HistoricalWorkout } from "../io/history-db";
 
 export const weekly_exp_goal = 150;
@@ -29,7 +29,6 @@ export type EXP = Object & {
  * Represents a soft streak. The higher the value, the cooler rank name you get
  */
 export type FitScore = Object & {
-  readonly _tag: "Score";
   /** Current fit score */
   readonly value: number;
   /** The name of the current rank */
@@ -66,7 +65,7 @@ export const sum = (arr: EXP[]) => pipe(
 /**
  * Use a workout's running time to calculate EXP gained
  */
-export const expFromTime = (seconds: units.Seconds) => exp(seconds.value);
+export const expFromTime = (time: Time.Duration) => exp(time.as("minutes"));
 
 /**
  * Use heart rate zones from a workout to calculate EXP gained
@@ -74,7 +73,9 @@ export const expFromTime = (seconds: units.Seconds) => exp(seconds.value);
 export const expFromZones = (zones: hr.Zones) => {
   return (stream: hr.Stream) => {
     const time = hr.timeInZone(zones)(stream);
-    return exp(time.moderate + (time.vigorous * 2));
+    return exp(
+      time.moderate.as("minutes") + (time.vigorous.as("minutes") * 2)
+    );
   }
 }
 
@@ -86,7 +87,6 @@ export const fitScore = (value: number): FitScore => {
   const rank = (clamped === 0) ? no_rank : scoreToRank(clamped);
 
   return {
-    _tag: "Score", 
     value: clamped, 
     rank,
     toString() {

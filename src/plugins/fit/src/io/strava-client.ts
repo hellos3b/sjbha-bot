@@ -4,11 +4,12 @@ import * as TE from "fp-ts/TaskEither";
 import * as E from "fp-ts/Either";
 import {pipe, flow} from "fp-ts/function";
 
-import type {Activity, Auth} from "./strava-types";
+import {Activity, Auth, Streams} from "./strava-types";
 import {client_id, client_secret} from "../../config";
 import {AsyncClient} from "@packages/async-client";
 import * as User from "../core/User";
 import * as Workout from "../core/Workout";
+import { sequenceT } from "fp-ts/lib/Apply";
 
 const StravaClient = (token: string) => AsyncClient({
   baseURL: 'https://www.strava.com/api/v3',
@@ -50,11 +51,15 @@ export const fetchWorkouts = (q: Pageable) => flow(
   withClient,
   TE.chain(client => client.get<Activity[]>('/activities', q)),
   TE.map(R.map(Workout.fromActivity))
-)
+);
 
 export const fetchActivity = (id: string) => flow(
   withClient,
-  TE.chain(client => client.get<Activity>('/activity/' + id))
+  TE.chain(client => sequenceT(TE.taskEither)(
+    client.get<Activity>('/activities/' + id),
+    client.get<Streams>('/activities/' + id + '/streams', {keys: "heartrate,time"})
+  )),
+  TE.map(([a, hr]) => Workout.fromActivity(a, hr))
 );
 
 // /** Get refresh token, use it for a user's first time in authenticating */

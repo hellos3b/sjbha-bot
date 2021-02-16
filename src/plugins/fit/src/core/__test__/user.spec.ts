@@ -1,8 +1,6 @@
 import '@relmify/jest-fp-ts';
 import * as E from "fp-ts/Either";
 import {pipe, flow} from "fp-ts/function";
-import {Member} from "packages/bastion";
-
 import UserBuilder from "./_UserBuilder_";
 import WorkoutBuilder from './_WorkoutBuilder_';
 
@@ -11,7 +9,7 @@ import * as hr from "../Heartrate";
 import * as xp from "../Exp";
 import * as db from "../../io/__mock__/user_rows";
 
-const member: Member = {
+const member = {
   id: "member-id",
   name: "user",
   avatar: "pic.jpg"
@@ -62,7 +60,7 @@ describe("User", () => {
 
       const [, exp] = addWorkout(user)(workout);
 
-      expect(exp.value).toEqual(100);
+      expect(exp.value).toBeCloseTo(100 / 60);
     });
 
     it("1exp/min when user has no max heartrate", () => {
@@ -77,11 +75,13 @@ describe("User", () => {
 
       const [,exp] = addWorkout(user)(workout);
 
-      expect(exp.value).toEqual(100);
+      expect(exp.value).toBeCloseTo(100 / 60);
     });
 
     it("uses HR zones to calculate XP", () => {
       const zones = hr.zones(200);
+      const moderate_minutes = 10;
+      const vigorous_minutes = 5;
       
       const user = UserBuilder()
         .withMaxHR(zones.max)
@@ -89,14 +89,14 @@ describe("User", () => {
 
       const workout = WorkoutBuilder()
         .withHR(160, 160)
-        .addHRSample(zones.moderate - 1, 30)
-        .addHRSample(zones.moderate + 1, 60)
-        .addHRSample(zones.vigorous + 1, 90)
+        .addHRSample(zones.moderate - 1, 160)
+        .addHRSample(zones.moderate + 1, (moderate_minutes * 60))
+        .addHRSample(zones.vigorous + 1, (vigorous_minutes * 60))
         .build();
 
       const [,exp] = addWorkout(user)(workout);
 
-      expect(exp.value).toEqual(60 + (90 * 2));
+      expect(exp.value).toBeCloseTo(moderate_minutes + (vigorous_minutes * 2));
     });
 
     it("user's exp gets updated", () => {
@@ -109,7 +109,7 @@ describe("User", () => {
 
       const [u] = addWorkout(user)(workout);
 
-      expect(u.exp.value).toEqual(100);      
+      expect(u.exp.value).toBeCloseTo(100 / 60);      
     })
   });
 
