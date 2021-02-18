@@ -1,7 +1,7 @@
 import * as Discord from "discord.js";
 import {pipe} from "fp-ts/function";
 import * as TE from "fp-ts/TaskEither";
-import { NotFound } from "@packages/common-errors";
+import { NotFoundError } from "@packages/common-errors";
 
 const DEFAULT_AVATAR = "https://cdn.discordapp.com/embed/avatars/0.png";
 
@@ -23,12 +23,10 @@ export const fromUser = (user: Discord.User): Member => ({
   avatar: user.avatarURL() || DEFAULT_AVATAR    
 })
 
-export const fetchById = (guild: Discord.Guild) => (id: string): TE.TaskEither<Error, Member> => pipe(
-  TE.tryCatch(
-    async () => {
-      const m = guild.member(id) || (await guild.members.fetch(id));
-      return fromMember(m);
-    },
-    NotFound.fromError
-  )
-)
+export const fetchById = (guild: Discord.Guild) => (id: string) => TE.tryCatch(
+  async () => {
+    const m = guild.member(id) || (await guild.members.fetch(id));
+    return fromMember(m);
+  },
+  NotFoundError.lazy("Could not find member by id " + id)
+);

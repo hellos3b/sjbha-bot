@@ -1,7 +1,8 @@
 import * as R from "ramda";
-import {MessageEmbedOptions, MessageOptions} from "discord.js";
+import {Reader} from "fp-ts/Reader";
+import {MessageEmbed, MessageOptions} from "discord.js";
 
-type EmbedProperty = (obj: MessageEmbedOptions) => MessageEmbedOptions;
+type EmbedProperty = (obj: MessageEmbed) => MessageEmbed;
 
 /**
  * Create an embed from a flat array of objects.
@@ -15,43 +16,35 @@ type EmbedProperty = (obj: MessageEmbedOptions) => MessageEmbedOptions;
  * ])
  * ```
  */
-export const embed = (props: EmbedProperty[]): MessageOptions => ({
-  embed: props.reduce((em, p) => (!p) ? em : p(em), {})
-});
+export const embed = (...props: EmbedProperty[]): MessageOptions => {
+  const message = new MessageEmbed();
+  props.forEach(opt => opt && opt(message));
 
-export const color = (value: number): EmbedProperty => {
-  return obj => ({...obj, color: value });
+  return message;
 };
 
-export const author = (name: string, icon_url?: string): EmbedProperty => {
+export const color = (value: number): Reader<MessageEmbed, MessageEmbed> => {
+  return em => em.setColor(value);
+};
+
+export const author = (name: string, icon_url?: string): Reader<MessageEmbed, MessageEmbed> => {
   const prop: {[key: string]: any} = {name};
 
   if (icon_url) {
     prop.icon_url = icon_url;
   }
 
-  return obj => ({...obj, author: prop});
+  return em => em.setAuthor(name, icon_url);
 };
 
-export const field = (name: string, value: any, inline: boolean = false): EmbedProperty => {
-  const field = {name, value: String(value), inline};
-
-  return obj => {
-    const fields = (obj.fields || []).concat(field);
-    return {...obj, fields};
-  };
+export const field = (name: string, inline: boolean = false) => (value: any): Reader<MessageEmbed, MessageEmbed> => {
+  return em => em.addField(name, value, inline);
 };
 
-export const description = (content: string): EmbedProperty => {
-  return obj => ({
-    ...obj,
-    description: content
-  })
+export const description = (content: string): Reader<MessageEmbed, MessageEmbed> => {
+  return em => em.setDescription(content);
 }
 
-export const thumbnail = (url: string): EmbedProperty => {
-  return obj => ({
-    ...obj,
-    thumbnaill: {url}
-  });
+export const thumbnail = (url: string): Reader<MessageEmbed, MessageEmbed> => {
+  return em => em.setThumbnail(url);
 };

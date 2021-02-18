@@ -1,35 +1,39 @@
 import minimist from "minimist";
-import {left, right, Either} from "fp-ts/Either";
+import {left, right, Either, fromNullable, mapLeft} from "fp-ts/Either";
 import * as O from "fp-ts/Option";
-import * as t from "io-ts";
 
-import {DecodeError, NotFound} from "@packages/common-errors";
+import {InvalidArgsError, NotFoundError} from "@packages/common-errors";
+import { pipe } from "fp-ts/lib/pipeable";
 
 // TODO: Fill in error messages
-export type Args = Object & {
-  nth(idx: number): O.Option<string>;
-  get(key: string): O.Option<string>;
-  getNumber(key: string): Either<Error, number>;
-}
-
-export function Args(message: string): Args {
+export type Args = ReturnType<typeof Args>;
+export function Args(message: string) {
   const parsed = minimist(message.split(" "));
 
   return {
-    nth: idx => O.fromNullable(parsed._[idx]),
-    get: key => O.fromNullable(parsed[key]),
-    getNumber: key => (!parsed[key])
-      ? left(NotFound.create("Error"))
-      : castToNumber(parsed[key]),
-    toString() {
-      return JSON.stringify(parsed)
-    }
+    args: parsed, 
+
+    nth: (idx: number) => O.fromNullable(parsed._[idx]),
+
+    nthE: (idx: number, onLeft: string) => pipe(
+      parsed._[idx],
+      fromNullable(InvalidArgsError.create(onLeft))
+    ),
+
+    get: (key: string): Either<NotFoundError, string> =>(!parsed[key])
+      ? left(NotFoundError.create("Error!"))
+      : right(parsed[key]),
+
+    getNumber: (key: string): Either<NotFoundError | InvalidArgsError, number> =>
+      (!parsed[key])
+        ? left(NotFoundError.create("Error"))
+        : castToNumber(parsed[key]),
   }
 }
 
-function castToNumber(value: any): Either<Error, number> {
+function castToNumber(value: any): Either<InvalidArgsError, number> {
   const val = parseInt(value);
   return (isNaN(val)) 
-    ? left(DecodeError.create(value + " is not a valid number"))
+    ? left(InvalidArgsError.create(value + " is not a valid number"))
     : right(val);
 }

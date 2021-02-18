@@ -1,7 +1,6 @@
 import {command} from "@app/bastion";
-
 import {profile} from "./src/commands/profile";
-import {adminAdd} from "./src/admin/add";
+import {adminAdd} from "./src/commands/add";
 
 const fit$ = command("fit");
 

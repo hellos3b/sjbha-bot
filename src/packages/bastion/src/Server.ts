@@ -1,7 +1,7 @@
 import * as Discord from "discord.js";
 import * as TE from "fp-ts/TaskEither";
 import {pipe} from "fp-ts/function";
-import {NotFound} from "@packages/common-errors";
+import {NotFoundError} from "@packages/common-errors";
 import * as Member from "./Member";
 
 export interface Server {
@@ -15,14 +15,14 @@ export const server = (guild: Discord.Guild): Server => ({
 });
 
 export const fetchById = (client: Discord.Client) => (id: string): Server => {
-  const guild = TE.tryCatch<Error, Discord.Guild>(
+  const guild = TE.tryCatch(
     async () => {
       const cache = client.guilds.cache.get(id);
       const guild = (!cache) ? (await client.guilds.fetch(id)) : cache;
-      if (!guild) throw NotFound.create("Can't find guild");
+      if (!guild) throw NotFoundError.create("Can't find guild");
       return guild;
     },
-    NotFound.fromError
+    NotFoundError.lazy("Could not find guild with id " + id)
   );
 
   return {

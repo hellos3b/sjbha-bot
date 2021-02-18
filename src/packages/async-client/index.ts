@@ -17,12 +17,12 @@ export function AsyncClient(config: AxiosRequestConfig = {}) {
   });
 
   return {
-    get: <R>(url: string, params: object = {}) => TE.tryCatch<Error, R>(
+    get: <R>(url: string, params: object = {}) => TE.tryCatch(
       () => client.get<R>(url, {params}).then(R.prop("data")),
       HTTPError.fromError
     ),
 
-    post: <R>(url: string, data: object = {}) => TE.tryCatch<Error, R>(
+    post: <R>(url: string, data: object = {}) => TE.tryCatch(
       () => client.post<R>(url, data).then(R.prop("data")),
       HTTPError.fromError
     )

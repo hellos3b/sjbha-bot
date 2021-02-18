@@ -5,10 +5,6 @@ import * as L from "luxon";
 import format from "@packages/string-format";
 import * as env from "@app/env";
 
-export type Duration = L.Duration;
-
-export const seconds = (seconds: number): Duration => L.Duration.fromObject({seconds});
-
 const now: IO.IO<L.DateTime> = () => L.DateTime.local().setZone(env.TIME_ZONE);
 
 export const weekFromDate = (date: L.DateTime) => L.Interval.after(
@@ -51,20 +47,16 @@ export const lastNDays = (days: number) => pipe(
   now,
   IO.map(_ => L.Interval.before(_, {days}))
 )
-
-// Formatting
-const pad = (v: number) => v.toString().padStart(2, "0");
-
 /**
  * Formats `seconds` into a friendly format such as "15m 32s"
  * Best used to describe elapsed time (hence the name)
  */
-export const formatElapsed = (d: Duration): string => {
-  if (d.hours > 0) 
-    return format('{0}h {1}m')(d.toFormat("h"), d.toFormat("mm"));
+// export const formatElapsed = (d: L.Duration): string => {
+//   if (d.hours > 0) 
+//     return format('{0}h {1}m')(d.toFormat("h"), d.toFormat("mm"));
 
-  if (d.minutes > 0) 
-    return format('{0}m {1}s')(d.toFormat("m"), d.toFormat("ss"));
+//   if (d.minutes > 0) 
+//     return format('{0}m {1}s')(d.toFormat("m"), d.toFormat("ss"));
 
-  return format('{0}s')(d.toFormat("ss"));
-};
+//   return format('{0}s')(d.toFormat("ss"));
+// };

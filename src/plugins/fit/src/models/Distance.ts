@@ -1,6 +1,6 @@
 import {pipe} from "fp-ts/function";
 import format from "@packages/string-format";
-import * as Time from "./Time";
+import * as L from "luxon";
 
 // Distance
 export interface Meters {
@@ -26,7 +26,10 @@ export const speed = (ms: number): Speed => ({
   ),
 
   pace: pipe(
-    Time.seconds((26.8224 / ms) * 60), // minutes per mile
+    // minutes per mile
+    L.Duration.fromObject({
+      minutes: (26.8224 / ms)
+    }),
     t => (t.as("hours") > 0) 
       ? t.toFormat("hh:mm:ss")
       : t.toFormat("mm:ss")
