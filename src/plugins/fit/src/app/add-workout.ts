@@ -1,7 +1,7 @@
 import * as L from "luxon";
 import * as O from "fp-ts/Option";
 import { sequenceT } from "fp-ts/lib/Apply";
-import { pipe } from "fp-ts/lib/function";
+import { pipe} from "fp-ts/lib/function";
 import {Lens} from "monocle-ts";
 
 import * as u from "../models/User";
@@ -94,21 +94,19 @@ const expGained = (workout: w.Workout) => {
 /**
  * Log a workout to a user
  */
-export const addWorkout = (workout: w.Workout) => {
-  return (user: u.User): [lw.LoggedWorkout, u.User] => {
-    const [type, moderate, vigorous] = expGained(workout)(user);
+export const logWorkout = (workout: w.Workout, user: u.User): [lw.LoggedWorkout, u.User] => {
+  const [type, moderate, vigorous] = expGained(workout)(user);
 
-    const logged = lw.create()
-      .forUser(user)
-      .forWorkout(workout)
-      .withExp(type, moderate, vigorous)
-      .build();
+  const logged = lw.create()
+    .forUser(user)
+    .forWorkout(workout)
+    .withExp(type, moderate, vigorous)
+    .build();
 
-    const updatedUser = Lens
-      .fromProp<u.User>()("xp")
-      .modify(_ => _ + moderate + vigorous)
-      (user);
-    
-    return [logged, updatedUser];
-  }
+  const updatedUser = Lens
+    .fromProp<u.User>()("xp")
+    .modify(_ => _ + moderate + vigorous)
+    (user);
+  
+  return [logged, updatedUser];
 };

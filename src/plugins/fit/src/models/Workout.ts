@@ -101,7 +101,7 @@ export type Workout = {
 export type GPS = {
   readonly distance: Distance.Meters;
   readonly elevation: Distance.Meters;
-  readonly averageSpeed: Distance.Speed;
+  readonly averageSpeed: Distance.MetersPerSecond;
 }
 
 export type Heartrate = {
@@ -139,17 +139,6 @@ const createStravaClient = flow(
 );
 
 /**
- * 
- */
-// export const find = (q: API.Pageable) => flow(
-//   createStravaClient,
-//   TE.chain
-//     (client => client.get<API.Activity[]>('/activities', q)),
-//   TE.map
-//     (R.map (fromActivity))
-// );
-
-/**
  * Return a single workout by ID
  */
 export const fetch = (id: string) => flow(
@@ -184,7 +173,7 @@ export const fromActivity = (res: API.Activity, stream?: API.Streams): Workout =
 export const gpsFromActivity = (res: API.Activity): GPS => ({
   distance:     Distance.meters(res.distance),
   elevation:    Distance.meters(res.total_elevation_gain),
-  averageSpeed: Distance.speed(res.average_speed)
+  averageSpeed: Distance.ms(res.average_speed)
 });
 
 export const hrFromActivity = (activity: API.ActivityWithHR, stream?: API.Streams): Heartrate => ({

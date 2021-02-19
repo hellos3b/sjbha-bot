@@ -1,8 +1,6 @@
 import * as IO from "fp-ts/IO";
 import {pipe} from "fp-ts/function";
 import * as L from "luxon";
-
-import format from "@packages/string-format";
 import * as env from "@app/env";
 
 const now: IO.IO<L.DateTime> = () => L.DateTime.local().setZone(env.TIME_ZONE);
@@ -12,10 +10,10 @@ export const weekFromDate = (date: L.DateTime) => L.Interval.after(
   L.Duration.fromObject({days: 7})
 );
 
-export const thisWeek = pipe(now, IO.map(weekFromDate));
-export const isThisWeek = (date: L.DateTime) => date.equals(thisWeek().start);
+export const current = pipe(now, IO.map(weekFromDate));
+export const isThisWeek = (date: L.DateTime) => date.equals(current().start);
 
-export const lastWeek = pipe(
+export const previous = pipe(
   now,
   IO.map(_ => _.minus({days: 7})),
   IO.map(weekFromDate)
@@ -47,16 +45,3 @@ export const lastNDays = (days: number) => pipe(
   now,
   IO.map(_ => L.Interval.before(_, {days}))
 )
-/**
- * Formats `seconds` into a friendly format such as "15m 32s"
- * Best used to describe elapsed time (hence the name)
- */
-// export const formatElapsed = (d: L.Duration): string => {
-//   if (d.hours > 0) 
-//     return format('{0}h {1}m')(d.toFormat("h"), d.toFormat("mm"));
-
-//   if (d.minutes > 0) 
-//     return format('{0}m {1}s')(d.toFormat("m"), d.toFormat("ss"));
-
-//   return format('{0}s')(d.toFormat("ss"));
-// };

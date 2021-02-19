@@ -13,28 +13,28 @@ export interface Feet {
   value: number;
 }
 
-export interface Speed {
-  readonly mph: string;
-  readonly pace: string;
+export interface MetersPerSecond {
+  _tag: "MetersPerSecond";
+  value: number;
 }
 
-export const speed = (ms: number): Speed => ({
-  mph: pipe(
-    ms * 2.237,
-    Math.floor,
-    format("{0}mph")
-  ),
+export const ms = (value: number): MetersPerSecond => ({_tag: "MetersPerSecond", value});
 
-  pace: pipe(
-    // minutes per mile
-    L.Duration.fromObject({
-      minutes: (26.8224 / ms)
-    }),
-    t => (t.as("hours") > 0) 
-      ? t.toFormat("hh:mm:ss")
-      : t.toFormat("mm:ss")
-  )
-});
+export const toPace = (ms: MetersPerSecond) => pipe(
+  // minutes per mile
+  L.Duration.fromObject({
+    minutes: (26.8224 / ms.value)
+  }),
+  t => (t.as("hours") > 0) 
+    ? t.toFormat("hh:mm:ss")
+    : t.toFormat("mm:ss")
+)
+
+export const toMph = (ms: MetersPerSecond) => pipe(
+  ms.value * 2.237,
+  Math.floor,
+  format("{0}mph")
+)
 
 // Constructors
 export const meters = (value: number): Meters => ({_tag: "Meters", value});

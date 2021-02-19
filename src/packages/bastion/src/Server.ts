@@ -6,7 +6,7 @@ import * as Member from "./Member";
 
 export interface Server {
   readonly id: string;
-  getMember: (id: string) => TE.TaskEither<Error, Member.Member>;
+  getMember: (id: string) => TE.TaskEither<NotFoundError, Member.Member>;
 }
 
 export const server = (guild: Discord.Guild): Server => ({

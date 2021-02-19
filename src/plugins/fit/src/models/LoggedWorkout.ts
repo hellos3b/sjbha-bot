@@ -2,6 +2,7 @@ import * as R from "ramda";
 import * as t from "io-ts";
 import * as E from "fp-ts/Either";
 import * as TE from "fp-ts/TaskEither";
+import * as Ord from "fp-ts/Ord";
 import { pipe, flow } from "fp-ts/lib/function";
 
 import * as db from "@packages/db";
@@ -9,7 +10,7 @@ import { DecodeError, InvalidArgsError } from "@packages/common-errors";
 import { Interval, DateTime } from "luxon";
 import { Workout } from "./Workout";
 import {User} from "./User";
-import * as Time from "./Week";
+import * as Week from "./Week";
 
 const collection = db.collection<LoggedWorkout>('fit-exp');
 
@@ -56,14 +57,14 @@ export const insert = (workout: LoggedWorkout) => {
   );
 }
 
-export const thirtyDayHistory = (user: User) => {
-  const interval = Interval.before(
-    DateTime.local(), 
-    {days: 30}
-  );
-
+export const fetchLastDays = (days: number, user: User) => {
+  const interval = Interval.before(DateTime.local(), {days});
   return find(interval)({discord_id: user.discordId})
 };
+
+export const fetchCurrentWeek = (user: User) => 
+  find(Week.current())
+    ({discord_id: user.discordId});
 
 export const create = (props: LoggedWorkout = {
   discord_id: "",
@@ -104,18 +105,10 @@ export const sumExp = (logs: LoggedWorkout[]) => logs
   .reduce(R.add, 0);
 
 export const filterThisWeek = () => {
-  const week = Time.thisWeek();
+  const week = Week.current();
   return (logs: LoggedWorkout[]) => logs
     .filter(w => pipe(
       DateTime.fromISO (w.timestamp),
-      date => {
-        console.log("date " + date.toFormat("DD MM YYYY hh:mm"));
-        console.log("start " + week.start.toFormat("DD MM YYYY hh:mm"));
-        console.log("end " + week.end.toFormat("DD MM YYYY hh:mm"));
-
-        const res= week.contains(date)
-        console.log("res?", res);
-        return res;
-      }
+      date => week.contains(date)
     ));
 };

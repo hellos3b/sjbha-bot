@@ -2,16 +2,19 @@ import * as R from "ramda";
 import * as t from "io-ts";
 import * as E from "fp-ts/Either";
 import * as TE from "fp-ts/TaskEither";
+import {sequenceT} from "fp-ts/Apply";
 import { pipe, flow } from "fp-ts/lib/function";
 
+import { server } from "@app/bastion";
 import * as db from "@packages/db";
 import { DecodeError } from "@packages/common-errors";
+import { Member } from "@packages/bastion";
 
 export class NoRefreshTokenError extends Error {}
 
-const collection = db.collection<User>("fit-users");
+const collection = db.collection<Schema>("fit-users");
 
-const SchemaT = t.interface({
+const UserT = t.interface({
   discordId: t.string,
   password: t.string,
   stravaId: t.string,
@@ -22,22 +25,32 @@ const SchemaT = t.interface({
   fitScore: t.number
 });
 
-export type User = t.TypeOf<typeof SchemaT>;
+type Schema = t.TypeOf<typeof UserT>;
+export type User = Schema & {member: Member};
 
-const decode = flow(
-  SchemaT.decode, 
-  E.mapLeft(DecodeError.fromError),
+const toSchema = (user: User): Schema =>
+  R.omit(["member"])(user);
+
+const decode = (json: any) => pipe(
   TE.fromEither
+    (UserT.decode(json)),
+  TE.mapLeft
+    (DecodeError.fromError),
+  TE.chain(user => pipe(
+    server.getMember(user.discordId),
+    TE.map
+      (member => <User>({...user, member}))
+  ))
 );
 
-export const byId = (discordId: string) => pipe(
+export const fetch = (discordId: string) => pipe(
   collection(),
-  db.findOne <User>({discordId}),
+  db.findOne <Schema>({discordId}),
   TE.chainW (decode)
 );
 
-export const byIdAuthorized = flow(
-  byId,
+export const fetchConnected = flow(
+  fetch,
   TE.chainW (user => 
     !user.refreshToken
       ? TE.left(new NoRefreshTokenError()) 
@@ -47,7 +60,10 @@ export const byIdAuthorized = flow(
 
 export const save = (user: User) => pipe(
   collection(),
-  db.update <User>({discordId: user.discordId}, user)
+  db.update <Schema>(
+    {discordId: user.discordId}, 
+    toSchema(user)
+  )
 );
 
 const ranks = [
