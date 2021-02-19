@@ -3,6 +3,7 @@ import "module-alias/register";
 // Load services
 import "@app/bastion";
 import "@app/mongodb";
+import "@app/express";
 
 // Load plugins
 import "@plugins/ping";

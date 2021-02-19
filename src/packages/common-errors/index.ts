@@ -7,7 +7,7 @@ import {AxiosError} from "axios";
  */
 export class NotFoundError extends Error {
   public type = "NotFound";
-  public details: any;
+  public details?: any;
 
   private constructor(message: string, details?: any) {
     super(message);
@@ -28,12 +28,16 @@ export class NotFoundError extends Error {
  */
 export class UnauthorizedError extends Error {
   public type = "Unauthorized";
-  public details: any;
+  public details?: any;
 
   private constructor(message: string, details?: any) {
     super(message);
     this.details = details;
   }
+
+  public static create(message: string, details?: any) {
+    return new UnauthorizedError(message, details);
+  }  
 }
 
 /**
@@ -41,7 +45,7 @@ export class UnauthorizedError extends Error {
  */
 export class MongoDbError extends Error {
   public type = "MongoDbError";
-  public details: any;
+  public details?: any;
 
   private constructor(message: string, details?: any) {
     super(message);
@@ -59,7 +63,7 @@ export class MongoDbError extends Error {
  */
 export class InvalidArgsError extends Error {
   public readonly type = "InvalidArgs";
-  public readonly details: any;
+  public details?: any;
 
   constructor(message: string, details?: any) {
     super(message);
@@ -81,7 +85,7 @@ export class HTTPError extends Error {
   public url = "";
   public method?: string;
   public code?: string;
-  public response: object = {};
+  public response: any = {};
 
   private constructor(message: string) {
     super(message);
@@ -115,7 +119,7 @@ export class HTTPError extends Error {
  */
 export class DecodeError extends Error {
   public type = "DecodeError";
-  public details: any;
+  public details?: any;
 
   private constructor(message: string, details?: any) {
     super(message);

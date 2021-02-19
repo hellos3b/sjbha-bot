@@ -1,8 +1,6 @@
 import * as R from "ramda";
 import * as t from "io-ts";
-import * as E from "fp-ts/Either";
 import * as TE from "fp-ts/TaskEither";
-import {sequenceT} from "fp-ts/Apply";
 import { pipe, flow } from "fp-ts/lib/function";
 
 import { server } from "@app/bastion";
@@ -57,6 +55,24 @@ export const fetchConnected = flow(
       : TE.right(user)
   )
 )
+
+export const initialize = (discordId: string, password: string) => {
+  const user: Schema = {
+    discordId, password,
+    stravaId: "",
+    refreshToken: "",
+    gender: "",
+    maxHR: 0,
+    xp: 0,
+    fitScore: 0
+  };
+
+  return pipe(
+    collection(), 
+    db.insert<Schema>(user),
+    TE.map (() => user)
+  );
+};
 
 export const save = (user: User) => pipe(
   collection(),

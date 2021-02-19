@@ -20,7 +20,7 @@ export const render = (user: u.User, logged: lw.LoggedWorkout, workout: w.Workou
     description (workout.description),
 
   field("Time", true) (formatElapsed(workout.elapsed)),
-  ...pipe(stats(workout, logged), getOrElse(() => <any>[])),
+  ...stats(workout, logged),
 
   footer (`${expGained(logged)} | ${weekExp(week)}`)
 );
@@ -58,7 +58,7 @@ const just = (workout: w.Workout) => {
   }
 }
 
-const fix = (val: number) => val.toFixed(1);
+const fixed = (val: number) => val.toFixed(1);
 
 /**
  * Text showing how much EXP this workout gained,
@@ -68,10 +68,10 @@ const expGained = ({ exp_type, exp_gained, exp_vigorous }: lw.LoggedWorkout) => 
   switch (exp_type) {
     case "hr": {
       const moderate = exp_gained - exp_vigorous;
-      return `Gained ${fix(exp_gained)} exp (${fix(moderate)}+ ${fix(exp_vigorous)}++})`;
+      return `Gained ${fixed(exp_gained)} exp (${fixed(moderate)}+ ${fixed(exp_vigorous)}++})`;
     }
     default:
-      return `Gained ${fix(exp_gained)} exp`;
+      return `Gained ${fixed(exp_gained)} exp`;
   }
 };
 
@@ -79,7 +79,7 @@ const expGained = ({ exp_type, exp_gained, exp_vigorous }: lw.LoggedWorkout) => 
  * Shows how much xp gained this week
  */
 const weekExp = flow(
-  lw.sumExp, fix, 
+  lw.sumExp, fixed, 
   gained => gained + ' exp this week'
 );
 
@@ -88,6 +88,7 @@ const weekExp = flow(
  * Some activities show different stats, most default to heartrate
  */
 const stats = (workout: w.Workout, logged: lw.LoggedWorkout) => {
+  type Field = ReturnType<ReturnType<typeof inline>>;
   const inline = (title: string) => field(title, true);
   const show = sequenceT(option);
 
@@ -124,17 +125,21 @@ const stats = (workout: w.Workout, logged: lw.LoggedWorkout) => {
 
   const heartrate = () => show (avgHr, maxHr);
 
-  switch (workout.type) {
-    case "Run": 
-      return pipe(show (distance, pace), alt (heartrate));
+  const fields = (() => { 
+    switch (workout.type) {
+      case "Run": 
+        return pipe(show (distance, pace), alt (heartrate));
 
-    case "Walk": 
-      return show (distance);
+      case "Walk": 
+        return show (distance);
 
-    case "Yoga": 
-      return show (avgHr);
+      case "Yoga": 
+        return show (avgHr);
 
-    default:
-      return pipe(show (distance, elevation), alt (heartrate));
-  }
+      default:
+        return pipe(show (distance, elevation), alt (heartrate));
+    } 
+  })();
+
+  return pipe(fields, getOrElse((): Field[] => []));
 }

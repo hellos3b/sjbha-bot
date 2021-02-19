@@ -15,6 +15,8 @@ app.use(express.json({ type: "application/json" }))
 app.use(express.static(PUBLIC_DIR));
 
 app.use(api);
+
+// todo: remove this and use nginx to route /api to here
 app.use("/*", (req, res) => {
   res.sendFile("index.html", {root: PUBLIC_DIR})
 });
