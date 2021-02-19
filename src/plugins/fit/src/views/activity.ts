@@ -5,37 +5,24 @@ import {sequenceT} from "fp-ts/Apply";
 
 import { color, author, embed, title, field, footer, description, thumbnail } from "@packages/embed";
 
-import {toMiles, toPace, toMph, toFeet} from "../models/Distance";
+import {toMiles, toPace, toFeet} from "../models/Distance";
 import * as u from "../models/User";
 import * as w from "../models/Workout";
 import * as lw from "../models/LoggedWorkout";
 
 export const render = (user: u.User, logged: lw.LoggedWorkout, workout: w.Workout, week: lw.LoggedWorkout[]) => embed(
-  color
-    (0x4ba7d1),
-
-  author
-    (`${user.member.name} ${just(workout)}`),
-
-  thumbnail
-    (user.member.avatar),
-
-  title
-    (workout.title),
+  color (0x4ba7d1),
+  author (`${user.member.name} ${just(workout)}`),
+  thumbnail (user.member.avatar),
+  title (workout.title),
 
   workout.description && 
     description (workout.description),
 
-  field("Time", true)
-    (formatElapsed(workout.elapsed)),
+  field("Time", true) (formatElapsed(workout.elapsed)),
+  ...pipe(stats(workout, logged), getOrElse(() => <any>[])),
 
-  ...pipe(
-    stats(workout, logged),
-    getOrElse(() => <any>[])
-  ),
-
-  footer
-    (`${expGained(logged)} | ${weekExp(week)}`)
+  footer (`${expGained(logged)} | ${weekExp(week)}`)
 );
 
 /**
@@ -55,7 +42,7 @@ export const formatElapsed = (d: Duration): string => {
 /**
  * Formats the part in the title with "just did xx"
  */
-export const just = (workout: w.Workout) => {
+const just = (workout: w.Workout) => {
   switch (workout.type) {
     case "Ride":            return "just went for a ride";
     case "Run":             return "just went for a run";
@@ -80,8 +67,8 @@ const fix = (val: number) => val.toFixed(1);
 const expGained = ({ exp_type, exp_gained, exp_vigorous }: lw.LoggedWorkout) => {
   switch (exp_type) {
     case "hr": {
-      const mod = exp_gained - exp_vigorous;
-      return `Gained ${fix(exp_gained)} exp (${fix(mod)}+ ${fix(exp_vigorous)}++})`;
+      const moderate = exp_gained - exp_vigorous;
+      return `Gained ${fix(exp_gained)} exp (${fix(moderate)}+ ${fix(exp_vigorous)}++})`;
     }
     default:
       return `Gained ${fix(exp_gained)} exp`;
@@ -120,8 +107,6 @@ const stats = (workout: w.Workout, logged: lw.LoggedWorkout) => {
     map (inline("Max HR"))
   );
 
-  const heartrate = () => show (avgHr, maxHr);
-
   const distance = pipe(
     workout.gps, map (_ => toMiles (_.distance)),
     map (inline("Distance"))
@@ -137,16 +122,11 @@ const stats = (workout: w.Workout, logged: lw.LoggedWorkout) => {
     map (inline("Pace"))
   );
 
+  const heartrate = () => show (avgHr, maxHr);
 
   switch (workout.type) {
     case "Run": 
       return pipe(show (distance, pace), alt (heartrate));
-
-    case "Ride": 
-      return pipe(show (distance, elevation), alt (heartrate));
-
-    case "Hike": 
-      return pipe(show (distance, elevation), alt (heartrate));
 
     case "Walk": 
       return show (distance);
@@ -155,6 +135,6 @@ const stats = (workout: w.Workout, logged: lw.LoggedWorkout) => {
       return show (avgHr);
 
     default:
-      return heartrate();
+      return pipe(show (distance, elevation), alt (heartrate));
   }
 }
