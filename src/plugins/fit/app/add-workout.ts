@@ -92,7 +92,10 @@ const expGained = (workout: w.Workout) => {
 }
 
 /**
- * Log a workout to a user
+ * Logging a workout to user calculates how much EXP they gained
+ * and applies it to the user object
+ * 
+ * Returns a tuple of the logged workout and the updated user
  */
 export const logWorkout = (workout: w.Workout, user: u.User): [lw.LoggedWorkout, u.User] => {
   const [type, moderate, vigorous] = expGained(workout)(user);

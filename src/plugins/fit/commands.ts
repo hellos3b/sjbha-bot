@@ -1,7 +1,8 @@
-import {sequenceT} from "fp-ts/Apply";
-import {taskEither, Do, bind, bindW, chainW, fromEither, mapLeft, map, getOrElseW} from "fp-ts/TaskEither";
+import { sequenceT} from "fp-ts/Apply";
+import {taskEither, Do, bind, bindW, chainFirstW, fromEither, mapLeft, map, getOrElseW, sequenceArray} from "fp-ts/TaskEither";
 import {pipe} from "fp-ts/function";
 import * as T from "fp-ts/Task";
+
 
 import {command} from "@app/bastion";
 import * as Error from "@packages/common-errors";
@@ -9,14 +10,15 @@ import * as Error from "@packages/common-errors";
 import * as u from "./models/User";
 import * as w from "./models/Workout";
 import * as lw from "./models/LoggedWorkout";
+import * as Week from "./models/Week";
 
 import * as env from "./env";
 import {logWorkout} from "./app/add-workout";
 import * as auth from "./app/authentication";
+import * as promote from "./app/promote";
 
 import * as profile from "./views/profile";
 import * as activity from "./views/activity";
-
 
 const seqTE = sequenceT(taskEither);
 
@@ -58,39 +60,50 @@ fit_("profile")
       (channel.send)
   )());
 
-// fit$("scores") (?)
-// fit$("balance")
-// fit$("promote")
 
-fit_admin_("add")
+fit_admin_("promotions")
+  .subscribe(promote.run);
+
+
+fit_admin_("post")
   .subscribe(({ args, author, channel }) => {
-    const activityId = fromEither (args.nthE(2, "Invalid ID"));
+    // todo: maybe make this a parser hmmm
+    const stravaId = fromEither (args.nthE(2, "Missing strava ID. Command: `!fit post {stravaId} {activityId}`"));
+    const activityId = fromEither (args.nthE(3, "Missing activity ID. Command: `!fit post {stravaId} {activityId}`"));
 
     return pipe(
       Do,
-        bind  ('user',       _ => u.fetchConnected(author.id)),
+        bind  ('stravaId',   _ => stravaId),
         bindW ('activityId', _ => activityId),
+        bindW ('user',       _ => u.fetchByStravaId(_.stravaId)),
         bindW ('workout',    _ => w.fetch(_.activityId)(_.user.refreshToken)),
-        bindW ('week',       _ => lw.fetchCurrentWeek(_.user)),
+        bindW ('week',       _ => lw.find(Week.current())({discordId: _.user})),
         map 
           (_ => {
             const [result, user] = logWorkout(_.workout, _.user);
             return {result, user, workout: _.workout, week: _.week};
           }),
-        // chainFirstW
-        //   (_ => seqTE(u.save(_.user), lw.insert(_.result))),
+        // Insert the logged result first in case an error happens
+        chainFirstW
+          (_ => lw.insert(_.result)),
+        chainFirstW
+          (_ => u.save(_.user)),
         map 
           (_ => activity.render(_.user, _.result, _.workout, _.week)),  
       getOrElseW 
-        (commonErrorReplies),
+        (replyFullError),
       T.map 
         (channel.send)
     )();
   });
 
+const replyFullError = (err: Error) => T.of(err.name + ": " + err.message);
 
 const commonErrorReplies = (err: Error) => { 
   switch (err.constructor) {
+    case Error.InvalidArgsError:
+      return T.of(err.message);
+
     case Error.NotFoundError:
     case u.NoRefreshTokenError:
       return T.of("You need to authorize with the bot first");

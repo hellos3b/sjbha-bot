@@ -1,5 +1,6 @@
 import * as R from "ramda";
 import * as t from "io-ts";
+import {sequence} from "fp-ts/Array";
 import * as TE from "fp-ts/TaskEither";
 import { pipe, flow } from "fp-ts/lib/function";
 
@@ -24,7 +25,7 @@ const UserT = t.interface({
 });
 
 type Schema = t.TypeOf<typeof UserT>;
-export type User = Schema & {member: Member};
+export type User = Readonly<Schema> & {member: Member};
 
 const toSchema = (user: User): Schema =>
   R.omit(["member"])(user);
@@ -34,12 +35,19 @@ const decode = (json: any) => pipe(
     (UserT.decode(json)),
   TE.mapLeft
     (DecodeError.fromError),
-  TE.chain(user => pipe(
+  TE.chain (user => pipe(
     server.getMember(user.discordId),
     TE.map
       (member => <User>({...user, member}))
   ))
 );
+
+export const getAll = () => pipe(
+  collection(),
+  db.find<Schema>({}),
+  TE.map (models => models.map(decode)),
+  TE.chain (users => sequence(TE.taskEither)(users))
+)
 
 export const fetch = (discordId: string) => pipe(
   collection(),
@@ -54,6 +62,12 @@ export const fetchConnected = flow(
       ? TE.left(new NoRefreshTokenError()) 
       : TE.right(user)
   )
+)
+
+export const fetchByStravaId = (stravaId: string) => pipe(
+  collection(),
+  db.findOne <Schema>({stravaId: stravaId.toString()}),
+  TE.chainW (decode)  
 )
 
 export const initialize = (discordId: string, password: string) => {
@@ -93,17 +107,22 @@ const ranks = [
 
 const no_rank = 'Bushtit';
 
-export const fitScore = (user: User) => {
-  const getName = (score: number) => pipe(
-    Math.floor (score / 20),
+export const rank = (user: User) => {
+  if (user.fitScore === 0)
+    return no_rank;
+
+  
+  const name = pipe(
+    Math.floor (user.fitScore / 20),
     R.clamp(0, ranks.length),
     i => ranks[i]
   );
+
+  const remainder = user.fitScore % 20;
+  const division = remainder < 5
+    ? "I" : remainder < 10
+    ? "II" : remainder < 15
+    ? "III" : "IV";
   
-  return {
-    value: user.fitScore, 
-    rank: (user.fitScore === 0) 
-      ? no_rank 
-      : getName(user.fitScore)
-  };
+  return name + " " + division;
 }

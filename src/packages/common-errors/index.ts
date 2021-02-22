@@ -140,6 +140,27 @@ export class DecodeError extends Error {
 }
 
 /**
+ * When trying to save something that is supposed to be unique, but isn't
+ */
+export class ConflictError extends Error {
+  public type = "ConflictError";
+  public details?: any;
+
+  private constructor(message: string, details?: any) {
+    super(message);
+    this.details = details;
+  }
+
+  public static create(message: string) {
+    return new ConflictError(message);
+  }
+
+  public static lazy(message: string) {
+    return () => new ConflictError(message);
+  }
+}
+
+/**
  * This lets you gracefully convert an error in an `E.left` to a reply you can send to the user
  * Any errors that don't match will stay in the left, and should be passed on to an error reporter
  * 

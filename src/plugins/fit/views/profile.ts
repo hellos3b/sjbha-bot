@@ -5,7 +5,7 @@ import * as ord from "fp-ts/Ord";
 import * as tuple from "fp-ts/Tuple";
 import {pipe, flow, constant} from "fp-ts/function";
 
-import { color, author, embed, field } from "@packages/embed";
+import { color, author, embed, field, title } from "@packages/embed";
 
 import * as u from "../models/User";
 import * as lw from "../models/LoggedWorkout";
@@ -15,8 +15,8 @@ export const render = (user: u.User, workouts: lw.LoggedWorkout[]) => embed(
 
   author(user.member.name, user.member.avatar),
 
-  field("Fit score", true)
-    (pipe(u.fitScore(user), fs => `${fs.value} (${fs.rank})`)),
+  field("Rank", true)
+    (pipe(u.rank(user), rank => `${rank} (${user.fitScore.toFixed(0)})`)),
 
   field("Total EXP", true)
     (formatExp(user.xp)),
@@ -32,7 +32,7 @@ export const render = (user: u.User, workouts: lw.LoggedWorkout[]) => embed(
       )
     )),
 
-  field("Favorite Workout")
+  field("Top Workout")
     (pipe(favorite(workouts), O.toNullable))
 );
 
@@ -56,10 +56,22 @@ const mostRecent = flow(
 /**
  * Get's the user's most logged workout
  */
-const favorite = flow(
-  R.countBy ((_: lw.LoggedWorkout) => _.activity_type),
-  Object.entries,
-  R.sortBy (tuple.snd),
-  A.head,
-  O.map (tuple.fst)
-);
+const favorite = (logs: lw.LoggedWorkout[]) => {
+  const groups = pipe(logs, R.groupBy(_ => _.activity_type));
+  const withCounts = Object.keys(groups)
+    .map(key => ({
+      type: key,
+      count: groups[key].length,
+      exp: lw.sumExp(groups[key])
+    }));
+
+  return pipe(
+    withCounts,
+    R.sort ((a, b) => a.exp > b.exp ? -1 : 1),
+    A.head,
+    O.map (({ count, type, exp}) => {
+      const plural = count > 1 ? 'activities' : 'activity';
+      return `**${type}**, with ${count} ${plural} / ${formatExp(exp)} xp`;
+    })
+  )
+}

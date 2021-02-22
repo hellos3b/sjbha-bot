@@ -22,7 +22,7 @@ export const render = (user: u.User, logged: lw.LoggedWorkout, workout: w.Workou
   field("Time", true) (formatElapsed(workout.elapsed)),
   ...stats(workout, logged),
 
-  footer (`${expGained(logged)} | ${weekExp(week)}`)
+  footer (`${expGained(logged)} | ${weekExp(logged)(week)}`)
 );
 
 /**
@@ -78,8 +78,9 @@ const expGained = ({ exp_type, exp_gained, exp_vigorous }: lw.LoggedWorkout) => 
 /**
  * Shows how much xp gained this week
  */
-const weekExp = flow(
-  lw.sumExp, fixed, 
+const weekExp = (logged: lw.LoggedWorkout) => flow(
+  lw.sumExp, xp => xp + logged.exp_gained,
+  fixed, 
   gained => gained + ' exp this week'
 );
 
@@ -109,7 +110,8 @@ const stats = (workout: w.Workout, logged: lw.LoggedWorkout) => {
   );
 
   const distance = pipe(
-    workout.gps, map (_ => toMiles (_.distance)),
+    workout.gps, 
+    map (_ => toMiles (_.distance)),
     map (inline("Distance"))
   );
 
@@ -129,6 +131,12 @@ const stats = (workout: w.Workout, logged: lw.LoggedWorkout) => {
     switch (workout.type) {
       case "Run": 
         return pipe(show (distance, pace), alt (heartrate));
+      
+      case "Hike":
+        return pipe(show (distance, elevation), alt (heartrate));
+
+      case "Ride":
+        return pipe(show (distance, elevation), alt (heartrate));
 
       case "Walk": 
         return show (distance);
@@ -137,7 +145,7 @@ const stats = (workout: w.Workout, logged: lw.LoggedWorkout) => {
         return show (avgHr);
 
       default:
-        return pipe(show (distance, elevation), alt (heartrate));
+        return heartrate();
     } 
   })();
 

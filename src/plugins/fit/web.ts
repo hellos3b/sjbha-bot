@@ -39,8 +39,12 @@ router.get("/fit/accept", (req, res) => {
     mapLeft 
       (err => {
         switch (err.constructor) {
-          case Error.UnauthorizedError: { return res.status(401).send("There was a problem accepting your strava auth code. Try running !fit auth and trying again"); }
-          case Error.DecodeError: { return res.status(400).send("Invalid token"); }
+          case Error.UnauthorizedError: { 
+            return res.status(401).send("There was a problem accepting your strava auth code. Try running !fit auth and trying again"); 
+          }
+          case Error.DecodeError: { 
+            return res.status(400).send("Invalid token"); 
+          }
           default: {
             console.error("Failed to accept token: ", err);
             res.status(500).send("Internal error happened");

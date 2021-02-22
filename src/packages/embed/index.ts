@@ -1,6 +1,6 @@
 import * as R from "ramda";
 import {Reader} from "fp-ts/Reader";
-import {MessageEmbed, MessageOptions} from "discord.js";
+import {Message, MessageEmbed, MessageOptions} from "discord.js";
 
 type EmbedProperty = (obj: MessageEmbed) => MessageEmbed;
 type Falsy = false | 0 | "" | null | undefined 
@@ -18,8 +18,10 @@ type Falsy = false | 0 | "" | null | undefined
  * ```
  */
 export const embed = (...props: (EmbedProperty | Falsy)[]): MessageOptions => {
-  const message = new MessageEmbed();
-  props.forEach(opt => opt && opt(message));
+  const message = props.reduce((msg, fn) => {
+    if (fn) return fn(msg);
+    return msg;
+  }, new MessageEmbed());
 
   return message;
 };

@@ -40,9 +40,5 @@ export const toMph = (ms: MetersPerSecond) => pipe(
 export const meters = (value: number): Meters => ({_tag: "Meters", value});
 
 // Converters
-export const toMiles = (m: Meters) => m.value * 0.000621371192;
-
-export const toFeet = (m: Meters): Feet => ({
-  _tag: "Feet",
-  value: m.value * 3.2808399
-});
+export const toMiles = (m: Meters) => (m.value * 0.000621371192).toFixed(2) + "mi";
+export const toFeet = (m: Meters) => (m.value * 3.2808399).toFixed(0) + "ft";

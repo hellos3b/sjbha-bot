@@ -3,10 +3,10 @@ import * as t from "io-ts";
 import * as E from "fp-ts/Either";
 import * as TE from "fp-ts/TaskEither";
 import * as Ord from "fp-ts/Ord";
-import { pipe, flow } from "fp-ts/lib/function";
+import { pipe, flow, constant } from "fp-ts/lib/function";
 
 import * as db from "@packages/db";
-import { DecodeError, InvalidArgsError } from "@packages/common-errors";
+import { ConflictError, DecodeError, InvalidArgsError, NotFoundError } from "@packages/common-errors";
 import { Interval, DateTime } from "luxon";
 import { Workout } from "./Workout";
 import {User} from "./User";
@@ -31,7 +31,7 @@ const decode = flow(
   E.mapLeft(DecodeError.fromError)
 );
 
-const find = (interval: Interval) => {
+export const find = (interval: Interval) => {
   return (q: db.Query<LoggedWorkout> = {}) => pipe(
     collection(),
     db.find <LoggedWorkout>({
@@ -51,9 +51,20 @@ export const insert = (workout: LoggedWorkout) => {
   if (!workout.activity_id)
     return TE.left(InvalidArgsError.create("Trying to save workout without mapping to an activity"));
 
+  const save = pipe(
+    collection(), 
+    db.insert <LoggedWorkout>(workout)
+  );
+
   return pipe(
     collection(),
-    db.insert <LoggedWorkout>(workout)
+    db.findOne<LoggedWorkout> 
+      ({activity_id: workout.activity_id}),
+    TE.map
+      (ConflictError.lazy(`Could not save LoggedWorkout: activity id '${workout.activity_id}' (${workout.activity_name}) already exists`)),
+    TE.swap,
+    TE.chainW
+      (err => (err instanceof NotFoundError) ? save : TE.left(err))
   );
 }
 
@@ -62,9 +73,11 @@ export const fetchLastDays = (days: number, user: User) => {
   return find(interval)({discord_id: user.discordId})
 };
 
-export const fetchCurrentWeek = (user: User) => 
-  find(Week.current())
-    ({discord_id: user.discordId});
+// export const fetchCurrentWeek = () => find(Week.current())
+
+// export const fetchInterval = (interval: Interval) => 
+//   find()
+//     ({discord_id: user.discordId});
 
 export const create = (props: LoggedWorkout = {
   discord_id: "",
