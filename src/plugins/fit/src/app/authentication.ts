@@ -1,4 +1,4 @@
-import * as env from "../env";
+import * as env from "../../env";
 import {TaskEither, taskEither, right, left, map, chain, orElse, mapLeft, chainFirstW} from "fp-ts/TaskEither";
 import {pipe} from "fp-ts/function";
 import { IO } from "fp-ts/lib/IO";

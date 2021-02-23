@@ -11,8 +11,16 @@ const log = logger("Command");
 export interface Command {
   stream: Observable<Message>;
   subscribe(callback: (req: Message) => void): void;
+  /** Restricts this command to a set of channels */
   restrict(...channelIds: string[]): Command;
+  /** Create a subcommand based on the 2nd arg of the command */
   subcommand(name: string): Command;
+  /** Only respond to DMs */
+  dm(): Command;
+  /** Only respond to public server */
+  public(): Command;
+  /** When the command was ran with nothing but the base command */
+  alone(): Command;
 }
 
 export type Commander = (instigator: string) => (routeName: string) => Command;
@@ -37,7 +45,7 @@ export const commander = (stream: Observable<Message>) => (instigator: string) =
 
 export const Command = (stream: Observable<Message>): Command => {
   const extend = (middleware: MonoTypeOperatorFunction<Message>) => 
-    Command(stream.pipe(middleware));
+    Command(stream.pipe(middleware, share()));
 
   return {
     stream, 
@@ -49,9 +57,21 @@ export const Command = (stream: Observable<Message>): Command => {
       extend(restrict(...channelIds)),
 
     subcommand: (name) => 
-      extend(subcommand(name))
+      extend(subcommand(name)),
+    
+    dm: () => extend(dm()),
+
+    public: () => extend(publicMessage()),
+
+    alone: () => extend(alone())
   };
 };
+
+const alone = () => filter<Message>(req => req.args.length === 1);
+
+const dm = () => filter<Message>(req => req.type === "direct");
+
+const publicMessage = () => filter<Message>(req => req.type !== "direct");
 
 const route = (routeName: string) => filter<Message>(
   req => pipe(
@@ -61,12 +81,7 @@ const route = (routeName: string) => filter<Message>(
   )
 );
 
-const restrict = (...channelIds: string[]) => filter<Message>(req => {
-  if (R.includes(req.channel.id, channelIds)) return true;
-
-  console.log(`Command used outside of restricted channels (${channelIds})`);
-  return false;
-});
+const restrict = (...channelIds: string[]) => filter<Message>(req => channelIds.includes(req.channel.id));
 
 const subcommand = (name: string) => filter<Message>(
   req => pipe(

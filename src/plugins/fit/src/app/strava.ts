@@ -2,7 +2,7 @@ import {taskEither, map, mapLeft, chain} from "fp-ts/TaskEither";
 import {pipe, flow} from "fp-ts/function";
 import {sequenceT} from "fp-ts/Apply";
 
-import * as env from "../env";
+import * as env from "../../env";
 import {AsyncClient} from "@packages/async-client";
 
 export namespace API {

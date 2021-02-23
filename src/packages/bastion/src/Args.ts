@@ -13,6 +13,8 @@ export function Args(message: string) {
   return {
     args: parsed, 
 
+    length: parsed._.length,
+
     nth: (idx: number) => O.fromNullable(parsed._[idx]),
 
     nthE: (idx: number, onLeft: string) => pipe(

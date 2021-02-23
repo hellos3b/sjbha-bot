@@ -1,29 +1,29 @@
 import * as L from "luxon";
 import * as O from "fp-ts/Option";
 import { sequenceT } from "fp-ts/lib/Apply";
+import {Do, bindW, chainFirstW, map} from "fp-ts/TaskEither";
 import { pipe} from "fp-ts/lib/function";
 import {Lens} from "monocle-ts";
 
 import * as u from "../models/User";
 import * as w from "../models/Workout";
 import * as lw from "../models/LoggedWorkout";
+import * as Week from "../models/Week";
 
 /**
  * Basic zone targets for working out
  */
-export type Zones = {
-  readonly max: number;
-  readonly vigorous: number;
-  readonly moderate: number;
+export type Zones = ReturnType<typeof Zones>;
+export function Zones(max: number, moderate: number, vigorous: number) {
+  return {max, moderate, vigorous} as const;
 }
 
 /**
  * A breakdown of time spent in each zone
  */
-export type TimeInZones = {
-  readonly rest: L.Duration;
-  readonly moderate: L.Duration;
-  readonly vigorous: L.Duration;
+export type TimeInZones = ReturnType<typeof TimeInZones>;
+export function TimeInZones (rest: L.Duration, moderate: L.Duration, vigorous: L.Duration) {
+  return {rest, moderate, vigorous} as const;
 }
 
 /**
@@ -34,17 +34,13 @@ const userZones = (user: u.User): O.Option<Zones> => {
   if (user.maxHR === 0)
     return O.none;
 
-  return O.some({
-    max: user.maxHR,
-    moderate: user.maxHR * 0.5,
-    vigorous: user.maxHR * 0.75
-  });
+  return O.some(Zones(user.maxHR, user.maxHR * 0.5, user.maxHR * 0.75));
 };
 
 /**
  * Calculates how long a workout was spent in a 'zone', based off of max heartrate
  */
-export const timeInZone = (zones: Zones, hr: w.Heartrate) => {
+export const timeInZone = (zones: Zones, hr: w.Heartrate): TimeInZones => {
   const getZone = (hr: number) =>
     (hr >= zones.vigorous) ? "vigorous"
       : (hr >= zones.moderate) ? "moderate"
@@ -61,11 +57,9 @@ export const timeInZone = (zones: Zones, hr: w.Heartrate) => {
     }
   }, [0, 0, 0]);
 
-  return {
-    rest: L.Duration.fromObject({seconds: rest}),
-    moderate: L.Duration.fromObject({seconds: mod}),
-    vigorous: L.Duration.fromObject({seconds: vig})
-  }
+  const Seconds = (seconds: number) => L.Duration.fromObject({seconds});
+
+  return TimeInZones(Seconds(rest), Seconds(mod), Seconds(vig));
 };
 
 /**
@@ -113,3 +107,26 @@ export const logWorkout = (workout: w.Workout, user: u.User): [lw.LoggedWorkout,
   
   return [logged, updatedUser];
 };
+
+/**
+ * Posts an activity to a user profile. 
+ * Updates EXP and saves the logged version of the workout
+ */
+export const post = (stravaId: string, activityId: string) => {
+  return pipe(
+    Do,
+      bindW ('user',       _ => u.fetchByStravaId(stravaId)),
+      bindW ('workout',    _ => w.fetch(activityId)(_.user.refreshToken)),
+      bindW ('week',       _ => lw.find(Week.current())({discordId: _.user})),
+      map 
+        (_ => {
+          const [result, user] = logWorkout(_.workout, _.user);
+          return {result, user, workout: _.workout, week: _.week};
+        }),
+      // Insert the logged result first in case an error happens
+      chainFirstW
+        (_ => lw.insert(_.result)),
+      chainFirstW
+        (_ => u.save(_.user))
+  );
+}

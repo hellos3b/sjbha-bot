@@ -19,7 +19,7 @@ export class NotFoundError extends Error {
   }
 
   public static lazy(message: string, details?: any) {
-    return () => new NotFoundError(message);
+    return () => new NotFoundError(message, details);
   }
 }
 
@@ -137,6 +137,10 @@ export class DecodeError extends Error {
 
     return new DecodeError("", err);
   }  
+  
+  public static lazy(msg: string) {
+    return () => new DecodeError(msg);
+  }
 }
 
 /**

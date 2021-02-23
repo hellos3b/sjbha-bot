@@ -31,6 +31,15 @@ const decode = flow(
   E.mapLeft(DecodeError.fromError)
 );
 
+export const recent = () => pipe(
+  collection(),
+  db.aggregate <LoggedWorkout>([
+    {"$sort": { "timestamp": -1 }},
+    {"$limit": 20}
+  ]),
+  TE.chainEitherKW (decode)
+)
+
 export const find = (interval: Interval) => {
   return (q: db.Query<LoggedWorkout> = {}) => pipe(
     collection(),

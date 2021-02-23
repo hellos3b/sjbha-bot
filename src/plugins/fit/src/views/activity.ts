@@ -129,21 +129,11 @@ const stats = (workout: w.Workout, logged: lw.LoggedWorkout) => {
 
   const fields = (() => { 
     switch (workout.type) {
-      case "Run": 
-        return pipe(show (distance, pace), alt (heartrate));
-      
-      case "Hike":
-        return pipe(show (distance, elevation), alt (heartrate));
-
-      case "Ride":
-        return pipe(show (distance, elevation), alt (heartrate));
-
-      case "Walk": 
-        return show (distance);
-
-      case "Yoga": 
-        return show (avgHr);
-
+      case "Run": return pipe(show (distance, pace), alt (heartrate));
+      case "Hike": return pipe(show (distance, elevation), alt (heartrate));
+      case "Ride": return pipe(show (distance, elevation), alt (heartrate));
+      case "Walk": return show (distance);
+      case "Yoga":  return show (avgHr);
       default:
         return heartrate();
     } 

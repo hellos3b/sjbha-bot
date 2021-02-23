@@ -13,7 +13,7 @@ export type Query<T> = FilterQuery<T>;
 export const findOne = <T>(q: Query<T>): ReaderTaskEither<Collection<T>, NotFoundError | MongoDbError, T> => {
   return (c: Collection<T>) => pipe (
     TE.tryCatch (
-      () => c.findOne(q), 
+      async () => c.findOne(q),
       MongoDbError.fromError
     ),
     TE.chainW 
@@ -41,6 +41,13 @@ export const update = <T>(q: Query<T>, model: T): ReaderTaskEither<Collection<T>
 export const insert = <T>(model: T): ReaderTaskEither<Collection<T>, MongoDbError, boolean> => {
   return (c: Collection<T>) => TE.tryCatch (
     () => c.insertOne(model as OptionalId<T>).then(constTrue),
+    MongoDbError.fromError
+  )
+};
+
+export const aggregate = <T>(pipeline: object[]): ReaderTaskEither<Collection<T>, MongoDbError, T[]> => {
+  return (c: Collection<T>) => TE.tryCatch (
+    () => c.aggregate(pipeline).toArray(),
     MongoDbError.fromError
   )
 };

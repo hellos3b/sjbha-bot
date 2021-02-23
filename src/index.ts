@@ -6,8 +6,8 @@ import "@app/mongodb";
 import "@app/express";
 
 // Load plugins
-import "@plugins/ping";
-import "@plugins/fit";
+import "@plugins/aqi";
 // import "@plugins/christmas";
+import "@plugins/fit";
+import "@plugins/ping";
 // import "@plugins/subscribe";
-// import "@plugins/aqi";

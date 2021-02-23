@@ -37,7 +37,7 @@ export const Message = (message: Discord.Message): Message => {
 
   return {
     ...msg,
-    type: "message",
+    type: message.channel.type === "dm" ? "direct" : "message",
     server: server(message.guild),
     author: pipe(
       message.guild.member(message.author.id)!, // I hate this, but this library is weird

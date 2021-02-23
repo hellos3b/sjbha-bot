@@ -7,12 +7,12 @@ import router from "@app/express";
 import * as express from "express";
 import * as Error from "@packages/common-errors";
 
-import * as auth from "./app/authentication";
+import * as auth from "../app/authentication";
 import { DecodeError } from "@packages/common-errors";
 
 // todo: move to frontend project
 router.get("/fit/accepted", (req, res) => {
-  res.send("Yay, welcmoe!");
+  res.send("Congrats!");
 });
 
 /**
