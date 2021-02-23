@@ -6,7 +6,7 @@ import { sequenceT } from "fp-ts/lib/Apply";
 
 import randomstring from "randomstring";
 import querystring from "querystring";
-import {AsyncClient} from "@packages/async-client";
+import * as http from "@packages/http-client";
 
 import * as u from "../models/User";
 import * as strava from "./strava";
@@ -63,7 +63,8 @@ export const acceptToken = (accessToken: string, state: string): TaskEither<Mong
   const [discordId, password] = state.split(".");
 
   const getRefreshToken = () => pipe(
-    AsyncClient().post<strava.API.Auth>(
+    http.Client(),
+    http.post<strava.API.Auth>(
       'https://www.strava.com/oauth/token', {
         grant_type    : "authorization_code",
         code          : accessToken,

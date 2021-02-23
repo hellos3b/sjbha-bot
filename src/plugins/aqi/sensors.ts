@@ -5,7 +5,7 @@ import * as A from "fp-ts/Array";
 import {pipe} from "fp-ts/function";
 import { convert } from "@shootismoke/convert";
 
-import {AsyncClient} from "@packages/async-client";
+import * as http from "@packages/http-client";
 import { DecodeError, HTTPError } from "@packages/common-errors";
 import { description, embed, title, color, footer} from "@packages/embed";
 
@@ -74,7 +74,8 @@ function Location(name: string, aqi: number) {
  * Fetch the sensor data from the API
  */
 const fetch = (): TE.TaskEither<HTTPError, PurpleAir.Sensor[]> => pipe(
-  AsyncClient().get <PurpleAir.Response>(
+  http.Client(),
+  http.get <PurpleAir.Response>(
     "https://www.purpleair.com/json", 
     {show: sources.map(_ => _.id).join("|")}
   ),

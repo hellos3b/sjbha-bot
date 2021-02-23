@@ -3,7 +3,7 @@ import {pipe, flow} from "fp-ts/function";
 import {sequenceT} from "fp-ts/Apply";
 
 import * as env from "../../env";
-import {AsyncClient} from "@packages/async-client";
+import * as http from "@packages/http-client";
 
 export namespace API {
   export interface Auth {
@@ -74,16 +74,16 @@ export namespace API {
 /**
  * Creates an authorized client
  */
-export const createClient = flow(
-  (refreshToken: string) => AsyncClient()
-    .post<API.Auth>('https://www.strava.com/oauth/token', {
+export const createClient = (refreshToken: string) => pipe(
+  http.Client(),
+  http.post<API.Auth>('https://www.strava.com/oauth/token', {
       grant_type    : "refresh_token",
       refresh_token : refreshToken,
       client_id: env.client_id, 
       client_secret: env.client_secret
     }),
   map
-    (_ => AsyncClient({
+    (_ => http.Client({
       baseURL: 'https://www.strava.com/api/v3',
       headers: {"Authorization": "Bearer " + _.access_token}
     })),
@@ -98,8 +98,8 @@ export const fetchActivity = (id: string) => flow(
   createClient,
   chain
     (client => sequenceT(taskEither)(
-      client.get<API.Activity>('/activities/' + id),
-      client.get<API.Streams>('/activities/' + id + '/streams', {keys: "heartrate,time"})
+      http.get<API.Activity>('/activities/' + id)(client),
+      http.get<API.Streams>('/activities/' + id + '/streams', {keys: "heartrate,time"})(client)
     )),
   mapLeft
     (err => err.withMessage(`Failed to fetch activity '${id}'`))
