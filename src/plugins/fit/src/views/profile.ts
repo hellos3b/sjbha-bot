@@ -8,6 +8,8 @@ import { color, author, embed, field } from "@packages/embed";
 import * as u from "../models/User";
 import * as lw from "../models/LoggedWorkout";
 
+import fromNow from "fromnow";
+
 export const render = (user: u.User, workouts: lw.LoggedWorkout[]) => embed(
   color(user.member.displayColor),
 
@@ -26,11 +28,11 @@ export const render = (user: u.User, workouts: lw.LoggedWorkout[]) => embed(
     (pipe(
       mostRecent(workouts), O.fold(
         constant("No workouts"), 
-        _ => _.activity_name
+        w => `${lw.emoji(user, w)} ${w.activity_name} • *${fromNow(w.timestamp, {suffix: true, max: 1})}*`
       )
     )),
 
-  field("Top Workout")
+  field("Top Workout (30 days)")
     (pipe(favorite(workouts), O.toNullable))
 );
 
@@ -69,7 +71,7 @@ const favorite = (logs: lw.LoggedWorkout[]) => {
     A.head,
     O.map (({ count, type, exp}) => {
       const plural = count > 1 ? 'activities' : 'activity';
-      return `**${type}**, with ${count} ${plural} / ${formatExp(exp)} xp`;
+      return `**${type}** with ${formatExp(exp)} exp from ${count} ${plural}`;
     })
   )
 }

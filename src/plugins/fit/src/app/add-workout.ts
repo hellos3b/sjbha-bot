@@ -1,14 +1,18 @@
+import * as R from "ramda";
 import * as L from "luxon";
 import * as O from "fp-ts/Option";
 import { sequenceT } from "fp-ts/lib/Apply";
 import {Do, bindW, chainFirstW, map} from "fp-ts/TaskEither";
 import { pipe} from "fp-ts/lib/function";
 import {Lens} from "monocle-ts";
+import logger from "@packages/logger";
 
 import * as u from "../models/User";
 import * as w from "../models/Workout";
 import * as lw from "../models/LoggedWorkout";
 import * as Week from "../models/Week";
+
+const log = logger("fit").child({action: 'add-workout'});
 
 /**
  * Basic zone targets for working out
@@ -111,11 +115,13 @@ export const logWorkout = (workout: w.Workout, user: u.User): [lw.LoggedWorkout,
  * Updates EXP and saves the logged version of the workout
  */
 export const save = (stravaId: string, activityId: string) => {
+  log.info({stravaId, activityId}, "Saving workout");
+
   return pipe(
     Do,
       bindW ('user',       _ => u.fetchByStravaId(stravaId)),
       bindW ('workout',    _ => w.fetch(activityId)(_.user.refreshToken)),
-      bindW ('week',       _ => lw.find(Week.current())({discordId: _.user})),
+      bindW ('week',       _ => lw.find(Week.current())({discordId: _.user.discordId})),
       map 
         (_ => {
           const [result, user] = logWorkout(_.workout, _.user);

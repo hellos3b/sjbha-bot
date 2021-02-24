@@ -6,13 +6,14 @@ import { pipe, flow } from "fp-ts/lib/function";
 
 import {findMember} from "@app/bot";
 import * as db from "@packages/db";
+import logger from "@packages/logger";
 import { DecodeError } from "@packages/common-errors";
 import * as U from "@packages/discord-fp/User";
-// import * as M from "@packages/discord-fp";
 
 export class NoRefreshTokenError extends Error {}
 
 const collection = db.collection<Schema>("fit-users");
+const log = logger("fit");
 
 const UserT = t.interface({
   discordId: t.string,
@@ -89,13 +90,17 @@ export const initialize = (discordId: string, password: string) => {
   );
 };
 
-export const save = (user: User) => pipe(
-  collection(),
-  db.update <Schema>(
-    {discordId: user.discordId}, 
-    toSchema(user)
-  )
-);
+export const save = (user: User) => {
+  log.debug({user}, "Saving user to db");
+
+  return pipe(
+    collection(),
+    db.update <Schema>(
+      {discordId: user.discordId}, 
+      toSchema(user)
+    )
+  );
+}
 
 const ranks = [
   'Hummingbird', 
@@ -123,7 +128,8 @@ export const rank = (user: User) => {
   const division = remainder < 5
     ? "I" : remainder < 10
     ? "II" : remainder < 15
-    ? "III" : "IV";
+    ? "III" 
+    : "IV";
   
   return name + " " + division;
 }

@@ -2,17 +2,21 @@ import * as R from "ramda";
 import * as t from "io-ts";
 import * as E from "fp-ts/Either";
 import * as TE from "fp-ts/TaskEither";
-import * as Ord from "fp-ts/Ord";
-import { pipe, flow, constant } from "fp-ts/lib/function";
+import { pipe, flow } from "fp-ts/lib/function";
 
-import * as db from "@packages/db";
-import { ConflictError, DecodeError, InvalidArgsError, NotFoundError } from "@packages/common-errors";
 import { Interval, DateTime } from "luxon";
+import { ConflictError, DecodeError, InvalidArgsError, NotFoundError } from "@packages/common-errors";
+import logger from "@packages/logger";
+import * as db from "@packages/db";
+
+import type {API} from "../app/strava";
+
 import { Workout } from "./Workout";
 import {User} from "./User";
 import * as Week from "./Week";
 
 const collection = db.collection<LoggedWorkout>('fit-exp');
+const log = logger("fit");
 
 export type LoggedWorkout = t.TypeOf<typeof LoggedWorkoutT>;
 const LoggedWorkoutT = t.interface({
@@ -60,20 +64,19 @@ export const insert = (workout: LoggedWorkout) => {
   if (!workout.activity_id)
     return TE.left(InvalidArgsError.create("Trying to save workout without mapping to an activity"));
 
-  const save = pipe(
+  const save = () => pipe(
     collection(), 
     db.insert <LoggedWorkout>(workout)
   );
 
+  log.debug({workout}, "Inserting new LoggedWorkout");
+
   return pipe(
     collection(),
-    db.findOne<LoggedWorkout> 
-      ({activity_id: workout.activity_id}),
-    TE.map
-      (ConflictError.lazy(`Could not save LoggedWorkout: activity id '${workout.activity_id}' (${workout.activity_name}) already exists`)),
+    db.findOne<LoggedWorkout> ({activity_id: workout.activity_id}),
+    TE.map (ConflictError.lazy(`Could not save LoggedWorkout: activity id '${workout.activity_id}' (${workout.activity_name}) already exists`)),
     TE.swap,
-    TE.chainW
-      (err => (err instanceof NotFoundError) ? save : TE.left(err))
+    TE.chainW (err => (err instanceof NotFoundError) ? save() : TE.left(err))
   );
 }
 
@@ -81,12 +84,6 @@ export const fetchLastDays = (days: number, user: User) => {
   const interval = Interval.before(DateTime.local(), {days});
   return find(interval)({discord_id: user.discordId})
 };
-
-// export const fetchCurrentWeek = () => find(Week.current())
-
-// export const fetchInterval = (interval: Interval) => 
-//   find()
-//     ({discord_id: user.discordId});
 
 export const create = (props: LoggedWorkout = {
   discord_id: "",
@@ -134,3 +131,31 @@ export const filterThisWeek = () => {
       date => week.contains(date)
     ));
 };
+
+export const emoji = (user: User, workout: LoggedWorkout) => {
+  if (user.gender === "F") {
+    switch (<API.ActivityType>workout.activity_type) {
+      case "Run": return "🏃";
+      case "Ride": return "🚴";
+      case "Yoga": return "🧘‍♂️";
+      case "Hike": return "⛰️";
+      case "Walk": return "🚶‍♂️";
+      case "Crossfit":
+      case "WeightTraining": return "🏋️‍♂️";
+      case "RockClimbing": return "🧗‍♂️";
+      default: return "🤸‍♂️";
+    }
+  } else {
+    switch (<API.ActivityType>workout.activity_type) {
+      case "Run": return "🏃‍♀️";
+      case "Ride": return "🚴‍♀️";
+      case "Yoga": return "🧘‍♀️";
+      case "Hike": return "⛰️";
+      case "Walk": return "🚶‍♀️";
+      case "Crossfit":
+      case "WeightTraining": return "🏋️‍♀️";
+      case "RockClimbing": return "🧗‍♀️";
+      default: return "🤸‍♀️";
+    }
+  }
+}

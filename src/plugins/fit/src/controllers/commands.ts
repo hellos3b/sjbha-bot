@@ -1,13 +1,15 @@
+import * as R from "ramda";
 import {sequenceS} from "fp-ts/Apply";
-import {chainW, Do, bind, fromEither, bindW, chainFirstW, mapLeft, map, chainEitherKW} from "fp-ts/TaskEither";
+import {chainW, Do, bind, fromEither, bindW, chainFirstW, mapLeft, map, chainEitherKW, orElse} from "fp-ts/TaskEither";
 import {flow, pipe} from "fp-ts/function";
 import * as O from "fp-ts/Option";
 import * as E from "fp-ts/Either";
 
+import logger from "@packages/logger";
 import {code} from "@packages/embed";
 import * as M from "@packages/discord-fp/Message";
 import * as Error from "@packages/common-errors";
-import {message$, broadcast} from "@app/bot";
+import {message$, broadcast, reportError} from "@app/bot";
 import channels from "@app/channels";
 
 import * as u from "../models/User";
@@ -22,6 +24,8 @@ import * as edit from "../app/edit-profile";
 import * as profile from "../views/profile";
 import * as activity from "../views/activity";
 import * as scores from "../views/scores";
+
+const log = logger("fit");
 
 const base = message$.pipe(M.startsWith("!fit"));
 /** Commands used in the #fitness channel */
@@ -42,7 +46,7 @@ fit_.subscribe(msg => {
 
   const run = pipe(
     action,
-    mapLeft (
+    orElse(
       flow(commonErrorReplies, M.replyTo(msg))
     )
   );
@@ -65,7 +69,7 @@ fit_dm_.subscribe(msg => {
 
   const run = pipe(
     action,
-    mapLeft (
+    orElse(
       flow(commonErrorReplies, M.replyTo(msg))
     )
   );
@@ -75,6 +79,7 @@ fit_dm_.subscribe(msg => {
 
 fit_admin_.subscribe(msg => {
   const route = M.route(msg);
+  log.debug({command: "fit-admin"});
 
   const action = 
     (route === "promote") ? RunPromotions(msg)
@@ -84,9 +89,17 @@ fit_admin_.subscribe(msg => {
 
   const run = pipe(
     action,
-    mapLeft(
+    orElse(
       flow(
-        err => err.name + ": " + err.message, 
+        err => {
+          switch (err.constructor) {
+            case Error.InvalidArgsError: return err.message;
+            default: {
+              reportError(msg)(err);
+              return err.toString();
+            }
+          }
+        },
         M.replyTo(msg)
       )
     )
@@ -99,9 +112,9 @@ fit_admin_.subscribe(msg => {
  * The help command
  */
 const Help = M.reply(`
-\`\`\`
 **Read up on how the fitness bot works:** <https://github.com/hellos3b/sjbha-bot/blob/ts-fit/src/plugins/fit/README.md>
 
+\`\`\`
 !fit auth        • Connect your strava account to the bot
 !fit profile     • View your profile stats like level, fit score, activity overview
 !fit scores      • View everyone's current ranking
@@ -227,6 +240,8 @@ const ListRecentWorkouts = (msg: M.Message) => {
  * If a workout gets stuck in limbo, you can manually force it to post
  */
 const ManuallyPostActivity = (msg: M.Message) => {
+  log.debug({content: msg.content}, "Manually posting activity");
+
   const params = sequenceS(E.either)({
     stravaId: M.nthE(2, "Missing strava ID. Command: `!fit post {stravaId} {activityId}`")(msg),
     activityId: M.nthE(3, "Missing activity ID. Command: `!fit post {stravaId} {activityId}`")(msg)

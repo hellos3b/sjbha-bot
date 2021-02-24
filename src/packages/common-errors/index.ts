@@ -21,6 +21,10 @@ export class NotFoundError extends Error {
   public static lazy(message: string, details?: any) {
     return () => new NotFoundError(message, details);
   }
+
+  public toString() {
+    return "NotFoundError: " + this.message;
+  }
 }
 
 /**
@@ -47,14 +51,21 @@ export class MongoDbError extends Error {
   public type = "MongoDbError";
   public details?: any;
 
-  private constructor(message: string, details?: any) {
+  private constructor(message: string, method: string, collection: string, context: any) {
     super(message);
-    this.details = details;
+    this.details = {method, collection, context: JSON.stringify(context, null, 2)};
   }
 
-  public static fromError(err: any) {
-    if (err instanceof Error) return new MongoDbError(err.message, err);
-    return new MongoDbError("Unexpected");
+  public static fromError(method: string, collection: string, context: any) {
+    const details = {method, collection, context};
+    return (err: any) => {
+      const message = (err instanceof Error) ? err.message : "Unexpected";
+      return new MongoDbError(message, method, collection, context);
+    }
+  }
+
+  public toString() {
+    return "MongoDbError : " + this.message;
   }
 }
 
@@ -109,6 +120,7 @@ export class HTTPError extends Error {
       error.method = err.config.method;
       error.code = err.code;
       error.response = err.response?.data;
+
       return error;
     };
 
@@ -136,7 +148,6 @@ export class DecodeError extends Error {
       return new DecodeError("Decode failed", report);
     }
 
-    // todo: parse error from io-ts decode error
     if (err instanceof Error) return new DecodeError(err.message, err);
 
     return new DecodeError("", err);

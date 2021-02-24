@@ -28,11 +28,11 @@ export function findMember(id: string) {
   );
 }
 
-export const errorReporter = (original: M.Message) => (error: any) => {
+export const reportError = (original: M.Message) => (error: any) => {
   const message = embed(
     color(0xff0000),
     thumbnail("https://i.imgur.com/gWpSgKI.jpg"),
-    author("Uncaught " + error.name),
+    author("Uncaught " + error.toString()),
     error.message && description(error.message),
     field("From", true)(`${original.author.username} in <#${original.channel.id}>`),
     field("Message", true)(original.content),
@@ -40,8 +40,8 @@ export const errorReporter = (original: M.Message) => (error: any) => {
   );
 
   console.error("Command failed to execute: ", {
-    author: original.author,
-    content: original.content
+    from: original.author.username,
+    message: original.content
   }, error);
 
   if (NODE_ENV === 'production') {

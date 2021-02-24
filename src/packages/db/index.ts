@@ -14,7 +14,7 @@ export const findOne = <T>(q: Query<T>): ReaderTaskEither<Collection<T>, NotFoun
   return (c: Collection<T>) => pipe (
     TE.tryCatch (
       async () => c.findOne(q),
-      MongoDbError.fromError
+      MongoDbError.fromError("findOne", c.collectionName, q)
     ),
     TE.chainW 
       (flow (
@@ -27,34 +27,34 @@ export const findOne = <T>(q: Query<T>): ReaderTaskEither<Collection<T>, NotFoun
 export const find = <T>(q: Query<T>): ReaderTaskEither<Collection<T>, MongoDbError, T[]> => {
   return (c: Collection<T>) => TE.tryCatch (
     () => c.find(q).toArray(), 
-    MongoDbError.fromError
+    MongoDbError.fromError("find", c.collectionName, q)
   )
 };
 
 export const update = <T>(q: Query<T>, model: T): ReaderTaskEither<Collection<T>, MongoDbError, boolean> => {
   return (c: Collection<T>) => TE.tryCatch (
     () => c.updateOne(q, {$set: model}).then(constTrue),
-    MongoDbError.fromError
+    MongoDbError.fromError("update", c.collectionName, model)
   )
 };
 
 export const insert = <T>(model: T): ReaderTaskEither<Collection<T>, MongoDbError, boolean> => {
   return (c: Collection<T>) => TE.tryCatch (
     () => c.insertOne(model as OptionalId<T>).then(constTrue),
-    MongoDbError.fromError
+    MongoDbError.fromError("insert", c.collectionName, model)
   )
 };
 
 export const aggregate = <T>(pipeline: object[]): ReaderTaskEither<Collection<T>, MongoDbError, T[]> => {
   return (c: Collection<T>) => TE.tryCatch (
     () => c.aggregate(pipeline).toArray(),
-    MongoDbError.fromError
+    MongoDbError.fromError("aggregate", c.collectionName, pipeline)
   )
 };
 
 export const deleteOne = <T>(q: Query<T>): ReaderTaskEither<Collection<T>, MongoDbError, boolean> => {
   return (c: Collection<T>) => TE.tryCatch (
     () => c.deleteOne(q).then(constTrue),
-    MongoDbError.fromError
+    MongoDbError.fromError("deleteOne", c.collectionName, q)
   )
 };
