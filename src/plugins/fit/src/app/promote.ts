@@ -1,8 +1,11 @@
 import * as R from "ramda";
 import { sequenceT} from "fp-ts/Apply";
-import {taskEither, chainFirstW, mapLeft, map, sequenceArray} from "fp-ts/TaskEither";
-import { pipe } from "fp-ts/lib/pipeable";
+import {taskEither, chainFirstW, chainW, map, sequenceArray} from "fp-ts/TaskEither";
+import { pipe } from "fp-ts/function";
 import * as tuple from "fp-ts/Tuple";
+
+import * as U from "@packages/discord-fp/User";
+import logger from "@packages/logger";
 
 import * as u from "../models/User";
 import * as lw from "../models/LoggedWorkout";
@@ -11,7 +14,9 @@ import * as spotlight from "../views/spotlight";
 
 import {broadcast} from "@app/bot";
 import channels from "@app/channels";
+import roles from "@app/roles";
 
+const log = logger("fit");
 
 /** How much your fit score goes up by when you hit the goal */
 const score_increase = 5;
@@ -22,6 +27,51 @@ const max_score = 100;
 const exp_goal = 150;
 
 const broadcastToStrava = broadcast(channels.strava);
+
+/**
+ * Gets all of the week's activities and runs promote on
+ */
+export const run = () => {
+  const week = Week.previous();
+  log.info({week: week.toFormat("MMM DD")}, "Running promotions");
+  
+  return pipe(
+    sequenceT(taskEither)
+      (u.getAll(), lw.find(week)()),
+    map (([ users, logs ]) => {
+      const promotions = promote(users, logs); 
+      return {logs, promotions};
+    }),
+    chainFirstW (({ promotions }) => {
+      const users = promotions.map(tuple.fst);
+      users.forEach(updateRoles);
+      return sequenceArray(users.map(u.save));
+    }),
+    map (_ => spotlight.render(week, _.promotions, _.logs)),
+    chainW (broadcastToStrava)
+  )();
+};
+
+export const updateRoles = (user: u.User) => {
+  const list = [roles.certified_swole, roles.max_effort, roles.break_a_sweat];
+  
+  const apply = (roleId: string) => {
+    log.debug({roleId}, `Adding role to ${user.member.displayName}`)
+
+    const changes = list.map(
+      role => (role === roleId) 
+        ? U.addRoleTo(user.member)(role) 
+        : U.removeRoleFrom(user.member)(role)
+    );
+
+    return sequenceArray(changes)()
+  };
+
+  return (user.fitScore >= 100) ? apply(roles.certified_swole)
+    : (user.fitScore >= 80) ? apply(roles.max_effort)
+    : (user.fitScore >= 60) ? apply(roles.break_a_sweat)
+    : apply("");
+}
 
 export type Promotion = [user: u.User, diff: number];
 
@@ -51,34 +101,3 @@ export const promote = (users: u.User[], logs: lw.LoggedWorkout[]) => {
 
   return users.map(user => promoteUser(user, userExp(user)));
 }
-
-/**
- * Gets all of the week's activities and runs promote on
- */
-export const run = () => {
-  const week = Week.previous();
-  
-  return pipe(
-    sequenceT(taskEither)
-      (u.getAll(), lw.find(week)()),
-    map 
-      (([ users, logs ]) => {
-        const promotions = promote(users, logs); 
-        return {logs, promotions};
-      }),
-    chainFirstW
-      (({ promotions }) => pipe(
-        promotions.map(tuple.fst),
-        p => p.map(u.save),
-        sequenceArray
-      )),
-    map 
-      (_ => spotlight.render(week, _.promotions, _.logs)),
-    map
-      (broadcastToStrava),
-    mapLeft
-      (err => {
-        console.error("Failed to post spotlight", err);
-      })
-  )();
-};

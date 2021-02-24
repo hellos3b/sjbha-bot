@@ -1,6 +1,6 @@
 import * as R from "ramda";
 import {sequenceS} from "fp-ts/Apply";
-import {chainW, Do, bind, fromEither, bindW, chainFirstW, mapLeft, map, chainEitherKW, orElse} from "fp-ts/TaskEither";
+import {chainW, Do, bind, fromEither, bindW, chainFirstW, map, chainEitherKW, orElse} from "fp-ts/TaskEither";
 import {flow, pipe} from "fp-ts/function";
 import * as O from "fp-ts/Option";
 import * as E from "fp-ts/Either";
@@ -42,6 +42,8 @@ fit_.subscribe(msg => {
     (route === "auth") ? Auth(msg)
     : (route === "profile") ? Profile(msg)
     : (route === "scores") ? Scores(msg)
+    : (route === "leaderboard") ? M.reply("Command has changed to `!fit scores`")(msg)
+    : (route === "exp") ? M.reply("You can now see your weekly exp in your profile, use `!fit profile`")(msg)
     : Help(msg);
 
   const run = pipe(
@@ -85,6 +87,7 @@ fit_admin_.subscribe(msg => {
     (route === "promote") ? RunPromotions(msg)
     : (route === "recent") ? ListRecentWorkouts(msg)
     : (route === "post") ? ManuallyPostActivity(msg)
+    : (route === "rm") ? RemoveActivity(msg)
     : AdminHelp(msg);
 
   const run = pipe(
@@ -93,7 +96,10 @@ fit_admin_.subscribe(msg => {
       flow(
         err => {
           switch (err.constructor) {
-            case Error.InvalidArgsError: return err.message;
+            case Error.NotFoundError:
+            case Error.InvalidArgsError:
+            case Error.ConflictError:
+              return err.message;
             default: {
               reportError(msg)(err);
               return err.toString();
@@ -249,7 +255,7 @@ const ManuallyPostActivity = (msg: M.Message) => {
 
   const send = pipe(
     M.get("broadcast")(msg),
-    O.fold(() => broadcast(channels.strava), () => M.replyTo(msg))
+    O.fold(() => M.replyTo(msg), () => broadcast(channels.strava))
   );
 
   return pipe(
@@ -258,6 +264,20 @@ const ManuallyPostActivity = (msg: M.Message) => {
       chainW (({ params }) => addWorkout.save(params.stravaId, params.activityId)),
       map  (_ => activity.render(_.user, _.result, _.workout, _.week)),
       chainW (send)
+  );
+}
+
+/**
+ * Removes a workout from the database and un-does the EXP from the user
+ */
+const RemoveActivity = (msg: M.Message) => {
+  const id = M.nthE(2, "Missing ID: `!fit-admin rm {ID}`")(msg);
+
+  return pipe(
+    fromEither(id),
+    chainW (id => addWorkout.unsave(+id)),
+    map (({ workout }) => `Removed '${workout.activity_name}' from logged history`),
+    chainW (M.replyTo(msg))
   );
 }
 

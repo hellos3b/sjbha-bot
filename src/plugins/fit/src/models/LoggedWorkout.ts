@@ -58,6 +58,16 @@ export const find = (interval: Interval) => {
   );
 };
 
+export const fetch = (id: number) => pipe(
+  collection(),
+  db.findOne<LoggedWorkout>({activity_id: id})
+)
+
+export const remove = (id: number) => pipe(
+  collection(),
+  db.deleteOne<LoggedWorkout>({activity_id: id})
+);
+
 export const insert = (workout: LoggedWorkout) => {
   if (!workout.discord_id)
     return TE.left(InvalidArgsError.create("Trying to log a workout but no user is provided"));

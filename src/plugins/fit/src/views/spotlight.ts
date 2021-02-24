@@ -4,11 +4,12 @@ import * as A from "fp-ts/Array";
 import * as L from "luxon";
 import {pipe, flow} from "fp-ts/function";
 import format from "@packages/string-format";
-import { author, color, description, embed, field, thumbnail, title } from "@packages/embed";
+import { author, color, description, embed, EmbedReader, field, thumbnail, title } from "@packages/embed";
 
 import * as u from "../models/User";
 import * as lw from "../models/LoggedWorkout";
 import {Promotion} from "../app/promote";
+import { MessageEmbed } from "discord.js";
 
 const swole_doge = "https://imgur.com/lUCIFkk.png";
 const exp_highlight_count = 2;
@@ -25,7 +26,7 @@ export const render = (week: L.Interval, promotions: Promotion[], logs: lw.Logge
 
     author(week.toFormat("MMM dd")),
     
-    title("Spotlight!"),
+    title("💡 Weekly Spotlight"),
 
     // show 2 random exp highlights
     ...pipe(
@@ -41,7 +42,7 @@ export const render = (week: L.Interval, promotions: Promotion[], logs: lw.Logge
       flow(R.uniq,  shuffle),
       A.head, 
       flow(
-        O.map(type => activityLeader(type, stats)),
+        O.chain(type => activityLeader(type, stats)),
         O.toNullable
       )
     ),
@@ -59,7 +60,7 @@ const progress = (promotions: Promotion[]) => {
     // get up or down doot emoji
     const emoji = (user.fitScore === 100) 
       ? "🔹" : (change > 0) 
-        ? "⬆️" : "⬇️";
+        ? "⬆️" : "🔻";// "⬇️";
         
     // add a plus sign if change is positive
     const diff = (change < 0) ? `(${change.toFixed(1)})` : "";
@@ -93,6 +94,10 @@ const getStats = (user: u.User, logs: lw.LoggedWorkout[]) => ({
   deviation: pipe(
     logs.map(l => l.exp_gained), 
     deviation
+  ),
+  biggestActivity: pipe(
+    most(logs)(s => s.exp_gained),
+    O.toNullable
   )
 });
 
@@ -102,46 +107,62 @@ type Stats = ReturnType<typeof getStats>;
  * Create the possible exp-based fields to show off in the spotlight
  * We'll pick 2 of these and one activity one to highlight
  */
-const createSpotlights = (stats: Stats[]) => [
-  field("Persistence")
+const createSpotlights = (stats: Stats[]): EmbedReader[] => {
+  const spotlights: O.Option<EmbedReader>[] = [
     (pipe(
       most(stats)(s => s.total_exp),
-      ({ user, total_exp }) => format('<@{0}> gained the most exp this week (**{1}** exp)')
+      O.map (({ user, total_exp }) => 
+        format('<@{0}> gained the most exp this week (**{1}** exp)')
           (user.member.id, total_exp.toFixed(1))
+      ),
+      O.map (field("Persistence"))
     )),
 
-  field("Steady")
     (pipe(
       most(stats)(s => s.total_moderate),
-      ({ user, total_moderate }) => format('<@{0}> gained the most moderate exp this week (**{1}+**)')
+      O.map (({ user, total_moderate }) => 
+        format('<@{0}> gained the most moderate exp this week (**{1}+**)')
           (user.member.id, total_moderate.toFixed(1))
+      ),
+      O.map (field("Steady"))
     )),
 
-  field("Explosive")
     (pipe(
       most(stats)(s => s.total_vigorous),
-      ({ user, total_vigorous }) => format('<@{0}> gained the most intense exp this week (**{1}++**)')
-        (user.member.id, total_vigorous.toFixed(1))
+      O.map(({ user, total_vigorous }) => 
+        format('<@{0}> gained the most intense exp this week (**{1}++**)')
+          (user.member.id, total_vigorous.toFixed(1))
+      ),
+      O.map (field("Explosive"))
     )),
 
-  field("Consistency")
     (pipe(
-      most(stats.filter(_ => _.logs.length >= 3))(s => s.deviation),
-      ({ user, deviation, logs }) => format("<@{0}> recorded {1} activities that only varied by **{2}** exp")
-        (user.member.id, logs.length, deviation.toFixed(1))
+      most(stats.filter(s => s.logs.length >= 3))(s => s.deviation),
+      O.map(({ user, deviation, logs }) => 
+        format("<@{0}> recorded {1} activities that only varied by **{2}** exp")
+          (user.member.id, logs.length, deviation.toFixed(1))
+      ),
+      O.map(field("Consistency"))
     )),
 
-  field("Biggest Activity")
-      (pipe(
-        stats.map(s => ({
-          user: s.user,
-          biggest: most(s.logs)(s => s.exp_gained)
-        })),
-        s => most(s)(s => s.biggest.exp_gained),
-        ({ user, biggest }) => format("<@{0}> got the most exp in one activity with {1} (**{2}** exp)")
-          (user.member.id, biggest.activity_name, biggest.exp_gained.toFixed(1))
-      ))
-];
+    (pipe(
+      stats
+        .filter(s => !!s.biggestActivity)
+        .map(s => ({user: s.user, biggestActivity: s.biggestActivity!})),
+      filtered => most(filtered)
+        (s => s.biggestActivity.exp_gained),
+      O.map(({ user, biggestActivity }) => 
+        format("<@{0}> got the most exp in one activity with {1} (**{2}** exp)")
+          (user.member.id, biggestActivity.activity_name, biggestActivity.exp_gained.toFixed(1))
+      ),
+      O.map(field("Biggest Activity"))
+    ))
+  ];
+
+  return spotlights
+    .map(O.toNullable)
+    .filter((s): s is EmbedReader => !!s);
+}
 
 /**
  * Field for leader of a specific activity type.
@@ -153,23 +174,25 @@ const activityLeader = (type: string, stats: Stats[]) => {
       return {user, logs: l, exp: lw.sumExp(l)};
     });
 
-  return field("Workout Highlight: " + type)
-    (pipe(
-      most(activityStats)(s => s.exp),
-      ({ user, logs, exp }) => {
-        const pluralize = logs.length > 1 ? 'activities' : 'activity'; 
-        return format(`<@{0}> was the {1} leader this week, with **{2}** exp from {3} ${pluralize}`)
-          (user.member.id, type, exp.toFixed(1), logs.length);
-      }
-    ))
+  return (pipe(
+    most(activityStats)(s => s.exp),
+    O.map(({ user, logs, exp }) => {
+      const pluralize = logs.length > 1 ? 'activities' : 'activity'; 
+
+      return format(`<@{0}> was the {1} leader this week, with **{2}** exp from {3} ${pluralize}`)
+        (user.member.id, type, exp.toFixed(1), logs.length);
+    }),
+    O.map(field("Workout Highlight: " + type))
+  ))
 }
 
 
 /** Returns the element in array with the greatest `prop` value */
-const most = <T>(arr: T[]) => (f: (t: T)=>number): T => pipe(
-  arr.map (_ => ({_, result: f(_)})),
+const most = <T>(arr: T[]) => (f: (t: T)=>number): O.Option<T> => pipe(
+  arr.map (i => ({i, result: f(i)})),
   R.sort ((a, b) => a.result > b.result ? -1 : 1),
-  list => list[0]._
+  A.head,
+  O.map (result => result.i)
 )
 
 /** Calculates standard deviation */

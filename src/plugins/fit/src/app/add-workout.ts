@@ -2,7 +2,7 @@ import * as R from "ramda";
 import * as L from "luxon";
 import * as O from "fp-ts/Option";
 import { sequenceT } from "fp-ts/lib/Apply";
-import {Do, bindW, chainFirstW, map} from "fp-ts/TaskEither";
+import {taskEither, Do, bindW, chainFirstW, map} from "fp-ts/TaskEither";
 import { pipe} from "fp-ts/lib/function";
 import {Lens} from "monocle-ts";
 import logger from "@packages/logger";
@@ -132,5 +132,32 @@ export const save = (stravaId: string, activityId: string) => {
         (_ => lw.insert(_.result)),
       chainFirstW
         (_ => u.save(_.user))
+  );
+}
+
+/**
+ * Removes an activity from the history, and undos the EXP gain from it
+ */
+export const unsave = (activityId: number) => {
+  log.info({activityId}, "Removing Workout");
+
+  return pipe(
+    Do,
+      bindW ('workout', _ => lw.fetch(activityId)),
+      bindW ('user',    _ => u.fetch(_.workout.discord_id)),
+      map 
+        (({ workout, user }) => ({
+          workout,
+          user: {
+            ...user, 
+            xp: user.xp - workout.exp_gained
+          }
+        })),
+      // Insert the logged result first in case an error happens
+      chainFirstW
+        (({ workout, user }) => sequenceT(taskEither)(
+          lw.remove(workout.activity_id),
+          u.save(user)
+        ))
   );
 }

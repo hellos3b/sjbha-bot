@@ -65,7 +65,7 @@ export class MongoDbError extends Error {
   }
 
   public toString() {
-    return "MongoDbError : " + this.message;
+    return "MongoDB Error: " + this.message;
   }
 }
 
@@ -88,6 +88,10 @@ export class InvalidArgsError extends Error {
 
   public static lazy(message: string, key?: string, expected?: string, ) {
     return () => new InvalidArgsError(message);
+  }
+
+  public toString() {
+    return "Invalid Arguments: " + this.message;
   }
 }
 
@@ -128,6 +132,10 @@ export class HTTPError extends Error {
 
     return new HTTPError("");
   }
+
+  public toString() {
+    return "HTTP Request Failed: " + this.message;
+  }
 };
 
 /**
@@ -156,6 +164,10 @@ export class DecodeError extends Error {
   public static lazy(msg: string) {
     return () => new DecodeError(msg);
   }
+
+  public toString() {
+    return "Decode Failure: " + this.message;
+  }
 }
 
 /**
@@ -178,6 +190,10 @@ export class ConflictError<A, B> extends Error {
 
   public static lazy<A, B>(message: string, first?: A, second?: B) {
     return () => new ConflictError(message, first, second);
+  }
+
+  public toString() {
+    return "Conflict Error: " + this.message;
   }
 }
 

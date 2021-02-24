@@ -91,14 +91,12 @@ export const initialize = (discordId: string, password: string) => {
 };
 
 export const save = (user: User) => {
-  log.debug({user}, "Saving user to db");
+  const model = toSchema(user);
+  log.debug({model}, "Saving user to db");
 
   return pipe(
     collection(),
-    db.update <Schema>(
-      {discordId: user.discordId}, 
-      toSchema(user)
-    )
+    db.update <Schema>({discordId: user.discordId}, model)
   );
 }
 
