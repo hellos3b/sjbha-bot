@@ -31,9 +31,6 @@ const fit_dm_ = base.pipe(M.direct);
 /** Admin-only commands, so don't have to hit a POST url to do everything */
 const fit_admin_ = base.pipe(M.restrict(channels.bot_admin));
 
-/**
- * Public commands sent
- */
 fit_.subscribe(msg => {
   const route = M.route(msg);
 
@@ -53,11 +50,58 @@ fit_.subscribe(msg => {
   return run();
 });
 
+fit_dm_.subscribe(msg => {
+  const route = M.route(msg);
+
+  const Usage = M.reply([
+    "!fit set [property] [value]",
+    "!fit get [property]"
+  ].join("\n"));
+
+  const action = 
+    (route === "set") ? UpdateProfile(msg)
+    : (route === "get") ? GetProfileSetting(msg)
+    : Usage(msg);
+
+  const run = pipe(
+    action,
+    mapLeft (
+      flow(commonErrorReplies, M.replyTo(msg))
+    )
+  );
+
+  return run();
+});
+
+fit_admin_.subscribe(msg => {
+  const route = M.route(msg);
+
+  const action = 
+    (route === "promote") ? RunPromotions(msg)
+    : (route === "recent") ? ListRecentWorkouts(msg)
+    : (route === "post") ? ManuallyPostActivity(msg)
+    : AdminHelp(msg);
+
+  const run = pipe(
+    action,
+    mapLeft(
+      flow(
+        err => err.name + ": " + err.message, 
+        M.replyTo(msg)
+      )
+    )
+  );
+
+  return run();
+});
+
 /**
  * The help command
  */
 const Help = M.reply(`
 \`\`\`
+**Read up on how the fitness bot works:** <https://github.com/hellos3b/sjbha-bot/blob/ts-fit/src/plugins/fit/README.md>
+
 !fit auth        • Connect your strava account to the bot
 !fit profile     • View your profile stats like level, fit score, activity overview
 !fit scores      • View everyone's current ranking
@@ -105,30 +149,6 @@ const Scores = (msg: M.ChannelMessage) => pipe(
   chainW (M.replyTo(msg))
 )
 
-
-fit_dm_.subscribe(msg => {
-  const route = M.route(msg);
-
-  const Usage = M.reply([
-    "!fit set [property] [value]",
-    "!fit get [property]"
-  ].join("\n"));
-
-  const action = 
-    (route === "set") ? UpdateProfile(msg)
-    : (route === "get") ? GetProfileSetting(msg)
-    : Usage(msg);
-
-  const run = pipe(
-    action,
-    mapLeft (
-      flow(commonErrorReplies, M.replyTo(msg))
-    )
-  );
-
-  return run();
-});
-
 /**
  * Let's a user update their private profile settings,
  * such as their max heartrate or their (//todo) gender
@@ -164,28 +184,6 @@ const GetProfileSetting = (msg: M.DirectMessage) => {
       chainW (M.replyTo(msg))
   );
 };
-
-fit_admin_.subscribe(msg => {
-  const route = M.route(msg);
-
-  const action = 
-    (route === "promote") ? RunPromotions(msg)
-    : (route === "recent") ? ListRecentWorkouts(msg)
-    : (route === "post") ? ManuallyPostActivity(msg)
-    : AdminHelp(msg);
-
-  const run = pipe(
-    action,
-    mapLeft(
-      flow(
-        err => err.name + ": " + err.message, 
-        M.replyTo(msg)
-      )
-    )
-  );
-
-  return run();
-});
 
 /**
  * Help block for admin commands
