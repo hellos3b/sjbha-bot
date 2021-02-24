@@ -1,4 +1,7 @@
-import {command} from "@app/bastion";
+import {message$} from "@app/bot";
+import * as C from "@packages/discord-fp/Command";
+import * as M from "@packages/discord-fp/Message";
 
-command("pong")
-  .subscribe(req => req.channel.send("...ping? (COMMAND)"));
+message$ 
+  .pipe (C.trigger("!pong"))
+  .subscribe (M.reply("...ping?"));

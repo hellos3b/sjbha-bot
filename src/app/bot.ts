@@ -1,26 +1,29 @@
-import {createBastion, Message} from "@packages/bastion";
+import * as Client from "@packages/discord-fp/Client";
+import * as C from "@packages/discord-fp/Command";
+import * as M from "@packages/discord-fp/Message";
+
 import { color, embed, author, description, field, thumbnail } from "@packages/embed";
 import {DISCORD_TOKEN, NODE_ENV, SERVER_ID} from "./env";
 
-const bastion = createBastion(DISCORD_TOKEN);
+const [client, message$] = Client.create(DISCORD_TOKEN);
 
-export const command = bastion.commander("!");
-export const server = bastion.server(SERVER_ID);
+export {message$};
 
-export const errorReporter = (original: Message) => (error: any) => {
+// export const command = bastion.commander("!");
+// export const server = bastion.server(SERVER_ID);
+
+export const errorReporter = (original: M.Message) => (error: any) => {
   const message = embed(
     color(0xff0000),
     thumbnail("https://i.imgur.com/gWpSgKI.jpg"),
     author("Uncaught " + error.name),
     error.message && description(error.message),
-    field("From", true)(`${original.author.name} in <#${original.channel.id}>`),
+    field("From", true)(`${original.author.username} in <#${original.channel.id}>`),
     field("Message", true)(original.content),
-    field("Args")( "`" + original.args + "`"),
     error.stack && field("Stack")("```" + error.stack + "```")
   );
 
   console.error("Command failed to execute: ", {
-    args: original.args.toString(),
     author: original.author,
     content: original.content
   }, error);

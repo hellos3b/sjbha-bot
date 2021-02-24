@@ -74,6 +74,10 @@ export class InvalidArgsError extends Error {
   public static create(message: string, key?: string, expected?: string, ) {
     return new InvalidArgsError(message);
   }
+
+  public static lazy(message: string, key?: string, expected?: string, ) {
+    return () => new InvalidArgsError(message);
+  }
 }
 
 /**
@@ -146,21 +150,23 @@ export class DecodeError extends Error {
 /**
  * When trying to save something that is supposed to be unique, but isn't
  */
-export class ConflictError extends Error {
+export class ConflictError<A, B> extends Error {
   public type = "ConflictError";
-  public details?: any;
+  public first?: A;
+  public second?: B;
 
-  private constructor(message: string, details?: any) {
+  private constructor(message: string, first?: A, second?: B) {
     super(message);
-    this.details = details;
+    this.first = first;
+    this.second = second;
   }
 
-  public static create(message: string) {
-    return new ConflictError(message);
+  public static create<A, B>(message: string, first?: A, second?: B) {
+    return new ConflictError(message, first, second);
   }
 
-  public static lazy(message: string) {
-    return () => new ConflictError(message);
+  public static lazy<A, B>(message: string, first?: A, second?: B) {
+    return () => new ConflictError(message, first, second);
   }
 }
 

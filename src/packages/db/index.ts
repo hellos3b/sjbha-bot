@@ -51,3 +51,10 @@ export const aggregate = <T>(pipeline: object[]): ReaderTaskEither<Collection<T>
     MongoDbError.fromError
   )
 };
+
+export const deleteOne = <T>(q: Query<T>): ReaderTaskEither<Collection<T>, MongoDbError, boolean> => {
+  return (c: Collection<T>) => TE.tryCatch (
+    () => c.deleteOne(q).then(constTrue),
+    MongoDbError.fromError
+  )
+};

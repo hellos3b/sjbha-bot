@@ -5,6 +5,7 @@ import * as T from "fp-ts/Task";
 import * as E from "fp-ts/Either";
 
 import {command} from "@app/bastion";
+import {Message} from "@packages/discord-fp";
 import * as Error from "@packages/common-errors";
 import channels from "@app/channels";
 
@@ -22,7 +23,7 @@ import * as activity from "../views/activity";
 import * as scores from "../views/scores";
 
 const root = command("fit");
-const fit_ = root.subcommand;
+const fit_ = root.public().subcommand;
 const fit_dm_ = root.dm().subcommand;
 const fit_admin_ = root.restrict(channels.bot_admin).subcommand;
 
@@ -46,8 +47,8 @@ fit_("help")
 
 // Set up your strava account with the bot
 fit_("auth")
-  .subscribe(({ author, channel }) => pipe(
-    auth.updateOrCreatePassword(author.id),
+  .subscribe(({ member, channel }) => pipe(
+    auth.updateOrCreatePassword(member.id),
     map 
       (url => `**Welcome to the fitness channel!**\n`
         + `\n`
@@ -56,7 +57,7 @@ fit_("auth")
         + `For information on how the bot works: ${env.host_name}/fit/help`),
     map
       (msg => {
-        author.send(msg);
+        member.send(msg);
         channel.send("Hello! I've DM'd you instructions on how to connect your account");
       }),
     mapLeft
@@ -67,9 +68,9 @@ fit_("auth")
 
 // View your current profile
 fit_("profile")
-  .subscribe(({ author, channel }) => pipe(
+  .subscribe(({ member, channel }) => pipe(
     Do,
-      bind  ('user',     _ => u.fetchConnected(author.id)),
+      bind  ('user',     _ => u.fetchConnected(member.id)),
       bindW ('workouts', _ => lw.fetchLastDays(30, _.user)),
       map 
         (_ => profile.render(_.user, _.workouts)),
@@ -78,8 +79,6 @@ fit_("profile")
     T.map 
       (channel.send)
   )());
-
-fit_("test").subscribe(({ channel }) => channel.send("success"));
   
 fit_("scores")
   .subscribe(({ channel }) => pipe(
@@ -93,7 +92,7 @@ fit_("scores")
 
 // Update user properties
 fit_dm_("set")
-  .subscribe(({ args, author, channel }) => {
+  .subscribe(({ args, user, channel }) => {
     const setProp = pipe(
       sequenceT(E.either)(
         args.nthE(2, "Usage: `!fit set [property] [value]`"),
@@ -104,7 +103,7 @@ fit_dm_("set")
     );
 
     return pipe(
-      u.fetch(author.id),
+      u.fetch(user.id),
       chainW
         (user => pipe(setProp, map (fn => fn(user)))),
       chainFirstW
@@ -120,7 +119,7 @@ fit_dm_("set")
 
 // Update 
 fit_dm_("get")
-  .subscribe(({ args, author, channel }) => {
+  .subscribe(({ args, user, channel }) => {
     const getProp = pipe(
       args.nthE(2, "Usage: `!fit get [property]`"),
       E.chain(prop => edit.get(prop)),
@@ -128,7 +127,7 @@ fit_dm_("get")
     );
 
     return pipe(
-      u.fetch(author.id),
+      u.fetch(user.id),
       chainW
         (user => pipe(getProp, map (fn => fn(user)))),
       getOrElseW
@@ -163,7 +162,7 @@ fit_admin_("list")
 
 // Manually submit an activity
 fit_admin_("post")
-  .subscribe(({ args, author, channel }) => {
+  .subscribe(({ args, channel }) => {
     // todo: maybe make this a parser hmmm
     const stravaId = fromEither (args.nthE(2, "Missing strava ID. Command: `!fit post {stravaId} {activityId}`"));
     const activityId = fromEither (args.nthE(3, "Missing activity ID. Command: `!fit post {stravaId} {activityId}`"));

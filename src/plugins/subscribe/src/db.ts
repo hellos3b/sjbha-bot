@@ -1,43 +1,53 @@
-import mongodb from '../_deprecate/old/db/node_modules/@shared/mongodb';
-import type {Collection} from 'mongodb';
-import { MissingSub, SubConflict } from './errors';
+import {mapLeft, chainW, map, right, left, orElse} from "fp-ts/TaskEither";
+import {pipe} from 'fp-ts/function';
 
-const COLLECTION_NAME = 'subscriptions';
+import * as Discord from 'discord.js';
 
+import * as db from '@packages/db';
+import { ConflictError, NotFoundError } from '@packages/common-errors';
+
+const collection = db.collection<Subscription>('subscriptions');
 export interface Subscription {
   name: string;
   id: string;
 }
 
-const getCollection = () => mongodb.getCollection(COLLECTION_NAME) as Collection<Subscription>;
+export const getByName = (name: string) => pipe(
+  collection(),
+  db.findOne<Subscription>({name}),
+  mapLeft (NotFoundError.lazy(`There is no subscription named '${name}'`))
+);
 
-export const getAll = async () => getCollection().find().toArray();
+export const getAll = () => pipe(
+  collection(),
+  db.find<Subscription>({})
+);
 
-export const getByName = async (name: string) => {
-  const tag = await getCollection().findOne({ name })
+const save = (role: Discord.Role) => pipe(
+  collection(),
+  db.insert<Subscription>({name: role.name, id: role.id})
+);
 
-  if (!tag) {
-    throw new MissingSub(`Subscripton '${name}' does not exist`);
-  }
-
-  return tag;
+export const create = (role: Discord.Role) => {
+  return pipe(
+    collection(),
+    db.findOne<Subscription>({id: role.id}),
+    chainW 
+      (sub => left(ConflictError.create(`Subscription already with id '${role.id}'`, role, sub))),
+    orElse 
+      (err => (err instanceof NotFoundError) ? right(true) : left(err)),
+    chainW
+      (() => save(role)),
+    map
+      (() => `Added ${role.name} to the subscriptions list`)
+  );
 }
 
-export const save = async (name: string, id: string) => {
-  const name_exists = await getCollection().findOne({name});
-  if (!!name_exists) {
-    throw new SubConflict(`Subscription with name '${name}' already exists`)
-  }
-
-  const id_exists = await getCollection().findOne({id});
-  if (!!id_exists) {
-    throw new SubConflict(`Subscription with id '${id}' already exists (${id_exists.name})`)
-  }
-
-  await getCollection().insertOne({id, name});
-}
-
-export const deleteSub = async (name: string) => {
-  await getByName(name)
-    .then(() => getCollection().deleteOne({name}));
-}
+export const remove = (name: string) => pipe(
+  getByName(name),
+  chainW (() => pipe(
+    collection(), 
+    db.deleteOne<Subscription>({name})
+  )),
+  map (() => name)
+);

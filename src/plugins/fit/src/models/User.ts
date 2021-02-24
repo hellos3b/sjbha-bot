@@ -7,7 +7,7 @@ import { pipe, flow } from "fp-ts/lib/function";
 import { server } from "@app/bastion";
 import * as db from "@packages/db";
 import { DecodeError } from "@packages/common-errors";
-import { Member } from "@packages/bastion";
+import { Member } from "@packages/discord-fp";
 
 export class NoRefreshTokenError extends Error {}
 

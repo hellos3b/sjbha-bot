@@ -1,18 +1,22 @@
 import {map} from "fp-ts/TaskEither";
 import {pipe} from "fp-ts/function";
 
-import {command} from "@app/bastion";
+import * as M from "@packages/discord-fp/Message";
+import * as C from "@packages/discord-fp/Command";
+
+import {message$} from "@app/bot";
 import channels from "@app/channels";
 
-import {aqiMessage} from "./sensors";
+import {aqiMessage} from "./src/aqi";
 
 /**
  * Picks a couple of sensors from a public Purple Air API,
  * and renders them in a nice little embed
  */
-command("aqi")
-  .restrict(channels.shitpost)
-  .subscribe(({ channel }) => pipe(
-    aqiMessage(),
-    map (channel.send)
-  )());
+message$.pipe(
+  C.trigger("!aqi"),
+  C.restrict(channels.shitpost)
+).subscribe(msg => pipe(
+  aqiMessage(),
+  map (M.replyTo(msg))
+));

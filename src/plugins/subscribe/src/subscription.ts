@@ -1,55 +1,61 @@
-import Debug from "debug";
-import format from "string-format";
-import { DiscordMember, ErrorHandlers, request, echo } from "../_deprecate/old/app/bot/node_modules/@shared/bastion";
-import { MissingSub } from "./errors";
-import { map, pipe, join } from "ramda";
-import { getAll, getByName, Subscription } from "./db";
+import * as A from "fp-ts/Array";
+import * as T from "fp-ts/Task";
+import {chainW, fold, map, left, right} from "fp-ts/TaskEither";
+import {pipe} from "fp-ts/function";
 
-const debug = Debug("@plugins/subscribe");
+import * as U from "@packages/discord-fp/User";
+import { ConflictError, NotFoundError } from "@packages/common-errors";
 
-const getSubscriptions = () => getAll().then(pipe(
-  map((sub: Subscription) => sub.name),
-  join(", ")
-))
+import { getByName, getAll, Subscription } from "./db";
 
-const getSubList = () => getSubscriptions()
-  .then(subs =>format("Available subscriptions: {0}", subs))
-
-const userHasRole = (member: DiscordMember, roleId: string) => member.roles.cache.some(role => role.id === roleId);
-
-const errorHandlers: ErrorHandlers = {
-  [MissingSub.name]: (err) => getSubList().then(subs => err.message + ": " + subs)
+/**
+ * List the available subscriptions that are in the database
+ */
+export function list() {
+  return pipe(
+    getAll(),
+    map (A.map(_ => _.name)),
+    fold (
+      () => T.of("Failed to fetch subscriptions"),
+      l => T.of("Available subscriptions: " + l.join(", "))
+    )
+  );
 }
 
 /**
- * Let a user add a subscription
- * `!subscribe apex`
+ * Adds a role to a member. Looks up by tag name
  */
-export const add = request(async req => {
-  const tag = await getByName(req.args[0]);
-
-  if (userHasRole(req.member, tag.id)) return req.reply("You're already subscribed to '{0}'", tag.name);
-  await req.member.roles.add(tag.id);
-
-  debug(`Added role '${tag.name}' to ${req.member.displayName}`)
-  return req.reply("You have been subscribed to '{0}'", tag.name);
-}, errorHandlers);
+export function addTo(member: U.GuildMember) {
+  return (tag: string) => pipe(
+    getByName (tag.toLowerCase()),
+    chainW (sub => U.hasRole(member)(sub.id) 
+      ? left(ConflictError.create(`You are already subscribed to '${tag}'`)) 
+      : right(sub)
+    ),
+    chainW (subscribe (member)),
+    fold (err => T.of(err.message), () => T.of(`You've been subscribed to '${tag}'`))
+  );
+}
 
 /**
- * Remove subscription
- * `!unsubscribe apex`
+ * Removes a subscription from a user, based on subscription name
  */
-export const remove = request(async req => {
-  const tag = await getByName(req.args[0]);
+export function removeFrom(member: U.GuildMember) {
+  return (tag: string) => pipe(
+    getByName (tag.toLowerCase()),
+    chainW (sub => !U.hasRole(member)(sub.id) 
+      ? left (NotFoundError.create(`You are not subscribed to '${tag}'`))
+      : right (sub)
+    ),
+    chainW (unsubscribe (member)),
+    fold (err => T.of(err.message), () => T.of(`You've been unsubscribed from '${tag}'`))
+  );
+}
 
-  if (!userHasRole(req.member, tag.id)) return req.reply("You're already subscribed to '{0}'", tag.name);
-  await req.member.roles.remove(tag.id);
-  
-  debug(`Removed role '${tag.name}' from ${req.member.displayName}`)
-  return req.reply("You have been unsubscribed from '{0}'", tag.name);
-});
+function subscribe(member: U.GuildMember) {
+  return (sub: Subscription) => pipe(sub.id, U.addRoleTo(member));
+};
 
-/**
- * List the available subscriptions
- */
-export const list = echo(getSubList)
+function unsubscribe(member: U.GuildMember) {
+  return (sub: Subscription) => pipe(sub.id, U.removeRoleFrom(member));
+}

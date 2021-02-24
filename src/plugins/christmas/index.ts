@@ -1,19 +1,22 @@
 import * as env from "@app/env";
+import {message$} from "@app/bot";
+
+import * as M from "@packages/discord-fp/Message";
+import * as C from "@packages/discord-fp/Command";
+
 import {DateTime} from "luxon";
-import {command} from "@app/bastion";
 import {pipe} from "fp-ts/function";
 
-command("christmas")
-  .subscribe(({ channel }) => {
-    const days = countDaysUntilChristmas();
-    return pipe(
-      (days === 0) 
-        ? `!!TODAY IS CHRISTMAS!!`
-        : `ONLY ${days} ${pluralize("DAY")(days)} UNTIL CHRISTMAS!!`,
-      festivize,
-      channel.send
-    );
-  });
+message$.pipe(
+  C.trigger("!christmas")
+).subscribe(msg => pipe(
+  countDaysUntilChristmas(),
+  days => (days === 0) 
+    ? `!!TODAY IS CHRISTMAS!!`
+    : `ONLY ${days} ${pluralize("DAY")(days)} UNTIL CHRISTMAS!!`,
+  festivize,
+  M.replyTo(msg)
+));
 
 const festivize = (msg: string) => `🎄☃️☃️🎄🎁 ${msg} 🎁🎄☃️☃️🎄`;
 const pluralize = (word: string) => (count: number) => word + (count === 1 ? '' : 's');

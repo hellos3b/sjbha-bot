@@ -1,48 +1,43 @@
 import channels from "@app/channels";
-import {Request} from "../_deprecate/old/app/bot/node_modules/@shared/bastion";
-import {message$, cmd, noParam, param, restrict} from "../_deprecate/old/app/bot/node_modules/@shared/bastion/fp";
-import { filter, share } from "rxjs/operators";
+import * as O from "fp-ts/Option";
+import {pipe, flow} from "fp-ts/function";
+
+import {message$} from "@app/bot";
+import * as C from "@packages/discord-fp/Command";
+import * as M from "@packages/discord-fp/Message";
 
 import * as subscription from "./src/subscription";
 import * as admin from "./src/admin";
 
-const hasParam = filter<Request>(req => !!req.args.length);
+message$.pipe(
+  C.trigger("!subscribe"), 
+  C.channel
+).subscribe(msg => {
+  const pipeline = pipe(
+    M.parse(msg), 
+    M.nth(1), 
+    O.fold (subscription.list, subscription.addTo(msg.member)) 
+  );
 
-// Subscribe!
-const subscribe$ = message$.pipe(cmd("subscribe"));
+  return pipeline().then(M.replyTo(msg));
+});
 
-subscribe$.pipe(hasParam)
-  .subscribe(subscription.add);
+message$.pipe(
+  C.trigger("!unsubscribe"), 
+  C.channel
+).subscribe(msg => {
+  const pipeline = pipe(
+    M.parse(msg), 
+    M.nth(1), 
+    O.fold (subscription.list, subscription.addTo(msg.member)) 
+  );
 
-subscribe$.pipe(noParam())
-  .subscribe(subscription.list);
+  return pipeline()
+    .then(M.replyTo(msg));  
+});
 
-// Unsubscribe :()
-const unsubscribe$ = message$.pipe(cmd("unsubscribe"));
-
-unsubscribe$.pipe(hasParam)
-  .subscribe(subscription.remove);
-
-unsubscribe$.pipe(noParam())
-  .subscribe(subscription.list);
-
-// Admin commands
-const admin$ = message$.pipe(
-  cmd("subscribe-admin"),
-  restrict(channels.bot_admin)
-);
-
-admin$.pipe(noParam())
-  .subscribe(admin.help);
-
-admin$.pipe(param("help"))
-  .subscribe(admin.help);
-
-admin$.pipe(param("list"))
-  .subscribe(admin.list);
-
-admin$.pipe(param("add"))
-  .subscribe(admin.add);
-
-admin$.pipe(param("rm"))
-  .subscribe(admin.remove);
+message$.pipe(
+  C.trigger("!sub-admin"), 
+  C.channel, 
+  C.restrict(channels.bot_admin)
+).subscribe(admin.handle);
