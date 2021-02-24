@@ -1,19 +1,17 @@
 import * as R from "ramda";
 import * as O from "fp-ts/Option";
 import * as A from "fp-ts/Array";
-import * as ord from "fp-ts/Ord";
-import * as tuple from "fp-ts/Tuple";
 import {pipe, flow, constant} from "fp-ts/function";
 
-import { color, author, embed, field, title } from "@packages/embed";
+import { color, author, embed, field } from "@packages/embed";
 
 import * as u from "../models/User";
 import * as lw from "../models/LoggedWorkout";
 
 export const render = (user: u.User, workouts: lw.LoggedWorkout[]) => embed(
-  color(0x4ba7d1),
+  color(user.member.displayColor),
 
-  author(user.member.name, user.member.avatar),
+  author(user.member.displayName, user.member.user.displayAvatarURL()),
 
   field("Rank", true)
     (pipe(u.rank(user), rank => `${rank} (${user.fitScore.toFixed(0)})`)),

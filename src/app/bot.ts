@@ -1,16 +1,32 @@
+import {MessageOptions} from "discord.js";
+import * as TE from "fp-ts/TaskEither";
 import * as Client from "@packages/discord-fp/Client";
-import * as C from "@packages/discord-fp/Command";
 import * as M from "@packages/discord-fp/Message";
+import * as G from "@packages/discord-fp/Guild";
+import * as U from "@packages/discord-fp/User";
+import * as C from "@packages/discord-fp/Channel";
 
 import { color, embed, author, description, field, thumbnail } from "@packages/embed";
 import {DISCORD_TOKEN, NODE_ENV, SERVER_ID} from "./env";
+import { pipe } from "fp-ts/lib/function";
 
 const [client, message$] = Client.create(DISCORD_TOKEN);
 
 export {message$};
 
-// export const command = bastion.commander("!");
-// export const server = bastion.server(SERVER_ID);
+export function broadcast(channelId: string) {
+  return (content: string | MessageOptions) => pipe(
+    C.find(channelId)(client),
+    TE.chainW (C.send(content))
+  )
+}
+
+export function findMember(id: string) {
+  return pipe(
+    G.find(SERVER_ID)(client),
+    TE.chain (U.find(id))
+  );
+}
 
 export const errorReporter = (original: M.Message) => (error: any) => {
   const message = embed(

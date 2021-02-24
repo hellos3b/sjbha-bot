@@ -1,12 +1,13 @@
-import {sequenceT} from "fp-ts/Apply";
-import {chainW, Do, bind, bindW, chainFirstW, fromEither, mapLeft, map, getOrElseW} from "fp-ts/TaskEither";
-import {pipe} from "fp-ts/function";
-import * as T from "fp-ts/Task";
+import {sequenceS} from "fp-ts/Apply";
+import {chainW, Do, bind, fromEither, bindW, chainFirstW, mapLeft, map, chainEitherKW} from "fp-ts/TaskEither";
+import {flow, pipe} from "fp-ts/function";
+import * as O from "fp-ts/Option";
 import * as E from "fp-ts/Either";
 
-import {command} from "@app/bastion";
-import {Message} from "@packages/discord-fp";
+import {code} from "@packages/embed";
+import * as M from "@packages/discord-fp/Message";
 import * as Error from "@packages/common-errors";
+import {message$, broadcast} from "@app/bot";
 import channels from "@app/channels";
 
 import * as u from "../models/User";
@@ -22,170 +23,230 @@ import * as profile from "../views/profile";
 import * as activity from "../views/activity";
 import * as scores from "../views/scores";
 
-const root = command("fit");
-const fit_ = root.public().subcommand;
-const fit_dm_ = root.dm().subcommand;
-const fit_admin_ = root.restrict(channels.bot_admin).subcommand;
+const base = message$.pipe(M.startsWith("!fit"));
+/** Commands used in the #fitness channel */
+const fit_ = base.pipe(M.channel, M.restrict(channels.strava));
+/** Commands used privately in DMs, such as editing your profile */
+const fit_dm_ = base.pipe(M.direct);
+/** Admin-only commands, so don't have to hit a POST url to do everything */
+const fit_admin_ = base.pipe(M.restrict(channels.bot_admin));
 
-// This link will probably answer most of your questions: 
-// <${helpLink}>
+/**
+ * Public commands sent
+ */
+fit_.subscribe(msg => {
+  const route = M.route(msg);
 
-const help = `
+  const action = 
+    (route === "auth") ? Auth(msg)
+    : (route === "profile") ? Profile(msg)
+    : (route === "scores") ? Scores(msg)
+    : Help(msg);
+
+  const run = pipe(
+    action,
+    mapLeft (
+      flow(commonErrorReplies, M.replyTo(msg))
+    )
+  );
+
+  return run();
+});
+
+/**
+ * The help command
+ */
+const Help = M.reply(`
 \`\`\`
 !fit auth        • Connect your strava account to the bot
 !fit profile     • View your profile stats like level, fit score, activity overview
-!fit leaderboard • View all users by fit score
+!fit scores      • View everyone's current ranking
 \`\`\`
-`;
-
-root
-  .alone()
-  .subscribe(({ channel }) => channel.send(help));
-
-fit_("help")
-  .subscribe(({ channel }) => channel.send(help));
-
-// Set up your strava account with the bot
-fit_("auth")
-  .subscribe(({ member, channel }) => pipe(
-    auth.updateOrCreatePassword(member.id),
-    map 
-      (url => `**Welcome to the fitness channel!**\n`
-        + `\n`
-        + `Click here to authorize the bot: ${url}\n`
-        + `If you don't have a Strava Account: <https://www.strava.com/>`
-        + `For information on how the bot works: ${env.host_name}/fit/help`),
-    map
-      (msg => {
-        member.send(msg);
-        channel.send("Hello! I've DM'd you instructions on how to connect your account");
-      }),
-    mapLeft
-      (err => {
-        channel.send("Failed to setup your account, something went wrong");
-      })
-  )());
-
-// View your current profile
-fit_("profile")
-  .subscribe(({ member, channel }) => pipe(
-    Do,
-      bind  ('user',     _ => u.fetchConnected(member.id)),
-      bindW ('workouts', _ => lw.fetchLastDays(30, _.user)),
-      map 
-        (_ => profile.render(_.user, _.workouts)),
-    getOrElseW 
-      (commonErrorReplies),
-    T.map 
-      (channel.send)
-  )());
-  
-fit_("scores")
-  .subscribe(({ channel }) => pipe(
-    u.getAll(),
-    map (scores.render),
-    getOrElseW 
-      (commonErrorReplies),
-    T.map 
-      (channel.send)
-  )());
-
-// Update user properties
-fit_dm_("set")
-  .subscribe(({ args, user, channel }) => {
-    const setProp = pipe(
-      sequenceT(E.either)(
-        args.nthE(2, "Usage: `!fit set [property] [value]`"),
-        args.nthE(3, "Usage: `!fit set [property] [value]`")
-      ),
-      E.chain(props => edit.edit(...props)),
-      fromEither
-    );
-
-    return pipe(
-      u.fetch(user.id),
-      chainW
-        (user => pipe(setProp, map (fn => fn(user)))),
-      chainFirstW
-        (user => u.save(user)),
-      map
-        (user => `Your profile has been updated!`),
-      getOrElseW
-        (commonErrorReplies),
-      T.map
-        (channel.send)
-    )();
-  });
-
-// Update 
-fit_dm_("get")
-  .subscribe(({ args, user, channel }) => {
-    const getProp = pipe(
-      args.nthE(2, "Usage: `!fit get [property]`"),
-      E.chain(prop => edit.get(prop)),
-      fromEither
-    );
-
-    return pipe(
-      u.fetch(user.id),
-      chainW
-        (user => pipe(getProp, map (fn => fn(user)))),
-      getOrElseW
-        (commonErrorReplies),
-      T.map
-        (channel.send)
-    )();
-  });
-
-// Manually trigger the weekly promotions
-fit_admin_("promotions")
-  .subscribe(promote.run);
-
-// list all the recently recorded activities
-fit_admin_("list")
-  .subscribe(({ channel}) => pipe(
-    lw.recent(),
-    map
-      (workouts => workouts.map(w => [
-          String(w.activity_id).padEnd(14),
-          `(${w.exp_gained.toFixed(1)})`.padEnd(8),
-          w.activity_name
-        ].join(" ")
-      )),
-    map
-      (lines => "```" + lines.join("\n") + "```"),
-    getOrElseW 
-      (replyFullError),
-    T.map 
-      (channel.send)
-  )());
-
-// Manually submit an activity
-fit_admin_("post")
-  .subscribe(({ args, channel }) => {
-    // todo: maybe make this a parser hmmm
-    const stravaId = fromEither (args.nthE(2, "Missing strava ID. Command: `!fit post {stravaId} {activityId}`"));
-    const activityId = fromEither (args.nthE(3, "Missing activity ID. Command: `!fit post {stravaId} {activityId}`"));
-
-    return pipe(
-      Do,
-        bind  ('stravaId',   _ => stravaId),
-        bindW ('activityId', _ => activityId),
-        chainW
-          (({ stravaId, activityId }) => addWorkout.post(stravaId, activityId)),
-        map 
-          (_ => activity.render(_.user, _.result, _.workout, _.week)),  
-      getOrElseW 
-        (replyFullError),
-      T.map 
-        (channel.send)
-    )();
-  });
+`);
 
 /**
- * Replies the contents of the raw error message. Useful for private admin commands
+ * Authorize their strava account with the bot.
+ * DM's the user an authorization url so they can start an OAuth flow
  */
-const replyFullError = (err: Error) => T.of(err.name + ": " + err.message);
+const Auth = (msg: M.ChannelMessage) => pipe(
+  auth.updateOrCreatePassword(msg.author.id),
+  map (url => {
+    const intro = 
+      `**Welcome to the fitness channel!**\n`
+      + `\n`
+      + `Click here to authorize the bot: ${url}\n`
+      + `If you don't have a Strava Account: <https://www.strava.com/>`
+      + `For information on how the bot works: ${env.host_name}/fit/help`;
+
+    msg.member.send(intro);
+    return "Hello! I've DM'd you instructions on how to connect your account";
+  }),
+  chainW (M.replyTo(msg))
+);
+
+/**
+ * Fetches the last 30 days of activities and displays a small profile embed
+ */
+const Profile = (msg: M.ChannelMessage) => pipe(
+  Do,
+    bind  ('user',     _ => u.fetchConnected(msg.author.id)),
+    bindW ('workouts', _ => lw.fetchLastDays(30, _.user)),
+    map (_ => profile.render(_.user, _.workouts)),
+    chainW (M.replyTo(msg))
+);
+  
+/**
+ * Kind of like a high score table but fit score based
+ * But it's not a competition !
+ */
+const Scores = (msg: M.ChannelMessage) => pipe(
+  u.getAll(),
+  map (scores.render),
+  chainW (M.replyTo(msg))
+)
+
+
+fit_dm_.subscribe(msg => {
+  const route = M.route(msg);
+
+  const Usage = M.reply([
+    "!fit set [property] [value]",
+    "!fit get [property]"
+  ].join("\n"));
+
+  const action = 
+    (route === "set") ? UpdateProfile(msg)
+    : (route === "get") ? GetProfileSetting(msg)
+    : Usage(msg);
+
+  const run = pipe(
+    action,
+    mapLeft (
+      flow(commonErrorReplies, M.replyTo(msg))
+    )
+  );
+
+  return run();
+});
+
+/**
+ * Let's a user update their private profile settings,
+ * such as their max heartrate or their (//todo) gender
+ */
+const UpdateProfile = (msg: M.DirectMessage) => {
+  const params = sequenceS(E.either)({
+    prop: M.nthE(2, "Usage: `!fit set [property] [value]`")(msg),
+    value: M.nthE(3, "Usage: `!fit set [property] [value]`")(msg)
+  });
+
+  return pipe(
+    Do,
+      bindW ('user', () => u.fetch(msg.author.id)),
+      bindW ('params', () => fromEither(params)),
+      chainEitherKW (({ params, user }) => edit.set(params.prop, params.value)(user)),
+      chainFirstW (user => u.save(user)),
+      map (() => `Your profile has been updated!`),
+      chainW (M.replyTo(msg))
+  );
+};
+
+/**
+ * Let's a user check what a certain profile setting is currently set to
+ */
+const GetProfileSetting = (msg: M.DirectMessage) => { 
+  const prop = M.nthE(2, "Usage: `!fit get [property]`")(msg);
+
+  return pipe(
+    Do,
+      bindW ('user', () => u.fetch(msg.author.id)),
+      bindW ('prop', () => fromEither(prop)),
+      chainEitherKW (({ user, prop }) => edit.get(prop)(user)),
+      chainW (M.replyTo(msg))
+  );
+};
+
+fit_admin_.subscribe(msg => {
+  const route = M.route(msg);
+
+  const action = 
+    (route === "promote") ? RunPromotions(msg)
+    : (route === "recent") ? ListRecentWorkouts(msg)
+    : (route === "post") ? ManuallyPostActivity(msg)
+    : AdminHelp(msg);
+
+  const run = pipe(
+    action,
+    mapLeft(
+      flow(
+        err => err.name + ": " + err.message, 
+        M.replyTo(msg)
+      )
+    )
+  );
+
+  return run();
+});
+
+/**
+ * Help block for admin commands
+ */
+const AdminHelp = M.reply(`
+Admin Fit commands:
+\`!fit promote\` Runs the weekly promotions (usefulf or testing, or if it week borked)
+\`!fit recent\` - list the recent workouts and ids (in case you want to delete one)
+\`!fit post [stravaId] [activityId] --broadcast(?)\` - Manually post an activity. Pass in \`--broadcast\` if you want it posted in the strava channel instead of just replied
+`)
+
+/**
+ * Force runs the weekly promotions.
+ * Not recommended for production
+ */
+const RunPromotions = (msg: M.Message) => {
+  promote.run();
+  return M.reply(`Promotions job began`)(msg);
+}
+
+/**
+ * Lists all the recently recorded workouts and their IDs
+ */
+const ListRecentWorkouts = (msg: M.Message) => {
+  const pad = (value: any) => value.toString().padEnd(16);
+
+  const format = (w: lw.LoggedWorkout) =>
+    pad(w.activity_id) + pad(w.exp_gained.toFixed(1)) + pad(w.activity_name);
+
+  return pipe(
+    lw.recent(),
+    map (w => {
+      const rows = w.map(format);
+      return code()(rows.join("\n"))
+    }),
+    chainW (M.replyTo(msg))
+  );
+}
+
+/**
+ * If a workout gets stuck in limbo, you can manually force it to post
+ */
+const ManuallyPostActivity = (msg: M.Message) => {
+  const params = sequenceS(E.either)({
+    stravaId: M.nthE(2, "Missing strava ID. Command: `!fit post {stravaId} {activityId}`")(msg),
+    activityId: M.nthE(3, "Missing activity ID. Command: `!fit post {stravaId} {activityId}`")(msg)
+  });
+
+  const send = pipe(
+    M.get("broadcast")(msg),
+    O.fold(() => broadcast(channels.strava), () => M.replyTo(msg))
+  );
+
+  return pipe(
+    Do,
+      bind  ('params',   _ => fromEither(params)),
+      chainW (({ params }) => addWorkout.save(params.stravaId, params.activityId)),
+      map  (_ => activity.render(_.user, _.result, _.workout, _.week)),
+      chainW (send)
+  );
+}
 
 /**
  * 
@@ -193,20 +254,20 @@ const replyFullError = (err: Error) => T.of(err.name + ": " + err.message);
 const commonErrorReplies = (err: Error) => { 
   switch (err.constructor) {
     case Error.InvalidArgsError:
-      return T.of(err.message);
+      return err.message;
 
     case Error.NotFoundError:
     case u.NoRefreshTokenError:
-      return T.of("You need to authorize with the bot first! Use `!fit auth` to get started");
+      return "You need to authorize with the bot first! Use `!fit auth` to get started";
 
     case Error.HTTPError: {
       console.error(err.message);
-      return T.of("Oops, there was an issue getting data from Strava");
+      return "Couldn't finish your request, something is wrong with Strava";
     }
 
     default: {
       console.error(err);
-      return T.of("Something unexpected happened");
+      return "Something unexpected happened, this error has been logged";
     }
   }
 };

@@ -1,18 +1,14 @@
-import {left, right} from "fp-ts/Either";
-import {flow} from "fp-ts/function";
-import {Lens} from "monocle-ts";
+import {left, right, Either} from "fp-ts/Either";
 import * as u from "../models/User";
 import { InvalidArgsError } from "@packages/common-errors";
-
-const hr = Lens.fromProp<u.User>()('maxHR');
 
 /**
  * Gets the current configuration setting
  */
-export const get = (prop: string) => {
+export const get = (prop: string) => (user: u.User): Either<InvalidArgsError, string> => {
   switch (prop.toLowerCase()) {
     case "hr": 
-      return right(flow(hr.get, _ => `Your max heartrate is set to ${_}`));
+      return right(`Your max heartrate is set to ${user.maxHR}`);
 
     default:
       return left(InvalidArgsError.create(`Invalid option '${prop}'. Possible options: hr`))
@@ -22,17 +18,17 @@ export const get = (prop: string) => {
 /**
  * Returns an Either with a fn to update a user's property
  */
-export const edit = (prop: string, value: string) => {  
+export const set = (prop: string, value: string) => (user: u.User): Either<InvalidArgsError, u.User> => {  
   switch (prop.toLowerCase()) {
     case "hr": 
-      return maxHr(value);
+      return updateMaxHR(value)(user);
 
     default:
       return left(InvalidArgsError.create(`Invalid option '${prop}'. Possible options: hr`))
   }
 };
 
-const maxHr = (value: string) => {
+const updateMaxHR = (value: string) => (user: u.User): Either<InvalidArgsError, u.User> => {
   const setTo = Number(value);
 
   if (isNaN(setTo)) 
@@ -44,5 +40,8 @@ const maxHr = (value: string) => {
   if (setTo > 220)
     return left(InvalidArgsError.create(`Are you sure?`));
 
-  return right(hr.set(setTo));
+  return right({
+    ...user,
+    maxHR: setTo
+  });
 }

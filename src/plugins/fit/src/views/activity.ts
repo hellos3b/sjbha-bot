@@ -11,9 +11,9 @@ import * as w from "../models/Workout";
 import * as lw from "../models/LoggedWorkout";
 
 export const render = (user: u.User, logged: lw.LoggedWorkout, workout: w.Workout, week: lw.LoggedWorkout[]) => embed(
-  color (0x4ba7d1),
-  author (`${user.member.name} ${just(workout)}`),
-  thumbnail (user.member.avatar),
+  color (user.member.displayColor),
+  author (`${user.member.displayName} ${just(workout)}`),
+  thumbnail (user.member.user.displayAvatarURL()),
   title (workout.title),
 
   workout.description && 

@@ -3,15 +3,14 @@ import * as O from "fp-ts/Option";
 import {pipe, flow} from "fp-ts/function";
 
 import {message$} from "@app/bot";
-import * as C from "@packages/discord-fp/Command";
 import * as M from "@packages/discord-fp/Message";
 
 import * as subscription from "./src/subscription";
 import * as admin from "./src/admin";
 
 message$.pipe(
-  C.trigger("!subscribe"), 
-  C.channel
+  M.startsWith("!subscribe"), 
+  M.channel
 ).subscribe(msg => {
   const pipeline = pipe(
     M.parse(msg), 
@@ -23,8 +22,8 @@ message$.pipe(
 });
 
 message$.pipe(
-  C.trigger("!unsubscribe"), 
-  C.channel
+  M.startsWith("!unsubscribe"), 
+  M.channel
 ).subscribe(msg => {
   const pipeline = pipe(
     M.parse(msg), 
@@ -37,7 +36,7 @@ message$.pipe(
 });
 
 message$.pipe(
-  C.trigger("!sub-admin"), 
-  C.channel, 
-  C.restrict(channels.bot_admin)
+  M.startsWith("!sub-admin"), 
+  M.channel, 
+  M.restrict(channels.bot_admin)
 ).subscribe(admin.handle);

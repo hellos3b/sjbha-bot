@@ -70,3 +70,7 @@ export const thumbnail = (url: string): Reader<MessageEmbed, MessageEmbed> => {
 export const footer = (value: string): Reader<MessageEmbed, MessageEmbed> => {
   return em => em.setFooter(value);
 };
+
+export const code = (type = "") => {
+  return (content: string) => "```" + type + "\n" + content + "```";
+};

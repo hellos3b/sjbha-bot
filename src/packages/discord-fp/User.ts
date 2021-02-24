@@ -1,8 +1,18 @@
 import {User, GuildMember} from "discord.js";
-import {TaskEither, throwError, tryCatch} from "fp-ts/TaskEither";
+import {TaskEither, tryCatch} from "fp-ts/TaskEither";
+import * as TE from "fp-ts/TaskEither";
 import * as E from "fp-ts/Either";
+import * as G from "./Guild";
+import { NotFoundError } from "@packages/common-errors";
 
 export {User, GuildMember};
+
+export function find(id: string) {
+  return (guild: G.Guild) => TE.tryCatch(
+    () => guild.members.fetch(id),
+    NotFoundError.lazy(`Could not find member with id '${id}' in guild '${guild.name}'`)
+  )
+};
 
 export const hasRole = (member: GuildMember) => {
   return (roleId: string) => member.roles.cache.has(roleId);

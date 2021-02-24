@@ -4,10 +4,11 @@ import {sequence} from "fp-ts/Array";
 import * as TE from "fp-ts/TaskEither";
 import { pipe, flow } from "fp-ts/lib/function";
 
-import { server } from "@app/bastion";
+import {findMember} from "@app/bot";
 import * as db from "@packages/db";
 import { DecodeError } from "@packages/common-errors";
-import { Member } from "@packages/discord-fp";
+import * as U from "@packages/discord-fp/User";
+// import * as M from "@packages/discord-fp";
 
 export class NoRefreshTokenError extends Error {}
 
@@ -25,7 +26,7 @@ const UserT = t.interface({
 });
 
 type Schema = t.TypeOf<typeof UserT>;
-export type User = Readonly<Schema> & {member: Member};
+export type User = Readonly<Schema> & {member: U.GuildMember};
 
 const toSchema = (user: User): Schema =>
   R.omit(["member"])(user);
@@ -36,7 +37,7 @@ const decode = (json: any) => pipe(
   TE.mapLeft
     (DecodeError.fromError),
   TE.chain (user => pipe(
-    server.getMember(user.discordId),
+    findMember(user.discordId),
     TE.map
       (member => <User>({...user, member}))
   ))

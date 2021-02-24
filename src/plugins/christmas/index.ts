@@ -2,13 +2,12 @@ import * as env from "@app/env";
 import {message$} from "@app/bot";
 
 import * as M from "@packages/discord-fp/Message";
-import * as C from "@packages/discord-fp/Command";
 
 import {DateTime} from "luxon";
 import {pipe} from "fp-ts/function";
 
 message$.pipe(
-  C.trigger("!christmas")
+  M.startsWith("!christmas")
 ).subscribe(msg => pipe(
   countDaysUntilChristmas(),
   days => (days === 0) 

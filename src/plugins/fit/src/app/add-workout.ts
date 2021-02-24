@@ -76,12 +76,10 @@ const expGained = (workout: w.Workout) => {
     ["hr", t.moderate.as("minutes"), t.vigorous.as("minutes") * 2];
 
   return (user: u.User) => pipe(
-    sequenceT (O.option)
+    sequenceT (O.option) 
       (userZones(user), workout.heartrate),
-    O.map 
-      (args => timeInZone(...args)),
-    O.fold 
-      (expFromTime, expFromZones)
+    O.map (args => timeInZone(...args)),
+    O.fold (expFromTime, expFromZones)
   );
 }
 
@@ -112,7 +110,7 @@ export const logWorkout = (workout: w.Workout, user: u.User): [lw.LoggedWorkout,
  * Posts an activity to a user profile. 
  * Updates EXP and saves the logged version of the workout
  */
-export const post = (stravaId: string, activityId: string) => {
+export const save = (stravaId: string, activityId: string) => {
   return pipe(
     Do,
       bindW ('user',       _ => u.fetchByStravaId(stravaId)),

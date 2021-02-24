@@ -9,7 +9,7 @@ import * as lw from "../models/LoggedWorkout";
 import * as Week from "../models/Week";
 import * as spotlight from "../views/spotlight";
 
-import { server } from "@app/bastion";
+import {broadcast} from "@app/bot";
 import channels from "@app/channels";
 
 
@@ -20,6 +20,8 @@ const max_score = 100;
 
 /** How much exp you need to go up */
 const exp_goal = 150;
+
+const broadcastToStrava = broadcast(channels.strava);
 
 export type Promotion = [user: u.User, diff: number];
 
@@ -73,10 +75,7 @@ export const run = () => {
     map 
       (_ => spotlight.render(week, _.promotions, _.logs)),
     map
-      (view => pipe(
-        server.channel(channels.strava),
-        map (_ => _.send(view))
-      )),
+      (broadcastToStrava),
     mapLeft
       (err => {
         console.error("Failed to post spotlight", err);
