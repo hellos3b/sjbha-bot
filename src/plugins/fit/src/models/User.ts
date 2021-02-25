@@ -31,7 +31,7 @@ type Schema = t.TypeOf<typeof UserT>;
 export type User = Readonly<Schema> & { member: U.GuildMember };
 
 const toSchema = (user: User): Schema =>
-  R.omit(["name", "avatar", "color"])(user);
+  R.omit(["member"])(user);
 
 // TODO: Come up with better way to handle this
 const withMember = (schema: Schema) => pipe(

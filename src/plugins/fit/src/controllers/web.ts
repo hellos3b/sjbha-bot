@@ -115,9 +115,7 @@ router.post("/fit/api/webhook", async (req, res) => {
   // todo: lsiten to "Update" events and update the messages instead
   env.IS_PRODUCTION && await wait(5 * 60 * 1000);
 
-  post()
-    .then(_ => console.log(_))
-    .catch(_ => console.error(_));
+  post();
 });
 
 /**

@@ -215,6 +215,7 @@ Admin Fit commands:
 \`!fit promote\` Runs the weekly promotions (usefulf or testing, or if it week borked)
 \`!fit recent\` - list the recent workouts and ids (in case you want to delete one)
 \`!fit post [stravaId] [activityId] --broadcast(?)\` - Manually post an activity. Pass in \`--broadcast\` if you want it posted in the strava channel instead of just replied
+\`!fit rm [activityId]\` - Remove an activity
 `)
 
 /**
