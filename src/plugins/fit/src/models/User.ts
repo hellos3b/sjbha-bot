@@ -19,7 +19,7 @@ const log = logger("fit");
 const UserT = t.interface({
   discordId: t.string,
   password: t.string,
-  stravaId: t.string,
+  stravaId: t.number,
   refreshToken: t.string,
   gender: t.string,
   maxHR: t.number,
@@ -86,16 +86,16 @@ export const fetchConnected = flow(
   )
 )
 
-export const fetchByStravaId = (stravaId: string) => pipe(
+export const fetchByStravaId = (stravaId: number) => pipe(
   collection(),
-  db.findOne <Schema>({stravaId: stravaId.toString()}),
+  db.findOne <Schema>({stravaId}),
   TE.chainW (decode)  
 )
 
 export const initialize = (discordId: string, password: string) => {
   const user: Schema = {
     discordId, password,
-    stravaId: "",
+    stravaId: -1,
     refreshToken: "",
     gender: "",
     maxHR: 0,

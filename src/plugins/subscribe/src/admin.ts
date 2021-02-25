@@ -15,28 +15,30 @@ const usage = [
 ].join("\n");
 
 export const handle = (msg: M.Message) => {
-  const reply = M.replyTo(msg);
   const args = M.parse(msg);
   const route = pipe(M.nth(1)(args), O.getOrElse(() => ""));
 
   const addSubscription = () => pipe(
     O.fromNullable (msg.mentions.roles.first()),
     fromOption (InvalidArgsError.lazy(usage)),
-    chainW (db.create)
+    chainW (db.create),
+    chainW (M.replyTo(msg))
   );
 
   const removeSubscription = () => pipe(
     M.nth(2)(args),
     fromOption (InvalidArgsError.lazy(`Missing name: \`!fit sub-admin rm <name>\``)),
     chainW (db.remove),
-    map (name => `Removed role '${name}' from list of subscriptions`)
+    map (name => `Removed role '${name}' from list of subscriptions`),
+    chainW (M.replyTo(msg))
   )
+
+  const Usage = M.reply(usage)(msg);
 
   const pipeline = 
     (route === "add")     ? addSubscription()
     : (route === "rm")    ? removeSubscription()
-    : right(usage);
+    : Usage;
 
-  return pipeline()
-    .then(E.fold(err => reply(err.message), reply));
+  pipeline();
 }

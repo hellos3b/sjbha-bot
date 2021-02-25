@@ -6,16 +6,26 @@ import * as M from "@packages/discord-fp/Message";
 import {DateTime} from "luxon";
 import {pipe} from "fp-ts/function";
 
+
+import logger from "@packages/logger";
+const log = logger("christmas");
+
 message$.pipe(
-  M.startsWith("!christmas")
-).subscribe(msg => pipe(
-  countDaysUntilChristmas(),
-  days => (days === 0) 
-    ? `!!TODAY IS CHRISTMAS!!`
-    : `ONLY ${days} ${pluralize("DAY")(days)} UNTIL CHRISTMAS!!`,
-  festivize,
-  M.replyTo(msg)
-));
+  M.trigger("!christmas")
+).subscribe(msg => {
+  log.info("Telling everyone christmas is coming");
+
+  const pipeline = pipe(
+    countDaysUntilChristmas(),
+    days => (days === 0) 
+      ? `!!TODAY IS CHRISTMAS!!`
+      : `ONLY ${days} ${pluralize("DAY")(days)} UNTIL CHRISTMAS!!`,
+    festivize,
+    M.replyTo(msg)
+  );
+  
+  pipeline();
+});
 
 const festivize = (msg: string) => `🎄☃️☃️🎄🎁 ${msg} 🎁🎄☃️☃️🎄`;
 const pluralize = (word: string) => (count: number) => word + (count === 1 ? '' : 's');

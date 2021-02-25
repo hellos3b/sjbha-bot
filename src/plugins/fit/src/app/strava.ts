@@ -94,7 +94,7 @@ export const createClient = (refreshToken: string) => pipe(
 /**
  * Return a single workout by ID
  */
-export const fetchActivity = (id: string) => flow(
+export const fetchActivity = (id: number) => flow(
   createClient,
   chain
     (client => sequenceT(taskEither)(

@@ -114,7 +114,7 @@ export const logWorkout = (workout: w.Workout, user: u.User): [lw.LoggedWorkout,
  * Posts an activity to a user profile. 
  * Updates EXP and saves the logged version of the workout
  */
-export const save = (stravaId: string, activityId: string) => {
+export const save = (stravaId: number, activityId: number) => {
   log.info({stravaId, activityId}, "Saving workout");
 
   return pipe(

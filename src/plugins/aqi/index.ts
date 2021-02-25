@@ -1,21 +1,27 @@
-import {map} from "fp-ts/TaskEither";
+import {chain, mapLeft} from "fp-ts/TaskEither";
 import {pipe} from "fp-ts/function";
 
 import * as M from "@packages/discord-fp/Message";
 
 import {message$} from "@app/bot";
-import channels from "@app/channels";
-
 import {aqiMessage} from "./src/aqi";
+
+import logger from "@packages/logger";
+const log = logger("aqi");
 
 /**
  * Picks a couple of sensors from a public Purple Air API,
  * and renders them in a nice little embed
  */
-message$.pipe(
-  M.startsWith("!aqi"),
-  M.restrict(channels.shitpost)
-).subscribe(msg => pipe(
-  aqiMessage(),
-  map (M.replyTo(msg))
-));
+message$
+  .pipe(M.trigger("!aqi"))
+  .subscribe(msg => {
+    log.info("Showing AQI");
+
+    const pipeline = pipe(
+      aqiMessage(),
+      chain (M.replyTo(msg))
+    );
+  
+    pipeline();
+  });

@@ -27,7 +27,7 @@ import * as scores from "../views/scores";
 
 const log = logger("fit");
 
-const base = message$.pipe(M.startsWith("!fit"));
+const base = message$.pipe(M.trigger("!fit"));
 /** Commands used in the #fitness channel */
 const fit_ = base.pipe(M.channel, M.restrict(channels.strava, channels.bot_admin));
 /** Commands used privately in DMs, such as editing your profile */
@@ -264,7 +264,7 @@ const ManuallyPostActivity = (msg: M.Message) => {
   return pipe(
     Do,
       bind  ('params',   _ => fromEither(params)),
-      chainW (({ params }) => addWorkout.save(params.stravaId, params.activityId)),
+      chainW (({ params }) => addWorkout.save(+params.stravaId, +params.activityId)),
       map  (_ => activity.render(_.user, _.result, _.workout, _.week)),
       chainW (send)
   );

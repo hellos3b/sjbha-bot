@@ -7,12 +7,15 @@ import * as env from "@app/env";
 import router from "@app/express";
 import {broadcast} from "@app/bot";
 import channels from "@app/channels";
+import logger from "@packages/logger";
 
 import * as auth from "../app/authentication";
 import * as addWorkout from "../app/add-workout";
 import * as activity from "../views/activity";
 
 import { UnauthorizedError, ConflictError, DecodeError } from "@packages/common-errors";
+
+const log = logger("fit");
 
 // todo: move to frontend project
 router.get("/fit/accepted", (req, res) => {
@@ -58,8 +61,8 @@ router.get("/fit/accept", (req, res) => {
 
 // Keep track of recently posted workouts,
 // and ignore if they try to post a second time
-let recent_ids: string[] = [];
-const addRecentId = (id: string) => {
+let recent_ids: number[] = [];
+const addRecentId = (id: number) => {
   recent_ids = [id, ...recent_ids.slice(0, 100)];
 }
 
@@ -71,17 +74,24 @@ const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
  * We want to load all the information, add it to the user, and publish it
  */
 router.post("/fit/api/webhook", async (req, res) => {
+  log.debug({body: req.body}, "Incoming webhook request");
+
   const BodyT = t.interface({
-    owner_id: t.string,
-    object_id: t.string,
+    owner_id: t.number,
+    object_id: t.number,
     aspect_type: t.literal("create") // note: if we want to expand to catching updates, we have to change this
   });
 
   type Body = t.TypeOf<typeof BodyT>;
 
-  const checkWasntPosted = (body: Body) => recent_ids.includes(body.object_id) 
-    ? E.left(ConflictError.create("Activity ID already exists", body))
-    : E.right(body);
+  const checkWasntPosted = (body: Body) => {
+    if (recent_ids.includes(body.object_id)) {
+      log.debug({id: body.object_id}, "Ignoring webhook because it was already posted");
+      return E.left(ConflictError.create("Activity ID already exists", body));
+    }
+
+    return E.right(body);
+  };
 
   const body = pipe(
     BodyT.decode(req.body),
@@ -105,7 +115,9 @@ router.post("/fit/api/webhook", async (req, res) => {
   // todo: lsiten to "Update" events and update the messages instead
   env.IS_PRODUCTION && await wait(5 * 60 * 1000);
 
-  post();
+  post()
+    .then(_ => console.log(_))
+    .catch(_ => console.error(_));
 });
 
 /**

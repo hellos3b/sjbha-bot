@@ -140,7 +140,10 @@ export const getE = (key: string, onLeft: string) => flow(
  * 
  * @category rxjs
  */
-export const startsWith = (t: string) => RX.filter(<T extends Message>(msg: T) => msg.content.startsWith(t));
+export const trigger = (t: string) => RX.filter(<T extends Message>(msg: T) => {
+  const [first] = msg.content.split(" ");
+  return first.toLowerCase() === t.toLowerCase();
+});
 
 /**
  * When a message is sent and has no parameters or extra notation
@@ -159,6 +162,15 @@ export const lonely = RX.filter(<T extends Message>(msg: T) => msg.content.split
  * @category rxjs
  */
 export const restrict = (...channels: string[]) => RX.filter(<T extends Message>(msg: T) => channels.includes(msg.channel.id));
+
+/**
+ * Ignores a command when used in a channels. If used outside of the channel ids,
+ * will ignore it
+ * 
+ * @category rxjs
+ */
+export const ignore = (...channels: string[]) => RX.filter(<T extends Message>(msg: T) => !channels.includes(msg.channel.id));
+
 
 /**
  * Command that only works in direct messages

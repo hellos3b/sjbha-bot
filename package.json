@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "scripts": {
     "start": "node build/index.js",
-    "build": "tsc && webpack --mode=production",
+    "build": "tsc",
     "build:watch": "rm -rf ./build; tsc-watch --onSuccess 'node -r dotenv/config build/index.js'",
     "dev": "docker-compose -f docker-compose.dev.yml up --build",
     "dev:ui": "webpack --mode=development --watch",

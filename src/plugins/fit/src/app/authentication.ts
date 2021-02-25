@@ -90,7 +90,7 @@ export const acceptToken = (accessToken: string, state: string): TaskEither<Mong
     map
       (([user, auth]): u.User => ({
         ...user,
-        stravaId: auth.athlete.id.toString(),
+        stravaId: auth.athlete.id,
         refreshToken: auth.refresh_token
       })),
     chain

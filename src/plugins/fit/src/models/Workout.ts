@@ -57,7 +57,7 @@ export type HRStream = HRSample[];
 /**
  * Return a single workout by ID
  */
-export const fetch = (id: string) => flow(
+export const fetch = (id: number) => flow(
   fetchActivity(id),
   TE.map (args => fromActivity(...args))
 );
