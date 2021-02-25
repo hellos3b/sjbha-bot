@@ -26,7 +26,7 @@ export const embed = (...props: (EmbedProperty | Falsy)[]): MessageOptions => {
   return message;
 };
 
-export type EmbedReader = Reader<MessageEmbed, MessageEmbed>;
+export type EmbedReader = Reader<MessageEmbed, MessageEmbed> | Falsy;
 
 export const title = (value: string): EmbedReader => {
   return em => em.setTitle(value);

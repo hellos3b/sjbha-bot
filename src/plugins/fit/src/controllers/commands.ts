@@ -24,6 +24,7 @@ import * as edit from "../app/edit-profile";
 import * as profile from "../views/profile";
 import * as activity from "../views/activity";
 import * as scores from "../views/scores";
+import * as leaders from "../views/leaders";
 
 const log = logger("fit");
 
@@ -43,6 +44,7 @@ fit_.subscribe(msg => {
     (route === "auth") ? Auth(msg)
     : (route === "profile") ? Profile(msg)
     : (route === "scores") ? Scores(msg)
+    : (route === "leaders") ? Leaders(msg)
     : (route === "leaderboard") ? M.reply("Command has changed to `!fit scores`")(msg)
     : (route === "exp") ? M.reply("You can now see your weekly exp in your profile, use `!fit profile`")(msg)
     : Help(msg);
@@ -155,7 +157,7 @@ const Auth = (msg: M.ChannelMessage) => pipe(
 const Profile = (msg: M.ChannelMessage) => pipe(
   Do,
     bind  ('user',     _ => u.fetchConnected(msg.author.id)),
-    bindW ('workouts', _ => lw.fetchLastDays(30, _.user)),
+    bindW ('workouts', _ => lw.fetchLastDays(30)({discord_id: _.user.discordId})),
     map (_ => profile.render(_.user, _.workouts)),
     chainW (M.replyTo(msg))
 );
@@ -170,6 +172,17 @@ const Scores = (msg: M.ChannelMessage) => pipe(
   map (scores.render),
   chainW (M.replyTo(msg))
 )
+
+const Leaders = (msg: M.ChannelMessage) => pipe(
+  Do,
+    // bindW('users', () => u.getAllAsAuthorized()),
+    bindW('workouts', () => lw.fetchLastDays(30)({})),
+    map (_ => {
+      const hrWorkouts = _.workouts.filter(w => w.exp_type === "hr");
+      return leaders.render([], hrWorkouts);
+    }),
+    chainW (M.replyTo(msg))
+);
 
 /**
  * Let's a user update their private profile settings,

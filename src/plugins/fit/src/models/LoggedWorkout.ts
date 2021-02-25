@@ -90,9 +90,11 @@ export const insert = (workout: LoggedWorkout) => {
   );
 }
 
-export const fetchLastDays = (days: number, user: User) => {
-  const interval = Interval.before(DateTime.local(), {days});
-  return find(interval)({discord_id: user.discordId})
+export const fetchLastDays = (days: number) => {
+  return (q: db.Query<LoggedWorkout>) => {
+    const interval = Interval.before(DateTime.local(), {days});
+    return find(interval)(q);
+  }
 };
 
 export const create = (props: LoggedWorkout = {
