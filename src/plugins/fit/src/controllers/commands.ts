@@ -131,6 +131,8 @@ const Help = M.reply(`
 !fit auth        • Connect your strava account to the bot
 !fit profile     • View your profile stats like level, fit score, activity overview
 !fit scores      • View everyone's current ranking
+!fit leaders     • Show the top 2 leaders for each activity type
+!fit balance     • Small analysis on your EXP types (hr activities only)
 \`\`\`
 `);
 
