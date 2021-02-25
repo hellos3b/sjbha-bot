@@ -48,8 +48,8 @@ const formatExp = (xp: number) =>
 /** 
  * Gets the most recent workout 
  */
-const mostRecent = flow(    
-  R.sortBy ((_: lw.LoggedWorkout) => _.timestamp),
+const mostRecent = (logs: lw.LoggedWorkout[]) => pipe(    
+  logs.sort((a, b) => a.timestamp > b.timestamp ? -1 : 1),
   A.head
 )
 
