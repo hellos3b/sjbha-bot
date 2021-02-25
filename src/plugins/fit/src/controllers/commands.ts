@@ -25,6 +25,8 @@ import * as profile from "../views/profile";
 import * as activity from "../views/activity";
 import * as scores from "../views/scores";
 import * as leaders from "../views/leaders";
+import * as balance from "../views/balance";
+import { left, right } from "fp-ts/lib/These";
 
 const log = logger("fit");
 
@@ -45,6 +47,7 @@ fit_.subscribe(msg => {
     : (route === "profile") ? Profile(msg)
     : (route === "scores") ? Scores(msg)
     : (route === "leaders") ? Leaders(msg)
+    : (route === "balance") ? Balance(msg)
     : (route === "leaderboard") ? M.reply("Command has changed to `!fit scores`")(msg)
     : (route === "exp") ? M.reply("You can now see your weekly exp in your profile, use `!fit profile`")(msg)
     : Help(msg);
@@ -182,6 +185,16 @@ const Leaders = (msg: M.ChannelMessage) => pipe(
       return leaders.render([], hrWorkouts);
     }),
     chainW (M.replyTo(msg))
+);
+
+const Balance = (msg: M.ChannelMessage) => pipe(
+  lw.fetchLastDays(14)({discord_id: msg.author.id}),
+  map (workouts => workouts.filter(_ => _.exp_type === 'hr')),
+  map (workouts => workouts.length < 4
+      ? "You need at least **4** heartrate workouts in the last 2 weeks to check your balance"
+      : balance.render(workouts)
+  ),
+  chainW (M.replyTo(msg))
 );
 
 /**
