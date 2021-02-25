@@ -2,6 +2,7 @@ import * as R from "ramda";
 import * as t from "io-ts";
 import {sequence} from "fp-ts/Array";
 import * as TE from "fp-ts/TaskEither";
+import * as T from "fp-ts/Task";
 import { pipe, flow } from "fp-ts/lib/function";
 
 import {findMember} from "@app/bot";
@@ -27,26 +28,53 @@ const UserT = t.interface({
 });
 
 type Schema = t.TypeOf<typeof UserT>;
-export type User = Readonly<Schema> & {member: U.GuildMember};
+export type User = Readonly<Schema> & {
+  name: string;
+  avatar: string;
+  color: number;
+};
 
 const toSchema = (user: User): Schema =>
-  R.omit(["member"])(user);
+  R.omit(["name", "avatar", "color"])(user);
+
+// TODO: Come up with better way to handle this
+const withUserDetails = (schema: Schema) => pipe(
+  findMember(schema.discordId),
+  TE.map (member => <User>({
+    ...schema,
+    name: member.displayName,
+    avatar: member.user.displayAvatarURL(),
+    color: member.displayColor
+  })),
+  TE.orElse (() => TE.right(<User>{
+    ...schema,
+    name: "unknown",
+    avatar: "",
+    color: 0x999999
+  }))
+)
 
 const decode = (json: any) => pipe(
   TE.fromEither
     (UserT.decode(json)),
   TE.mapLeft
     (DecodeError.fromError),
-  TE.chain (user => pipe(
-    findMember(user.discordId),
-    TE.map
-      (member => <User>({...user, member}))
-  ))
+  TE.chainW (withUserDetails)
 );
+
+export const isAuthorized = (user: Schema) => !!user.refreshToken;
 
 export const getAll = () => pipe(
   collection(),
   db.find<Schema>({}),
+  TE.map (models => models.map(decode)),
+  TE.chain (users => sequence(TE.taskEither)(users))
+)
+
+export const getAllAsAuthorized = () => pipe(
+  collection(),
+  db.find<Schema> ({}),
+  TE.map (m => m.filter(isAuthorized)),
   TE.map (models => models.map(decode)),
   TE.chain (users => sequence(TE.taskEither)(users))
 )

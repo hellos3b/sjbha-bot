@@ -12,6 +12,7 @@ import * as lw from "../models/LoggedWorkout";
 import * as Week from "../models/Week";
 import * as spotlight from "../views/spotlight";
 
+import {findMember} from "@app/bot";
 import {broadcast} from "@app/bot";
 import channels from "@app/channels";
 import roles from "@app/roles";
@@ -37,7 +38,7 @@ export const run = () => {
   
   return pipe(
     sequenceT(taskEither)
-      (u.getAll(), lw.find(week)()),
+      (u.getAllAsAuthorized(), lw.find(week)()),
     map (([ users, logs ]) => {
       const promotions = promote(users, logs); 
       return {logs, promotions};
@@ -56,15 +57,18 @@ export const updateRoles = (user: u.User) => {
   const list = [roles.certified_swole, roles.max_effort, roles.break_a_sweat];
   
   const apply = (roleId: string) => {
-    log.debug({roleId}, `Adding role to ${user.member.displayName}`)
+    log.debug({roleId}, `Adding role to ${user.name}`)
 
-    const changes = list.map(
-      role => (role === roleId) 
-        ? U.addRoleTo(user.member)(role) 
-        : U.removeRoleFrom(user.member)(role)
-    );
-
-    return sequenceArray(changes)()
+    return pipe(
+      findMember(user.discordId),
+      chainW (member => pipe(
+        list.map(role => (role === roleId) 
+          ? U.addRoleTo(member)(role) 
+        : U.removeRoleFrom(member)(role)
+        ),
+        sequenceArray
+      ))
+    )()
   };
 
   return (user.fitScore >= 100) ? apply(roles.certified_swole)

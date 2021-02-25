@@ -9,7 +9,6 @@ import { author, color, description, embed, EmbedReader, field, thumbnail, title
 import * as u from "../models/User";
 import * as lw from "../models/LoggedWorkout";
 import {Promotion} from "../app/promote";
-import { MessageEmbed } from "discord.js";
 
 const swole_doge = "https://imgur.com/lUCIFkk.png";
 const exp_highlight_count = 2;
@@ -65,7 +64,7 @@ const progress = (promotions: Promotion[]) => {
     // add a plus sign if change is positive
     const diff = (change < 0) ? `(${change.toFixed(1)})` : "";
   
-    return format("{0} **{1}** {2} {3}")(emoji, u.rank(user), user.member.displayName, diff);
+    return format("{0} **{1}** {2} {3}")(emoji, u.rank(user), user.name, diff);
   }
 
   const text = promotions
@@ -113,7 +112,7 @@ const createSpotlights = (stats: Stats[]): EmbedReader[] => {
       most(stats)(s => s.total_exp),
       O.map (({ user, total_exp }) => 
         format('<@{0}> gained the most exp this week (**{1}** exp)')
-          (user.member.id, total_exp.toFixed(1))
+          (user.discordId, total_exp.toFixed(1))
       ),
       O.map (field("Persistence"))
     )),
@@ -122,7 +121,7 @@ const createSpotlights = (stats: Stats[]): EmbedReader[] => {
       most(stats)(s => s.total_moderate),
       O.map (({ user, total_moderate }) => 
         format('<@{0}> gained the most moderate exp this week (**{1}+**)')
-          (user.member.id, total_moderate.toFixed(1))
+          (user.discordId, total_moderate.toFixed(1))
       ),
       O.map (field("Steady"))
     )),
@@ -131,7 +130,7 @@ const createSpotlights = (stats: Stats[]): EmbedReader[] => {
       most(stats)(s => s.total_vigorous),
       O.map(({ user, total_vigorous }) => 
         format('<@{0}> gained the most intense exp this week (**{1}++**)')
-          (user.member.id, total_vigorous.toFixed(1))
+          (user.discordId, total_vigorous.toFixed(1))
       ),
       O.map (field("Explosive"))
     )),
@@ -140,7 +139,7 @@ const createSpotlights = (stats: Stats[]): EmbedReader[] => {
       most(stats.filter(s => s.logs.length >= 3))(s => s.deviation),
       O.map(({ user, deviation, logs }) => 
         format("<@{0}> recorded {1} activities that only varied by **{2}** exp")
-          (user.member.id, logs.length, deviation.toFixed(1))
+          (user.discordId, logs.length, deviation.toFixed(1))
       ),
       O.map(field("Consistency"))
     )),
@@ -153,7 +152,7 @@ const createSpotlights = (stats: Stats[]): EmbedReader[] => {
         (s => s.biggestActivity.exp_gained),
       O.map(({ user, biggestActivity }) => 
         format("<@{0}> got the most exp in one activity with {1} (**{2}** exp)")
-          (user.member.id, biggestActivity.activity_name, biggestActivity.exp_gained.toFixed(1))
+          (user.discordId, biggestActivity.activity_name, biggestActivity.exp_gained.toFixed(1))
       ),
       O.map(field("Biggest Activity"))
     ))
@@ -180,7 +179,7 @@ const activityLeader = (type: string, stats: Stats[]) => {
       const pluralize = logs.length > 1 ? 'activities' : 'activity'; 
 
       return format(`<@{0}> was the {1} leader this week, with **{2}** exp from {3} ${pluralize}`)
-        (user.member.id, type, exp.toFixed(1), logs.length);
+        (user.discordId, type, exp.toFixed(1), logs.length);
     }),
     O.map(field("Workout Highlight: " + type))
   ))

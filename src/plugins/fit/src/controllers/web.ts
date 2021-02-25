@@ -70,7 +70,7 @@ const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
  * When a user records an activity on strava, Strava sends a POST request to this url
  * We want to load all the information, add it to the user, and publish it
  */
-router.get("/fit/webhook", async (req, res) => {
+router.post("/fit/api/webhook", async (req, res) => {
   const BodyT = t.interface({
     owner_id: t.string,
     object_id: t.string,
@@ -115,7 +115,7 @@ router.get("/fit/webhook", async (req, res) => {
  * @see https://developers.strava.com/docs/webhooks/
  * @query `hub.challenge`
  */
-router.get("/fit/webhook/verify", (req, res) => {
+router.get("/fit/api/webhook", (req, res) => {
   const challenge = <string>req.query["hub.challenge"];
   res.send({"hub.challenge": challenge});
 });

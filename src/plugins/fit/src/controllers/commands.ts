@@ -29,13 +29,14 @@ const log = logger("fit");
 
 const base = message$.pipe(M.startsWith("!fit"));
 /** Commands used in the #fitness channel */
-const fit_ = base.pipe(M.channel, M.restrict(channels.strava));
+const fit_ = base.pipe(M.channel, M.restrict(channels.strava, channels.bot_admin));
 /** Commands used privately in DMs, such as editing your profile */
 const fit_dm_ = base.pipe(M.direct);
 /** Admin-only commands, so don't have to hit a POST url to do everything */
 const fit_admin_ = base.pipe(M.restrict(channels.bot_admin));
 
 fit_.subscribe(msg => {
+  log.debug({user: msg.author.username, message: msg.content, router: "fit"});
   const route = M.route(msg);
 
   const action = 
@@ -57,6 +58,7 @@ fit_.subscribe(msg => {
 });
 
 fit_dm_.subscribe(msg => {
+  log.debug({user: msg.author.username, message: msg.content, router: "fit_dm"});
   const route = M.route(msg);
 
   const Usage = M.reply([
@@ -80,8 +82,8 @@ fit_dm_.subscribe(msg => {
 });
 
 fit_admin_.subscribe(msg => {
+  log.debug({user: msg.author.username, message: msg.content, router: "fit_admin"});
   const route = M.route(msg);
-  log.debug({command: "fit-admin"});
 
   const action = 
     (route === "promote") ? RunPromotions(msg)
@@ -163,7 +165,8 @@ const Profile = (msg: M.ChannelMessage) => pipe(
  * But it's not a competition !
  */
 const Scores = (msg: M.ChannelMessage) => pipe(
-  u.getAll(),
+  u.getAllAsAuthorized(),
+  map (users => users.filter(_ => _.fitScore > 0)),
   map (scores.render),
   chainW (M.replyTo(msg))
 )
@@ -285,6 +288,8 @@ const RemoveActivity = (msg: M.Message) => {
  * 
  */
 const commonErrorReplies = (err: Error) => { 
+  log.debug({type: err.name}, "Handling fit error");
+
   switch (err.constructor) {
     case Error.InvalidArgsError:
       return err.message;

@@ -11,9 +11,9 @@ import * as lw from "../models/LoggedWorkout";
 import fromNow from "fromnow";
 
 export const render = (user: u.User, workouts: lw.LoggedWorkout[]) => embed(
-  color(user.member.displayColor),
+  color(user.color),
 
-  author(user.member.displayName, user.member.user.displayAvatarURL()),
+  author(user.name, user.avatar),
 
   field("Rank", true)
     (pipe(u.rank(user), rank => `${rank} (${user.fitScore.toFixed(0)})`)),
