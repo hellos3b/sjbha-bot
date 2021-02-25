@@ -12,7 +12,7 @@ import * as w from "../models/Workout";
 import * as lw from "../models/LoggedWorkout";
 import * as Week from "../models/Week";
 
-const log = logger("fit").child({action: 'add-workout'});
+const log = logger("fit");
 
 /**
  * Basic zone targets for working out
@@ -121,10 +121,11 @@ export const save = (stravaId: number, activityId: number) => {
     Do,
       bindW ('user',       _ => u.fetchByStravaId(stravaId)),
       bindW ('workout',    _ => w.fetch(activityId)(_.user.refreshToken)),
-      bindW ('week',       _ => lw.find(Week.current())({discordId: _.user.discordId})),
+      bindW ('week',       _ => lw.find(Week.current())({discord_id: _.user.discordId})),
       map 
         (_ => {
           const [result, user] = logWorkout(_.workout, _.user);
+          console.log(_);
           return {result, user, workout: _.workout, week: _.week};
         }),
       // Insert the logged result first in case an error happens

@@ -23,7 +23,7 @@ export const render = (user: u.User, logged: lw.LoggedWorkout, workout: w.Workou
   
   ...stats(workout, logged),
 
-  footer (`${expGained(logged)} | ${weekExp(logged)(week)}`)
+  footer (`${expGained(logged)} | ${weekExp([logged, ...week])}`)
 );
 
 /**
@@ -79,8 +79,8 @@ const expGained = ({ exp_type, exp_gained, exp_vigorous }: lw.LoggedWorkout) => 
 /**
  * Shows how much xp gained this week
  */
-const weekExp = (logged: lw.LoggedWorkout) => flow(
-  lw.sumExp, xp => xp + logged.exp_gained,
+const weekExp = flow(
+  lw.sumExp, 
   fixed, 
   gained => gained + ' exp this week'
 );

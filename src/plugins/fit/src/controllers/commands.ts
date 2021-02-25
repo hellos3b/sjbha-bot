@@ -36,7 +36,7 @@ const fit_dm_ = base.pipe(M.direct);
 const fit_admin_ = base.pipe(M.restrict(channels.bot_admin));
 
 fit_.subscribe(msg => {
-  log.debug({user: msg.author.username, message: msg.content, router: "fit"});
+  log.debug({user: msg.author.username, message: msg.content});
   const route = M.route(msg);
 
   const action = 
