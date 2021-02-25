@@ -1,14 +1,14 @@
 import * as R from "ramda";
 import * as t from "io-ts";
-import {sequence} from "fp-ts/Array";
 import * as TE from "fp-ts/TaskEither";
 import * as T from "fp-ts/Task";
+import * as A from "fp-ts/Array";
 import { pipe, flow } from "fp-ts/lib/function";
 
 import {findMember} from "@app/bot";
 import * as db from "@packages/db";
 import logger from "@packages/logger";
-import { DecodeError } from "@packages/common-errors";
+import { DecodeError, MongoDbError } from "@packages/common-errors";
 import * as U from "@packages/discord-fp/User";
 
 export class NoRefreshTokenError extends Error {}
@@ -28,38 +28,24 @@ const UserT = t.interface({
 });
 
 type Schema = t.TypeOf<typeof UserT>;
-export type User = Readonly<Schema> & {
-  name: string;
-  avatar: string;
-  color: number;
-};
+export type User = Readonly<Schema> & { member: U.GuildMember };
 
 const toSchema = (user: User): Schema =>
   R.omit(["name", "avatar", "color"])(user);
 
 // TODO: Come up with better way to handle this
-const withUserDetails = (schema: Schema) => pipe(
+const withMember = (schema: Schema) => pipe(
   findMember(schema.discordId),
   TE.map (member => <User>({
     ...schema,
-    name: member.displayName,
-    avatar: member.user.displayAvatarURL(),
-    color: member.displayColor
-  })),
-  TE.orElse (() => TE.right(<User>{
-    ...schema,
-    name: "unknown",
-    avatar: "",
-    color: 0x999999
+    member
   }))
 )
 
 const decode = (json: any) => pipe(
-  TE.fromEither
-    (UserT.decode(json)),
-  TE.mapLeft
-    (DecodeError.fromError),
-  TE.chainW (withUserDetails)
+  TE.fromEither (UserT.decode(json)),
+  TE.mapLeft (DecodeError.fromError),
+  TE.chainW (withMember)
 );
 
 export const isAuthorized = (user: Schema) => !!user.refreshToken;
@@ -67,16 +53,22 @@ export const isAuthorized = (user: Schema) => !!user.refreshToken;
 export const getAll = () => pipe(
   collection(),
   db.find<Schema>({}),
-  TE.map (models => models.map(decode)),
-  TE.chain (users => sequence(TE.taskEither)(users))
+  TE.chainW (m => pipe(
+    m.map(decode),
+    A.sequence(T.task),
+    T.map (A.rights),
+    TE.rightTask
+  ))
 )
 
-export const getAllAsAuthorized = () => pipe(
+export const getAllAsAuthorized = flow(
+  getAll,
+  TE.map (m => m.filter(isAuthorized))
+);
+
+export const find = (query: db.Query<Schema>) => pipe(
   collection(),
-  db.find<Schema> ({}),
-  TE.map (m => m.filter(isAuthorized)),
-  TE.map (models => models.map(decode)),
-  TE.chain (users => sequence(TE.taskEither)(users))
+  db.find<Schema> (query)
 )
 
 export const fetch = (discordId: string) => pipe(

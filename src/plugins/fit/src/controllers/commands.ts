@@ -288,7 +288,7 @@ const RemoveActivity = (msg: M.Message) => {
  * 
  */
 const commonErrorReplies = (err: Error) => { 
-  log.debug({type: err.name}, "Handling fit error");
+  log.debug({type: err.toString()}, "Handling fit error");
 
   switch (err.constructor) {
     case Error.InvalidArgsError:

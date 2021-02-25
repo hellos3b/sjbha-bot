@@ -57,7 +57,7 @@ export const updateRoles = (user: u.User) => {
   const list = [roles.certified_swole, roles.max_effort, roles.break_a_sweat];
   
   const apply = (roleId: string) => {
-    log.debug({roleId}, `Adding role to ${user.name}`)
+    log.debug({roleId}, `Adding role to ${user.member.displayName}`)
 
     return pipe(
       findMember(user.discordId),

@@ -64,7 +64,7 @@ const progress = (promotions: Promotion[]) => {
     // add a plus sign if change is positive
     const diff = (change < 0) ? `(${change.toFixed(1)})` : "";
   
-    return format("{0} **{1}** {2} {3}")(emoji, u.rank(user), user.name, diff);
+    return format("{0} **{1}** {2} {3}")(emoji, u.rank(user), user.member.displayName, diff);
   }
 
   const text = promotions

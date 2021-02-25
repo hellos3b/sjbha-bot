@@ -13,4 +13,4 @@ export const render = (users: u.User[]) => {
   )
 };
 
-const toRow = (user: u.User) => `**${u.rank(user)}** • ${user.name}`;
+const toRow = (user: u.User) => `**${u.rank(user)}** • ${user.member.displayName}`;
