@@ -69,7 +69,7 @@ const expGained = ({ exp_type, exp_gained, exp_vigorous }: lw.LoggedWorkout) => 
   switch (exp_type) {
     case "hr": {
       const moderate = exp_gained - exp_vigorous;
-      return `Gained ${fixed(exp_gained)} exp (${fixed(moderate)}+ ${fixed(exp_vigorous)}++})`;
+      return `Gained ${fixed(exp_gained)} exp (${fixed(moderate)}+ ${fixed(exp_vigorous)}++)`;
     }
     default:
       return `Gained ${fixed(exp_gained)} exp`;
