@@ -31,7 +31,11 @@ export const render = (user: u.User, logged: lw.LoggedWorkout, workout: w.Workou
  * Best used to describe elapsed time (hence the name)
  */
 export const formatElapsed = (d: Duration): string => {
-  if (d.as("hours") > 0) 
+  console.log("FORMAT======")
+  console.log("hours", d.as("hours"))
+  console.log("hours direct", d.hours)
+
+  if (d.as("hours") > 1) 
     return d.toFormat("h'h' mm'm'");
 
   if (d.as("minutes") > 0) 

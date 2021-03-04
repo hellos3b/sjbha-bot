@@ -25,7 +25,7 @@ export const toPace = (ms: MetersPerSecond) => pipe(
   L.Duration.fromObject({
     minutes: (26.8224 / ms.value)
   }),
-  t => (t.as("hours") > 0) 
+  t => (t.as("hours") > 1) 
     ? t.toFormat("hh:mm:ss")
     : t.toFormat("mm:ss")
 )
