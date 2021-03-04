@@ -1,6 +1,7 @@
 node_modules
 .env
 build
+dist
 public
 
 _plugins

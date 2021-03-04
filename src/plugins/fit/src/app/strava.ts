@@ -1,3 +1,4 @@
+import * as RTE from "fp-ts/ReaderTaskEither";
 import {taskEither, map, mapLeft, chain} from "fp-ts/TaskEither";
 import {pipe, flow} from "fp-ts/function";
 import {sequenceT} from "fp-ts/Apply";
@@ -94,13 +95,20 @@ export const createClient = (refreshToken: string) => pipe(
 /**
  * Return a single workout by ID
  */
-export const fetchActivity = (id: number) => flow(
-  createClient,
-  chain
-    (client => sequenceT(taskEither)(
-      http.get<API.Activity>('/activities/' + id)(client),
-      http.get<API.Streams>('/activities/' + id + '/streams', {keys: "heartrate,time"})(client)
-    )),
-  mapLeft
-    (err => err.withMessage(`Failed to fetch activity '${id}'`))
-);
+export const fetchActivity = (id: number) => {
+  const fetchStreams = (id: number) => pipe(
+    http.get<API.Streams>('/activities/' + id + '/streams', {keys: "heartrate,time"}),
+    RTE.orElse(() => RTE.right(<API.Streams>[]))
+  )
+
+  return flow(
+    createClient,
+    chain
+      (client => sequenceT(taskEither)(
+        http.get<API.Activity>('/activities/' + id)(client),
+        fetchStreams(id)(client)
+      )),
+    mapLeft
+      (err => err.withMessage(`Failed to fetch activity '${id}'`))
+  );
+}
