@@ -20,7 +20,7 @@ export default function (bastion, opt = {}) {
             if (response.ok) {
                 let jsonResponse = await response.json();
                 if (jsonResponse.online === false) {
-                    return "The server is either offline or the bot is broken. Please dm @Devrim#1557 if the server is online."
+                    return "The server is either offline or the bot is broken. Please dm @Devrim#9999 if the server is online."
                 } else {
                     return "Current Players in the Server is: " + jsonResponse.players.now;
                 }
