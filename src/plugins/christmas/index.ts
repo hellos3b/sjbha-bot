@@ -1,34 +1,13 @@
 import * as env from "@app/env";
-import {message$} from "@app/bot";
+import {command} from "@app/bot";
 
 import * as M from "@packages/discord-fp/Message";
 
 import {DateTime} from "luxon";
 import {pipe} from "fp-ts/function";
 
-
 import logger from "@packages/logger";
 const log = logger("christmas");
-
-message$.pipe(
-  M.trigger("!christmas")
-).subscribe(msg => {
-  log.info("Telling everyone christmas is coming");
-
-  const pipeline = pipe(
-    countDaysUntilChristmas(),
-    days => (days === 0) 
-      ? `!!TODAY IS CHRISTMAS!!`
-      : `ONLY ${days} ${pluralize("DAY")(days)} UNTIL CHRISTMAS!!`,
-    festivize,
-    M.replyTo(msg)
-  );
-  
-  pipeline();
-});
-
-const festivize = (msg: string) => `🎄☃️☃️🎄🎁 ${msg} 🎁🎄☃️☃️🎄`;
-const pluralize = (word: string) => (count: number) => word + (count === 1 ? '' : 's');
 
 function countDaysUntilChristmas() {
   const now = DateTime.local()
@@ -51,3 +30,22 @@ function countDaysUntilChristmas() {
 
   return Math.floor(diff.days);
 }
+
+const festivize = (msg: string) => `🎄☃️☃️🎄🎁 ${msg} 🎁🎄☃️☃️🎄`;
+const pluralize = (word: string) => (count: number) => word + (count === 1 ? '' : 's');
+
+command("!christmas")
+  .subscribe(msg => {
+    log.info("Telling everyone christmas is coming");
+
+    const pipeline = pipe(
+      countDaysUntilChristmas(),
+      days => (days === 0) 
+        ? `!!TODAY IS CHRISTMAS!!`
+        : `ONLY ${days} ${pluralize("DAY")(days)} UNTIL CHRISTMAS!!`,
+      festivize,
+      M.replyTo(msg)
+    );
+    
+    pipeline();
+  });

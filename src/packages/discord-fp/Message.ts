@@ -177,7 +177,7 @@ export const ignore = (...channels: string[]) => RX.filter(<T extends Message>(m
  * 
  * @category rxjs
  */
-export const direct = RX.filter(isDirect);
+export const directOnly = RX.filter(isDirect);
 
 /**
  * Command that only works in servers.
@@ -185,4 +185,4 @@ export const direct = RX.filter(isDirect);
  * 
  * @category rxjs
  */
-export const channel = RX.filter(isChannel);
+export const channelOnly = RX.filter(isChannel);

@@ -1,12 +1,10 @@
-import {message$} from "@app/bot";
+import {command} from "@app/bot";
 import * as M from "@packages/discord-fp/Message";
-
-
 import logger from "@packages/logger";
+
 const log = logger("ping");
 
-message$ 
-  .pipe (M.trigger("!pong"))
+command("!pong")
   .subscribe (msg => {
     log.info("Yes I'm alive!!");
 

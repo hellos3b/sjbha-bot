@@ -26,15 +26,14 @@ import * as activity from "../views/activity";
 import * as scores from "../views/scores";
 import * as leaders from "../views/leaders";
 import * as balance from "../views/balance";
-import { left, right } from "fp-ts/lib/These";
 
 const log = logger("fit");
 
 const base = message$.pipe(M.trigger("!fit"));
 /** Commands used in the #fitness channel */
-const fit_ = base.pipe(M.channel, M.restrict(channels.strava, channels.bot_admin));
+const fit_ = base.pipe(M.channelOnly, M.restrict(channels.strava, channels.bot_admin));
 /** Commands used privately in DMs, such as editing your profile */
-const fit_dm_ = base.pipe(M.direct);
+const fit_dm_ = base.pipe(M.directOnly);
 /** Admin-only commands, so don't have to hit a POST url to do everything */
 const fit_admin_ = base.pipe(M.restrict(channels.bot_admin));
 

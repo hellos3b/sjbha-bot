@@ -14,6 +14,10 @@ const [client, message$] = Client.create(DISCORD_TOKEN);
 
 export {message$};
 
+export function command(cmd: string) {
+  return message$.pipe(M.trigger(cmd));
+}
+
 export function broadcast(channelId: string) {
   return (content: string | MessageOptions) => pipe(
     C.find(channelId)(client),
