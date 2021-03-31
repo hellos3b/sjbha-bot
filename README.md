@@ -1,5 +1,7 @@
 # Bot for SJBHA
 
+> :warning: This version of bored bot is legacy and deprecated. This branch is here for backwards support until all the commands are migrated to the master branch
+
 ## Setup
 
 Setup is simple, make sure you have npm installed. Just clone the repo and install dependencies
