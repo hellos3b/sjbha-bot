@@ -1,6 +1,7 @@
 import * as R from "ramda";
 import {sequenceS} from "fp-ts/Apply";
-import {chainW, Do, bind, fromEither, bindW, chainFirstW, map, chainEitherKW, orElse} from "fp-ts/TaskEither";
+import {sequence} from 'fp-ts/Array';
+import {chainW, Do, bind, fromEither, bindW, chainFirstW, map, chainEitherKW, orElse, taskEither, getOrElseW, orElseW} from "fp-ts/TaskEither";
 import {flow, pipe} from "fp-ts/function";
 import * as O from "fp-ts/Option";
 import * as E from "fp-ts/Either";
@@ -31,7 +32,7 @@ const log = logger("fit");
 
 const base = message$.pipe(M.trigger("!fit"));
 /** Commands used in the #fitness channel */
-const fit_ = base.pipe(M.channelOnly, M.restrict(channels.strava, channels.bot_admin));
+const fit_ = base.pipe(M.channelOnly, M.restrict(channels.strava));
 /** Commands used privately in DMs, such as editing your profile */
 const fit_dm_ = base.pipe(M.directOnly);
 /** Admin-only commands, so don't have to hit a POST url to do everything */
@@ -85,39 +86,56 @@ fit_dm_.subscribe(msg => {
   return run();
 });
 
-fit_admin_.subscribe(msg => {
-  log.debug({user: msg.author.username, message: msg.content, router: "fit_admin"});
+fit_admin_.subscribe(async msg => {
   const route = M.route(msg);
+  log.debug({user: msg.author.username, message: msg.content, route, router: "fit_admin"});
 
-  const action = 
-    (route === "promote") ? RunPromotions(msg)
-    : (route === "recent") ? ListRecentWorkouts(msg)
-    : (route === "post") ? ManuallyPostActivity(msg)
-    : (route === "rm") ? RemoveActivity(msg)
-    : AdminHelp(msg);
+  const handleError = flow(
+    (err: Error) => {
+      switch (err.constructor) {
+        case Error.NotFoundError:
+        case Error.InvalidArgsError:
+        case Error.ConflictError:
+          return err.message;
+        default: {
+          reportError(msg)(err);
+          return err.toString();
+        }
+      }
+    },
 
-  const run = pipe(
-    action,
-    orElse(
-      flow(
-        err => {
-          switch (err.constructor) {
-            case Error.NotFoundError:
-            case Error.InvalidArgsError:
-            case Error.ConflictError:
-              return err.message;
-            default: {
-              reportError(msg)(err);
-              return err.toString();
-            }
-          }
-        },
-        M.replyTo(msg)
-      )
-    )
+    M.replyTo (msg)
   );
 
-  return run();
+  switch (route) {
+    case 'promote': 
+      return await RunPromotions(msg)()
+        .then(E.mapLeft (handleError));
+
+    case 'recent':
+      return await ListRecentWorkouts(msg)()
+        .then(E.mapLeft (handleError));
+
+    case 'post':
+      return await ManuallyPostActivity(msg)()
+        .then(E.mapLeft (handleError));
+
+    case 'rm':
+      return await RemoveActivity(msg)()
+        .then(E.mapLeft (handleError));
+
+    case 'promote-list':
+      return await ListPromotionActivities(msg)()
+        .then(E.mapLeft (handleError));   
+
+    case 'promote-preview':
+      return await PreviewPromotions(msg)()
+        .then(E.mapLeft (handleError));
+
+    default:
+      return await AdminHelp(msg)()
+        .then(E.mapLeft (handleError));
+  }
 });
 
 /**
@@ -252,6 +270,25 @@ Admin Fit commands:
 const RunPromotions = (msg: M.Message) => {
   promote.run();
   return M.reply(`Promotions job began`)(msg);
+}
+
+const PreviewPromotions = (msg: M.Message) => pipe(
+  promote.preview(),
+  chainW (views => 
+    sequence(taskEither)(views.map(M.replyTo(msg)))
+  )
+);
+
+const ListPromotionActivities = (msg: M.Message) => {
+  return pipe(
+    promote.previewActivities(),
+    map (data => data.map(row => 
+      `# ${row.user.discordId}` + '\n' +
+      row.logs.map(_ => `  > ${_.activity_name}`).join("\n")
+    )),
+    map (results => results.join("\n\n")),
+    chainW (M.replyTo(msg))
+  )
 }
 
 /**

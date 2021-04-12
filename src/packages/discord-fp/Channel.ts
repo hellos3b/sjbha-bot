@@ -20,6 +20,9 @@ export function find(id: string) {
 export const send = (content: string | Discord.MessageOptions) => {
   return (channel: Channel) => TE.tryCatch(
     () => (typeof content === 'string') ? channel.send(content) : channel.send(content),
-    () => new Error(`Failed to send message to channel (unknown reasons)`)
+    error => {
+      console.error("Failed to send message to channel", {content, error});
+      return new Error(`Failed to send message to channel (unknown reasons)`)
+    }
   )
 };

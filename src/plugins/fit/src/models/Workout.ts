@@ -21,8 +21,10 @@ export type Workout = {
   readonly description: string;
   /** Activity is set to private */
   readonly private: boolean;
-  /** How long the activity went for. In a GPS activity, this time will reflect time that was spent actually moving */
+  /** Total elapsed time of activity*/
   readonly elapsed: Duration;
+  /** How long was spent moving, in GPS activities */
+  readonly moving: Duration;
   /** GPS data, if recorded outdoors */
   readonly gps: O.Option<GPS>;
   /** Heart rate data if recorded with a device */
@@ -36,9 +38,9 @@ export type GPS = {
 }
 
 export type Heartrate = {
- readonly average: number;
- readonly max: number;
- readonly stream: HRStream;
+  readonly average: number;
+  readonly max: number;
+  readonly stream: HRStream;
 }
 
 /**
@@ -68,8 +70,9 @@ export const fromActivity = (res: API.Activity, stream?: API.Streams): Workout =
   title: res.name,
   description: res.description,
   private: res.private,
-  timestamp: DateTime.fromISO(res.start_date),
-  elapsed: Duration.fromObject({seconds: res.moving_time}),
+  timestamp: DateTime.fromISO(res.start_date, {zone: 'utc'}),
+  elapsed: Duration.fromObject({seconds: res.elapsed_time}),
+  moving: Duration.fromObject({seconds: res.moving_time}),
   gps: (res.distance > 0)
     ? O.some(gpsFromActivity(res))
     : O.none,

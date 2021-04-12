@@ -52,8 +52,6 @@ const chart = (relScore: number) => {
   const dash_count = 15;
   const marks = Math.floor(Math.abs(relScore) / 50 * dash_count);
 
-  console.log(relScore, marks);
-
   const fill = (str: string, count: number) =>
     new Array(count).fill(str).join("");
 

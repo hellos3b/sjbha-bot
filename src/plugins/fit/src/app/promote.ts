@@ -1,5 +1,6 @@
 import * as R from "ramda";
 import { sequenceT} from "fp-ts/Apply";
+import {sequence} from 'fp-ts/Array';
 import {taskEither, chainFirstW, chainW, map, sequenceArray} from "fp-ts/TaskEither";
 import { pipe } from "fp-ts/function";
 import * as tuple from "fp-ts/Tuple";
@@ -11,6 +12,7 @@ import * as u from "../models/User";
 import * as lw from "../models/LoggedWorkout";
 import * as Week from "../models/Week";
 import * as spotlight from "../views/spotlight";
+import * as promotionView from "../views/promotions";
 
 import {findMember} from "@app/bot";
 import {broadcast} from "@app/bot";
@@ -48,10 +50,37 @@ export const run = () => {
       users.forEach(updateRoles);
       return sequenceArray(users.map(u.save));
     }),
-    map (_ => spotlight.render(week, _.promotions, _.logs)),
-    chainW (broadcastToStrava)
+    map (_ => {
+      const spot = spotlight.render(week, _.promotions, _.logs);
+      const progress = promotionView.render(week, _.promotions);
+
+      return [spot, ...progress];
+    }),
+    chainW (views =>
+      sequence(taskEither)(views.map(broadcastToStrava))
+    )
   )();
 };
+
+export const preview = () => {
+  const week = Week.previous();
+  log.info({week: week.toFormat("MMM DD")}, "Running promotions");
+  
+  return pipe(
+    sequenceT(taskEither)
+      (u.getAllAsAuthorized(), lw.find(week)()),
+    map (([ users, logs ]) => {
+      const promotions = promote(users, logs); 
+      return {logs, promotions};
+    }),
+    map (_ => {
+      const spot = spotlight.render(week, _.promotions, _.logs);
+      const progress = promotionView.render(week, _.promotions);
+
+      return [spot, ...progress];
+    })
+  );
+}
 
 export const updateRoles = (user: u.User) => {
   const list = [roles.certified_swole, roles.max_effort, roles.break_a_sweat];
@@ -104,4 +133,19 @@ export const promote = (users: u.User[], logs: lw.LoggedWorkout[]) => {
   );
 
   return users.map(user => promoteUser(user, userExp(user)));
+}
+
+export const previewActivities = () => {
+  const week = Week.previous();
+
+  const groupUser = (logs: lw.LoggedWorkout[]) => (user: u.User) => ({
+    user,
+    logs: logs.filter(_ => _.discord_id === user.discordId)
+  });
+
+  return pipe(
+    sequenceT(taskEither)
+      (u.getAllAsAuthorized(), lw.find(week)()),
+    map (([ users, logs ]) => users.map(groupUser(logs)))
+  );
 }

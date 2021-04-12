@@ -8,7 +8,7 @@ import { pipe, flow } from "fp-ts/lib/function";
 import {findMember} from "@app/bot";
 import * as db from "@packages/db";
 import logger from "@packages/logger";
-import { DecodeError, MongoDbError } from "@packages/common-errors";
+import { DecodeError } from "@packages/common-errors";
 import * as U from "@packages/discord-fp/User";
 
 export class NoRefreshTokenError extends Error {}

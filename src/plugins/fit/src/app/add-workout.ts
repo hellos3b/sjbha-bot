@@ -74,7 +74,7 @@ const expGained = (workout: w.Workout) => {
   type ExpResult = ["time" | "hr", number, number];
 
   const expFromTime = (): ExpResult => 
-    ["time", workout.elapsed.as("minutes"), 0];
+    ["time", workout.moving.as("minutes"), 0];
 
   const expFromZones = (t: TimeInZones): ExpResult => 
     ["hr", t.moderate.as("minutes"), t.vigorous.as("minutes") * 2];
@@ -125,7 +125,6 @@ export const save = (stravaId: number, activityId: number) => {
       map 
         (_ => {
           const [result, user] = logWorkout(_.workout, _.user);
-          console.log(_);
           return {result, user, workout: _.workout, week: _.week};
         }),
       // Insert the logged result first in case an error happens

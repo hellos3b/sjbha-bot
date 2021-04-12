@@ -32,6 +32,7 @@ export namespace API {
     readonly start_date: string;
     readonly distance: number;
     readonly moving_time: number;
+    readonly elapsed_time: number;
     readonly average_speed: number;
     readonly total_elevation_gain: number;
     readonly type: string;

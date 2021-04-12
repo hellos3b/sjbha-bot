@@ -44,36 +44,9 @@ export const render = (week: L.Interval, promotions: Promotion[], logs: lw.Logge
         O.chain(type => activityLeader(type, stats)),
         O.toNullable
       )
-    ),
-
-    // show every user's change
-    progress(promotions)
+    )
   );
 };
-
-/**
- * Lists out all promotions / demotions that happened in this week
- */
-const progress = (promotions: Promotion[]) => {
-  const formatPromotion = ([user, change]: Promotion) => {
-    // get up or down doot emoji
-    const emoji = (user.fitScore === 100) 
-      ? "🔹" : (change > 0) 
-        ? "⬆️" : "🔻";// "⬇️";
-        
-    // add a plus sign if change is positive
-    const diff = (change < 0) ? `(${change.toFixed(1)})` : "";
-  
-    return format("{0} **{1}** {2} {3}")(emoji, u.rank(user), user.member.displayName, diff);
-  }
-
-  const text = promotions
-    .sort((a, b) => a[0].fitScore > b[0].fitScore ? -1 : 1)
-    .map(formatPromotion)
-    .join("\n");
-
-  return field("Progress")(text);
-}
 
 /**
  * Parse a user's logs and group together some stats about them
