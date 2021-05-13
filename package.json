@@ -20,7 +20,6 @@
     "chrono": "^1.0.5",
     "chrono-node": "^1.3.5",
     "deepmerge": "^2.1.1",
-    "discord.io": "github:woor/discord.io#gateway_v6",
     "dotenv": "^5.0.1",
     "express": "^4.16.3",
     "image-downloader": "^3.4.1",
