@@ -34,7 +34,10 @@
     "sillyid": "^0.2.2",
     "vanilla-js-calendar": "^1.0.10",
     "winston": "^2.4.1",
-    "wretch": "^1.7.1"
+    "wretch": "^1.7.1",
+    "ws": "^1.1.0",
+    "cjopus": "^0.0.4",
+    "tweetnacl": "^0.14.0"
   },
   "devDependencies": {
     "@types/node": "^10.12.18"
