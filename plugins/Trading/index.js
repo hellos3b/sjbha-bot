@@ -223,6 +223,7 @@ export default function(bastion, opt = {}) {
         const amt = parseInt(amtInput)
 
         if (!Number.isInteger(amt)) return `'${amtInput}' is not a valid amount`
+        if (amt <= 0) return `'${amt}' is not a valid amount`
 
         let quote;
         try {
