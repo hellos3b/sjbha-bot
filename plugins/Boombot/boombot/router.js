@@ -1,4 +1,3 @@
-import Discord from 'discord.io'
 import logger from 'winston'
 import Routes from "./commands/CommandRoutes"
 import Season from './game/Season'
