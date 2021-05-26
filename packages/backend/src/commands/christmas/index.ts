@@ -1,11 +1,11 @@
-import { env, Handler } from '@sjbha/app';
-import { registerCommand, startsWith } from '@sjbha/utils/command';
+import { env, onMessage, MessageHandler } from '@sjbha/app';
+import { startsWith } from '@sjbha/utils/message-middleware';
 import { DateTime } from 'luxon';
 
 const festivize = (msg: string) => `🎄☃️☃️🎄🎁 ${msg} 🎁🎄☃️☃️🎄`;
 const pluralize = (word: string, count: number) => word + (count === 1 ? '' : 'S');
 
-const christmas : Handler = message => {
+const christmas : MessageHandler = message => {
   const now = DateTime
     .local ()
     .setZone (env.TIME_ZONE)
@@ -48,7 +48,7 @@ const christmas : Handler = message => {
   message.channel.send (reply);
 };
 
-registerCommand (
+onMessage (
   startsWith ('!christmas'),
   christmas
 );

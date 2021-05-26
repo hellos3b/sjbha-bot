@@ -1,6 +1,7 @@
-import {registerCommand, reply, startsWith} from '@sjbha/utils/command';
+import { onMessage } from '@sjbha/app';
+import { reply, startsWith } from '@sjbha/utils/message-middleware';
 
-registerCommand (
+onMessage (
   startsWith ('!ping'),
-  reply ("Pong!")
+  reply ('Pong!')
 );

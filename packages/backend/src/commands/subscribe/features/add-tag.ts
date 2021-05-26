@@ -1,7 +1,7 @@
-import { Handler } from '@sjbha/app';
+import { MessageHandler } from '@sjbha/app';
 import { Subscriptions } from '../db/subscription';
 
-export const add : Handler = async message => {
+export const add : MessageHandler = async message => {
   const role = message.mentions.roles.first ();
 
   if (!role) {

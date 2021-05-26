@@ -4,6 +4,7 @@ export { db } from './mongodb';
 export { channels } from './channels';
 
 export {
-  Handler,
-  onMessageEvent
+  MessageHandler,
+  MessageMiddleware,
+  onMessage,
 } from './bot';

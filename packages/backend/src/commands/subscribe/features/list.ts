@@ -1,7 +1,7 @@
-import { Handler } from '@sjbha/app';
+import { MessageHandler } from '@sjbha/app';
 import { Subscriptions } from '../db/subscription';
 
-export const list : Handler = async message => {
+export const list : MessageHandler = async message => {
   const subs = await Subscriptions ()
     .find ()
     .toArray ();

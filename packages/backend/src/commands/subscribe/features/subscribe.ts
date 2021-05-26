@@ -1,7 +1,7 @@
-import { Handler } from '@sjbha/app';
+import { MessageHandler } from '@sjbha/app';
 import { Subscriptions } from '../db/subscription';
 
-export const subscribe : Handler = async message => {
+export const subscribe : MessageHandler = async message => {
   const [_, name] = message.content.split (' ');
 
   const sub = await Subscriptions ().findOne ({ name: name.toLowerCase () });

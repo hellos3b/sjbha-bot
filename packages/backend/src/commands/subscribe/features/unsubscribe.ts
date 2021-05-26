@@ -1,10 +1,10 @@
-import { Handler } from '@sjbha/app';
+import { MessageHandler } from '@sjbha/app';
 import { Subscriptions } from '../db/subscription';
 
 /**
  * List the available subscriptions that are in the database
  */
-export const unsubscribe : Handler = async message => {
+export const unsubscribe : MessageHandler = async message => {
   const [_, target] = message.content.split (' ');
 
   if (!target) {

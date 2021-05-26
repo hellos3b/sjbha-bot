@@ -1,21 +1,50 @@
-// import * as TE from "fp-ts/TaskEither";
-// import * as Client from "@packages/discord-fp/Client";
-// import * as M from "@packages/discord-fp/Message";
-// import * as G from "@packages/discord-fp/Guild";
-// import * as U from "@packages/discord-fp/User";
-// import * as C from "@packages/discord-fp/Channel";
-
-// import { color, embed, author, description, field, thumbnail } from "@packages/embed";
 import { DISCORD_TOKEN } from './env';
 import { Client, Message } from 'discord.js';
 
-export type Handler = (message: Message) => void;
+// Message Event
 
-const handlers : Handler[] = [];
+export type MessageHandler = (message: Message) => void;
 
-export const onMessageEvent = (handler: Handler) : void => {
-  handlers.push (handler);
-};
+const messageHandler : MessageHandler[] = [];
+
+export type NextFn = () => void;
+export type MessageMiddleware = (message: Message, next: NextFn) => void;
+
+/**
+ * Compose a series middleware together to create a command.
+ * 
+ * Middleware is used as helpers for filtering and routing an incoming message.
+ * 
+ * ```ts
+ * compose (
+ *   startsWith ("!ping"),
+ *   reply ("Pong!")
+ * )
+ * ```
+ * 
+ * @returns A Handler that can be passed to `onMessageEvent`
+ */
+export const compose = (...middlewares: MessageMiddleware[]) : MessageHandler => {
+  if (!middlewares.length) {
+    return _ => { /** Ignore */ }
+  }
+
+  const [run, ...tail] = middlewares;
+  const next = compose (...tail);
+
+  return message => run (message, () => next (message));
+}
+
+/**
+ * Listen to messages from the bot.
+ * 
+ * todo: explain middleware
+ */
+export const onMessage = (...middleware: MessageMiddleware[]) : void => {
+  messageHandler.push (compose (...middleware));
+}
+
+// Connect
 
 const client = new Client ();
 
@@ -23,10 +52,46 @@ client.on ('ready', () => console.log (`Bastion connected as '${client.user?.tag
 
 client.on ('message', (msg: Message) => {
   if (msg.author.bot) return;
-  handlers.forEach (f => f (msg));
+  messageHandler.forEach (f => f (msg));
 });
 
 client.login (DISCORD_TOKEN);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // const [client, message$] = Client.create(DISCORD_TOKEN);
 
