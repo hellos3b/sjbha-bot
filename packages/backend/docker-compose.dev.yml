@@ -1,11 +1,11 @@
-version: '2.0'
+version: '3.8'
 
 services:
   app:
     tty: true
     image: node:12-alpine
     container_name: bored_bot
-    command: yarn build:watch
+    command: npm run watch
     env_file: .env
     working_dir: /home/node/app
     environment:

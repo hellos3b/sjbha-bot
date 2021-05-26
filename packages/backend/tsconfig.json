@@ -10,20 +10,8 @@
     "outDir": "build",
     "baseUrl": "src",
     "paths": {
-      "@app/*": ["./app/*"],
-      "@shared/*": ["./shared/*"],
-      "@plugins/*": ["./plugins/*"],
-      "@packages/*": ["./packages/*"]
+      "@sjbha/*": ["./*"]
     }
   },
-  // "include": [
-  //   "src/**/*"
-  // ],
-  "include": [
-    "src/index.ts"
-  ],
-  "exclude": [
-    "**/*.tsx",
-    "**/*.test.ts"
-  ]
+  "include": ["src"]
 }

@@ -1,0 +1,40 @@
+{
+  "name": "@sjbha/bot",
+  "description": "",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "node build/index.js",
+    "build": "tsc",
+    "watch": "ts-node-dev src/main.ts",
+    "dev": "docker-compose -f docker-compose.dev.yml up --build --remove-orphans",
+    "test": "jest --setupFiles dotenv/config",
+    "test:watch": "jest --setupFiles dotenv/config --watch"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@shootismoke/convert": "^0.2.31",
+    "axios": "^0.21.1",
+    "discord.js": "^12.5.3",
+    "luxon": "^1.27.0",
+    "module-alias": "^2.2.2",
+    "pipe-ts": "0.0.9",
+    "purify-ts": "^0.16.3",
+    "ramda": "^0.27.1",
+    "superagent": "^6.1.0",
+    "ts-pipe": "^1.2.3",
+    "variant": "^2.1.0"
+  },
+  "devDependencies": {
+    "@types/luxon": "^1.26.5",
+    "@types/node": "^15.6.1",
+    "@types/ramda": "^0.27.40",
+    "@types/superagent": "^4.1.11",
+    "ts-node-dev": "^1.1.6",
+    "typescript": "^4.2.4"
+  },
+  "_moduleAliases": {
+    "@sjbha": "src"
+  }
+}
