@@ -1,7 +1,7 @@
-import { convert } from "@shootismoke/convert";
+import { convert } from '@shootismoke/convert';
 import { Either } from 'purify-ts';
 import { pipeWith } from 'pipe-ts';
-import superagent from "superagent";
+import superagent from 'superagent';
 import * as R from 'ramda';
 
 export interface Response {
@@ -9,17 +9,22 @@ export interface Response {
 }
 
 export interface SensorData {
+
   /** The Sensor ID */
   readonly ID: number;
+
   /** The sensor ID of the parent if it's channel B */
   readonly ParentID?: number;
+
   /** Needs to be JSON Stringified */
   readonly Stats: string;
 }
 
 export interface SensorStats {
+
   /** Real time PM2.5 value */
   readonly v: number;
+
   /** Short term (10 minute average) */
   readonly v1: number;
 }
@@ -48,7 +53,7 @@ class Sensor {
   getAQI () : Either<Error, number> {
     return Either
       .encase (() : SensorStats => JSON.parse (this.data.Stats))
-      .map (stats => convert('pm25', 'raw', 'usaEpa', stats.v1))
+      .map (stats => convert ('pm25', 'raw', 'usaEpa', stats.v1))
   }
 }
 
@@ -64,7 +69,8 @@ export class SensorCollection {
    * @returns 
    */
   filter (ids: number[]) : SensorCollection {
-    const sensors = this.sensors.filter(sensor => ids.includes (sensor.id));
+    const sensors = this.sensors.filter (sensor => ids.includes (sensor.id));
+
     return new SensorCollection (sensors);
   }
 
@@ -82,8 +88,8 @@ export class SensorCollection {
       if (arr.length < 3)
         return arr;
 
-      return arr.map((v, idx) => arr.slice(idx, idx + 3))
-        .filter(v => v.length === 3)
+      return arr.map ((v, idx) => arr.slice (idx, idx + 3))
+        .filter (v => v.length === 3)
         .map (R.median);
     }
 
@@ -100,10 +106,10 @@ export class SensorCollection {
    * 
    * @returns A Sensor manager
    */
-  static fetchIds = async (ids: number[]) => {
+  static fetchIds = async (ids: number[]) : Promise<SensorCollection> => {
     const response = await superagent
-      .get ("https://www.purpleair.com/json")
-      .query ({ show: ids.join("|") })
+      .get ('https://www.purpleair.com/json')
+      .query ({ show: ids.join ('|') })
       .then (r => <Response>r.body);
   
     const sensors = response.results.map (s => new Sensor (s));

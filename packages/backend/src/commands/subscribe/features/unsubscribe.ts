@@ -1,0 +1,32 @@
+import { Handler } from '@sjbha/app';
+import { Subscriptions } from '../db/subscription';
+
+/**
+ * List the available subscriptions that are in the database
+ */
+export const unsubscribe : Handler = async message => {
+  const [_, target] = message.content.split (' ');
+
+  if (!target) {
+    message.reply (`No subscription named '${target}' found. Use '!subscribe' to view a list of possible subscriptions`);
+
+    return;
+  }
+
+  const sub = await Subscriptions ().findOne ({ name: target.toLowerCase () });
+
+  if (!sub) {
+    message.reply (`No subscription named '${target}' found. Use '!subscribe' to view a list of possible subscriptions`);
+
+    return;
+  }
+
+  if (!message.member?.roles.cache.has (sub.id)) {
+    message.reply (`You aren't subscribed to ${sub.name}`);
+
+    return;
+  }
+  
+  await message.member?.roles.remove (sub.id);
+  message.reply ('Unsubscribed from ' + sub.name);
+}

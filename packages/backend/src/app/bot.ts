@@ -6,24 +6,24 @@
 // import * as C from "@packages/discord-fp/Channel";
 
 // import { color, embed, author, description, field, thumbnail } from "@packages/embed";
-import {DISCORD_TOKEN, NODE_ENV, SERVER_ID} from "./env";
-import {Client, Message} from "discord.js";
+import { DISCORD_TOKEN } from './env';
+import { Client, Message } from 'discord.js';
 
 export type Handler = (message: Message) => void;
 
 const handlers : Handler[] = [];
 
-export const registerHandler = (handler: Handler) : void => {
+export const onMessageEvent = (handler: Handler) : void => {
   handlers.push (handler);
 };
 
-const client = new Client();
+const client = new Client ();
 
-client.on ("ready", () => console.log(`Bastion connected as '${client.user?.tag}'`));
+client.on ('ready', () => console.log (`Bastion connected as '${client.user?.tag}'`));
 
-client.on ("message", (msg: Message) => {
+client.on ('message', (msg: Message) => {
   if (msg.author.bot) return;
-  handlers.forEach(f => f (msg));
+  handlers.forEach (f => f (msg));
 });
 
 client.login (DISCORD_TOKEN);

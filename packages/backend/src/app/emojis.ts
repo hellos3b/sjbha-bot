@@ -1,8 +1,8 @@
-import {IS_PRODUCTION} from "./env";
+import { IS_PRODUCTION } from './env';
 
 const emoji = (name: string, id: string) => ({
   id,
-  toString() { return `<:${name}:${id}>`}
+  toString() { return `<:${name}:${id}>` }
 });
 
 const production = {};

@@ -1,10 +1,9 @@
 export * as env from './env';
 
-export { default as channels } from './channels';
+export { db } from './mongodb';
+export { channels } from './channels';
 
 export {
   Handler,
-  registerHandler
+  onMessageEvent
 } from './bot';
-
-// Commonly used

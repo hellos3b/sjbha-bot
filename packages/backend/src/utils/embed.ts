@@ -1,7 +1,7 @@
-import {MessageEmbed, MessageOptions} from "discord.js";
+import { MessageEmbed, MessageOptions } from 'discord.js';
 
 type EmbedProperty = (obj: MessageEmbed) => MessageEmbed;
-type Falsy = false | 0 | "" | null | undefined;
+type Falsy = false | 0 | '' | null | undefined;
 type EmbedBuilder = EmbedProperty | Falsy;
 
 /**
@@ -17,59 +17,45 @@ type EmbedBuilder = EmbedProperty | Falsy;
  * ```
  */
 export const embed = (...props: EmbedBuilder[]): MessageOptions => {
-  const message = props.reduce((msg, fn) => {
-    if (fn) return fn(msg);
+  const message = props.reduce ((msg, fn) => {
+    if (fn) return fn (msg);
+
     return msg;
-  }, new MessageEmbed());
+  }, new MessageEmbed ());
 
   return message;
 };
 
-export const title = (value: string): EmbedBuilder => {
-  return em => em.setTitle(value);
-}
+export const title = (value: string): EmbedBuilder => 
+  embed => embed.setTitle (value)
 
 /**
  * Set the color of the embed
  */
-export const color = (value: number): EmbedBuilder => {
-  return em => em.setColor(value);
-};
+export const color = (value: number): EmbedBuilder => 
+  embed => embed.setColor (value);
 
 /**
  * Author component
  */
-export const author = (name: string, icon_url?: string): EmbedBuilder => {
-  const prop: {[key: string]: any} = {name};
-
-  if (icon_url) {
-    prop.icon_url = icon_url;
-  }
-
-  return em => em.setAuthor(name, icon_url);
-};
+export const author = (name: string, icon_url?: string): EmbedBuilder => 
+  embed => embed.setAuthor (name, icon_url);
 
 /**
  * Creates a field, defaults to inline.
  * If the passed in `value` is null, the field will not be added
  */
-export const field = (name: string, inline: boolean = false) => (value: number | string | null): EmbedBuilder => {
-  return em => !value ? em : em.addField(name, value, inline);
-};
+export const field = (name: string, inline = false) => (value: number | string | null): EmbedBuilder => 
+  embed => !value ? embed : embed.addField (name, value, inline);
 
-export const description = (content: string): EmbedBuilder => {
-  return em => em.setDescription(content);
-}
+export const description = (content: string): EmbedBuilder => 
+  embed => embed.setDescription (content)
 
-export const thumbnail = (url: string): EmbedBuilder => {
-  return em => em.setThumbnail(url);
-};
+export const thumbnail = (url: string): EmbedBuilder => 
+  embed => embed.setThumbnail (url);
 
 
-export const footer = (value: string): EmbedBuilder => {
-  return em => em.setFooter(value);
-};
+export const footer = (value: string): EmbedBuilder => 
+  embed => embed.setFooter (value);
 
-export const code = (type = "") => {
-  return (content: string) => "```" + type + "\n" + content + "```";
-};
+// export const code = (type = '') => (content: string) : string => '```' + type + '\n' + content + '```';

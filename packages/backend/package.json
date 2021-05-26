@@ -19,6 +19,7 @@
     "discord.js": "^12.5.3",
     "luxon": "^1.27.0",
     "module-alias": "^2.2.2",
+    "mongodb": "^3.6.8",
     "pipe-ts": "0.0.9",
     "purify-ts": "^0.16.3",
     "ramda": "^0.27.1",
@@ -28,11 +29,15 @@
   },
   "devDependencies": {
     "@types/luxon": "^1.26.5",
+    "@types/mongodb": "^3.6.16",
     "@types/node": "^15.6.1",
     "@types/ramda": "^0.27.40",
     "@types/superagent": "^4.1.11",
+    "@typescript-eslint/eslint-plugin": "^4.25.0",
+    "@typescript-eslint/parser": "^4.25.0",
+    "eslint": "^7.27.0",
     "ts-node-dev": "^1.1.6",
-    "typescript": "^4.2.4"
+    "typescript": "^4.3.2"
   },
   "_moduleAliases": {
     "@sjbha": "src"
