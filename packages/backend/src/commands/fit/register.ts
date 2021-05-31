@@ -19,11 +19,15 @@ onMessage (
 // Admin Commands
 
 import { post } from './admin/post';
+import { list } from './admin/list';
+import { remove } from './admin/remove';
 
 onMessage (
   startsWith ('$fit'),
   routes ({
-    post: post
+    post:   post,
+    list:   list,
+    remove: remove
   })
 );
 

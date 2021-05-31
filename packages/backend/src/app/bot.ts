@@ -73,10 +73,10 @@ export const Instance = {
     return (<TextChannel>channel).send (message);
   },
 
-  editMessage: async (channelId: string, messageId: string, content: string | MessageEmbed) : Promise<Message> => {
+  getMessage: async (channelId: string, messageId: string) : Promise<Message> => {
     const channel = await client.channels.fetch (channelId);
     const message = await (<TextChannel>channel).messages.fetch (messageId);
 
-    return message.edit (content);
+    return message;
   }
 }

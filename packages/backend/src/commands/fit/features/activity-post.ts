@@ -1,7 +1,7 @@
 import { EmbedField, MessageEmbed } from 'discord.js';
 import { Interval, DateTime, Duration } from 'luxon';
 import { Just, Maybe, Nothing } from 'purify-ts';
-import { isType, just, match } from 'variant';
+import { just, match } from 'variant';
 
 import { Instance } from '@sjbha/app';
 import { channels } from '@sjbha/config';
@@ -40,19 +40,19 @@ export const postWorkout = async (stravaId: number, activityId: number) : Promis
   // Fetch all the data we need
   const [member, workouts, activity, streams] = await Promise.all ([
     Instance.findMember (user.discordId),
-    Workout.find (
-      { discord_id: user.discordId },
-      Interval.before (DateTime.local (), { days: 30 })
-    ),
+    Workout.find ({ 
+      discord_id: user.discordId,
+      timestamp:  Workout.between (Interval.before (DateTime.local (), { days: 30 }))
+    }),
     client.getActivity (activityId),
     client.getActivityStreams (activityId).catch (_ => [])
   ]);
 
   // Create the workout
   const exp = calculateExp (user.maxHR, activity, streams);
-  const weeklyExp = expTotal (exp) + workouts
+  const weeklyExp = Workout.expTotal (exp) + workouts
     .filter (w => w.activity_id !== activity.id)
-    .map (w => expTotal (w.exp))
+    .map (w => Workout.expTotal (w.exp))
     .reduce ((sum, exp) => sum + exp, 0);
 
   // Build the Embed
@@ -69,30 +69,45 @@ export const postWorkout = async (stravaId: number, activityId: number) : Promis
 
   // Update if exists
   if (previouslyRecorded) {
-    await Instance.editMessage (
-      channels.strava, 
-      previouslyRecorded.message_id, 
-      embed
-    );
+    const expDiff = Workout.expTotal (exp) - Workout.expTotal (previouslyRecorded.exp);
 
-    await Workout.update ({
-      ...previouslyRecorded,
-      activity_name: activity.name,
-      exp:           exp
-    });
+    await Instance
+      .getMessage (channels.strava, previouslyRecorded.message_id)
+      .then (message => message.edit (embed));
+
+    await Promise.all ([
+      Workout.update ({
+        ...previouslyRecorded,
+        activity_name: activity.name,
+        exp:           exp
+      }),
+
+      User.update ({
+        ...user,
+        xp: user.xp + expDiff
+      })
+    ]);
   }
   // Create new workout if doesn't
   else {
     const message = await Instance.broadcast (channels.strava, embed);
-    await Workout.insert ({
-      discord_id:    user.discordId,
-      activity_id:   activity.id,
-      message_id:    message.id,
-      activity_name: activity.name,
-      timestamp:     activity.start_date,
-      activity_type: activity.type,
-      exp:           exp      
-    });
+
+    await Promise.all ([
+      Workout.insert ({
+        discord_id:    user.discordId,
+        activity_id:   activity.id,
+        message_id:    message.id,
+        activity_name: activity.name,
+        timestamp:     activity.start_date,
+        activity_type: activity.type,
+        exp:           exp      
+      }),
+
+      User.update ({
+        ...user,
+        xp: Workout.expTotal (exp)
+      })
+    ]);
   }
 }
 
@@ -159,25 +174,14 @@ const calculateExp = (maxHeartrate: number | undefined, activity: Activity, stre
  * @returns The string to place in the footer
  */
 const gainedText = (exp: Workout.Exp) => {
-  const total = `Gained ${format.exp (expTotal (exp))}`;
+  const total = `Gained ${format.exp (Workout.expTotal (exp))}`;
   
   return match (exp, {
-    hr:   ({ moderate, vigorous }) => total + ` exp (${format.exp (moderate)}+ ${format.exp (vigorous)}++)`,
+    hr: ({ moderate, vigorous }) => 
+      total + ` exp (${format.exp (moderate)}+ ${format.exp (vigorous)}++)`,
     time: _ => total
   });
 }
-
-
-/**
- * Calculates the total EXP.
- * 
- * @returns The number of Exp gained
- */
-const expTotal = (exp: Workout.Exp) => match (exp, {
-  hr:   h => h.moderate + h.vigorous,
-  time: t => t.exp
-});
-
 
 /**
  * Formats the part in the title with "just did xx"
@@ -287,6 +291,6 @@ const format = {
   },
 
   exp: (amt: number) => 
-    (amt >= 1000) ? (amt / 1000).toFixed (2) + 'k'
-    : amt.toFixed (2)
+    (amt >= 1000) ? (amt / 1000).toFixed (1) + 'k'
+    : amt.toFixed (1)
 };

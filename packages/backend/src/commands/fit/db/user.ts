@@ -58,6 +58,11 @@ export const update = async (user: User) : Promise<User> => {
   return user;
 }
 
+// Helpers
+
+export const isAuthorized = (user: User | null) : user is Authorized => 
+  !!user && 'refreshToken' in user;
+
 // --------------------------------------------------------------------------------
 //
 // Migrations

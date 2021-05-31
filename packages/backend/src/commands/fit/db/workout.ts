@@ -1,7 +1,7 @@
 import { db } from '@sjbha/app';
 import { Interval } from 'luxon';
-import { FilterQuery } from 'mongodb';
-import { variantModule, TypeNames, VariantOf } from 'variant';
+import { FilterQuery, FindOneOptions, QuerySelector } from 'mongodb';
+import { variantModule, TypeNames, VariantOf, match } from 'variant';
 
 const collection = db<Model> ('fit-exp');
 
@@ -25,23 +25,17 @@ export type Workout = {
 
 type Model = Workout | Workout__V0;
 
-export const find = (query: FilterQuery<Workout>, interval: Interval) : Promise<Workout[]> =>
+export const find = (query: FilterQuery<Workout>, options: FindOneOptions<Workout> = {}) : Promise<Workout[]> =>
   collection ()
-    .find ({
-      ...query,
-      timestamp: {
-        $lt: interval.end.toUTC ().toISO (),
-        $gt: interval.start.toUTC ().toISO (),
-      }
-    })
+    .find (query, options)
     .toArray ()
     .then (a => a.map (migrate));
 
-export const findByActivity = async (activityId: number) : Promise<Workout | null> => 
+export const findOne = (query: FilterQuery<Workout>, options: FindOneOptions<Workout> = {}) : Promise<Workout | null> =>
   collection ()
-    .findOne ({ activity_id: activityId })
+    .findOne (query, options)
     .then (workout => workout ? migrate (workout) : null);
-
+  
 export const insert = async (props: Omit<Workout, '__version'>) : Promise<Workout> => {
   const workout : Workout = { __version: 1, ...props };
 
@@ -56,6 +50,22 @@ export const update = async (workout: Workout) : Promise<void> => {
     workout
   );
 }
+
+export const remove = async (workout: Workout) : Promise<void> => {
+  await collection ().deleteOne ({ activity_id: workout.activity_id });
+}
+
+// Helpers
+
+export const between = (i: Interval) : QuerySelector<Workout['timestamp']> => ({
+  $lt: i.end.toUTC ().toISO (),
+  $gt: i.start.toUTC ().toISO ()
+});
+
+export const expTotal = (exp: Exp) : number => match (exp, {
+  hr:   h => h.moderate + h.vigorous,
+  time: t => t.exp
+});
 
 // --------------------------------------------------------------------------------
 //
