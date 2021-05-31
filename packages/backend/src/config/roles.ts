@@ -1,4 +1,4 @@
-import { IS_PRODUCTION } from './env';
+import { env } from '@sjbha/app';
 
 const production = {
   // Fitness related emojis
@@ -15,5 +15,5 @@ const development: Roles = {
   break_a_sweat:   '748684543497601065',
 };
 
-const roles = IS_PRODUCTION ? production : development;
+const roles = env.IS_PRODUCTION ? production : development;
 export default roles;

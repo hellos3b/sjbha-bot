@@ -1,5 +1,19 @@
-import { DISCORD_TOKEN } from './env';
-import { Client, Message } from 'discord.js';
+import { DISCORD_TOKEN, SERVER_ID } from './env';
+import { Client, Message, GuildMember, APIMessage, TextChannel, APIMessageContentResolvable, MessageEmbed } from 'discord.js';
+import { MessageOptions } from 'child_process';
+
+// Connect
+
+const client = new Client ();
+
+client.on ('ready', () => console.log (`Bastion connected as '${client.user?.tag}'`));
+
+client.on ('message', (msg: Message) => {
+  if (msg.author.bot) return;
+  messageHandler.forEach (f => f (msg));
+});
+
+client.login (DISCORD_TOKEN);
 
 // Message Event
 
@@ -44,96 +58,25 @@ export const onMessage = (...middleware: MessageMiddleware[]) : void => {
   messageHandler.push (compose (...middleware));
 }
 
-// Connect
+// Instance Utilities
+export const Instance = {
+  findMember: async (discordId: string) : Promise<GuildMember> => {
+    const guild = await client.guilds.fetch (SERVER_ID);
+    const member = await guild.members.fetch (discordId);
 
-const client = new Client ();
+    return member;
+  },
 
-client.on ('ready', () => console.log (`Bastion connected as '${client.user?.tag}'`));
+  broadcast: async (channelId: string, message: string | MessageEmbed) : Promise<Message> => {
+    const channel = await client.channels.fetch (channelId);
 
-client.on ('message', (msg: Message) => {
-  if (msg.author.bot) return;
-  messageHandler.forEach (f => f (msg));
-});
+    return (<TextChannel>channel).send (message);
+  },
 
-client.login (DISCORD_TOKEN);
+  editMessage: async (channelId: string, messageId: string, content: string | MessageEmbed) : Promise<Message> => {
+    const channel = await client.channels.fetch (channelId);
+    const message = await (<TextChannel>channel).messages.fetch (messageId);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// const [client, message$] = Client.create(DISCORD_TOKEN);
-
-// export {message$};
-
-// export function command(cmd: string) {
-//   return message$.pipe(M.trigger(cmd));
-// }
-
-// export function broadcast(channelId: string) {
-//   return (content: string | MessageOptions) => pipe(
-//     C.find(channelId)(client),
-//     TE.chainW (C.send(content))
-//   )
-// }
-
-// export function findMember(id: string) {
-//   return pipe(
-//     G.find(SERVER_ID)(client),
-//     TE.chain (U.find(id))
-//   );
-// }
-
-// export const reportError = (original: M.Message) => (error: any) => {
-//   const message = embed(
-//     color(0xff0000),
-//     thumbnail("https://i.imgur.com/gWpSgKI.jpg"),
-//     author("Uncaught " + error.toString()),
-//     error.message && description(error.message),
-//     field("From", true)(`${original.author.username} in <#${original.channel.id}>`),
-//     field("Message", true)(original.content),
-//     error.stack && field("Stack")("```" + error.stack + "```")
-//   );
-
-//   console.error("Command failed to execute: ", {
-//     from: original.author.username,
-//     message: original.content
-//   }, error);
-
-//   if (NODE_ENV === 'production') {
-//     // todo: log it in #botadmin
-//   } else {
-//     original.channel.send(message);
-//   }
-// }
+    return message.edit (content);
+  }
+}

@@ -1,4 +1,4 @@
-import { IS_PRODUCTION } from './env';
+import { env } from '@sjbha/app';
 
 const production = {
   strava:    '450913008323919872',
@@ -14,4 +14,4 @@ const development: Channels = {
   bot_admin: '530597070558461972'
 };
 
-export const channels = IS_PRODUCTION ? production : development;
+export const channels = env.IS_PRODUCTION ? production : development;

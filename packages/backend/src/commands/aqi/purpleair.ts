@@ -1,6 +1,5 @@
 import { convert } from '@shootismoke/convert';
 import { Either } from 'purify-ts';
-import { pipeWith } from 'pipe-ts';
 import superagent from 'superagent';
 import * as R from 'ramda';
 
@@ -80,8 +79,6 @@ export class SensorCollection {
    * @returns The average AQI of all sensors in this collection
    */
   getAverageAqi () : number {
-    const values = Either.rights (this.sensors.map (s => s.getAQI ()));
-
     // A median filter removes noise from an array of values by calculating the median over triplets and creating a new array 
     const medianFilter = (arr: number[]) => {
       // Requires at least 3 to work
@@ -93,12 +90,11 @@ export class SensorCollection {
         .map (R.median);
     }
 
-    return pipeWith (
-      values,
-      medianFilter,
-      R.mean,
-      Math.floor
-    );
+    const values = Either.rights (this.sensors.map (s => s.getAQI ()));
+    const smoothed = medianFilter (values);
+    const rounded = Math.floor (R.mean (smoothed));
+
+    return rounded;
   }
 
   /**

@@ -43,6 +43,7 @@ export const author = (name: string, icon_url?: string): EmbedBuilder =>
 
 /**
  * Creates a field, defaults to inline.
+ * 
  * If the passed in `value` is null, the field will not be added
  */
 export const field = (name: string, inline = false) => (value: number | string | null): EmbedBuilder => 
@@ -57,5 +58,3 @@ export const thumbnail = (url: string): EmbedBuilder =>
 
 export const footer = (value: string): EmbedBuilder => 
   embed => embed.setFooter (value);
-
-// export const code = (type = '') => (content: string) : string => '```' + type + '\n' + content + '```';

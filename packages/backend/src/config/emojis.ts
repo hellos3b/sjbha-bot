@@ -1,4 +1,4 @@
-import { IS_PRODUCTION } from './env';
+import { env } from '@sjbha/app';
 
 const emoji = (name: string, id: string) => ({
   id,
@@ -11,5 +11,5 @@ type Emojis = typeof production;
 
 const development: Emojis = {};
 
-const emojis = IS_PRODUCTION ? production : development;
+const emojis = env.IS_PRODUCTION ? production : development;
 export default emojis;

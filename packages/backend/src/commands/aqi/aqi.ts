@@ -1,12 +1,11 @@
-import { channels, onMessage, MessageHandler } from '@sjbha/app';
-import { restrictToChannel, startsWith } from '@sjbha/utils/message-middleware';
+import { MessageHandler } from '@sjbha/app';
 
 import * as Config from './config';
 import * as PurpleAir from './purpleair';
 
 import { description, embed, title, color, footer } from '@sjbha/utils/embed';
 
-const aqi : MessageHandler = async message => {
+export const aqi : MessageHandler = async message => {
   const sensors = await PurpleAir.SensorCollection.fetchIds (Config.sensorIds);
   const aqi = sensors.getAverageAqi ();
 
@@ -38,9 +37,3 @@ const aqi : MessageHandler = async message => {
 
   message.channel.send (reply);
 }
-
-onMessage (
-  startsWith ('!aqi'),
-  restrictToChannel (channels.shitpost, 'AQI command is limited to #shitpost'),
-  aqi
-);

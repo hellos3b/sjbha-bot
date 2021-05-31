@@ -1,4 +1,5 @@
-import { MessageHandler, MessageMiddleware, channels } from '@sjbha/app';
+import { MessageHandler, MessageMiddleware } from '@sjbha/app';
+import { channels } from '@sjbha/config';
 
 /**
  * Filters for messages that start with a string.
@@ -71,8 +72,6 @@ export const restrictToChannel = (channelIds: string | string[], replyWith?: str
       message.channel.send (replyWith);
     }
   }
-
-// Specific Helpers
 
 /**
  * Replies directly with a string message
