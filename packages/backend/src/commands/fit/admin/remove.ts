@@ -31,9 +31,9 @@ export const remove : MessageHandler = async message => {
   }
   
   const exp = Workout.expTotal (workout.exp);
-  const msg = new format.MessageBuilder ();
+  const reply = new format.MessageBuilder ();
 
-  msg.addLine (`Removing [${workout.activity_name}]:`);
+  reply.addLine (`Removing **${workout.activity_name}**:`);
 
   const results = await Promise.all ([
     Instance.getMessage (channels.strava, workout.message_id)
@@ -52,9 +52,9 @@ export const remove : MessageHandler = async message => {
       .catch (error => `❌ Failed to delete workout: ${error.message || 'Unknown Error'}`)
   ]);
 
-  results.forEach (msg.addLine);
+  results.forEach (reply.addLine);
 
-  message.channel.send (msg.toString ());
+  message.channel.send (reply.toString ());
 }
 
 const throwIfUnauthorized = (user: User.User | null) : User.Authorized => {

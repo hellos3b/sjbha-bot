@@ -9,7 +9,14 @@ import * as Workout from '../db/workout';
 export const list : MessageHandler = async message => {
   const workouts = await Workout.find ({}, { limit: 20 });
 
+  // todo: Ensure chronological order
   const rows = await Promise.all (workouts.map (formatRow));
+
+  if (!rows.length) {
+    message.reply ('No recent workouts');
+
+    return;
+  }
   
   message.channel.send (
     format.code (table (rows, {
