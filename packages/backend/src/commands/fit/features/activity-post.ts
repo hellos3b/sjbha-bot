@@ -1,7 +1,8 @@
 import { EmbedField, MessageEmbed } from 'discord.js';
-import { Interval, DateTime, Duration } from 'luxon';
+import { DateTime, Duration } from 'luxon';
 import { Just, Maybe, Nothing } from 'purify-ts';
 import { just, match } from 'variant';
+import * as R from 'ramda';
 
 import { Instance } from '@sjbha/app';
 import { channels } from '@sjbha/config';
@@ -14,6 +15,7 @@ import {
 
 import * as User from '../db/user';
 import * as Workout from '../db/workout';
+import { currentWeek } from '../common/week';
 import { activityEmoji } from '../common/activity-emoji';
 
 
@@ -36,24 +38,39 @@ export const postWorkout = async (stravaId: number, activityId: number) : Promis
   }
 
   const client = await StravaClient.authenticate (user.refreshToken);
+  const thisWeek = currentWeek ();
 
   // Fetch all the data we need
   const [member, workouts, activity, streams] = await Promise.all ([
     Instance.findMember (user.discordId),
     Workout.find ({ 
       discord_id: user.discordId,
-      timestamp:  Workout.between (Interval.before (DateTime.local (), { days: 30 }))
+      timestamp:  Workout.between (thisWeek)
     }),
     client.getActivity (activityId),
     client.getActivityStreams (activityId).catch (_ => [])
   ]);
 
-  // Create the workout
+  const timestamp = DateTime.fromISO (activity.start_date);
+
+  // We only care about workouts done or updated in this week
+  if (!thisWeek.contains (timestamp)) {
+    console.log (
+      `Not posting activity ${activityId}, activity is not from this week`, 
+      { timestamp: timestamp.toString (), week: thisWeek.toString () }
+    );
+
+    return;
+  }
+
+  // Exp gained from this workout
   const exp = calculateExp (user.maxHR, activity, streams);
+
+  // Exp from all other workouts this week
   const weeklyExp = Workout.expTotal (exp) + workouts
     .filter (w => w.activity_id !== activity.id)
     .map (w => Workout.expTotal (w.exp))
-    .reduce ((sum, exp) => sum + exp, 0);
+    .reduce (R.add, 0);
 
   // Build the Embed
   const embed = new MessageEmbed ()
@@ -65,7 +82,7 @@ export const postWorkout = async (stravaId: number, activityId: number) : Promis
     .setFooter (gainedText (exp) + ' | ' + format.exp (weeklyExp) + ' exp this week');
 
   // Check if workout has been recorded already
-  const previouslyRecorded = workouts.find (workout => workout.activity_id === activity.id);
+  const previouslyRecorded = await Workout.findOne ({ activity_id: activity.id });
 
   // Update if exists
   if (previouslyRecorded) {
@@ -105,7 +122,7 @@ export const postWorkout = async (stravaId: number, activityId: number) : Promis
 
       User.update ({
         ...user,
-        xp: Workout.expTotal (exp)
+        xp: user.xp + Workout.expTotal (exp)
       })
     ]);
   }
@@ -138,11 +155,12 @@ const calculateExp = (maxHeartrate: number | undefined, activity: Activity, stre
   if (maxHeartrate && hr.length && time.length) {
     const moderate = maxHeartrate * 0.5;
     const vigorous = maxHeartrate * 0.75;
+
     let moderateSeconds = 0;
     let vigorousSeconds = 0;
 
     for (let i = 0; i < hr.length; i++) {
-      const bpm = hr[0];
+      const bpm = hr[i];
       const seconds = (time[i + 1])
         ? (time[i + 1] - time[i])
         : 0;
@@ -155,7 +173,10 @@ const calculateExp = (maxHeartrate: number | undefined, activity: Activity, stre
       }
     }
 
-    return Workout.Exp.hr (moderateSeconds, vigorousSeconds * 2);
+    return Workout.Exp.hr (
+      moderateSeconds / 60, 
+      (vigorousSeconds / 60) * 2
+    );
   }
   else {
     const minutes = Duration

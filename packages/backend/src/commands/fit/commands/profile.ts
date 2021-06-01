@@ -31,11 +31,12 @@ export const profile : MessageHandler = async message => {
   embed.setColor (displayColor);
   embed.setAuthor (username, message.author.displayAvatarURL ());
 
-  // Profile stats are based on the last 30 days
+  // All workouts in the last 30 days
   const workouts = await Workout
     .find ({ timestamp: Workout.between (Interval.before (DateTime.local (), { days: 30 })) })
     .then (WorkoutCollection.of);
 
+  // User's workouts in the last 30 days
   const profileWorkouts = workouts.filter (w => w.discord_id === user.discordId);
 
   // Small overview of favorite activity for the description
@@ -62,20 +63,22 @@ export const profile : MessageHandler = async message => {
   //   embed.setDescription ('No activities recorded in the last 30 days. Get to steppin!');
   // }
 
-  // Progression stats
-
+  // User's current rank name
   const rank = getRank (user.fitScore);
-  const weekStart = currentWeek ().start.toUTC ();
-  const weekly = profileWorkouts.filter (w => w.timestamp >= weekStart.toISO ());
-
   embed.addField ('Rank', rank, true);
+  
+  // Lifetime EXP gained
   embed.addField ('Total EXP', formatExp (user.xp), true);
+
+  // The start of the week, used for EXP promotion calculation
+  const weekStart = currentWeek ().start.toUTC ();
+
+  // Collection of workouts that apply to this week's promotion
+  const weekly = profileWorkouts.filter (w => w.timestamp >= weekStart.toISO ());
   embed.addField ('Weekly EXP', formatExp (weekly.totalExp), true); 
 
-  // Show the most recent
-
-  profileWorkouts
-    .getRecent ()
+  // The user's most recently recorded workout
+  profileWorkouts.getRecent ()
     .map (w => [
       activityEmoji ({ type: <ActivityType>w.activity_type }, user.gender),
       w.activity_name,

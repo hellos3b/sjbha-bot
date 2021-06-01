@@ -1,6 +1,9 @@
 import { MessageHandler } from '@sjbha/app';
 import * as format from '@sjbha/utils/string-formatting';
 
+/**
+ * Show a help string 
+ */
 export const help : MessageHandler = message => {
   const help = format.help ({
     preface:     'Read this for an explanation on how the bot works with strava:\n<https://github.com/hellos3b/sjbha-bot/blob/ts-fit/src/plugins/fit/README.md>',

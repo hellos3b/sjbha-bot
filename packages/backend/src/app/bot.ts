@@ -1,6 +1,5 @@
 import { DISCORD_TOKEN, SERVER_ID } from './env';
-import { Client, Message, GuildMember, APIMessage, TextChannel, APIMessageContentResolvable, MessageEmbed } from 'discord.js';
-import { MessageOptions } from 'child_process';
+import { Client, Message, GuildMember, TextChannel, MessageEmbed } from 'discord.js';
 
 // Connect
 
@@ -10,6 +9,7 @@ client.on ('ready', () => console.log (`Bastion connected as '${client.user?.tag
 
 client.on ('message', (msg: Message) => {
   if (msg.author.bot) return;
+
   messageHandler.forEach (f => f (msg));
 });
 

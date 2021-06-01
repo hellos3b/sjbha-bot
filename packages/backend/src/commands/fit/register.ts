@@ -6,13 +6,15 @@ import { routes, startsWith } from '@sjbha/utils/message-middleware';
 import { auth } from './commands/auth';
 import { help } from './commands/help';
 import { profile } from './commands/profile';
+import { balance } from './commands/balance';
 
 onMessage (
   startsWith ('!fit'),
   routes ({
     auth:    auth,
     profile: profile,
-    empty:   help
+    balance: balance,
+    empty:   help,
   })
 );
 

@@ -52,7 +52,11 @@ export const remove : MessageHandler = async message => {
       .catch (error => `❌ Failed to delete workout: ${error.message || 'Unknown Error'}`)
   ]);
 
-  results.forEach (reply.addLine);
+
+  const resultLog = new format.MessageBuilder ();
+  results.forEach (resultLog.addLine);
+
+  reply.addLine (resultLog.toCode ());
 
   message.channel.send (reply.toString ());
 }

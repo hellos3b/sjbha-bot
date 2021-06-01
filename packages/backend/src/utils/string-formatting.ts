@@ -1,5 +1,4 @@
-export const code = (content: string, format = '') : string => 
-['```' + format, content, '```'].join ('\n');
+export const code = (content: string, format = '') : string => ['```' + format, content, '```'].join ('\n');
 
 export const inlineCode = (content: string) : string => '`' + content + '`';
 
