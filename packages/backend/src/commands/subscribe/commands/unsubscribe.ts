@@ -7,6 +7,10 @@ import { Subscriptions } from '../db/subscription';
 export const unsubscribe : MessageHandler = async message => {
   const [_, target] = message.content.split (' ');
 
+  if (!message.member) {
+    throw new Error ('Subscription commands should not work in DMs');
+  }
+
   if (!target) {
     message.reply (`No subscription named '${target}' found. Use '!subscribe' to view a list of possible subscriptions`);
 
@@ -21,12 +25,12 @@ export const unsubscribe : MessageHandler = async message => {
     return;
   }
 
-  if (!message.member?.roles.cache.has (sub.id)) {
+  if (!message.member.roles.cache.has (sub.id)) {
     message.reply (`You aren't subscribed to ${sub.name}`);
 
     return;
   }
   
-  await message.member?.roles.remove (sub.id);
+  await message.member.roles.remove (sub.id);
   message.reply ('Unsubscribed from ' + sub.name);
 }

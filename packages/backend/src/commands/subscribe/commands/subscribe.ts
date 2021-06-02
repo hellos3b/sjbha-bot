@@ -4,6 +4,10 @@ import { Subscriptions } from '../db/subscription';
 export const subscribe : MessageHandler = async message => {
   const [_, name] = message.content.split (' ');
 
+  if (!message.member) {
+    throw new Error ('Subscription commands should not work in DMs');
+  }
+
   const sub = await Subscriptions ().findOne ({ name: name.toLowerCase () });
 
   if (!sub) {
@@ -12,12 +16,12 @@ export const subscribe : MessageHandler = async message => {
     return;
   }
 
-  if (message.member?.roles.cache.has (sub.id)) {
+  if (message.member.roles.cache.has (sub.id)) {
     message.reply (`You are already subscribed to ${sub.name}`);
 
     return;
   }
 
-  await message.member?.roles.add (sub.id);
+  await message.member.roles.add (sub.id);
   message.reply ('Subscribed to ' + sub.name);
 }

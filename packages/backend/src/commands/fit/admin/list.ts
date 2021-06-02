@@ -27,7 +27,8 @@ export const list : MessageHandler = async message => {
 }
 
 const formatRow = async (workout: Workout.Workout) : Promise<string[]> => {
-  const username = await Instance.findMember (workout.discord_id)
+  const username = await Instance
+    .fetchMember (workout.discord_id)
     .then (member => member.displayName)
     .catch (() => '<unknown>');
   

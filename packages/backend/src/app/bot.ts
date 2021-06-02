@@ -1,5 +1,5 @@
 import { DISCORD_TOKEN, SERVER_ID } from './env';
-import { Client, Message, GuildMember, TextChannel, MessageEmbed } from 'discord.js';
+import { Client, Message, GuildMember, TextChannel } from 'discord.js';
 
 // Connect
 
@@ -60,20 +60,24 @@ export const onMessage = (...middleware: MessageMiddleware[]) : void => {
 
 // Instance Utilities
 export const Instance = {
-  findMember: async (discordId: string) : Promise<GuildMember> => {
+  fetchMember: async (discordId: string) : Promise<GuildMember> => {
     const guild = await client.guilds.fetch (SERVER_ID);
     const member = await guild.members.fetch (discordId);
 
     return member;
   },
 
-  broadcast: async (channelId: string, message: string | MessageEmbed) : Promise<Message> => {
+  fetchChannel: async (channelId: string) : Promise<TextChannel> => {
     const channel = await client.channels.fetch (channelId);
+    
+    if (channel.type !== 'dm' && channel.type !== 'text') {
+      throw new Error ('Channel is not of type \'dm\' or \'text');
+    }
 
-    return (<TextChannel>channel).send (message);
+    return <TextChannel>channel;
   },
 
-  getMessage: async (channelId: string, messageId: string) : Promise<Message> => {
+  fetchMessage: async (channelId: string, messageId: string) : Promise<Message> => {
     const channel = await client.channels.fetch (channelId);
     const message = await (<TextChannel>channel).messages.fetch (messageId);
 

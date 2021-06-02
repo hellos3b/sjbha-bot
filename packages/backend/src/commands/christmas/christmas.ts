@@ -1,33 +1,23 @@
 import { env, MessageHandler } from '@sjbha/app';
-import { DateTime } from 'luxon';
+import { DateObjectUnits, DateTime } from 'luxon';
 
 const festivize = (msg: string) => `🎄☃️☃️🎄🎁 ${msg} 🎁🎄☃️☃️🎄`;
 const pluralize = (word: string, count: number) => word + (count === 1 ? '' : 'S');
+
+const resetTime : DateObjectUnits = {
+  hour: 0, minute: 0, second: 0, millisecond: 0
+};
 
 export const christmas : MessageHandler = message => {
   const now = DateTime
     .local ()
     .setZone (env.TIME_ZONE)
-    .set ({ 
-      hour:   0, 
-      minute: 0, 
-      second: 0, 
-      
-      millisecond: 0 
-    });
+    .set (resetTime);
 
   const xmas = DateTime
     .local ()
     .setZone (env.TIME_ZONE)
-    .set ({
-      month:  12, 
-      day:    25,
-      hour:   0, 
-      minute: 0, 
-      second: 0, 
-      
-      millisecond: 0
-    });
+    .set ({ ...resetTime, month: 12,  day: 25 });
 
   let diff = xmas.diff (now, 'days');
 

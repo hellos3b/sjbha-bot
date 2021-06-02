@@ -59,10 +59,11 @@ export const authAccept : Route = async req => {
 
   // Send an update to the user
   // todo: Add instructions in the message
-  Instance.findMember (user.discordId)
-    .then (member => {
-      member.send ('Congrats on connecting! I should add some instructions on what to do next! TODO YAY')
-    });
+  Instance
+    .fetchMember (user.discordId)
+    .then (member => member.send (`
+      Congrats on connecting! I should add some instructions on what to do next! TODO YAY
+    `));
 
   return 'You have been authorized with the bot, now go workout!';
 }

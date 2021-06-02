@@ -2,6 +2,7 @@ import { convert } from '@shootismoke/convert';
 import { Either } from 'purify-ts';
 import superagent from 'superagent';
 import * as R from 'ramda';
+import { variantList, TypeNames, VariantOf } from 'variant';
 
 export interface Response {
   readonly results: SensorData[];
@@ -78,7 +79,7 @@ export class SensorCollection {
    * 
    * @returns The average AQI of all sensors in this collection
    */
-  getAverageAqi () : number {
+  getAverageAqi () : AQI {
     // A median filter removes noise from an array of values by calculating the median over triplets and creating a new array 
     const medianFilter = (arr: number[]) => {
       // Requires at least 3 to work
@@ -92,9 +93,8 @@ export class SensorCollection {
 
     const values = Either.rights (this.sensors.map (s => s.getAQI ()));
     const smoothed = medianFilter (values);
-    const rounded = Math.floor (R.mean (smoothed));
 
-    return rounded;
+    return new AQI (R.mean (smoothed));
   }
 
   /**
@@ -111,5 +111,40 @@ export class SensorCollection {
     const sensors = response.results.map (s => new Sensor (s));
   
     return new SensorCollection (sensors);
+  }
+}
+
+/**
+ * A readable impression of the aqi number
+ */
+const Level = variantList ([
+  'good',
+  'sketchy',
+  'bad',
+  'terrible'
+]);
+
+export type Level<T extends TypeNames<typeof Level> = undefined>= VariantOf<typeof Level, T>;
+
+export class AQI {
+  constructor (
+    public readonly value: number
+  ) {}
+
+  get level () : Level {
+    if (this.value < 50)
+      return Level.good ();
+
+    if (this.value < 100)
+      return Level.sketchy ();
+
+    if (this.value < 150)
+      return Level.bad ();
+
+    return Level.terrible ();
+  }
+
+  toString () : string {
+    return this.value.toFixed (0);
   }
 }

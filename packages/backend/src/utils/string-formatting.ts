@@ -3,21 +3,33 @@ export const code = (content: string, format = '') : string => ['```' + format, 
 export const inlineCode = (content: string) : string => '`' + content + '`';
 
 export class MessageBuilder {
-  private value: string[] = [];
+  private value = '';
 
-  addLine = (content: string) : MessageBuilder => {
-    this.value.push (content);
-
-    return this;
-  }
-
-  addSpace = () : MessageBuilder => {
-    this.value.push (' ');
+  append = (content: string) : MessageBuilder => {
+    this.value += content + '\n';
 
     return this;
   }
 
-  toString = () : string => this.value.join ('\n');
+  space = () : MessageBuilder => {
+    this.value += '\n';
+
+    return this;
+  }
+
+  beginCode = (format = '') : MessageBuilder => {
+    this.value += '\n```' + format + '\n';
+
+    return this;
+  }
+
+  endCode = () : MessageBuilder => {
+    this.value += '\n```\n';
+
+    return this;
+  }
+
+  toString = () : string => this.value;
 
   toCode = (format = '') : string => code (this.toString (), format);
 }
@@ -35,12 +47,12 @@ export type HelpOptions = {
 export const help = (options: HelpOptions) : string => {
   const output = new MessageBuilder ();
 
-  output.addLine ('# ' + options.commandName);
-  output.addLine ('  ' + options.description);
-  output.addSpace ();
+  output.append ('# ' + options.commandName);
+  output.append ('  ' + options.description);
+  output.space ();
 
-  output.addLine ('# Usage');
-  output.addLine ('  ' + options.usage);
+  output.append ('# Usage');
+  output.append ('  ' + options.usage);
 
   if (options.commands) {
     const commands = options.commands;
@@ -48,10 +60,10 @@ export const help = (options: HelpOptions) : string => {
     const longestCmdLength = keys.reduce ((len, word) => word.length > len ? word.length : len, 0);
     const padEnd = longestCmdLength + 2;
 
-    output.addSpace ();
-    output.addLine ('# Commands');
+    output.space ();
+    output.append ('# Commands');
     keys.forEach (k => {
-      output.addLine ('  ' + k.padEnd (padEnd) + commands[k]);
+      output.append ('  ' + k.padEnd (padEnd) + commands[k]);
     });
   }
 

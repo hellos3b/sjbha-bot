@@ -42,7 +42,7 @@ export const postWorkout = async (stravaId: number, activityId: number) : Promis
 
   // Fetch all the data we need
   const [member, workouts, activity, streams] = await Promise.all ([
-    Instance.findMember (user.discordId),
+    Instance.fetchMember (user.discordId),
     Workout.find ({ 
       discord_id: user.discordId,
       timestamp:  Workout.between (thisWeek)
@@ -89,7 +89,7 @@ export const postWorkout = async (stravaId: number, activityId: number) : Promis
     const expDiff = Workout.expTotal (exp) - Workout.expTotal (previouslyRecorded.exp);
 
     await Instance
-      .getMessage (channels.strava, previouslyRecorded.message_id)
+      .fetchMessage (channels.strava, previouslyRecorded.message_id)
       .then (message => message.edit (embed));
 
     await Promise.all ([
@@ -107,7 +107,9 @@ export const postWorkout = async (stravaId: number, activityId: number) : Promis
   }
   // Create new workout if doesn't
   else {
-    const message = await Instance.broadcast (channels.strava, embed);
+    const message = await Instance
+      .fetchChannel (channels.strava)
+      .then (c => c.send (embed));
 
     await Promise.all ([
       Workout.insert ({

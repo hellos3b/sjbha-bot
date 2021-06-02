@@ -32,8 +32,9 @@ export const profile : MessageHandler = async message => {
   embed.setAuthor (username, message.author.displayAvatarURL ());
 
   // All workouts in the last 30 days
+  const thirtyDays = Interval.before (DateTime.local (), { days: 30 });
   const workouts = await Workout
-    .find ({ timestamp: Workout.between (Interval.before (DateTime.local (), { days: 30 })) })
+    .find ({ timestamp: Workout.between (thirtyDays) })
     .then (WorkoutCollection.of);
 
   // User's workouts in the last 30 days

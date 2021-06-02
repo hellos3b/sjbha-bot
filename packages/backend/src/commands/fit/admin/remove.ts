@@ -33,10 +33,10 @@ export const remove : MessageHandler = async message => {
   const exp = Workout.expTotal (workout.exp);
   const reply = new format.MessageBuilder ();
 
-  reply.addLine (`Removing **${workout.activity_name}**:`);
+  reply.append (`Removing **${workout.activity_name}**:`);
 
   const results = await Promise.all ([
-    Instance.getMessage (channels.strava, workout.message_id)
+    Instance.fetchMessage (channels.strava, workout.message_id)
       .then (message => message.delete ())
       .then (_ => `-> Deleted message ${workout.message_id}`)
       .catch (error => `❌ Failed to delete message: ${error.message || 'Unknown error'}`),
@@ -52,11 +52,9 @@ export const remove : MessageHandler = async message => {
       .catch (error => `❌ Failed to delete workout: ${error.message || 'Unknown Error'}`)
   ]);
 
-
-  const resultLog = new format.MessageBuilder ();
-  results.forEach (resultLog.addLine);
-
-  reply.addLine (resultLog.toCode ());
+  reply.beginCode ();
+  results.forEach (reply.append);
+  reply.endCode ();
 
   message.channel.send (reply.toString ());
 }

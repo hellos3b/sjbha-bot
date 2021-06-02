@@ -7,6 +7,7 @@ import { auth } from './commands/auth';
 import { help } from './commands/help';
 import { profile } from './commands/profile';
 import { balance } from './commands/balance';
+import { leaders } from './commands/leaders';
 
 onMessage (
   startsWith ('!fit'),
@@ -14,7 +15,9 @@ onMessage (
     auth:    auth,
     profile: profile,
     balance: balance,
-    empty:   help,
+    leaders: leaders,
+    help:    help,
+    empty:   help
   })
 );
 

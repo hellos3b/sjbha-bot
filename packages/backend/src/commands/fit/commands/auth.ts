@@ -27,11 +27,11 @@ export const auth : MessageHandler = async message => {
 
   const dm = new format.MessageBuilder ();
 
-  dm.addLine ('Welcome to the fitness channel!');
-  dm.addSpace ();
+  dm.append ('Welcome to the fitness channel!');
+  dm.space ();
 
-  dm.addLine ('Click here to authorize the bot: ' + authUrl);
-  dm.addLine ('You will be asked to authorize your account with the SJBHA bot. If you do not have a strava account, you can sign up here: <https://www.strava.com>');
+  dm.append ('Click here to authorize the bot: ' + authUrl);
+  dm.append ('You will be asked to authorize your account with the SJBHA bot. If you do not have a strava account, you can sign up here: <https://www.strava.com>');
 
   message.author.send (dm.toString ());
   message.reply ('Check your DMs for instructions on how to connect with strava');
