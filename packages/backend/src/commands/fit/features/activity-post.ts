@@ -1,10 +1,9 @@
-import { EmbedField, MessageEmbed } from 'discord.js';
 import { DateTime, Duration } from 'luxon';
 import { Just, Maybe, Nothing } from 'purify-ts';
 import { just, match } from 'variant';
 import * as R from 'ramda';
 
-import { Instance } from '@sjbha/app';
+import { Instance, EmbedField, MessageEmbed } from '@sjbha/app';
 import { channels } from '@sjbha/config';
 
 import { 
@@ -75,8 +74,8 @@ export const postWorkout = async (stravaId: number, activityId: number) : Promis
   // Build the Embed
   const embed = new MessageEmbed ()
     .setColor (member.displayColor)
-    .setAuthor (activityEmoji (activity, user.gender) + ' ' + member.displayName + ' ' + justDid (activity))
-    .setThumbnail (member.user.displayAvatarURL ())
+    .setAuthor (activityEmoji (activity, user.gender) + ' ' + member.nickname + ' ' + justDid (activity))
+    .setThumbnail (member.avatar)
     .setDescription (activity.description)
     .addFields (activityStats (activity))
     .setFooter (gainedText (exp) + ' | ' + format.exp (weeklyExp) + ' exp this week');

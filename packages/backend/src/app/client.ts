@@ -1,16 +1,19 @@
 import { DISCORD_TOKEN, SERVER_ID } from './env';
-import { Client, TextChannel, Message, GuildMember } from 'discord.js';
+import * as Discord from 'discord.js';
+
+import { Member, Message, TextChannel } from './discord-js';
 
 // Connect
 
-const client = new Client ();
+const client = new Discord.Client ();
 
 client.on ('ready', () => console.log (`Bastion connected as '${client.user?.tag}'`));
 
-client.on ('message', (msg: Message) => {
+client.on ('message', (msg: Discord.Message) => {
   if (msg.author.bot) return;
 
-  [...messageHandlers].forEach (f => f (msg));
+  const message = Message (msg);
+  [...messageHandlers].forEach (f => f (message));
 });
 
 client.login (DISCORD_TOKEN);
@@ -66,11 +69,11 @@ export const onMessage = (...middleware: MessageMiddleware[]) : UnsubscribeHandl
 
 // Instance Utilities
 export const Instance = {
-  fetchMember: async (discordId: string) : Promise<GuildMember> => {
+  fetchMember: async (discordId: string) : Promise<Member> => {
     const guild = await client.guilds.fetch (SERVER_ID);
     const member = await guild.members.fetch (discordId);
 
-    return member;
+    return Member (member);
   },
 
   fetchChannel: async (channelId: string) : Promise<TextChannel> => {
@@ -80,13 +83,13 @@ export const Instance = {
       throw new Error ('Channel is not of type \'dm\' or \'text');
     }
 
-    return <TextChannel>channel;
+    return TextChannel (<Discord.TextChannel>channel);
   },
 
   fetchMessage: async (channelId: string, messageId: string) : Promise<Message> => {
     const channel = await client.channels.fetch (channelId);
-    const message = await (<TextChannel>channel).messages.fetch (messageId);
+    const message = await (<Discord.TextChannel>channel).messages.fetch (messageId);
 
-    return message;
+    return Message (message);
   }
 }

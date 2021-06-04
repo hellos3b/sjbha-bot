@@ -1,6 +1,5 @@
-import { onMessage, Instance } from '@sjbha/app';
+import { onMessage, Instance, Message } from '@sjbha/app';
 import { MessageBuilder } from './string-formatting';
-import type { Message } from 'discord.js';
 import { Maybe } from 'purify-ts';
 
 export namespace Interaction {

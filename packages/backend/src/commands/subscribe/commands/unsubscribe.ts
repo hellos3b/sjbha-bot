@@ -1,36 +1,31 @@
 import { MessageHandler } from '@sjbha/app';
+import { Left, Right } from 'purify-ts';
 import { Subscriptions } from '../db/subscription';
 
 /**
  * List the available subscriptions that are in the database
  */
 export const unsubscribe : MessageHandler = async message => {
-  const [_, target] = message.content.split (' ');
-
-  if (!message.member) {
-    throw new Error ('Subscription commands should not work in DMs');
-  }
-
-  if (!target) {
-    message.reply (`No subscription named '${target}' found. Use '!subscribe' to view a list of possible subscriptions`);
-
-    return;
-  }
-
-  const sub = await Subscriptions ().findOne ({ name: target.toLowerCase () });
+  const [_, name] = message.content.split (' ');
+  const sub = await Subscriptions ().findOne ({ name: name.toLowerCase () });
 
   if (!sub) {
-    message.reply (`No subscription named '${target}' found. Use '!subscribe' to view a list of possible subscriptions`);
+    message.reply (`No subscription named '${name}' found. Use '!subscribe' to view a list of possible subscriptions`);
 
     return;
   }
 
-  if (!message.member.roles.cache.has (sub.id)) {
-    message.reply (`You aren't subscribed to ${sub.name}`);
+  const member = message.member
+    .toEither ('You cannot subscribe in DMs')
+    .chain (m => m.roles.has (sub.id) 
+      ? Left ('You are already subscribed to ' + sub.name)
+      : Right (m)
+    );
 
-    return;
-  }
-  
-  await message.member.roles.remove (sub.id);
-  message.reply ('Unsubscribed from ' + sub.name);
+  const removeRole = member.caseOf ({
+    Left:  error => Promise.resolve (error),
+    Right: m => m.roles.remove (sub.id).then (_ => 'Unsubscribed from ' + sub.name)
+  });
+
+  removeRole.then (message.reply);
 }

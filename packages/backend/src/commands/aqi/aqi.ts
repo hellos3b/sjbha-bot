@@ -1,10 +1,8 @@
-import { MessageHandler } from '@sjbha/app';
+import { MessageHandler, MessageEmbed } from '@sjbha/app';
+import { lookup } from 'variant';
 
 import * as Config from './config';
 import * as PurpleAir from './purpleair';
-
-import { MessageEmbed } from 'discord.js';
-import { lookup } from 'variant';
 
 export const aqi : MessageHandler = async message => {
   const sensors = await PurpleAir.SensorCollection.fetchIds (Config.sensorIds);

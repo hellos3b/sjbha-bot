@@ -1,5 +1,4 @@
-import { MessageHandler } from '@sjbha/app';
-import { MessageEmbed } from 'discord.js';
+import { MessageHandler, MessageEmbed } from '@sjbha/app';
 import { DateTime, Interval } from 'luxon';
 import { Maybe } from 'purify-ts';
 import * as R from 'ramda';
@@ -22,14 +21,13 @@ export const profile : MessageHandler = async message => {
     return;
   }
 
-  const member = Maybe.fromNullable (message.member);
-  const username = member.mapOrDefault (m => m.displayName, message.author.username);
-  const displayColor = member.mapOrDefault (m => m.displayColor, 0xcccccc);
+  const username = message.member.mapOrDefault (m => m.nickname, message.author.username);
+  const displayColor = message.member.mapOrDefault (m => m.displayColor, 0xcccccc);
 
   const embed = new MessageEmbed ();
 
   embed.setColor (displayColor);
-  embed.setAuthor (username, message.author.displayAvatarURL ());
+  embed.setAuthor (username, message.author.avatar);
 
   // All workouts in the last 30 days
   const thirtyDays = Interval.before (DateTime.local (), { days: 30 });

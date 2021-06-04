@@ -1,5 +1,4 @@
-import { Instance, MessageHandler } from '@sjbha/app';
-import { MessageEmbed } from 'discord.js';
+import { Instance, MessageHandler, MessageEmbed } from '@sjbha/app';
 import { DateTime, Interval } from 'luxon';
 import { isType } from 'variant';
 import * as R from 'ramda';
@@ -20,7 +19,7 @@ export const leaders : MessageHandler = async message => {
   // Prefetch & create a dict of username ids -> display names
   const usernameById = await Promise.all (discordIds.map (discordId => 
     Instance.fetchMember (discordId)
-      .then (member => ({ [discordId]: member.displayName }))
+      .then (member => ({ [discordId]: member.nickname }))
       .catch (_ => ({ [discordId]: 'Error' }))
   )).then (R.mergeAll);
 
