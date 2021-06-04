@@ -2,11 +2,14 @@ export const code = (content: string, format = '') : string => ['```' + format, 
 
 export const inlineCode = (content: string) : string => '`' + content + '`';
 
+export const template = (content: string) => (filler: Record<string, number | string>) : string => 
+  content.replace (/{([A-z]+)}/g, (match, idx) => (filler[idx]) ? filler[idx].toString () : match);
+
 export class MessageBuilder {
   private value = '';
 
-  append = (content: string) : MessageBuilder => {
-    this.value += content + '\n';
+  append = (content: string, filler: Record<string, string> = {}) : MessageBuilder => {
+    this.value += template (content) (filler) + '\n';
 
     return this;
   }
@@ -18,13 +21,13 @@ export class MessageBuilder {
   }
 
   beginCode = (format = '') : MessageBuilder => {
-    this.value += '\n```' + format + '\n';
+    this.value += '```' + format + '\n';
 
     return this;
   }
 
   endCode = () : MessageBuilder => {
-    this.value += '\n```\n';
+    this.value += '```\n';
 
     return this;
   }

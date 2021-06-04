@@ -89,3 +89,17 @@ export const adminOnly = () : MessageMiddleware =>
       next ();
     }
   };
+
+
+/**
+ * Restricts a command to the a private DM
+ */
+ export const dmsOnly = (error?: string) : MessageMiddleware => 
+ (message, next) => {
+   if (message.channel.type === 'dm') {
+     next ();
+   }
+   else if (error) {
+     message.reply (error);
+   }
+ };

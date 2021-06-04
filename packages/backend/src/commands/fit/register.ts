@@ -1,5 +1,5 @@
-import { onMessage, router } from '@sjbha/app';
-import { routes, startsWith } from '@sjbha/utils/message-middleware';
+import { onMessage, router, compose } from '@sjbha/app';
+import { dmsOnly, routes, startsWith } from '@sjbha/utils/message-middleware';
 
 // Bot
 
@@ -8,16 +8,21 @@ import { help } from './commands/help';
 import { profile } from './commands/profile';
 import { balance } from './commands/balance';
 import { leaders } from './commands/leaders';
+import { settings } from './commands/settings'
 
 onMessage (
   startsWith ('!fit'),
   routes ({
-    auth:    auth,
-    profile: profile,
-    balance: balance,
-    leaders: leaders,
-    help:    help,
-    empty:   help
+    auth:     auth,
+    profile:  profile,
+    balance:  balance,
+    leaders:  leaders,
+    settings: compose (
+      dmsOnly ('DM me to update your settings!'), 
+      settings
+    ),
+    help:  help,
+    empty: help
   })
 );
 

@@ -38,10 +38,10 @@ export const leaders : MessageHandler = async message => {
 
     let leaders = '';
 
-    leaders += `🏆 ${usernameById[first.discordId]} • **${first.exp.toFixed (1)}** (${first.count})`;
+    leaders += `🏆 ${usernameById[first.discordId]} • **${first.exp.toFixed (1)}** exp (${first.count} workouts)`;
 
     if (second) {
-      leaders += `\n🥈 ${usernameById[first.discordId]} • **${first.exp.toFixed (1)}** (${first.count})`;
+      leaders += `\n🥈 ${usernameById[first.discordId]} • **${first.exp.toFixed (1)}** exp (${first.count} workouts)`;
     }
 
     embed.addField (activity, leaders);

@@ -3,11 +3,12 @@ export * as env from './env';
 export { db } from './mongodb';
 
 export {
+  compose,
   MessageHandler,
   MessageMiddleware,
   onMessage,
   Instance
-} from './bot';
+} from './client';
 
 export { 
   Route,

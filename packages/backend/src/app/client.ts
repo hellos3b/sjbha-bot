@@ -1,5 +1,5 @@
 import { DISCORD_TOKEN, SERVER_ID } from './env';
-import { Client, Message, GuildMember, TextChannel } from 'discord.js';
+import { Client, TextChannel, Message, GuildMember } from 'discord.js';
 
 // Connect
 
@@ -10,7 +10,7 @@ client.on ('ready', () => console.log (`Bastion connected as '${client.user?.tag
 client.on ('message', (msg: Message) => {
   if (msg.author.bot) return;
 
-  messageHandler.forEach (f => f (msg));
+  [...messageHandlers].forEach (f => f (msg));
 });
 
 client.login (DISCORD_TOKEN);
@@ -19,10 +19,12 @@ client.login (DISCORD_TOKEN);
 
 export type MessageHandler = (message: Message) => void;
 
-const messageHandler : MessageHandler[] = [];
+const messageHandlers : Set<MessageHandler> = new Set ();
 
 export type NextFn = () => void;
 export type MessageMiddleware = (message: Message, next: NextFn) => void;
+
+export type UnsubscribeHandler = () => void;
 
 /**
  * Compose a series middleware together to create a command.
@@ -54,8 +56,12 @@ export const compose = (...middlewares: MessageMiddleware[]) : MessageHandler =>
  * 
  * todo: explain middleware
  */
-export const onMessage = (...middleware: MessageMiddleware[]) : void => {
-  messageHandler.push (compose (...middleware));
+export const onMessage = (...middleware: MessageMiddleware[]) : UnsubscribeHandler => {
+  const handler = compose (...middleware);
+
+  messageHandlers.add (handler);
+
+  return () => messageHandlers.delete (handler);
 }
 
 // Instance Utilities

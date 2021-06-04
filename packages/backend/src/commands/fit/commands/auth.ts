@@ -30,7 +30,7 @@ export const auth : MessageHandler = async message => {
   dm.append ('Welcome to the fitness channel!');
   dm.space ();
 
-  dm.append ('Click here to authorize the bot: ' + authUrl);
+  dm.append ('Click here to authorize the bot: {url}', { url: authUrl });
   dm.append ('You will be asked to authorize your account with the SJBHA bot. If you do not have a strava account, you can sign up here: <https://www.strava.com>');
 
   message.author.send (dm.toString ());
