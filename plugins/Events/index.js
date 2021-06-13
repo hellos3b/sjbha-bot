@@ -188,18 +188,23 @@ export default function(bastion, opt={}) {
                 const event = await this.chooseEvent(context, events)
                 if (!event) return log("(edit) Failed to get event"), null
 
-                const update = await this.getUpdated(context, event)
-                if (!update) return log("(edit) Failed to get update string"), null
+                const newProps = await this.getUpdated(context, event)
+                if (!newProps) return log("(edit) Failed to get update string"), null
 
-                const oldEvent = Object.assign({}, event.toJSON().options)
-                oldEvent.date = event.date_str()
+                console.log ("update with:", newProps);
+
+                // This is used just for diff
+                const prevEventJSON = Object.assign({}, event.toJSON().options)
+                prevEventJSON.date = event.date_str()
+
+                console.log ("oldEvent", prevEventJSON);
 
                 log("Editing event", event.toJSON())
-                event.update(update)
+                event.update(newProps)
                 await event.updateAnnouncement(bastion.bot)
 
-                const newEvent = Object.assign({}, event.toJSON().options)
-                newEvent.date = event.date_str()
+                const updatedEventJSON = Object.assign({}, event.toJSON().options)
+                updatedEventJSON.date = event.date_str()
 
                 log("Saving to database")
                 await q.update({ id: event.id() }, event.toJSON())
@@ -207,29 +212,29 @@ export default function(bastion, opt={}) {
                 log("Emitting events-update")
                 bastion.emit("events-update")
 
-                console.log(oldEvent)
-                console.log("options", oldEvent, newEvent)
+                console.log(prevEventJSON)
+                console.log("options", prevEventJSON, updatedEventJSON)
                 // Create the DIFF
                 let changes = ``
                 const compare = (key) => {
-                    console.log(oldEvent[key], "==", newEvent[key])
-                    return oldEvent[key] === newEvent[key]
+                    console.log(prevEventJSON[key], "==", updatedEventJSON[key])
+                    return prevEventJSON[key] === updatedEventJSON[key]
                 }
                 const addChange = (key) => {
                     if (!compare(key)) {
                         changes += `${key}:\n` +
-                            `- ${oldEvent[key]} \n` +
-                            `+ ${newEvent[key]} \n\n`
+                            `- ${prevEventJSON[key]} \n` +
+                            `+ ${updatedEventJSON[key]} \n\n`
                     }
                 }
 
                 addChange('date')
 
                 if (!compare('description')) {
-                    if (newEvent.description.length < 240 && oldEvent.description.length < 240) {
+                    if (updatedEventJSON.description.length < 240 && prevEventJSON.description.length < 240) {
                         changes += `description:\n` +
-                            `- ${oldEvent.description} \n` +
-                            `+ ${newEvent.description} \n \n`
+                            `- ${prevEventJSON.description} \n` +
+                            `+ ${updatedEventJSON.description} \n \n`
                     } else {
                         changes += `description has been updated\n\n`
                     }
@@ -244,7 +249,7 @@ export default function(bastion, opt={}) {
                 updateCompact()
 
                 if (changes.length) {
-                    return `<@${context.userID}> Has updated **${newEvent.name}**\n\nThe following has been updated:` + bastion.helpers.code(changes, 'diff')
+                    return `<@${context.userID}> Has updated **${updatedEventJSON.name}**\n\nThe following has been updated:` + bastion.helpers.code(changes, 'diff')
                 } else {
                     return `You didn't change anything :|`
                 }

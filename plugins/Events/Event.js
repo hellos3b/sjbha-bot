@@ -61,14 +61,19 @@ export default function({
     // Time
     let date_time = date_moment.clone().tz("America/Los_Angeles").format("h:mma")
 
-    console.log("   - MOMENT: ", date_moment)
-
     let meetup_info = `${info} | ${date_str}`
 
     let reactions = { yes: [], maybe: [] }
 
-    this.parseDate = function() {
-        const d = timestamp ? new Date(timestamp) : getParsedDate(date)
+    this.parseDate = function(newDate) {
+        let d;
+
+        if (newDate) {
+            d = getParsedDate (newDate);
+        }
+        else {
+            d = timestamp ? new Date(timestamp) : getParsedDate(date)
+        }
 
         date_moment = new moment(d)
 
@@ -338,10 +343,11 @@ export default function({
     }
 
     this.update = function(new_options) {
+        this.parseDate (new_options.date);
+        
         date = new_options.date;
         info = new_options.name;
         options = new_options;
-        this.parseDate();
         this.updateInfo();
     }
 
