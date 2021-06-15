@@ -6,7 +6,7 @@ import { isOfVariant, isType, lookup, variantList } from 'variant';
 import * as format from '@sjbha/utils/string-formatting';
 
 import * as User from '../db/user';
-import * as Workout from '../db/workout';
+import { Workouts, Exp } from '../db/workout';
 
 /** Controls how wide the chart is */
 const CHART_SIZE = 15;
@@ -31,14 +31,15 @@ export const balance : MessageHandler = async message => {
     return;
   }
 
-  const workouts = await Workout.find ({ 
-    discord_id: user.discordId,
-    timestamp:  Workout.between (Interval.before (DateTime.local (), { days: 14 }))
-  });
+  const last14Days = Interval.before (DateTime.local (), { days: 14 });
+  const workouts = await Workouts ()
+    .recordedBy (user.discordId)
+    .during (last14Days)
+    .find ();
 
   const hrExp = workouts
     .map (w => w.exp)
-    .filter (isType (Workout.Exp.hr));
+    .filter (isType (Exp.hr));
 
   if (hrExp.length < 4) {
     message.reply (`You need at least 4 heartrate workouts in the last 2 weeks to check your balance. You have **${hrExp.length}**`);

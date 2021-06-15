@@ -1,30 +1,84 @@
 import { Route } from '@sjbha/app';
-import { Codec, exactly, number, parseError } from 'purify-ts';
-import Boom from '@hapi/boom';
+import { wait } from '@sjbha/utils/wait';
+import { postWorkout } from '../features/post-workout';
 
-import { postWorkout } from '../features/activity-post';
-
-const NewActivityQuery = Codec.interface ({
-  owner_id:    number,
-  object_id:   number,
-  aspect_type: exactly ('create') // note: if we want to expand to catching updates, we have to change this
-});
+// When an activity is first posted as 'created',
+// We'll give the user some (n) amount of time to edit their activity
+// This set just keeps track of which activities are waiting to post
+const pending = new Set<number> ();
 
 /**
  * After a user accepts on Strava's integrations hook, it will redirect us with an access code and the state we passed (auth token)
  * This route will verify the auth, and then initialize the user's account with defaults
  */
 export const newWorkout : Route = async req => {
-  // Validate request query
-  const params = NewActivityQuery
-    .decode ({ ...req.query })
-    .mapLeft (val => {
-      const error = parseError (val);
-      throw Boom.badRequest ('Failed to decode query', error);
-    })
-    .unsafeCoerce ();
+  const params = req.query as Webhook;
 
-  postWorkout (params.owner_id, params.object_id);
+  console.log ('Webhook Request', params);
 
-  return 'Done';
+  // Webhook gets updates to users profile,
+  // We can ignore these
+  if (params.object_type === 'athlete') {
+    console.warn ('Ignore Athlete Update');
+
+    return 'Ignoring Athlete Update';
+  }
+
+
+  // Do not have a current feature to delete
+  // a posted workout, but it's on the TODO list
+  if (params.aspect_type === 'delete') {
+    console.warn ('Delete not currently supported');
+
+    return 'Delete not currently supported';
+  }
+
+
+  // If this activity is already waiting to be posted
+  // we can just ignore the event
+  if (pending.has (params.object_id)) {
+    console.warn ('Activity is pending, skip');
+
+    return 'Activity is already pending, ignoring';
+  }
+
+
+  // New workouts have a minor delay before being submitted
+  if (params.aspect_type === 'create') {
+    postWithDelay (params.owner_id, params.object_id);
+  }
+  else {
+    postWorkout (params.owner_id, params.object_id);
+  }
+
+  return 'Done!'
+}
+
+
+// Adds a small buffer to the first post
+const postWithDelay = async (athleteId: number, activityId: number) => {
+  pending.add (activityId);
+
+  // Wait a minute before posting
+  await wait (60 * 1000);
+  await postWorkout (athleteId, activityId);
+
+  pending.delete (activityId);
+}
+
+
+/** The JSON Data that is sent as part of the incoming webhook */
+export type Webhook = {
+
+  /** Always either 'activity' or 'athlete' */
+  object_type: 'activity' | 'athlete';
+  
+  /** The unique ID for either the activity or athlete */
+  object_id: number;
+
+  /** The type of action that triggered this event */
+  aspect_type: 'create' | 'update' | 'delete';
+
+  /** The ID of the athlete */
+  owner_id: number;
 }

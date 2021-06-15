@@ -7,7 +7,7 @@ import { auth } from './commands/auth';
 import { help } from './commands/help';
 import { profile } from './commands/profile';
 import { balance } from './commands/balance';
-import { leaders } from './commands/leaders';
+import { leaders } from './commands/leaderboard';
 import { settings } from './commands/settings'
 
 onMessage (
@@ -31,13 +31,15 @@ onMessage (
 import { post } from './admin/post';
 import { list } from './admin/list';
 import { remove } from './admin/remove';
+import { promote } from './admin/promote';
 
 onMessage (
   startsWith ('$fit'),
   routes ({
-    post:   post,
-    list:   list,
-    remove: remove
+    post:    post,
+    list:    list,
+    remove:  remove,
+    promote: promote
   })
 );
 

@@ -1,8 +1,9 @@
 import { db } from '@sjbha/app';
 import { FilterQuery } from 'mongodb';
 import { nanoid } from 'nanoid';
+import type { EmojiSet } from '../common/activity-emoji';
 
-const collection = db<Model> ('fit-users');
+const collection = db<LegacySchema> ('fit-users');
 
 export type MidAuthorization = {
   __version: 1;
@@ -16,15 +17,18 @@ export type Authorized = {
   authToken:    string;
   stravaId:     number;
   refreshToken: string;
-  gender:       string;
+  emojis:       EmojiSet;
   maxHR?:       number;
+  maxRecordedHR?: number;
   xp:           number;
   fitScore:     number;
 }
 
-export type User = Authorized | MidAuthorization;
+export type User = 
+  | Authorized 
+  | MidAuthorization;
 
-type Model = User | User__V0;
+type LegacySchema = User | Schema__V0;
 
 /**
  * Create a new User and insert it into the DB.
@@ -47,12 +51,18 @@ export const init = async (discordId: string) : Promise<User> => {
   return user;
 }
 
+export const find = (q: FilterQuery<User> = {}) : Promise<User[]> =>
+  collection ()
+    .find (q)
+    .toArray ()
+    .then (users => users.map (migrate));
+
 export const findOne = (q: FilterQuery<User>) : Promise<User | null> =>
   collection ()
     .findOne (q)
     .then (user => user ? migrate (user) : null);
 
-export const update = async (user: User) : Promise<User> => {
+export const update = async <T extends User>(user: T) : Promise<T> => {
   await collection ().replaceOne ({ discordId: user.discordId }, user);
 
   return user;
@@ -69,7 +79,7 @@ export const isAuthorized = (user: User | null) : user is Authorized =>
 //
 // --------------------------------------------------------------------------------
 
-const migrate = (model: Model) : User => {
+const migrate = (model: LegacySchema) : User => {
   if (!('__version' in model)) {
     return migrations.v0 (model);
   }
@@ -78,19 +88,22 @@ const migrate = (model: Model) : User => {
 }
 
 const migrations = {
-  v0: (model: User__V0) : Authorized => {
+  v0: (model: Schema__V0) : Authorized => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, ...user } = model;
   
     return {
       ...user,
       __version: 1,
-      authToken: nanoid ()
+      authToken: nanoid (),
+      emojis:    model.gender === 'M'
+        ? 'people-default'
+        : 'people-female',
     };
   }
 }
 
-type User__V0 = {
+type Schema__V0 = {
   discordId:    string;
   password:     string;
   stravaId:     number;

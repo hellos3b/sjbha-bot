@@ -10,8 +10,7 @@ export namespace Interaction {
 
     private filterFn : MapMessage<boolean> = _ => true;
 
-    // todo: increase default timeout
-    private timeout_ms  = 5000;
+    private timeout_ms  = 5 * 60 * 1000;
 
     private timeoutFn : () => void = () => { /** Ah Well! */ };
 
@@ -71,6 +70,12 @@ export namespace Interaction {
 
       return this;
     }
+
+    setTimeout = (ms: number) : Capture<T> => {
+      this.timeout_ms = ms;
+
+      return this;
+    }
     
     /**
      * Triggers the interaction, promise resolves once a filter passes through.
@@ -123,7 +128,13 @@ export namespace Interaction {
    * @param mapfn 
    * @returns Interaction of type T
    */
-  export const capture = <T>(mapfn: MapMessage<T>) : Capture<T> => new Capture (mapfn);
+  export function capture(): Capture<string>;
+  export function capture<T>(mapfn: MapMessage<T>): Capture<T>;
+  export function capture<T>(mapfn?: MapMessage<T>) : Capture<T> | Capture<string> {
+    return (mapfn)
+      ? new Capture<T> (mapfn)
+      : new Capture<string> (msg => msg.content);
+  }
 
   /**
   * Shorthand for creating a capture that returns `true` when the message is a 'Y', otherwise false

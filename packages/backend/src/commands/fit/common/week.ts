@@ -27,11 +27,8 @@ const weekFromDate = (date: DateTime) : Interval => Interval.after (
   Duration.fromObject ({ days: 7 })
 );
 
-// FIXME: temp debugging
-export const currentWeek = () : Interval => previousWeek ();
-
-// export const currentWeek = () : Interval => 
-//   weekFromDate (DateTime.local ());
+export const currentWeek = () : Interval => 
+  weekFromDate (DateTime.local ());
 
 export const previousWeek = () : Interval =>
   weekFromDate (DateTime.local ().minus ({ days: 7 }));

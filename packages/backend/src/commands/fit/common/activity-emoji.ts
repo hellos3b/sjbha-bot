@@ -1,21 +1,80 @@
 import { just, match } from 'variant';
-import { ActivityType } from './StravaClient';
+import * as Workout from '../db/workout';
 
-type Activity = { type: ActivityType };
+export type EmojiSet =
+  | 'people-default'
+  | 'people-female'
+  | 'objects'
+  | 'intensity'
+  | 'intensity-circle';
 
-export const activityEmoji = (activity: Activity, gender = 'M'): string => {
-  const gendered = (male: string, female: string) => 
-    (gender === 'F') ? just (female) : just (male);
+export type WorkoutDetails = {
+  type: string;
+  exp: Workout.Exp;
+}
 
-  return match (activity, {
-    Run:            gendered ('🏃‍♀️', '🏃'),
-    Ride:           gendered ('🚴‍♀️', '🚴'),
-    Yoga:           gendered ('🧘‍♀️', '🧘‍♂️'),
-    Walk:           gendered ('🚶‍♀️', '🚶‍♂️'),
-    Crossfit:       gendered ('🏋️‍♀️', '🏋️‍♂️'),
-    WeightTraining: gendered ('🏋️‍♀️', '🏋️‍♂️'),
-    RockClimbing:   gendered ('🧗‍♂️', '🧗‍♀️'),
-    Hike:           just ('⛰️'),
-    default:        gendered ('🤸‍♀️', '🤸‍♂️'),
-  });
+export const activityEmoji = (workout: WorkoutDetails, set: EmojiSet = 'people-default'): string => {
+  switch (set) {
+    case 'people-default': return match (workout, {
+      Run:            just ('🏃'),
+      Ride:           just ('🚴'),
+      Yoga:           just ('🧘‍♂️'),
+      Walk:           just ('🚶‍♂️'),
+      Hike:           just ('🚶‍♂️'),
+      Crossfit:       just ('🏋️‍♂️'),
+      WeightTraining: just ('🏋️‍♂️'),
+      RockClimbing:   just ('🧗‍♀️'),
+      default:        just ('🤸‍♂️'),
+    });
+
+    case 'people-female': return match (workout, {
+      Run:            just ('🏃‍♀️'),
+      Ride:           just ('🚴‍♀️'),
+      Yoga:           just ('🧘‍♀️'),
+      Walk:           just ('🚶‍♀️'),
+      Hike:           just ('🚶‍♀️'),
+      Crossfit:       just ('🏋️‍♀️'),
+      WeightTraining: just ('🏋️‍♀️'),
+      RockClimbing:   just ('🧗‍♂️'),
+      default:        just ('🤸‍♀️')
+    });
+
+    case 'objects': return match (workout, {
+      Run:            just ('👟'),
+      Ride:           just ('🚲'),
+      Yoga:           just ('☮️'),
+      Walk:           just ('👟'),
+      Hike:           just ('🥾'),
+      Crossfit:       just ('💪'),
+      WeightTraining: just ('💪'),
+      RockClimbing:   just ('⛰️'),
+      default:        just ('💦')
+    });
+
+    case 'intensity': return match (workout.exp, {
+      time: just ('🕒'),
+      hr:   ({ moderate, vigorous }) => {
+        const ratio = moderate / (moderate + vigorous);
+
+        return (ratio === 1) ? '🙂'
+          : (ratio > 0.75) ? '😶'
+          : (ratio > 0.5) ? '😦'
+          : (ratio > 0.25) ? '😨'
+          : '🥵';
+      }
+    });
+
+    case 'intensity-circle': return match (workout.exp, {
+      time: just ('🕒'),
+      hr:   ({ moderate, vigorous }) => {
+        const ratio = moderate / (moderate + vigorous);
+
+        return (ratio === 1) ? '​🟣'
+          : (ratio > 0.75) ? '🟢'
+          : (ratio > 0.5) ? '🟡'
+          : (ratio > 0.25) ? '🟠'
+          : '🔴';
+      }
+    });
+  }
 }

@@ -5,6 +5,7 @@ import { AuthResponse } from '../common/StravaClient';
 
 import { strava } from '../env';
 import * as User from '../db/user';
+import { MessageBuilder } from '@sjbha/utils/string-formatting';
 
 const StravaQuery = Codec.interface ({
   code:  string,
@@ -46,7 +47,7 @@ export const authAccept : Route = async req => {
   // Set the strava id + refresh token, plus additional defaults if user isn't set up
   await User.update ({
     // defaults
-    gender:   auth.athlete.sex,
+    emojis:   'people-default',
     maxHR:    undefined,
     xp:       0,
     fitScore: 0,
@@ -58,12 +59,23 @@ export const authAccept : Route = async req => {
   });
 
   // Send an update to the user
-  // todo: Add instructions in the message
   Instance
     .fetchMember (user.discordId)
-    .then (member => member.send (`
-      Congrats on connecting! I should add some instructions on what to do next! TODO YAY
-    `));
+    .then (member => {
+      const intro = new MessageBuilder ();
+
+      intro.append ('**Welcome to the #fitness channel!**');
+      intro.append ('From now on, when you record an activity on Strava, it will be posted to the fitness channel.');
+      intro.append ('Please note that there is a small minute delay after recording and when it posts. This is so you can edit your workout and add a title!');
+      intro.space ();
+
+      intro.append ('You will get exp for each workout you record. **If you are using a heartrate tracker** -- such as a garmin, fitbit, apple watch, or any other device -- You can get bonus exp for harder efforts. For this feature to work, set your max heartrate by sending me a message with `!fit settings`');
+      intro.space ();
+
+      intro.append ('Have fun, and make sure to hit those blob cheers!')
+
+      member.send (intro.toString ());
+    });
 
   return 'You have been authorized with the bot, now go workout!';
 }

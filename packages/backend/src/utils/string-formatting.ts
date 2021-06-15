@@ -1,6 +1,8 @@
-export const code = (content: string, format = '') : string => ['```' + format, content, '```'].join ('\n');
+type Stringable = number | string;
 
-export const inlineCode = (content: string) : string => '`' + content + '`';
+export const code = (content: Stringable, format = '') : string => ['```' + format, content, '```'].join ('\n');
+
+export const inlineCode = (content: Stringable) : string => '`' + content + '`';
 
 export const template = (content: string) => (filler: Record<string, number | string>) : string => 
   content.replace (/{([A-z]+)}/g, (match, idx) => (filler[idx]) ? filler[idx].toString () : match);

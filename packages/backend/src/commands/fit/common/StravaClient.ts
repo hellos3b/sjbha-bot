@@ -75,6 +75,9 @@ type BaseActivity = {
   readonly description: string;
   readonly manual: boolean;
   readonly private: boolean;
+
+  /** Workout type is used to check if something is an activity, workout, or race. */
+  readonly workout_type: undefined | WorkoutType;
 }
 
 /**
@@ -90,7 +93,29 @@ type ActivityHeartrate =
     readonly max_heartrate: number;
   };
 
-export type Activity = BaseActivity & ActivityHeartrate
+type ActivityPower =
+  | {
+    readonly device_watts: false
+  }
+  | {
+    readonly device_watts: true;
+    readonly weighted_average_watts: number;
+    readonly max_watts: number;
+  }
+
+export type Activity = BaseActivity & ActivityHeartrate & ActivityPower;
+
+export type WorkoutType = typeof WorkoutType[keyof typeof WorkoutType];
+export const WorkoutType = <const>{
+  Run:            0,
+  RunningRace:    1,
+  RunningLong:    2,
+  RunningWorkout: 3,
+  Ride:           10,
+  RideRace:       11,
+  RideWorkout:    12
+};
+
 
 /**
  * @see https://developers.strava.com/docs/reference/#api-Streams-getActivityStreams

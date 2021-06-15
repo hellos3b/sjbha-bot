@@ -31,8 +31,13 @@ export const auth : MessageHandler = async message => {
   dm.space ();
 
   dm.append ('Click here to authorize the bot: {url}', { url: authUrl });
+  dm.space ();
+  
   dm.append ('You will be asked to authorize your account with the SJBHA bot. If you do not have a strava account, you can sign up here: <https://www.strava.com>');
 
   message.author.send (dm.toString ());
-  message.reply ('Check your DMs for instructions on how to connect with strava');
+
+  if (message.channel.type !== 'dm') {
+    message.reply ('Check your DMs for instructions on how to connect with strava');
+  }
 }

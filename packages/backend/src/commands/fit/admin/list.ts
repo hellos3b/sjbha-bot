@@ -1,13 +1,12 @@
 import { Instance, MessageHandler } from '@sjbha/app';
 
 import * as format from '@sjbha/utils/string-formatting';
-import { DateTime } from 'luxon';
 import { table } from 'table';
 
-import * as Workout from '../db/workout';
+import { Workouts, Workout } from '../db/workout';
 
 export const list : MessageHandler = async message => {
-  const workouts = await Workout.find ({}, { limit: 20 });
+  const workouts = await Workouts ().limit (20).find ();
 
   // todo: Ensure chronological order
   const rows = await Promise.all (workouts.map (formatRow));
@@ -26,23 +25,19 @@ export const list : MessageHandler = async message => {
   ); 
 }
 
-const formatRow = async (workout: Workout.Workout) : Promise<string[]> => {
+const formatRow = async (workout: Workout.Model) : Promise<string[]> => {
   const username = await Instance
     .fetchMember (workout.discord_id)
-    .then (member => member.displayName)
+    .then (member => member.nickname)
     .catch (() => '<unknown>');
   
-  const timestamp = DateTime
-    .fromISO (workout.timestamp)
-    .toLocal ()
-    .toFormat ('hh:mma');
+  const timestamp = workout.started.toFormat ('hh:mma');
 
   return [
     workout.activity_id.toString (),
     timestamp,
     '@' + username,
-    Workout.expTotal (workout.exp).toFixed (1),
+    workout.totalExp.toFixed (1),
     workout.activity_name
   ];
 }
-

@@ -1,6 +1,8 @@
 import { Maybe } from 'purify-ts';
 import * as Discord from 'discord.js';
 
+type MessageContent = string | Discord.MessageEmbed;
+
 export type Message = {
   id:      string;
   author:  User;
@@ -12,9 +14,9 @@ export type Message = {
   };
 
   // crud
-  reply:   (content: string | Discord.MessageEmbed) => Promise<Message>;
+  reply:   (content: MessageContent) => Promise<Message>;
   delete: () => Promise<Message>;
-  edit: (content: string | Discord.MessageEmbed) => Promise<Message>;
+  edit: (content: MessageContent) => Promise<Message>;
 }
 
 export const Message = (message: Discord.Message) : Message => ({
