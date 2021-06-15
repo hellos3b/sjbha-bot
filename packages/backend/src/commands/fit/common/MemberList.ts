@@ -5,11 +5,8 @@ import { Maybe } from 'purify-ts';
  * Fetches members from an array of IDs, 
  * and then provides a lookup table for their nicknames
  */
-export class DisplayNames {
+export class MemberList {
   private memberById = new Map<string, Member> ();
-
-  /** When discord fails to find a member, use this for the default nickname */
-  defaultName = 'none';
 
   private constructor (members: Member[]) {
     members.forEach (member => {
@@ -17,16 +14,19 @@ export class DisplayNames {
     });
   }
 
-  get = (discordId: string) : string =>
+  get = (discordId: string) : Maybe<Member> => 
+    Maybe.fromNullable (this.memberById.get (discordId));
+
+  nickname = (discordId: string, orDefault = 'unknown') : string =>
     Maybe
       .fromNullable (this.memberById.get (discordId))
-      .mapOrDefault (m => m.nickname, this.defaultName);
+      .mapOrDefault (m => m.nickname, orDefault);
 
-  static fetch = async (discordIds: string[]) : Promise<DisplayNames> => {
+  static fetch = async (discordIds: string[]) : Promise<MemberList> => {
     const members = await Promise
       .all (discordIds.map (id => Instance.fetchMember (id).catch (_ => null)))
       .then (m => m.filter ((member): member is Member => !!member));
 
-    return new DisplayNames (members);
+    return new MemberList (members);
   }
 }

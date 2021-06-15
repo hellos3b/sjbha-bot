@@ -27,7 +27,8 @@ export const profile : MessageHandler = async message => {
 
   // User's current rank name
   const rank = getRank (user.fitScore);
-  embed.addField ('Rank', rank, true);
+  const score = Math.floor (user.fitScore);
+  embed.addField ('Rank', `${rank} (${score})`, true);
   
   // Lifetime EXP gained
   embed.addField ('Total EXP', formatExp (user.xp), true);

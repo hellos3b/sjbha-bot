@@ -7,7 +7,7 @@ import { auth } from './commands/auth';
 import { help } from './commands/help';
 import { profile } from './commands/profile';
 import { balance } from './commands/balance';
-import { leaders } from './commands/leaderboard';
+import { leaders } from './commands/leaders';
 import { settings } from './commands/settings'
 
 onMessage (

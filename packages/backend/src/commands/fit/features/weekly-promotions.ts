@@ -1,17 +1,32 @@
 import * as R from 'ramda';
 import { MessageEmbed } from 'discord.js';
+import { DateTime } from 'luxon';
+import schedule from 'node-schedule';
 
-import { Instance } from '@sjbha/app';
-import { channels } from '@sjbha/config';
+import { Instance, Member } from '@sjbha/app';
+import { channels, roles } from '@sjbha/config';
 
 import { Workout, Workouts, sumExp, belongsTo } from '../db/workout';
 import * as User from '../db/user';
 import { previousWeek } from '../common/week';
-import { DisplayNames } from '../common/DisplayNames';
+import { MemberList } from '../common/MemberList';
 import { getRank } from '../common/ranks';
 
 const MINIMUM_EXP_FOR_PROMOTION = 150;
 const MAX_FITSCORE = 100;
+
+/** The time when the weekly update gets posted */
+const weekly_post_time = DateTime
+  .local ()
+  .set ({ weekday: 1, hour: 8, minute: 0, second: 0 })
+  .toLocal ();
+
+schedule.scheduleJob ({
+  dayOfWeek: weekly_post_time.weekday,
+  hour:      weekly_post_time.hour,
+  minute:    weekly_post_time.minute,
+  second:    weekly_post_time.second
+}, () => { runPromotions () });
 
 /**
  * Once a week we tally up how much exp a user's gained in a week,
@@ -34,26 +49,37 @@ export const runPromotions = async () : Promise<void> => {
   ]);
 
   const promoters = users.map (UserPromoter);
+
+  const [members, channel] = await Promise.all ([
+    MemberList.fetch (promoters.map (p => p.user.discordId)),
+    Instance.fetchChannel (channels.strava)
+  ]);
+
   console.log (`Promoting ${promoters.length} users who recorded ${allWorkouts.length} workouts`);  
+
 
   // Promote everyone based on their workouts for the week
   // and save it to the database
   await Promise.all (
-    promoters.map (promoter => {
+    promoters.map (async promoter => {
       const workouts = allWorkouts.filter (belongsTo (promoter.user));
       promoter.promote (workouts);
 
-      return User.update (promoter.user);
+      await User.update (promoter.user);
+
+      const userRole = 
+        (promoter.user.fitScore >= 100)   ? roles.certified_swole
+        : (promoter.user.fitScore >= 80)  ? roles.max_effort
+        : (promoter.user.fitScore >= 60)  ? roles.break_a_sweat
+        : '';
+
+      await members.get (promoter.user.discordId)
+        .map (m => setFitRole (m, userRole))
+        .orDefault (Promise.resolve (false));
     })
   );
 
   
-  const [nicknames, channel] = await Promise.all ([
-    DisplayNames.fetch (promoters.map (p => p.user.discordId)),
-    Instance.fetchChannel (channels.strava)
-  ]);
-
-
   // Format each result type into a row 
   // that we'll display all one after another in an embed
   const rows = promoters
@@ -63,11 +89,13 @@ export const runPromotions = async () : Promise<void> => {
       // get up or down doot emoji
       const emoji = 
         (user.fitScore === 100 && change === 0) ? '🔹' 
+        : (user.fitScore === 100 && change > 0) ? '🎉'
         : (change > 0)  ? '⬆️' 
+        : (user.fitScore === 0 && change < 0) ? '🥺'
         : '🔻';
           
       const rank = getRank (user.fitScore);
-      const nickname = nicknames.get (user.discordId);
+      const nickname = members.nickname (user.discordId);
       
       // add a plus sign if change is positive
       const diff = (change < 0) ? `(${change.toFixed (1)})` : '';
@@ -83,7 +111,7 @@ export const runPromotions = async () : Promise<void> => {
 
   for (let i = 0; i < rows.length; i += chunkSize) {
     const embed = new MessageEmbed ({
-      color:  0xff0000,
+      color:  0xffd700,
       footer: { text: lastWeek.toFormat ('MMM dd') },
       fields: [{
         name:  'Promotions',
@@ -139,3 +167,18 @@ const UserPromoter = (user: User.Authorized) : UserPromoter => {
     }
   }
 };
+
+
+/**
+ * Set the role the user has been awarded.
+ * User can only have 1 role at a time, so we'll remove the others
+ */
+const setFitRole = (member: Member, roleId: string) : Promise<boolean> => 
+  Promise.all ([
+    roles.certified_swole, 
+    roles.max_effort, 
+    roles.break_a_sweat
+  ].map (role => (role === roleId)
+    ? member.roles.add (role)
+    : member.roles.remove (role)
+  )).then (_ => true);

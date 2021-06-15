@@ -3,7 +3,7 @@ import { DateTime, Interval } from 'luxon';
 import * as R from 'ramda';
 
 import { Workouts, sumExp, Workout } from '../db/workout';
-import { DisplayNames } from '../common/DisplayNames';
+import { MemberList } from '../common/MemberList';
 
 export const leaders : MessageHandler = async message => {
   const lastThirtyDays = Interval.before (DateTime.local (), { days: 30 });
@@ -12,11 +12,10 @@ export const leaders : MessageHandler = async message => {
     .find ()
     .then (WorkoutCollection);
 
-  const nicknames = await DisplayNames.fetch (allWorkouts.discordIds);
-  nicknames.defaultName = '(Missing)';
+  const members = await MemberList.fetch (allWorkouts.discordIds);
 
   const embed = new MessageEmbed ({
-    color:       0xffffff,
+    color:       0xffd700,
     title:       'Leaders',
     description: 'Top EXP Earners in the last 30 days, per activity',
     footer:      {
@@ -30,7 +29,7 @@ export const leaders : MessageHandler = async message => {
     // list of people who have actually recorded an activity of this type
     const leaderboard = workouts.discordIds
       .map (discordId => ({ 
-        nickname: nicknames.get (discordId), 
+        nickname: members.nickname (discordId), 
         workouts: workouts.filterUser (discordId) 
       }))
       .sort ((a, b) => a.workouts.exp > b.workouts.exp ? -1 : 1);

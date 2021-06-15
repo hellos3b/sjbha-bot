@@ -15,5 +15,4 @@ const development: Roles = {
   break_a_sweat:   '748684543497601065',
 };
 
-const roles = env.IS_PRODUCTION ? production : development;
-export default roles;
+export const roles = env.IS_PRODUCTION ? production : development;
