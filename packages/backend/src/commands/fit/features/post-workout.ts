@@ -269,7 +269,7 @@ const activityStats = (activity: Activity) : EmbedField[] => {
   // Power based fields
   const power = activity.device_watts ? Just (activity) : Nothing;
   const avgPower = power.map (field ('Avg Watts', a => format.power (a.weighted_average_watts)));
-  const maxPower = power.map (field ('Max Watts', a => format.power (a.max_watts)));
+  // const maxPower = power.map (field ('Max Watts', a => format.power (a.max_watts)));
 
   const activitySpecific : EmbedField[] = match (activity, {
     // We want to show GPS activity first unless the activity is marked as a workout, 
@@ -293,11 +293,13 @@ const activityStats = (activity: Activity) : EmbedField[] => {
         .alt (heartrate)
         .orDefault ([]),
 
-    VirtualRide: _ =>
-      Maybe.sequence ([avgPower, maxPower])
-        .alt (Maybe.sequence ([distance, elevation]))
-        .alt (heartrate)
-        .orDefault ([]),
+    VirtualRide: _ => {
+      const fieldA = distance.alt (averageHeartrate);
+      const fieldB = avgPower.alt (elevation).alt (maxHeartrate);
+
+      return [fieldA.extractNullable (), fieldB.extractNullable ()]
+        .filter ((f): f is EmbedField => !!f);
+    },
     
     Walk: _ =>
       Maybe.catMaybes ([distance, averageHeartrate]),

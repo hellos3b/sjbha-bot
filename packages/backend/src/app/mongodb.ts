@@ -7,7 +7,8 @@ const client: Ref = {};
 MongoClient
   .connect (MONGO_URL, { useUnifiedTopology: true })
   .then (r => { client.instance = r; })
-  .then (_ => { console.log ('Connected to mongodb'); });
+  .then (_ => { console.log ('Connected to mongodb'); })
+  .catch (_ => { console.warn ('MongoDB failed to connect, some things may not work.\n(Make sure the db is running with \'npm run db\') ', MONGO_URL) })
 
 export function db<T>(name: string) {
   return () : Collection<T> => {
