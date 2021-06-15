@@ -39,6 +39,8 @@ schedule.scheduleJob ({
 export const runPromotions = async () : Promise<void> => {
   const lastWeek = previousWeek ();
 
+  console.log ('Begin promotions: Fetching all users and workouts from week ' + lastWeek.toString ());
+
   const [users, allWorkouts] = await Promise.all ([
     User.find ()
       .then (u => u.filter (User.isAuthorized)),
@@ -50,13 +52,14 @@ export const runPromotions = async () : Promise<void> => {
 
   const promoters = users.map (UserPromoter);
 
+  console.log ('Fetching all members and channel from discord');
+
   const [members, channel] = await Promise.all ([
     MemberList.fetch (promoters.map (p => p.user.discordId)),
     Instance.fetchChannel (channels.strava)
   ]);
 
   console.log (`Promoting ${promoters.length} users who recorded ${allWorkouts.length} workouts`);  
-
 
   // Promote everyone based on their workouts for the week
   // and save it to the database
@@ -65,6 +68,7 @@ export const runPromotions = async () : Promise<void> => {
       const workouts = allWorkouts.filter (belongsTo (promoter.user));
       promoter.promote (workouts);
 
+      console.log (`Saving ${promoter.user.discordId} (${members.nickname (promoter.user.discordId)})`);
       await User.update (promoter.user);
 
       const userRole = 
@@ -73,13 +77,12 @@ export const runPromotions = async () : Promise<void> => {
         : (promoter.user.fitScore >= 60)  ? roles.break_a_sweat
         : '';
 
-      await members.get (promoter.user.discordId)
-        .map (m => setFitRole (m, userRole))
-        .orDefault (Promise.resolve (false));
+      members.get (promoter.user.discordId)
+        .map (m => setFitRole (m, userRole));
     })
   );
 
-  
+
   // Format each result type into a row 
   // that we'll display all one after another in an embed
   const rows = promoters
@@ -173,12 +176,15 @@ const UserPromoter = (user: User.Authorized) : UserPromoter => {
  * Set the role the user has been awarded.
  * User can only have 1 role at a time, so we'll remove the others
  */
-const setFitRole = (member: Member, roleId: string) : Promise<boolean> => 
-  Promise.all ([
-    roles.certified_swole, 
-    roles.max_effort, 
-    roles.break_a_sweat
-  ].map (role => (role === roleId)
-    ? member.roles.add (role)
-    : member.roles.remove (role)
-  )).then (_ => true);
+const setFitRole = (member: Member, roleId: string) : Promise<void[]> => 
+  Promise.all (
+    [roles.certified_swole, roles.max_effort, roles.break_a_sweat]
+      .map (async role => {
+        if (role === roleId && member.roles.has (role)) {
+          await member.roles.add (role);
+        }
+        else if (role !== roleId && member.roles.has (role)) {
+          await member.roles.remove (role);
+        }
+      })
+  );

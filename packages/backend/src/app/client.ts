@@ -76,6 +76,13 @@ export const Instance = {
     return Member (member);
   },
 
+  fetchMembers: async (discordIds: string[]) : Promise<Member[]> => {
+    const guild = await client.guilds.fetch (SERVER_ID);
+    const members = await guild.members.fetch ({ user: discordIds });
+
+    return members.map (Member);
+  }, 
+
   fetchChannel: async (channelId: string) : Promise<TextChannel> => {
     const channel = await client.channels.fetch (channelId);
     

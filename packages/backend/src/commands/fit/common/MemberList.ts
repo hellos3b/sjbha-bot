@@ -23,9 +23,12 @@ export class MemberList {
       .mapOrDefault (m => m.nickname, orDefault);
 
   static fetch = async (discordIds: string[]) : Promise<MemberList> => {
-    const members = await Promise
-      .all (discordIds.map (id => Instance.fetchMember (id).catch (_ => null)))
-      .then (m => m.filter ((member): member is Member => !!member));
+    const members = await Instance.fetchMembers (discordIds).catch (e => {
+      console.error ('Failed to fetch member list');
+      console.error (e);
+
+      return [] as Member[];
+    });
 
     return new MemberList (members);
   }
