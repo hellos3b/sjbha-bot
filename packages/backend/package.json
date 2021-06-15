@@ -7,7 +7,6 @@
     "dev": "ts-node-dev -r dotenv/config src/main.ts",
     "build": "tsc",
     "db": "docker-compose -f docker-compose.db.yml up --build --remove-orphans",
-    
     "@comment test": "test commands still WIP, doesnt exist yet",
     "test": "jest --setupFiles dotenv/config",
     "test:watch": "jest --setupFiles dotenv/config --watch"
@@ -27,6 +26,7 @@
     "module-alias": "^2.2.2",
     "mongodb": "^3.6.8",
     "nanoid": "^3.1.23",
+    "node-cache": "^5.1.2",
     "node-schedule": "^2.0.0",
     "purify-ts": "^0.16.3",
     "ramda": "^0.27.1",
