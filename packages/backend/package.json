@@ -3,9 +3,10 @@
   "description": "",
   "version": "1.0.0",
   "scripts": {
-    "start": "node build/index.js",
+    "start": "node build/main.js",
     "dev": "ts-node-dev -r dotenv/config src/main.ts",
     "build": "tsc",
+    "deploy": "docker-compose --context s3bby up --build --remove-orphans",
     "db": "docker-compose -f docker-compose.db.yml up --build --remove-orphans",
     "@comment test": "test commands still WIP, doesnt exist yet",
     "test": "jest --setupFiles dotenv/config",
