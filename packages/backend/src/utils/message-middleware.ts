@@ -20,6 +20,23 @@ export const startsWith = (...instigator: string[]) : MessageMiddleware =>
   };
 
 /**
+ * Filters for messages that start with a string.
+ * You can pass in additional aliases
+ * 
+ * ```ts
+ * startsWith("!ping", "!p");
+ * ```
+ */
+ export const messageEquals = (...instigator: string[]) : MessageMiddleware =>
+ (message, next) => {
+   const matches = instigator.map (s => s.toLowerCase ());
+
+   if (matches.includes (message.content.trim ().toLowerCase ())) {
+     next ();
+   }
+ };
+
+/**
  * Routes to different handlers based on the second word of a command where 'route' is the second word passed in
  * 
  * `{!command} {route} {...message}`

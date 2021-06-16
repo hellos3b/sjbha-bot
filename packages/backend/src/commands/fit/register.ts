@@ -1,5 +1,6 @@
 import { onMessage, router, compose } from '@sjbha/app';
-import { dmsOnly, routes, startsWith } from '@sjbha/utils/message-middleware';
+import { channels } from '@sjbha/config';
+import { dmsOnly, messageEquals, reply, restrictToChannel, routes, startsWith } from '@sjbha/utils/message-middleware';
 
 // Bot
 
@@ -12,18 +13,22 @@ import { settings } from './commands/settings'
 
 onMessage (
   startsWith ('!fit'),
+  restrictToChannel (channels.strava),
   routes ({
     auth:     auth,
     profile:  profile,
     balance:  balance,
     leaders:  leaders,
-    settings: compose (
-      dmsOnly ('DM me to update your settings!'), 
-      settings
-    ),
-    help:  help,
-    empty: help
+    help:     help,
+    empty:    help,
+    settings: reply ('DM me to update your settings!')
   })
+);
+
+onMessage (
+  messageEquals ('!fit settings'),
+  dmsOnly (),
+  settings
 );
 
 // Admin Commands
@@ -35,6 +40,7 @@ import { promote } from './admin/promote';
 
 onMessage (
   startsWith ('$fit'),
+  restrictToChannel (channels.bot_admin),
   routes ({
     post:    post,
     list:    list,
