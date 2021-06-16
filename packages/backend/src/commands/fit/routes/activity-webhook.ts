@@ -12,7 +12,7 @@ const pending = new Set<number> ();
  * This route will verify the auth, and then initialize the user's account with defaults
  */
 export const newWorkout : Route = async req => {
-  const params = req.query as Webhook;
+  const params = req.payload as Webhook;
 
   console.log ('Webhook Request', params);
 

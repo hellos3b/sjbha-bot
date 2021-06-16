@@ -55,4 +55,4 @@ import { authAccept } from './routes/auth-accept';
 import { newWorkout } from './routes/activity-webhook';
 
 router.get ('/fit/accept', authAccept);
-router.get ('/fit/webhook', newWorkout);
+router.post ('/fit/api/webhook', newWorkout);
