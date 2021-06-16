@@ -1,7 +1,0 @@
-☐ !fit
-  ☐ Create IO for exp
-  ☐ Group EXP together and do aggregate crap
-
-☐ Error Reporting
-☐ Code formatters
-  Maybe throw into a `formatting` package and consolidate it with `embed`
