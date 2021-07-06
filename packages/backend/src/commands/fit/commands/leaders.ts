@@ -2,14 +2,16 @@ import { MessageHandler, MessageEmbed } from '@sjbha/app';
 import { DateTime, Interval } from 'luxon';
 import * as R from 'ramda';
 
-import { Workouts, sumExp, Workout } from '../db/workout';
+import { Workouts, sumExp, Exp, Workout } from '../db/workout';
 import { MemberList } from '../common/MemberList';
+import { isType } from 'variant';
 
 export const leaders : MessageHandler = async message => {
   const lastThirtyDays = Interval.before (DateTime.local (), { days: 30 });
   const allWorkouts = await Workouts ()
     .during (lastThirtyDays)
     .find ()
+    .then (list => list.filter (w => isType (w.exp, Exp.hr)))
     .then (WorkoutCollection);
 
   const members = await MemberList.fetch (allWorkouts.discordIds);
