@@ -1,21 +1,6 @@
 version: '3.8'
 
 services:
-  # app:
-    # tty: true
-    # image: node:12-alpine
-    # container_name: bored_bot
-    # command: npm run watch
-    # env_file: .env
-    # working_dir: /home/node/app
-    # environment:
-    #   NODE_ENV: "development"
-    #   HOSTNAME: "http://localhost:5000"
-    # ports:
-    #   - "5000:5000"
-    # volumes:
-    #   - .:/home/node/app
-    
   # Database
   mongo:
     image: mongo

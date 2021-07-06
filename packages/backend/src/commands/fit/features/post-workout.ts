@@ -85,26 +85,29 @@ export const postWorkout = async (stravaId: number, activityId: number) : Promis
   const expSoFar = sumExp (
     workouts
       .filter (w => w.activity_id !== activity.id)
-      .filter (w => w.timestamp < timestamp.toISO ())
+      .filter (w => w.timestamp < timestamp.toUTC ().toISO ())
   );
   
   const weeklyExp = workout.totalExp + expSoFar;
   const member = await Instance.fetchMember (user.discordId);
 
+  const displayColor = member.mapOrDefault (m => m.displayColor, 0xffffff);
+  const nickname = member.mapOrDefault (m => m.nickname, 'Unknown');
+  const avatar = member.mapOrDefault (m => m.avatar, 'https://discordapp.com/assets/322c936a8c8be1b803cd94861bdfa868.png');
 
   // Create an embed that shows the name of the activity,
   // Some highlighted stats from the recording
   // And the user's Exp progress
   const embed = new MessageEmbed ({
-    color:       member.displayColor,
+    color:       displayColor,
     title:       activity.name,
     description: activity.description,
     fields:      activityStats (activity),
     author:      { 
-      name: `${workout.emoji (user.emojis)} ${member.nickname} ${justDid (activity)}` 
+      name: `${workout.emoji (user.emojis)} ${nickname} ${justDid (activity)}` 
     },
     thumbnail: { 
-      url: member.avatar 
+      url: avatar 
     },
     footer: { 
       text: gainedText (workout) + ' | ' + format.exp (weeklyExp) + ' exp this week' 
@@ -263,7 +266,11 @@ const activityStats = (activity: Activity) : EmbedField[] => {
   // GPS based fields
   const gps = Just (activity).filter (a => a.distance > 0);
   const distance = gps.map (field ('Distance', a => format.miles (a.distance)));
-  const elevation = gps.map (field ('Elevation', a => format.feet (a.total_elevation_gain)));
+
+  // Return none if elevation gain === 0, as this usually means
+  // this was an indoor run
+  const elevation = gps.filter (a => a.total_elevation_gain > 0)
+    .map (field ('Elevation', a => format.feet (a.total_elevation_gain)));
   const pace = gps.map (field ('Pace', a => format.pace (a.average_speed)));
 
   // Power based fields
@@ -282,11 +289,16 @@ const activityStats = (activity: Activity) : EmbedField[] => {
 
     // We want to show GPS activity first unless the activity is marked as a workout, 
     // then we show the HR stats instead
-    Ride: _ => 
-      Maybe.sequence ([distance, elevation])
+    Ride: _ => {
+      const second = elevation
+        .alt (avgPower)
+        .alt (averageHeartrate);
+
+      return Maybe.sequence ([distance, second])
         .filter (_ => activity.workout_type !== WorkoutType.RideWorkout)
         .alt (heartrate)
-        .orDefault ([]),
+        .orDefault ([])
+    },
 
     Hike: _ => 
       Maybe.sequence ([distance, elevation])
