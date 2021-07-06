@@ -14,7 +14,6 @@ export const help : MessageHandler = message => {
     commands:    {
       'auth':    'Set up your strava account with the bot',
       'profile': 'View your progress and stats',
-      'scores':  'View a leaderboard of everyone\'s progress',
       'leaders': 'View the top 2 exp earners for each activity type',
       'balance': 'Check how balanced your XP'
     }
