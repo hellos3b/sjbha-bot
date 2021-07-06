@@ -5,6 +5,7 @@ import { Member, Message, TextChannel } from './discord-js';
 
 import { channels } from '../config';
 import * as env from './env';
+import { Maybe, Just, Nothing } from 'purify-ts';
 
 // Connect
 
@@ -80,11 +81,16 @@ export const onMessage = (...middleware: MessageMiddleware[]) : UnsubscribeHandl
 
 // Instance Utilities
 export const Instance = {
-  fetchMember: async (discordId: string) : Promise<Member> => {
-    const guild = await client.guilds.fetch (SERVER_ID);
-    const member = await guild.members.fetch (discordId);
+  fetchMember: async (discordId: string) : Promise<Maybe<Member>> => {
+    try {
+      const guild = await client.guilds.fetch (SERVER_ID);
+      const member = await guild.members.fetch (discordId);
 
-    return Member (member);
+      return Just (Member (member));
+    }
+    catch (e) {
+      return Nothing;
+    }
   },
 
   fetchMembers: async (discordIds: string[]) : Promise<Member[]> => {

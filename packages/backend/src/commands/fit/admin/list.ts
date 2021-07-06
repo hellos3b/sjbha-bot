@@ -26,10 +26,8 @@ export const list : MessageHandler = async message => {
 }
 
 const formatRow = async (workout: Workout.Model) : Promise<string[]> => {
-  const username = await Instance
-    .fetchMember (workout.discord_id)
-    .then (member => member.nickname)
-    .catch (() => '<unknown>');
+  const member = await Instance.fetchMember (workout.discord_id);
+  const username = member.mapOrDefault (m => m.nickname, '<unknown>');
   
   const timestamp = workout.started.toFormat ('hh:mma');
 
