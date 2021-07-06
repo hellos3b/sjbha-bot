@@ -3,11 +3,22 @@ import * as Discord from 'discord.js';
 
 import { Member, Message, TextChannel } from './discord-js';
 
+import { channels } from '../config';
+import * as env from './env';
+
 // Connect
 
 const client = new Discord.Client ();
 
-client.on ('ready', () => console.log (`Bastion connected as '${client.user?.tag}'`));
+client.on ('ready', () => {
+  console.log (`Bastion connected as '${client.user?.tag}'`);
+
+  if (env.IS_PRODUCTION) {
+    Instance
+      .fetchChannel (channels.bot_admin)
+      .then (c => c.send (`🤖 BoredBot Online! v${env.VERSION}`));
+  }
+});
 
 client.on ('message', (msg: Discord.Message) => {
   if (msg.author.bot) return;

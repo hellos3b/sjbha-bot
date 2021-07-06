@@ -11,3 +11,4 @@ import './commands/christmas/register';
 import './commands/fit/register';
 import './commands/pong/register';
 import './commands/subscribe/register';
+import './commands/version/register';
