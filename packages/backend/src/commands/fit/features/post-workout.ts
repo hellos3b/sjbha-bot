@@ -85,7 +85,7 @@ export const postWorkout = async (stravaId: number, activityId: number) : Promis
   const expSoFar = sumExp (
     workouts
       .filter (w => w.activity_id !== activity.id)
-      .filter (w => w.timestamp < timestamp.toISO ())
+      .filter (w => w.timestamp < timestamp.toUTC ().toISO ())
   );
   
   const weeklyExp = workout.totalExp + expSoFar;
