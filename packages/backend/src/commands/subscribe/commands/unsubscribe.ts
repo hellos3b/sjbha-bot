@@ -18,8 +18,8 @@ export const unsubscribe : MessageHandler = async message => {
   const member = message.member
     .toEither ('You cannot subscribe in DMs')
     .chain (m => m.roles.has (sub.id) 
-      ? Left ('You are already subscribed to ' + sub.name)
-      : Right (m)
+      ? Right (m)
+      : Left ('You are not subscribed to ' + sub.name)
     );
 
   const removeRole = member.caseOf ({
