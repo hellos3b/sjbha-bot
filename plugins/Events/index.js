@@ -283,7 +283,7 @@ export default function(bastion, opt={}) {
                     return events[ctx.message]
                 },
                 getUpdated: async function(context, event) {
-                    const question = `Ok, editing **${event.info_str()}**\nWhat do you want to change it to?\n\nYou can copy and paste this:\n${bastion.helpers.code(event.getMeetupString())}\nOr, use the UI: ${process.env.DOMAIN}/create-meetup?id=${event.id()}`
+                    const question = `Ok, editing **${event.info_str()}**\Click this link to edit the meetup: ${process.env.DOMAIN}/create-meetup?id=${event.id()}`
                     const msg = await bastion.bot.sendMessage({
                         to: context.channelID, 
                         message: question
