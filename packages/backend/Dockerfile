@@ -19,6 +19,5 @@ FROM node:12-alpine as production
 COPY package.json ./
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/build ./build
-# COPY --from=builder /app/public ./public
 
 CMD npm start

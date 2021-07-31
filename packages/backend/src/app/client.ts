@@ -12,7 +12,7 @@ import { Maybe, Just, Nothing } from 'purify-ts';
 const client = new Discord.Client ();
 
 client.on ('ready', () => {
-  console.log (`Bastion connected as '${client.user?.tag}'`);
+  console.log (`Bastion connected as '${client.user?.tag}' v${env.VERSION}`);
 
   if (env.IS_PRODUCTION) {
     Instance
