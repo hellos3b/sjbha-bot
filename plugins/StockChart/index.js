@@ -48,6 +48,15 @@ export default function(bastion, opt={}) {
                         dest: `${__dirname}/chart.png`
                     }
                 }
+                
+                if (symbol.startsWith('*')) {
+                    symbol = symbol.substr(1)
+                    
+                    options = {
+                        url: `https://finviz.com/fx_image.ashx?${symbol}USD_m1_l.png`,
+                        dest: `${__dirname}/chart.png`
+                    }
+                }
 
                 bastion.bot.simulateTyping(context.channelID)
 
