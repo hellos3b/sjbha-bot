@@ -40,6 +40,7 @@ export const postWorkout = async (stravaId: number, activityId: number) : Promis
     client.getActivityStreams (activityId).catch (_ => [])
   ]);
 
+  console.log ('ACTIVITY', activity);
   
   // We're only going to update or post activities from this week
   // which will prevent spam if a really old activity gets updated

@@ -75,6 +75,7 @@ type BaseActivity = {
   readonly description: string;
   readonly manual: boolean;
   readonly private: boolean;
+  readonly visibility: 'everyone' | 'followers_only' | 'only_me';
 
   /** Workout type is used to check if something is an activity, workout, or race. */
   readonly workout_type: undefined | WorkoutType;
