@@ -19,6 +19,7 @@ export const getOrThrow = (key: string) : string => required (key);
 // Env Variables
 
 export const HOSTNAME = required ('HOSTNAME');
+export const UI_HOSTNAME = required ('UI_HOSTNAME');
 export const HTTP_PORT = required ('VIRTUAL_PORT');
 export const DISCORD_TOKEN = required ('DISCORD_TOKEN');
 
@@ -32,4 +33,4 @@ export const IS_PRODUCTION = NODE_ENV === 'production';
 
 export const TIME_ZONE = 'America/Los_Angeles';
 
-export const VERSION = process.env.npm_package_version
+export const VERSION = process.env.npm_package_version;

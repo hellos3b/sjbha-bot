@@ -3,7 +3,17 @@ import { Message } from 'discord.js';
 import { Option, option } from 'ts-option';
 import { MessageBuilder } from './string-formatting';
 
-export namespace Interaction {
+/**
+ * @deprecated 
+ * For Interactions API, use discord.js' message collector instead
+ * ```ts
+    const interaction = message.channel.createMessageCollector (m => m.author.id === message.author.id);
+    const meetup = await interaction.next.then (meetupPicker.get);
+  ```
+
+  For building a prompt, use the `multi-choice` module instead
+ */
+export namespace InteractionLegacy {
   export type MapMessage<T> = (message: Message) => T;
 
   class Capture<T> {
