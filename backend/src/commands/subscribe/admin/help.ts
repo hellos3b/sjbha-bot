@@ -1,7 +1,7 @@
-import { MessageHandler } from '@sjbha/app';
 import * as format from '@sjbha/utils/string-formatting';
+import { Message } from 'discord.js';
 
-export const help : MessageHandler = async message => {
+export async function help (message: Message) : Promise<void> {
   const help = format.help ({
     commandName: 'subscribe (admin)',
     description: 'Add or remove roles to the list of possible subscriptions',

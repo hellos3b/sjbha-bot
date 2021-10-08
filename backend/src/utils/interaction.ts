@@ -1,6 +1,7 @@
-import { onMessage, Instance, Message } from '@sjbha/app';
+import { Instance, Message$ } from '@sjbha/app';
+import { Message } from 'discord.js';
+import { Option, option } from 'ts-option';
 import { MessageBuilder } from './string-formatting';
-import { Maybe } from 'purify-ts';
 
 export namespace Interaction {
   export type MapMessage<T> = (message: Message) => T;
@@ -91,22 +92,17 @@ export namespace Interaction {
      * @returns A promise that resolves with the interaction capture
      */
     get = () : Promise<T> => new Promise ((resolve) => {
-      const unsubscribe = onMessage (
-        (message, next) => {
-          if (message.content.toLowerCase () === 'cancel') {
-            unsubscribe ();
-          }
-          if (this.filterFn (message)) {
-            next ();
-          }
-        },
-        message => {
+      let unsubscribe = () => { /** */ };
+
+      unsubscribe = Message$
+        .filterElse (message => message.content.toLowerCase () === 'cancel', unsubscribe)
+        .filter (this.filterFn)
+        .subscribe (message => {
           unsubscribe ();
           clearTimeout (tookTooLong);
           
           resolve (this.mapFn (message));
-        }
-      );
+        });
 
       const tookTooLong = setTimeout (() => {
         unsubscribe ();
@@ -144,7 +140,7 @@ export namespace Interaction {
   export const confirm = () : Capture<boolean> => 
     new Capture (message => ['yes', 'y'].includes (message.content.toLowerCase ()));
 
-  type Option<T> = {
+  type Choice<T> = {
     name: string;
     value: T;
   };
@@ -168,7 +164,7 @@ export namespace Interaction {
   export class OptionBuilder<T> {
     private readonly question: string;
 
-    private options: Option<T>[] = [];
+    private options: Choice<T>[] = [];
 
     constructor (question = '') {
       this.question = question;
@@ -180,12 +176,10 @@ export namespace Interaction {
       return this;
     }
 
-    get = (index: number | string) : Maybe<T> => {
+    get = (index: number | string) : Option<T> => {
       const choice = (typeof index === 'string') ? parseInt (index) : index;
 
-      return Maybe
-        .fromNullable (this.options[choice])
-        .map (o => o.value);
+      return option (this.options[choice]).map (o => o.value);
     }
 
     toString = () : string => {
@@ -208,8 +202,7 @@ export namespace Interaction {
       Instance.fetchChannel (channelId)
         .then (channel => channel.send (this.toString ()));
 
-    capture = () : Capture<T | null> => new Capture (message => 
-      this.get (message.content).extractNullable ()
-    );
+    capture = () : Capture<T | null> => 
+      new Capture (message => this.get (message.content).orNull);
   }
 }

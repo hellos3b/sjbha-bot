@@ -1,6 +1,5 @@
-import { onMessage, router, compose } from '@sjbha/app';
+import { router, Message$ } from '@sjbha/app';
 import { channels } from '@sjbha/config';
-import { dmsOnly, messageEquals, reply, restrictToChannel, routes, startsWith } from '@sjbha/utils/message-middleware';
 
 // Bot
 
@@ -11,25 +10,24 @@ import { balance } from './commands/balance';
 import { leaders } from './commands/leaders';
 import { settings } from './commands/settings'
 
-onMessage (
-  startsWith ('!fit'),
-  restrictToChannel (channels.strava),
-  routes ({
+Message$
+  .startsWith ('!fit')
+  .restrictToChannel (channels.strava)
+  .routes ({
     auth:     auth,
     profile:  profile,
     balance:  balance,
     leaders:  leaders,
     help:     help,
     empty:    help,
-    settings: reply ('DM me to update your settings!')
-  })
-);
+    settings: message => message.reply ('Settings menu is available only in DMs')
+  });
 
-onMessage (
-  messageEquals ('!fit settings'),
-  dmsOnly (),
-  settings
-);
+
+Message$
+  .equals ('!fit settings')
+  .dmsOnly ()
+  .subscribe (settings);
 
 // Admin Commands
 
@@ -38,16 +36,15 @@ import { list } from './admin/list';
 import { remove } from './admin/remove';
 import { promote } from './admin/promote';
 
-onMessage (
-  startsWith ('$fit'),
-  restrictToChannel (channels.bot_admin),
-  routes ({
+Message$
+  .startsWith ('$fit')
+  .adminOnly ()
+  .routes ({
     post:    post,
     list:    list,
     remove:  remove,
     promote: promote
-  })
-);
+  });
 
 // Web API
 

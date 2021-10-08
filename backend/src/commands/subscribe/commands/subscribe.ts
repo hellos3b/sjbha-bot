@@ -1,8 +1,7 @@
-import { MessageHandler } from '@sjbha/app';
-import { Left, Right } from 'purify-ts';
+import { Message } from 'discord.js';
 import { Subscriptions } from '../db/subscription';
 
-export const subscribe : MessageHandler = async message => {
+export async function subscribe (message: Message) : Promise<void> {
   const [_, name] = message.content.split (' ');
   const sub = await Subscriptions ().findOne ({ name: name.toLowerCase () });
 
@@ -12,17 +11,18 @@ export const subscribe : MessageHandler = async message => {
     return;
   }
 
-  const member = message.member
-    .toEither ('You cannot subscribe in DMs')
-    .chain (m => m.roles.has (sub.id) 
-      ? Left ('You are already subscribed to ' + sub.name)
-      : Right (m)
-    );
-    
-  const addRole = member.caseOf ({
-    Left:  error => Promise.resolve (error),
-    Right: m => m.roles.add (sub.id).then (_ => 'Subscribed to ' + sub.name)
-  });
+  if (!message.member) {
+    message.reply ('You cannot subscribe in DMs');
 
-  addRole.then (message.reply);
+    return;
+  }
+
+  if (message.member.roles.cache.has (sub.id)) {
+    message.reply (`You are already subscribed to ${sub.name}`);
+
+    return;
+  }
+
+  await message.member.roles.add (sub.id);
+  message.reply (`Subscribed to ${sub.name}`);
 }

@@ -1,11 +1,10 @@
-import { MessageHandler } from '@sjbha/app';
-import { Left, Right } from 'purify-ts';
+import { Message } from 'discord.js';
 import { Subscriptions } from '../db/subscription';
 
 /**
  * List the available subscriptions that are in the database
  */
-export const unsubscribe : MessageHandler = async message => {
+export async function unsubscribe (message: Message) : Promise<void> {
   const [_, name] = message.content.split (' ');
   const sub = await Subscriptions ().findOne ({ name: name.toLowerCase () });
 
@@ -15,17 +14,18 @@ export const unsubscribe : MessageHandler = async message => {
     return;
   }
 
-  const member = message.member
-    .toEither ('You cannot subscribe in DMs')
-    .chain (m => m.roles.has (sub.id) 
-      ? Right (m)
-      : Left ('You are not subscribed to ' + sub.name)
-    );
+  if (!message.member) {
+    message.reply ('You cannot subscribe in DMs');
 
-  const removeRole = member.caseOf ({
-    Left:  error => Promise.resolve (error),
-    Right: m => m.roles.remove (sub.id).then (_ => 'Unsubscribed from ' + sub.name)
-  });
+    return;
+  }
 
-  removeRole.then (message.reply);
+  if (!message.member.roles.cache.has (sub.id)) {
+    message.reply (`You are not subscribed to ${sub.name}`);
+
+    return;
+  }
+
+  await message.member.roles.remove (sub.id);
+  message.reply (`Unsubscribed from ${sub.name}`);
 }

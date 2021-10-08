@@ -1,4 +1,4 @@
-import { MessageHandler, MessageEmbed } from '@sjbha/app';
+import { Message, MessageEmbed } from 'discord.js';
 import { DateTime, Interval } from 'luxon';
 import * as R from 'ramda';
 import { isOfVariant, isType, lookup, variantList } from 'variant';
@@ -22,7 +22,7 @@ const Balance = variantList ([
 const Aerobic = variantList ([Balance.lowAerobic, Balance.aerobic]);
 const Anerobic = variantList ([Balance.anerobic, Balance.highAnerobic]);
 
-export const balance : MessageHandler = async message => {
+export async function balance (message: Message) : Promise<void> {
   const user = await User.findOne ({ discordId: message.author.id });
 
   if (!User.isAuthorized (user)) {

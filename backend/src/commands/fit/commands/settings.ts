@@ -1,7 +1,6 @@
 import { variantList,TypeNames, VariantOf, match } from 'variant';
 import * as yup from 'yup';
-
-import { Message, MessageHandler } from '@sjbha/app';
+import { Message } from 'discord.js';
 import { Interaction } from '@sjbha/utils/interaction';
 import { MessageBuilder, inlineCode } from '@sjbha/utils/string-formatting';
 
@@ -11,7 +10,7 @@ import { EmojiSet } from '../common/activity-emoji';
 const SettingsMenu = variantList (['hr', 'emoji']);
 type SettingsMenu<T extends TypeNames<typeof SettingsMenu> = undefined>= VariantOf<typeof SettingsMenu, T>;
 
-export const settings : MessageHandler = async message => {
+export async function settings (message: Message) : Promise<void> {
   const user = await User.findOne ({ discordId: message.author.id });
 
   if (!User.isAuthorized (user)) {
@@ -96,7 +95,8 @@ const setMaxHeartrate = async (user: User.Authorized, message: Message) => {
     message.reply (`Your max heartrate has been updated! ${inlineCode (user.maxHR || 'none')} -> ${inlineCode (hr)}`);
   }
   catch (e) {
-    message.reply (e.message);
+    const reply = (e instanceof Error) ? e.message : 'Something unexpected happened';
+    message.reply (reply);
   }
 }
 

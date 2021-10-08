@@ -1,9 +1,6 @@
-import { onMessage } from '@sjbha/app';
-import { startsWith } from '@sjbha/utils/message-middleware';
-
+import { Message$ } from '@sjbha/app';
 import { christmas } from './christmas';
 
-onMessage (
-  startsWith ('!christmas'),
-  christmas
-);
+Message$
+  .startsWith ('!christmas')
+  .subscribe (christmas);

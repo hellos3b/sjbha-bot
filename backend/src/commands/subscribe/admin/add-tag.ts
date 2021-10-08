@@ -1,8 +1,8 @@
-import { MessageHandler } from '@sjbha/app';
+import { Message } from 'discord.js';
 import { Subscriptions } from '../db/subscription';
 
-export const add : MessageHandler = async message => {
-  const role = message.mentions.roles[0];
+export async function add (message: Message) : Promise<void> {
+  const role = message.mentions.roles.first ();
 
   if (!role) {
     message.reply ('Failed to add tag: Missing role to add. Usage: `!subscribe add @role`');

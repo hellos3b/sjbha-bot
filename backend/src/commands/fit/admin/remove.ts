@@ -1,4 +1,6 @@
-import { MessageHandler, Instance } from '@sjbha/app';
+import { Message } from 'discord.js';
+
+import { Instance } from '@sjbha/app';
 import { MessageBuilder } from '@sjbha/utils/string-formatting';
 import { channels } from '@sjbha/config';
 
@@ -13,7 +15,7 @@ const usage = 'Usage: `$fit remove {activityId}`';
  * 
  * @admin
  */
-export const remove : MessageHandler = async message => {
+ export async function remove (message: Message) : Promise<void> {
   const [/* !fit */, /* post */, activityId] = message.content.split (' ');
 
   if (!activityId) {

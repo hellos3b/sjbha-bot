@@ -1,11 +1,11 @@
-import { Instance, MessageHandler } from '@sjbha/app';
-
-import * as format from '@sjbha/utils/string-formatting';
+import { Message } from 'discord.js';
 import { table } from 'table';
+import { Instance } from '@sjbha/app';
+import * as format from '@sjbha/utils/string-formatting';
 
 import { Workouts, Workout } from '../db/workout';
 
-export const list : MessageHandler = async message => {
+export async function list (message: Message) : Promise<void> {
   const workouts = await Workouts ().limit (20).find ();
 
   // todo: Ensure chronological order
@@ -27,7 +27,7 @@ export const list : MessageHandler = async message => {
 
 const formatRow = async (workout: Workout.Model) : Promise<string[]> => {
   const member = await Instance.fetchMember (workout.discord_id);
-  const username = member.mapOrDefault (m => m.nickname, '<unknown>');
+  const username = member.map (m => m.nickname).getOrElseValue ('<unknown>');
   
   const timestamp = workout.started.toFormat ('hh:mma');
 

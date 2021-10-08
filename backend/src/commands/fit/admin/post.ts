@@ -1,9 +1,9 @@
-import { MessageHandler } from '@sjbha/app';
+import { Message } from 'discord.js';
 import { postWorkout } from '../features/post-workout';
 
 const usage = 'Usage: `!fit post {stravaId} {activityId}`';
 
-export const post : MessageHandler = async message => {
+export async function post (message: Message) : Promise<void> {
   const [/** !fit */, /** post */, stravaId, activityId] = message.content.split (' ');
 
   if (!stravaId || !activityId) {

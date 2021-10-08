@@ -1,9 +1,9 @@
 import * as R from 'ramda';
-import { MessageEmbed } from 'discord.js';
+import { MessageEmbed, GuildMember } from 'discord.js';
 import { DateTime } from 'luxon';
 import schedule from 'node-schedule';
 
-import { Instance, Member } from '@sjbha/app';
+import { Instance } from '@sjbha/app';
 import { channels, roles } from '@sjbha/config';
 
 import { Workout, Workouts, sumExp, belongsTo } from '../db/workout';
@@ -176,14 +176,14 @@ const UserPromoter = (user: User.Authorized) : UserPromoter => {
  * Set the role the user has been awarded.
  * User can only have 1 role at a time, so we'll remove the others
  */
-const setFitRole = (member: Member, roleId: string) : Promise<void[]> => 
+const setFitRole = (member: GuildMember, roleId: string) : Promise<void[]> => 
   Promise.all (
     [roles.certified_swole, roles.max_effort, roles.break_a_sweat]
       .map (async role => {
-        if (role === roleId && member.roles.has (role)) {
+        if (role === roleId && member.roles.cache.has (role)) {
           await member.roles.add (role);
         }
-        else if (role !== roleId && member.roles.has (role)) {
+        else if (role !== roleId && member.roles.cache.has (role)) {
           await member.roles.remove (role);
         }
       })

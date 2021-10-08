@@ -1,5 +1,5 @@
 import { Instance, Route } from '@sjbha/app';
-import { Codec, string } from 'purify-ts';
+import { assert, defaulted, object, string } from 'superstruct';
 import superagent from 'superagent';
 import { AuthResponse } from '../common/StravaClient';
 
@@ -7,9 +7,9 @@ import { strava } from '../env';
 import * as User from '../db/user';
 import { MessageBuilder } from '@sjbha/utils/string-formatting';
 
-const StravaQuery = Codec.interface ({
-  code:  string,
-  state: string
+const StravaQuery = object ({
+  code:  defaulted (string (), () => ''),
+  state: defaulted (string (), () => '')
 });
 
 /**
@@ -17,10 +17,15 @@ const StravaQuery = Codec.interface ({
  * This route will verify the auth, and then initialize the user's account with defaults
  */
 export const authAccept : Route = async req => {
+  const params = req.query;
+
   // Validate request query
-  const params = StravaQuery
-    .decode ({ ...req.query })
-    .orDefault ({ code: '', state: '' });
+  try {
+    assert (params, StravaQuery);
+  }
+  catch (e) {
+    return 'Error! code or state is missing'
+  }
 
   if (!params.code) {
     return 'Something went wrong while authorizing. Try to use <b>!fit auth</b> again, and if it doesnt work contact @s3b';

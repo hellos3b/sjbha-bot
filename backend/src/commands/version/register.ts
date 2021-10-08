@@ -1,8 +1,6 @@
-import { onMessage } from '@sjbha/app';
-import { reply, startsWith } from '@sjbha/utils/message-middleware';
+import { Message$ } from '@sjbha/app';
 import { env } from '@sjbha/app';
 
-onMessage (
-  startsWith ('!version'),
-  reply (`BoredBot v${env.VERSION}`)
-);
+Message$
+  .startsWith ('!version')
+  .replyWith (`BoredBot v${env.VERSION}`);

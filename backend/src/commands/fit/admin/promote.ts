@@ -1,11 +1,11 @@
-import { MessageHandler } from '@sjbha/app';
+import { Message } from 'discord.js';
 import { runPromotions } from '../features/weekly-promotions';
 
 /**
  * Force the promotions to happen
  * This should only be used in a dev environment
  */
-export const promote : MessageHandler = async message => {
+ export async function promote (message: Message) : Promise<void> {
   message.reply ('Beginning promotions');
   await runPromotions ();
 }

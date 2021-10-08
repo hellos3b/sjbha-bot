@@ -1,4 +1,5 @@
-import { env, MessageHandler } from '@sjbha/app';
+import { env } from '@sjbha/app';
+import { Message } from 'discord.js';
 import { DateObjectUnits, DateTime } from 'luxon';
 
 const festivize = (msg: string) => `🎄☃️☃️🎄🎁 ${msg} 🎁🎄☃️☃️🎄`;
@@ -8,7 +9,7 @@ const resetTime : DateObjectUnits = {
   hour: 0, minute: 0, second: 0, millisecond: 0
 };
 
-export const christmas : MessageHandler = message => {
+export async function christmas (message : Message) : Promise<void> {
   const now = DateTime
     .local ()
     .setZone (env.TIME_ZONE)
@@ -35,4 +36,4 @@ export const christmas : MessageHandler = message => {
     : festivize (`ONLY ${daysLeft} ${pluralize ('DAY', daysLeft)} UNTIL CHRISTMAS!!`);
 
   message.channel.send (reply);
-};
+}

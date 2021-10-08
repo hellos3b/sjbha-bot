@@ -1,5 +1,4 @@
 import { convert } from '@shootismoke/convert';
-import { Either } from 'purify-ts';
 import superagent from 'superagent';
 import * as R from 'ramda';
 import { variantList, TypeNames, VariantOf } from 'variant';
@@ -50,10 +49,15 @@ class Sensor {
    * 
    * @returns The AQI of the sensor, or an error from parsing JSON
    */
-  getAQI () : Either<Error, number> {
-    return Either
-      .encase (() : SensorStats => JSON.parse (this.data.Stats))
-      .map (stats => convert ('pm25', 'raw', 'usaEpa', stats.v1))
+  getAQI () : Error | number {
+    try {
+      const stats: SensorStats = JSON.parse (this.data.Stats);
+
+      return convert ('pm25', 'raw', 'usaEpa', stats.v1);
+    }
+    catch (e) {
+      return (e instanceof Error) ? e : new Error ('An error occured when trying to parse AQI stats');
+    }
   }
 }
 
@@ -91,7 +95,10 @@ export class SensorCollection {
         .map (R.median);
     }
 
-    const values = Either.rights (this.sensors.map (s => s.getAQI ()));
+    const values = this.sensors
+      .map (s => s.getAQI ())
+      .filter ((s): s is number => typeof s === 'number');
+
     const smoothed = medianFilter (values);
 
     return new AQI (R.mean (smoothed));

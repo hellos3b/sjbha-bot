@@ -1,8 +1,9 @@
 import { DateTime, Duration } from 'luxon';
-import { Just, Maybe, Nothing } from 'purify-ts';
+import { Option, option, none, some } from 'ts-option';
 import { just, match } from 'variant';
+import { EmbedField, MessageEmbed } from 'discord.js';
 
-import { Instance, EmbedField, MessageEmbed } from '@sjbha/app';
+import { Instance } from '@sjbha/app';
 import { channels } from '@sjbha/config';
 
 import { 
@@ -67,9 +68,7 @@ export const postWorkout = async (stravaId: number, activityId: number) : Promis
 
   // If the workout has been recorded previously, 
   // we'll want to update it instead of insert
-  const previouslyRecorded = Maybe.fromNullable (
-    workouts.find (w => w.activity_id === activity.id)
-  );
+  const previouslyRecorded = option (workouts.find (w => w.activity_id === activity.id));
   
   const exp = calculateExp (user.maxHR, activity, streams);
 
@@ -78,7 +77,7 @@ export const postWorkout = async (stravaId: number, activityId: number) : Promis
       activity_type: activity.type,
       exp:           exp
     }))
-    .orDefaultLazy (() => Workout.create (user.discordId, activity, exp));
+    .getOrElse (() => Workout.create (user.discordId, activity, exp));
 
 
   // The total exp from all the workouts this week that came before this current workout
@@ -92,15 +91,17 @@ export const postWorkout = async (stravaId: number, activityId: number) : Promis
   const weeklyExp = workout.totalExp + expSoFar;
   const member = await Instance.fetchMember (user.discordId);
 
-  const displayColor = member.mapOrDefault (m => m.displayColor, 0xffffff);
-  const nickname = member.mapOrDefault (m => m.nickname, 'Unknown');
-  const avatar = member.mapOrDefault (m => m.avatar, 'https://discordapp.com/assets/322c936a8c8be1b803cd94861bdfa868.png');
+  const nickname = member.map (m => m.nickname)
+    .getOrElseValue ('Unknown');
+  const avatar = member.map (m => m.user.displayAvatarURL ())
+    .getOrElseValue ('https://discordapp.com/assets/322c936a8c8be1b803cd94861bdfa868.png');
 
   // Create an embed that shows the name of the activity,
   // Some highlighted stats from the recording
   // And the user's Exp progress
   const embed = new MessageEmbed ({
-    color:       displayColor,
+    color: member.map (m => m.displayColor)
+      .getOrElseValue (0xffffff),
     title:       activity.name,
     description: activity.description,
     fields:      activityStats (activity),
@@ -136,7 +137,7 @@ export const postWorkout = async (stravaId: number, activityId: number) : Promis
     // If this workout was recorded previously,
     // We'll remove the xp from the user exp (kind of like an 'undo')
     // Before adding the new workout's exp
-    const prevExp = previouslyRecorded.mapOrDefault (prev => prev.totalExp, 0);
+    const prevExp = previouslyRecorded.map (prev => prev.totalExp).getOrElseValue (0);
 
     User.update ({ 
       ...user, 
@@ -165,13 +166,13 @@ export const postWorkout = async (stravaId: number, activityId: number) : Promis
  * @returns Calculated result of either HR Exp or Time based Exp
  */
 const calculateExp = (maxHeartrate: number | undefined, activity: Activity, streams: StreamResponse) : Exp => {
-  const hr = Maybe
-    .fromNullable (streams.find (s => s.type === 'heartrate'))
-    .mapOrDefault (s => s.data, []);
+  const hr = option (streams.find (s => s.type === 'heartrate'))
+    .map (s => s.data)
+    .getOrElseValue ([]);
 
-  const time = Maybe
-    .fromNullable (streams.find (s => s.type === 'time'))
-    .mapOrDefault (s => s.data, []);
+  const time = option (streams.find (s => s.type === 'time'))
+    .map (s => s.data)
+    .getOrElseValue ([]);
 
   // Max HR and hr data is required to be calculated by hr
   if (maxHeartrate && hr.length && time.length) {
@@ -259,71 +260,82 @@ const activityStats = (activity: Activity) : EmbedField[] => {
   const elapsed = field ('Elapsed', (a: Activity) => format.duration (a.elapsed_time)) (activity);
 
   // Heartrate fields
-  const hr = activity.has_heartrate ? Just (activity) : Nothing;
-  const averageHeartrate = hr.map (field ('Avg HR', a => format.hr (a.average_heartrate)));
-  const maxHeartrate = hr.map (field ('Max HR', a => format.hr (a.max_heartrate)));
-  const heartrate = Maybe.sequence ([averageHeartrate, maxHeartrate]);
+  const Heartrate = (activity.has_heartrate) ? some (activity) : none;
+  const Gps = option (activity).filter (a => a.distance > 0);
+  const Power = activity.device_watts ? some (activity) : none;
 
-  // GPS based fields
-  const gps = Just (activity).filter (a => a.distance > 0);
-  const distance = gps.map (field ('Distance', a => format.miles (a.distance)));
-
-  // Return none if elevation gain === 0, as this usually means
-  // this was an indoor run
-  const elevation = gps.filter (a => a.total_elevation_gain > 0)
-    .map (field ('Elevation', a => format.feet (a.total_elevation_gain)));
-  const pace = gps.map (field ('Pace', a => format.pace (a.average_speed)));
+  const avgHr = field ('Avg HR', format.hr);
+  const maxHr = field ('Max HR', format.hr);
+  const distance = field ('Distance', format.miles);
+  const elevation = field ('Elevation', format.feet);
+  const pace = field ('Pace', format.pace);
 
   // Power based fields
-  const power = activity.device_watts ? Just (activity) : Nothing;
-  const avgPower = power.map (field ('Avg Watts', a => format.power (a.weighted_average_watts)));
+  const avgPower = field ('Avg Watts', format.power);
   // const maxPower = power.map (field ('Max Watts', a => format.power (a.max_watts)));
 
-  const activitySpecific : EmbedField[] = match (activity, {
+  const hasElevation = activity.total_elevation_gain > 0;
+  const isWorkout = (type: WorkoutType) => activity.workout_type === type;
+
+  const activitySpecific : Option<EmbedField>[] = match (activity, {
     // We want to show GPS activity first unless the activity is marked as a workout, 
     // then we show the HR stats instead
-    Run: _ => 
-      Maybe.sequence ([distance, pace])
-        .filter (_ => activity.workout_type !== WorkoutType.RunningWorkout)
-        .alt (heartrate)
-        .orDefault ([]),
+    Run: _ => [
+      Gps.map (data => distance (data.distance))
+        .filter (_ => !isWorkout (WorkoutType.RunningWorkout))
+        .orElseValue (Heartrate.map (data => maxHr (data.max_heartrate))),
+
+      Gps.map (data => pace (data.average_speed))
+        .filter (_ => !isWorkout (WorkoutType.RunningWorkout))
+        .orElseValue (Heartrate.map (data => maxHr (data.average_heartrate)))
+    ],
 
     // We want to show GPS activity first unless the activity is marked as a workout, 
     // then we show the HR stats instead
-    Ride: _ => {
-      const second = elevation
-        .alt (avgPower)
-        .alt (averageHeartrate);
+    Ride: _ => [
+      Gps.map (data => distance (data.distance))
+        .filter (_ => !isWorkout (WorkoutType.RideWorkout))
+        .orElseValue (Heartrate.map (data => maxHr (data.max_heartrate))),
 
-      return Maybe.sequence ([distance, second])
-        .filter (_ => activity.workout_type !== WorkoutType.RideWorkout)
-        .alt (heartrate)
-        .orDefault ([])
-    },
+      Gps.filter (_ => hasElevation)
+        .map (data => elevation (data.total_elevation_gain))
+        .orElseValue (Power.map (d => avgPower (d.weighted_average_watts)))
+        .orElseValue (Heartrate.map (d => avgHr (d.average_heartrate)))
+    ],
 
-    Hike: _ => 
-      Maybe.sequence ([distance, elevation])
-        .alt (heartrate)
-        .orDefault ([]),
+    Hike: _ => [
+      Gps.map (data => distance (data.distance))
+        .orElseValue (Heartrate.map (data => maxHr (data.max_heartrate))),
 
-    VirtualRide: _ => {
-      const fieldA = distance.alt (averageHeartrate);
-      const fieldB = avgPower.alt (elevation).alt (maxHeartrate);
+      Gps.map (data => elevation (data.total_elevation_gain))
+        .orElseValue (Heartrate.map (d => avgHr (d.average_heartrate)))
+    ],
 
-      return [fieldA.extractNullable (), fieldB.extractNullable ()]
-        .filter ((f): f is EmbedField => !!f);
-    },
+    VirtualRide: _ => [
+      Gps.map (d => distance (d.distance))
+        .orElseValue (Heartrate.map (d => avgHr (d.average_heartrate))),
+
+      Power.map (d => avgPower (d.weighted_average_watts))
+        .orElseValue (Heartrate.map (d => maxHr (d.max_heartrate)))
+    ],
     
-    Walk: _ =>
-      Maybe.catMaybes ([distance, averageHeartrate]),
+    Walk: _ => [
+      Gps.map (d => distance (d.distance)),
+      Heartrate.map (d => avgHr (d.average_heartrate))
+    ],
 
-    Yoga: _ =>
-      heartrate.orDefault ([]),
-
-    default: () => heartrate.orDefault ([])
+    default: () => [
+      Heartrate.map (data => avgHr (data.average_heartrate)),
+      Heartrate.map (data => maxHr (data.max_heartrate)) 
+    ]
   });
 
-  return [elapsed, ...activitySpecific];
+  // Remove any nones
+  const fields = activitySpecific
+    .map (opt => opt.orNull)
+    .filter ((i): i is EmbedField => Boolean (i));
+
+  return [elapsed, ...fields];
 }
 
 

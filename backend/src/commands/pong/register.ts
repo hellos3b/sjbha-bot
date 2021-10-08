@@ -1,7 +1,5 @@
-import { onMessage } from '@sjbha/app';
-import { reply, startsWith } from '@sjbha/utils/message-middleware';
+import { Message$ } from '@sjbha/app';
 
-onMessage (
-  startsWith ('!pong'),
-  reply ('Ping?')
-);
+Message$
+  .startsWith ('!pong')
+  .replyWith ('Ping?');

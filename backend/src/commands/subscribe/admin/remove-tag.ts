@@ -1,7 +1,7 @@
-import { MessageHandler } from '@sjbha/app';
+import { Message } from 'discord.js';
 import { Subscriptions } from '../db/subscription';
 
-export const remove : MessageHandler = async message => {
+export async function remove (message: Message) : Promise<void> {
   const [_, __, name] = message.content.split (' ');
 
   if (!name) {

@@ -1,15 +1,14 @@
 import { DISCORD_TOKEN, SERVER_ID } from './env';
-import * as Discord from 'discord.js';
-
-import { Member, Message, TextChannel } from './discord-js';
+import { Client, Message, GuildMember, TextChannel } from 'discord.js';
+import { none, option, Option } from 'ts-option';
 
 import { channels } from '../config';
 import * as env from './env';
-import { Maybe, Just, Nothing } from 'purify-ts';
+import { MessageStream, WritableMessageStream } from '../utils/MessageStream';
 
 // Connect
 
-const client = new Discord.Client ();
+const client = new Client ();
 
 client.on ('ready', () => {
   console.log (`Bastion connected as '${client.user?.tag}' v${env.VERSION}`);
@@ -21,83 +20,38 @@ client.on ('ready', () => {
   }
 });
 
-client.on ('message', (msg: Discord.Message) => {
+client.on ('message', (msg: Message) => {
   if (msg.author.bot) return;
 
-  const message = Message (msg);
-  [...messageHandlers].forEach (f => f (message));
+  Message$$.emit (msg);
 });
 
 client.login (DISCORD_TOKEN);
 
 // Message Event
+const Message$$ = new WritableMessageStream ();
+export const Message$ : MessageStream = Message$$;
 
-export type MessageHandler = (message: Message) => void;
-
-const messageHandlers : Set<MessageHandler> = new Set ();
-
-export type NextFn = () => void;
-export type MessageMiddleware = (message: Message, next: NextFn) => void;
-
-export type UnsubscribeHandler = () => void;
-
-/**
- * Compose a series middleware together to create a command.
- * 
- * Middleware is used as helpers for filtering and routing an incoming message.
- * 
- * ```ts
- * compose (
- *   startsWith ("!ping"),
- *   reply ("Pong!")
- * )
- * ```
- * 
- * @returns A Handler that can be passed to `onMessageEvent`
- */
-export const compose = (...middlewares: MessageMiddleware[]) : MessageHandler => {
-  if (!middlewares.length) {
-    return _ => { /** Ignore */ }
-  }
-
-  const [run, ...tail] = middlewares;
-  const next = compose (...tail);
-
-  return message => run (message, () => next (message));
-}
-
-/**
- * Listen to messages from the bot.
- * 
- * todo: explain middleware
- */
-export const onMessage = (...middleware: MessageMiddleware[]) : UnsubscribeHandler => {
-  const handler = compose (...middleware);
-
-  messageHandlers.add (handler);
-
-  return () => messageHandlers.delete (handler);
-}
 
 // Instance Utilities
 export const Instance = {
-  fetchMember: async (discordId: string) : Promise<Maybe<Member>> => {
+  fetchMember: async (discordId: string) : Promise<Option<GuildMember>> => {
     try {
       const guild = await client.guilds.fetch (SERVER_ID);
       const member = await guild.members.fetch (discordId);
 
-      return Just (Member (member));
+      return option (member);
     }
     catch (e) {
-      return Nothing;
+      return none;
     }
   },
 
-  fetchMembers: async (discordIds: string[]) : Promise<Member[]> => {
+  fetchMembers: async (discordIds: string[]) : Promise<GuildMember[]> => {
     const guild = await client.guilds.fetch (SERVER_ID);
     const members = await guild.members.fetch ({ user: discordIds });
 
-    return members.map (Member);
+    return [...members.values ()];
   }, 
 
   fetchChannel: async (channelId: string) : Promise<TextChannel> => {
@@ -107,13 +61,13 @@ export const Instance = {
       throw new Error ('Channel is not of type \'dm\' or \'text');
     }
 
-    return TextChannel (<Discord.TextChannel>channel);
+    return channel as TextChannel;
   },
 
   fetchMessage: async (channelId: string, messageId: string) : Promise<Message> => {
     const channel = await client.channels.fetch (channelId);
-    const message = await (<Discord.TextChannel>channel).messages.fetch (messageId);
+    const message = await (<TextChannel>channel).messages.fetch (messageId);
 
-    return Message (message);
+    return message;
   }
 }

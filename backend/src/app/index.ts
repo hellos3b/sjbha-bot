@@ -2,25 +2,10 @@ export * as env from './env';
 
 export { db } from './mongodb';
 
-export {
-  compose,
-  MessageHandler,
-  MessageMiddleware,
-  onMessage,
-  Instance
+export { 
+  Instance, 
+  Message$ 
 } from './client';
-
-export {
-  MessageEmbed,
-  EmbedField
-} from 'discord.js';
-
-export {
-  Message,
-  User,
-  Member,
-  TextChannel
-} from './discord-js';
 
 export { 
   Route,

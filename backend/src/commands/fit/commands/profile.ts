@@ -1,15 +1,14 @@
-import { MessageHandler, MessageEmbed } from '@sjbha/app';
+import { Message, MessageEmbed } from 'discord.js';
 import { DateTime, Interval } from 'luxon';
 import fromNow from 'fromnow';
-import { Just } from 'purify-ts';
+import { option } from 'ts-option';
 
 import * as User from '../db/user';
 import { Workouts, sumExp } from '../db/workout';
-
 import { currentWeek } from '../common/week';
 import { getRank } from '../common/ranks';
 
-export const profile : MessageHandler = async message => {
+export async function profile (message: Message) : Promise<void> {
   const user = await User.findOne ({ discordId: message.author.id });
 
   if (!User.isAuthorized (user)) {
@@ -18,12 +17,14 @@ export const profile : MessageHandler = async message => {
     return;
   }
 
-  const username = message.member.mapOrDefault (m => m.nickname, message.author.username);
-  const displayColor = message.member.mapOrDefault (m => m.displayColor, 0xcccccc);
+  const member = option (message.member);
+
+  const username = member.map (m => m.nickname).getOrElse (() => message.author.username);
+  const displayColor = member.map (m => m.displayColor).getOrElse (() => 0xcccccc);
 
   const embed = new MessageEmbed ();
   embed.setColor (displayColor);
-  embed.setAuthor (username, message.author.avatar);
+  embed.setAuthor (username, message.author.displayAvatarURL ());
 
   // User's current rank name
   const rank = getRank (user.fitScore);
@@ -50,11 +51,11 @@ export const profile : MessageHandler = async message => {
   embed.addField ('Weekly EXP', formatExp (sumExp (weekly)), true); 
 
   // The user's most recently recorded workout
-  const mostRecentWorkout = Just (profileWorkouts)
+  const mostRecentWorkout = option (profileWorkouts)
     .map (list => list.sort ((a, b) => a.timestamp > b.timestamp ? -1 : 1))
-    .chainNullable (list => list[0])
+    .flatMap (list => option (list[0]));
 
-  mostRecentWorkout.ifJust (workout => {
+  mostRecentWorkout.map (workout => {
     const emoji = workout.emoji (user.emojis);
     const name = workout.activity_name;
     const timeAgo = fromNow (workout.timestamp, { suffix: true, max: 1 });

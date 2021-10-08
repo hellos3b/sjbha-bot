@@ -1,13 +1,13 @@
-import { MessageHandler, env } from '@sjbha/app';
-
+import { env } from '@sjbha/app';
 import * as format from '@sjbha/utils/string-formatting';
 import { strava } from '../env';
 import * as User from '../db/user';
+import { Message } from 'discord.js';
 
 /**
  * The initial command users use to set their password and connect to Strava
  */
-export const auth : MessageHandler = async message => {
+export async function auth (message: Message) : Promise<void> {
   const user = await User.init (message.author.id);
 
   const params = {

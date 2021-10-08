@@ -1,7 +1,7 @@
-import { MessageHandler } from '@sjbha/app';
+import { Message } from 'discord.js';
 import { Subscriptions } from '../db/subscription';
 
-export const list : MessageHandler = async message => {
+export async function list (message : Message) : Promise<void> {
   const subs = await Subscriptions ().find ().toArray ();
   const names = subs.map (_ => _.name).join (', ');
 
