@@ -68,22 +68,24 @@ export class MessageStream extends Stream<Message> {
    */
    routes (routes: Record<'noMatch' | 'empty' | '*' | string, Listener<Message>>) : Unsubscribe {
     return this.subscribe (message => {
-      const [_, route] = message.content.split (' ');
+      const [_, route] = message.content
+        .replace (/\n/g, ' ')
+        .split (' ');
 
       switch (true) {
-        case (Boolean (route) && routes[route]):
+        case (route in routes):
           routes[route] (message);
           break;
 
-        case (Boolean (route) && routes['noMatch']):
+        case (route.length && ('noMatch' in routes)):
           routes.noMatch (message);
           break;
 
-        case (Boolean (routes.empty)):
+        case (!route && ('empty' in routes.empty)):
           routes.empty (message);
           break;
 
-        case (Boolean (routes['*'])):
+        case ('*' in routes):
           routes['*'] (message);
           break;
       }
@@ -197,10 +199,18 @@ export class WritableStream<T> extends Stream<T> {
   emit (value: T) : void {
     this.listeners.forEach (l => l (value));
   }
+
+  get readonly () : Stream<T> {
+    return this;
+  }
 }
 
 export class WritableMessageStream extends MessageStream {
   emit (message: Message) : void {
     this.listeners.forEach (l => l (message));
+  }
+
+  get readonly () : MessageStream {
+    return this;
   }
 }

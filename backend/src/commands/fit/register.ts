@@ -1,4 +1,4 @@
-import { router, Message$ } from '@sjbha/app';
+import { Router, Message$ } from '@sjbha/app';
 import { channels } from '@sjbha/config';
 
 // Bot
@@ -51,5 +51,5 @@ Message$
 import { authAccept } from './routes/auth-accept';
 import { newWorkout } from './routes/activity-webhook';
 
-router.get ('/fit/accept', authAccept);
-router.post ('/fit/api/webhook', newWorkout);
+Router.get ('/fit/accept', authAccept);
+Router.post ('/fit/api/webhook', newWorkout);

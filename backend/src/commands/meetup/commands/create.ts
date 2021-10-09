@@ -2,9 +2,10 @@ import { Message } from 'discord.js';
 import { nanoid } from 'nanoid';
 import YAML from 'yaml';
 
-import { mapOptionsToMeetup, ValidationError } from '../common/MeetupOptions';
-import Meetup from '../core/Meetup';
 import * as db from '../db/meetups';
+import * as M from '../common/Meetup';
+import { validateOptions, ValidationError } from '../common/validateOptions';
+import { Announcement } from '../embeds/Announcement';
 
 
 /**
@@ -14,7 +15,7 @@ import * as db from '../db/meetups';
   const inputText = message.content.replace ('!meetup create', '');
   const messageOptions = YAML.parse (inputText);
 
-  const options = mapOptionsToMeetup (messageOptions);
+  const options = validateOptions (messageOptions);
   
   if (options instanceof ValidationError) {
     message.reply (options.error);
@@ -22,13 +23,30 @@ import * as db from '../db/meetups';
     return;
   }
 
-  const meetup = db.Meetup ({
+  const meetup : db.Meetup = {
     id:           nanoid (),
-    details:      db.Details ({ ...options, organizerId: message.author.id }),
-    state:        db.MeetupState.Created (),
-    announcement: db.AnnouncementType.Pending (message.channel.id)
-  });
+    organizerId:  message.author.id,
+    title:        options.title,
+    // todo: verify date format 
+    timestamp:    options.date,
+    description:  options.description || '',
+    links:        options.links ?? [],
+    location:     M.location (options),
+    state:        { type: 'Live' },
+    announcement: { type: 'Pending', channelId: message.channel.id }
+  };
 
-  await Meetup.post (meetup);
-  await message.delete ();
+  const [announcement] = await Promise.all ([
+    message.channel.send (Announcement (meetup, [])),
+    message.delete ()
+  ]);
+  
+  await db.insert ({
+    ...meetup,
+    announcement: { 
+      type:      'Inline', 
+      channelId: announcement.channel.id,
+      messageId: announcement.id
+    }
+  });
 }

@@ -17,17 +17,16 @@ export default class MultiChoice<T> {
     this.choices = choices;
   }
 
-  get (index: number | string) : Option<T> {
+  get = (index: number | string) : Option<T> => {
     const choice = (typeof index === 'string') ? parseInt (index) : index;
 
     return option (this.choices[choice]).map (o => o.value);
   }
 
-  parse (message: Message) : T | null {
-    return (message.content === 'cancel')
+  parse = (message: Message) : T | null => 
+    (message.content === 'cancel')
       ? null
-      : this.get (message.content).orNull;
-  }
+      : this.get (message.content).orNull
 
   toString() : string {
     const msg = new MessageBuilder ();

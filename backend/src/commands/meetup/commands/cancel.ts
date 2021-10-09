@@ -1,26 +1,32 @@
-import Meetup from '../core/Meetup';
 import { Message, MessageEmbed } from 'discord.js';
+import { DateTime } from 'luxon';
 import MultiChoice from '@sjbha/utils/multi-choice';
+
+import * as db from '../db/meetups';
+import * as M from '../common/Meetup';
+import { Cancelled } from '../embeds/Cancelled';
 
 /**
  * Cancel a meetup
  */
  export async function cancel (message: Message) : Promise<void> {
-  const userMeetups = Meetup.find (meetup => meetup.isLive && meetup.organizerId === message.author.id)
+  const userMeetups = await db.find ({
+    state:       { type: 'Live' },
+    organizerId: message.author.id
+  });
   
   // Make sure they have any meetups they can cancel
-  if (!userMeetups.size) {
+  if (!userMeetups.length) {
     message.reply ('You have no meetups to cancel');
 
     return;
   }
 
   // Pick a meetup they want to cancel
-  const meetupPicker = MultiChoice.create <Meetup> (
+  // todo: Should add a note that they can transfer responsibility
+  const meetupPicker = MultiChoice.create <db.Meetup> (
     'Which meetup would you like to cancel?',
-    userMeetups.map (meetup => 
-      MultiChoice.opt (`${meetup.time.toLocaleString ()} ${meetup.title}`, meetup)
-    )
+    userMeetups.map (meetup => MultiChoice.opt (meetup.title, meetup))
   );
 
   await message.reply (meetupPicker.toString ());
@@ -40,13 +46,21 @@ import MultiChoice from '@sjbha/utils/multi-choice';
   if (!cancelReason)
     return;
 
+  await Promise.all ([
+    M.edit (meetup, Cancelled (meetup, cancelReason)),
+    db.update ({
+      ...meetup,
+      state: { 
+        type:      'Cancelled', 
+        reason:    cancelReason, 
+        timestamp: DateTime.local ().toISO () 
+      }
+    })
+  ]);
 
-  // Cancel the meetup
-  await meetup.cancel (cancelReason);
-
-  const embed = new MessageEmbed ({
-    description: `❌ **${meetup.title}** was cancelled`
-  });
-
-  message.reply (embed);
+  message.reply (
+    new MessageEmbed ({
+      description: `❌ **${meetup.title}** was cancelled`
+    })
+  );
 }

@@ -9,6 +9,7 @@ Settings.defaultZoneName = 'America/Los_Angeles';
 import './commands/aqi/register';
 import './commands/christmas/register';
 import './commands/fit/register';
+import './commands/meetup/register';
 import './commands/pong/register';
 import './commands/subscribe/register';
 import './commands/version/register';

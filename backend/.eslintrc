@@ -16,7 +16,6 @@
     "lines-around-comment": ["warn", { "beforeBlockComment": true }],
     "lines-between-class-members": ["error", "always"],
     "no-unneeded-ternary": "warn",
-    "padding-line-between-statements": ["warn", { "blankLine": "always", "prev": "*", "next": "return" }],
     "object-curly-spacing": ["warn", "always"],
     "semi-style": "warn",
     "space-before-blocks": "warn",

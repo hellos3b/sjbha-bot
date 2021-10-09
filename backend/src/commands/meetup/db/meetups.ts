@@ -7,11 +7,8 @@ const collection = db<AllSchemas> ('meetups');
 
 export const events = new EventEmitter<{
   'add': (meetup: Meetup) => void;
-  'change': () => void;
+  'update': (meetup: Meetup) => void;
 }>();
-
-// auto change events (:
-events.on ('add', () => events.emit ('change'));
 
 export type Schema = {
   __version: 1;
@@ -38,11 +35,6 @@ export type Schema = {
 
 export type Meetup = Omit<Schema, '__version'>;
 export const Meetup = (meetup: Meetup) : Meetup => ({ ...meetup });
-  
-
-type AllSchemas = 
-  | Schema 
-  | Schema__V0;
 
 const schemaToMeetup = ({ __version, ...schema }: Schema) : Meetup => schema;
 
@@ -57,7 +49,8 @@ export async function insert(meetup: Meetup) : Promise<Meetup> {
 
 export async function update(meetup: Meetup) : Promise<Meetup> {
   await collection ().replaceOne ({ id: meetup.id }, meetupToSchema (meetup));
-
+  events.emit ('update', meetup);
+  
   return meetup;
 }
 
@@ -84,6 +77,9 @@ export const findOne = async (q: FilterQuery<Schema> = {}) : Promise<Meetup | nu
 //
 // --------------------------------------------------------------------------------
 
+type AllSchemas = 
+  | Schema 
+  | Schema__V0;
 
 const migrate = (model: AllSchemas) : Schema => {
   if (!('__version' in model)) {

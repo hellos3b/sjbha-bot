@@ -1,4 +1,4 @@
-import { Message$, router } from '@sjbha/app';
+import { Message$, Router } from '@sjbha/app';
 
 
 // Commands
@@ -18,18 +18,21 @@ Message$
 
 // Admin Commands
 
-import { refresh } from './admin/refresh';
+// import { refresh } from './admin/refresh';
 
-Message$
-  .startsWith ('$meetup')
-  .adminOnly ()
-  .routes ({ 
-    'refresh': refresh
-  });
+// Message$
+//   .startsWith ('$meetup')
+//   .adminOnly ()
+//   .routes ({ 
+//     'refresh': refresh
+//   });
+
+import * as RSVP from './features/rsvps';
+
+RSVP.init ();
 
 
-// public API
-
+// Web API for editor
 import { meetup } from './routes/meetup';
 
-router.get ('/meetup/{id}', meetup);
+Router.get ('/meetup/{id}', meetup);

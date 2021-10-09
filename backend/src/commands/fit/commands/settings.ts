@@ -1,11 +1,11 @@
 import { variantList,TypeNames, VariantOf, match } from 'variant';
 import * as yup from 'yup';
 import { Message } from 'discord.js';
-import { Interaction } from '@sjbha/utils/interaction';
+
+import MultiChoice from '@sjbha/utils/multi-choice';
 import { MessageBuilder, inlineCode } from '@sjbha/utils/string-formatting';
 
 import * as User from '../db/user';
-import { EmojiSet } from '../common/activity-emoji';
 
 const SettingsMenu = variantList (['hr', 'emoji']);
 type SettingsMenu<T extends TypeNames<typeof SettingsMenu> = undefined>= VariantOf<typeof SettingsMenu, T>;
@@ -23,17 +23,15 @@ export async function settings (message: Message) : Promise<void> {
     ? 'Update Max Heartrate [Current: ' + user.maxHR + ']'
     : 'Set Max Heartrate (Needed for HR based exp)';
 
-  const actions = new Interaction
-    .OptionBuilder <SettingsMenu> ('What would you like to do?')
-    .addOption (hrText, SettingsMenu.hr)
-    .addOption ('Select Emoji Set [Current: ' + user.emojis +']', SettingsMenu.emoji);
+  const actions = MultiChoice.create <SettingsMenu> ('What would you like to do?', [
+    MultiChoice.opt (hrText, SettingsMenu.hr),
+    MultiChoice.opt (`Select Emoji Set [Current: ${user.emojis}]`, SettingsMenu.emoji)
+  ]);
 
-  await actions.askIn (message.channel.id);
-
-  const action = await actions
-    .capture ()
-    .inReplyTo (message)
-    .get ();
+  await message.channel.send (actions.toString ());
+  const action = await message.channel
+    .createMessageCollector (m => m.author.id === message.author.id)
+    .next.then (actions.parse);
 
   if (!action)
     return;
@@ -59,12 +57,10 @@ const setMaxHeartrate = async (user: User.Authorized, message: Message) => {
   prompt.append ('What do you want to set your max heartrate to?');
 
   await message.channel.send (prompt.toString ());
-
-  const input = await Interaction
-    .capture ()
-    .inReplyTo (message)
-    .setTimeout (1000 * 60)
-    .get ();
+  
+  const input = await message.channel
+    .createMessageCollector (m => m.author.id === message.author.id)
+    .next.then (msg => msg.content.toLowerCase ());
 
   if (input === 'remove') {
     await User.update ({
@@ -101,30 +97,27 @@ const setMaxHeartrate = async (user: User.Authorized, message: Message) => {
 }
 
 const setEmoji = async (user: User.Authorized, message: Message) => {
-  const emojis = new Interaction
-    .OptionBuilder <EmojiSet> ('Which emoji set do you want to use when an activity posts?')
-    .addOption ('People - Default (🏃🚴🧘‍♂️🚶‍♂️🏋️‍♂️🧗‍♀️🤸‍♂️)', 'people-default')
-    .addOption ('People - Female (🏃‍♀️🚴‍♀️🧘‍♀️🚶‍♀️🏋️‍♀️🧗‍♂️🤸‍♀️)', 'people-female')
-    .addOption ('Objects (👟🚲☮️🥾🥾💪⛰️💦)', 'objects')
-    .addOption ('Intensity Based Faces (🙂😶😦😨🥵)', 'intensity')
-    .addOption ('Intensity Based Colors (​🟣​🟢​​🟡🟠🔴​​)', 'intensity-circle');
+  const emojiChoice = MultiChoice.create ('Which emoji set do you want to use when an activity posts?', [
+    MultiChoice.opt ('People - Default (🏃🚴🧘‍♂️🚶‍♂️🏋️‍♂️🧗‍♀️🤸‍♂️)', 'people-default'),
+    MultiChoice.opt ('People - Female (🏃‍♀️🚴‍♀️🧘‍♀️🚶‍♀️🏋️‍♀️🧗‍♂️🤸‍♀️)', 'people-female'),
+    MultiChoice.opt ('Objects (👟🚲☮️🥾🥾💪⛰️💦)', 'objects'),
+    MultiChoice.opt ('Intensity Based Faces (🙂😶😦😨🥵)', 'intensity'),
+    MultiChoice.opt ('Intensity Based Colors (​🟣​🟢​​🟡🟠🔴​​)', 'intensity-circle')
+  ]);
 
-  await emojis.askIn (message.channel.id);
+  await message.channel.send (emojiChoice.toString ());
+  const emojis = await message.channel
+    .createMessageCollector (m => m.author.id === message.author.id)
+    .next.then (msg => msg.content.toLowerCase ());
 
-  const input = await emojis
-    .capture ()
-    .inReplyTo (message)
-    .setTimeout (1000 * 60)
-    .get ();
-
-  if (!input) {
+  if (!emojis) {
     return;
   }
 
   await User.update ({
     ...user,
-    emojis: input
+    emojis: emojis
   });
 
-  message.reply (`Your Emoji Set has been updated! ${inlineCode (user.emojis)} -> ${inlineCode (input)}`);
+  message.reply (`Your Emoji Set has been updated! ${inlineCode (user.emojis)} -> ${inlineCode (emojis)}`);
 }
