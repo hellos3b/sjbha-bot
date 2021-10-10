@@ -5,7 +5,6 @@ import { MessageEmbed } from 'discord.js';
 import * as db from '../db/meetups';
 import * as M from '../common/Meetup';
 import { DateTime } from 'luxon';
-import { refresh } from '../admin/refresh';
 
 const MessageIds = Settings<string[]> ('meetup/directory-ids', []);
 
