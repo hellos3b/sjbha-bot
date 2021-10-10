@@ -1,9 +1,10 @@
 import { env } from '@sjbha/app';
 
 const production = {
-  strava:    '450913008323919872',
-  shitpost:  '506911331257942027',
-  bot_admin: '430517752546197509'
+  strava:            '450913008323919872',
+  shitpost:          '506911331257942027',
+  bot_admin:         '430517752546197509',
+  meetups_directory: ''
 };
 
 type Channels = typeof production;
@@ -14,9 +15,10 @@ const devServer = {
 };
 
 const development: Channels = {
-  strava:    devServer.bot1,
-  shitpost:  devServer.bot1,
-  bot_admin: devServer.bot1
+  strava:            devServer.bot1,
+  shitpost:          devServer.bot1,
+  bot_admin:         devServer.bot1,
+  meetups_directory: '876983154924204043'
 };
 
 export const channels = env.IS_PRODUCTION ? production : development;

@@ -8,12 +8,16 @@ const collection = db<AllSchemas> ('meetups');
 export const events = new EventEmitter<{
   'add': (meetup: Meetup) => void;
   'update': (meetup: Meetup) => void;
+  // If the DB was edited manually, hit the $meetup refresh command
+  'edited': () => void;
 }>();
 
 export type Schema = {
   __version: 1;
   id: string;
   organizerId: string;
+  sourceChannelID: string;
+  createdAt: string;
   title: string;
   timestamp: string;
   description: string;
@@ -84,12 +88,14 @@ type AllSchemas =
 const migrate = (model: AllSchemas) : Schema => {
   if (!('__version' in model)) {
     return migrate ({
-      __version:   1,
-      id:          model.id,
-      title:       model.options.name,
-      description: model.options.description,
-      organizerId: model.userID,
-      timestamp:   model.timestamp,
+      __version:       1,
+      id:              model.id,
+      title:           model.options.name,
+      description:     model.options.description,
+      organizerId:     model.userID,
+      timestamp:       model.timestamp,
+      sourceChannelID: model.sourceChannelID,
+      createdAt:       '',
       
       location: (model.options.location)
         ? { type: 'Address', value: model.options.location, comments: '' }

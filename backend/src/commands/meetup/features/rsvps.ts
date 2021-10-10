@@ -1,7 +1,7 @@
 import { Instance, onClientReady, onMongoDbReady, Reaction$ } from '@sjbha/app';
 import { Collection, Message, MessageReaction, User } from 'discord.js';
 import * as db from '../db/meetups';
-import { Announcement, Reaction } from '../embeds/Announcement';
+import { Announcement, Reaction } from '../common/Announcement';
 
 export const RsvpEmoji =  '✅';
 export const MaybeEmoji = '🤔';
@@ -11,28 +11,6 @@ export const MaybeEmoji = '🤔';
 // We get reactions on every message in the server so it
 // would be a waste to do a DB lookup every time
 const announcementIds = new Set<string> ();
-
-db.events.on ('add', initAnnouncement);
-db.events.on ('update', meetup => {
-  const messageId = (meetup.announcement.type === 'Inline')
-    ? meetup.announcement.messageId
-    : '';
-
-  if (meetup.state.type !== 'Live') {
-    announcementIds.delete (messageId);
-  }
-});
-
-
-Reaction$
-  .filter (data => announcementIds.has (data.reaction.message.id))
-  .filter (data => !data.user.bot)
-  .filter (data => [RsvpEmoji, MaybeEmoji].includes (data.reaction.emoji.name))
-  .subscribe (({ type, reaction, user }) => 
-    (type === 'add')
-      ? onAddReaction (reaction, user)
-      : onRemoveReaction (reaction)
-  );
 
 
 // Meant to be called when booting up
@@ -46,7 +24,31 @@ export async function init() : Promise<void> {
     'announcement.type': 'Inline'
   });
 
-  meetups.forEach (initAnnouncement);
+  for (const meetup of meetups) {
+    await initAnnouncement (meetup);
+  }
+
+  // Begin listening to events
+  db.events.on ('add', initAnnouncement);
+  db.events.on ('update', meetup => {
+    const messageId = (meetup.announcement.type === 'Inline')
+      ? meetup.announcement.messageId
+      : '';
+
+    if (meetup.state.type !== 'Live') {
+      announcementIds.delete (messageId);
+    }
+  });
+
+  Reaction$
+    .filter (data => announcementIds.has (data.reaction.message.id))
+    .filter (data => !data.user.bot)
+    .filter (data => [RsvpEmoji, MaybeEmoji].includes (data.reaction.emoji.name))
+    .subscribe (({ type, reaction, user }) => 
+      (type === 'add')
+        ? onAddReaction (reaction, user)
+        : onRemoveReaction (reaction)
+    );
 }
 
 

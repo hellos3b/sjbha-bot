@@ -4,7 +4,6 @@ import MultiChoice from '@sjbha/utils/multi-choice';
 
 import * as db from '../db/meetups';
 import * as M from '../common/Meetup';
-import { Cancelled } from '../embeds/Cancelled';
 
 /**
  * Cancel a meetup
@@ -46,8 +45,14 @@ import { Cancelled } from '../embeds/Cancelled';
   if (!cancelReason)
     return;
 
+  const posting = new MessageEmbed ({
+    title:       '📅  **CANCELLED**: ~~' + meetup.title + '~~',
+    color:       '#9b3128',
+    description: `> ${cancelReason}`
+  });
+
   await Promise.all ([
-    M.edit (meetup, Cancelled (meetup, cancelReason)),
+    M.edit (meetup, posting),
     db.update ({
       ...meetup,
       state: { 

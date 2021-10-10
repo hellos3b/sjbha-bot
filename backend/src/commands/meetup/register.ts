@@ -18,17 +18,19 @@ Message$
 
 // Admin Commands
 
-// import { refresh } from './admin/refresh';
+import { refresh } from './admin/refresh';
 
-// Message$
-//   .startsWith ('$meetup')
-//   .adminOnly ()
-//   .routes ({ 
-//     'refresh': refresh
-//   });
+Message$
+  .startsWith ('$meetup')
+  .adminOnly ()
+  .routes ({ 
+    'refresh': refresh
+  });
 
 import * as RSVP from './features/rsvps';
+import * as Directory from './features/directory';
 
+Directory.init ();
 RSVP.init ();
 
 

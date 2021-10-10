@@ -7,7 +7,7 @@ import MultiChoice from '@sjbha/utils/multi-choice';
 import * as db from '../db/meetups';
 import * as M from '../common/Meetup';
 import { validateOptions, ValidationError } from '../common/validateOptions';
-import { Announcement } from '../embeds/Announcement';
+import { Announcement } from '../common/Announcement';
 import { fetchReactions } from '../features/rsvps';
 
 

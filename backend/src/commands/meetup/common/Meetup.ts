@@ -1,5 +1,6 @@
 import { Instance } from '@sjbha/app';
 import { Message, MessageEmbed } from 'discord.js';
+import { DateTime } from 'luxon';
 import * as db from '../db/meetups';
 import { MeetupOptions } from './validateOptions';
 
@@ -43,4 +44,16 @@ export function location (options: MeetupOptions) : db.Meetup['location'] {
     default:
       return { type: 'None' };
   }
+}
+
+/**
+ * Formats the timestamp from the meetup into a nice string
+ * @param meetup 
+ * @returns 
+ */
+export function timestring (meetup: db.Meetup) : string {
+  return DateTime.fromISO (meetup.timestamp).toLocaleString ({
+    weekday: 'long', month:   'long',  day:     '2-digit', 
+    hour:    '2-digit', minute:  '2-digit' 
+  });
 }

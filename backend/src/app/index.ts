@@ -16,3 +16,7 @@ export {
   Route,
   Router
 } from './hapi';
+
+export {
+  Settings
+} from './settings';

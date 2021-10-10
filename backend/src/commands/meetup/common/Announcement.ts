@@ -11,6 +11,13 @@ export type Reaction = {
   users: string[];
 }
 
+/**
+ * This is the Announcement embed
+ * 
+ * @param meetup 
+ * @param reactions 
+ * @returns 
+ */
 export function Announcement (meetup: db.Meetup, reactions: Reaction[]) : MessageEmbed {
   const embed = new MessageEmbed ({
     title:       '📅  ' + meetup.title,
