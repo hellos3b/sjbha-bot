@@ -12,7 +12,9 @@ Message$
   .routes ({ 
     'create': create, 
     'cancel': cancel, 
-    'edit':   edit 
+    'edit':   edit,
+    // todo
+    'empty':  msg => msg.reply ('<insert meetup link here>')
   });
 
 

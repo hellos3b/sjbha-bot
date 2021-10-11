@@ -77,11 +77,11 @@ export class MessageStream extends Stream<Message> {
           routes[route] (message);
           break;
 
-        case (route.length && ('noMatch' in routes)):
+        case (Boolean (route) && ('noMatch' in routes)):
           routes.noMatch (message);
           break;
 
-        case (!route && ('empty' in routes.empty)):
+        case (!route && ('empty' in routes)):
           routes.empty (message);
           break;
 

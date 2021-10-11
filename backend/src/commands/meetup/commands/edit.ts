@@ -76,14 +76,14 @@ async function updateMeetup(message: Message) {
     case 'Inline': {
       const message = await Instance.fetchMessage (meetup.announcement.channelId, meetup.announcement.messageId);
       const reactions = await fetchReactions (message);
-      await message.edit (Announcement (meetup, reactions));
+      await message.edit ({ embeds: [Announcement (meetup, reactions)] });
       break;
     }
   }
 
   // Let the user know it has been done!
   await message.delete ();
-  message.channel.send (
+  message.channel.send ({ embeds: [
     new MessageEmbed ({
       description: `✨ **${meetup.title}** was updated`
       // todo: display a diff
@@ -91,7 +91,7 @@ async function updateMeetup(message: Message) {
       //   .map (key => '`' + key + '`')
       //   .join (', ')
     })
-  );
+  ] });
 }
 
 
@@ -116,7 +116,7 @@ async function getEditLink(message: Message) {
   );
 
   await message.reply (meetupPicker.toString ());
-  const interaction = message.channel.createMessageCollector (m => m.author.id === message.author.id);
+  const interaction = message.channel.createMessageCollector ({ filter: m => m.author.id === message.author.id });
   const meetup = await interaction.next.then (meetupPicker.parse);
 
   if (!meetup)
@@ -124,10 +124,10 @@ async function getEditLink(message: Message) {
 
   const editUrl = env.UI_HOSTNAME + '/meetup#' + meetup.id;
 
-  message.channel.send (
+  message.channel.send ({ embeds: [
     new MessageEmbed ({
       description: `:pencil2: [Click here to edit '**${meetup.title}**'](${editUrl})`,
       color:       '#d7d99e'
     })
-  );
+  ] });
 }

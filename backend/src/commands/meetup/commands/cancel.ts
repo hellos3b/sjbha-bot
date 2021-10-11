@@ -30,7 +30,7 @@ import * as M from '../common/Meetup';
 
   await message.reply (meetupPicker.toString ());
   const meetup = await  message.channel
-    .createMessageCollector (m => m.author.id === message.author.id)
+    .createMessageCollector ({ filter: m => m.author.id === message.author.id })
     .next.then (meetupPicker.parse);
 
   if (!meetup) 
@@ -39,7 +39,7 @@ import * as M from '../common/Meetup';
   // Give a reason, which we use to let people know why
   await message.reply (`What is the reason for cancelling '${meetup.title}'? (Will let the RSVP's know it was cancelled)`)
   const cancelReason = await message.channel
-    .createMessageCollector (m => m.author.id === message.author.id)
+    .createMessageCollector ({ filter: m => m.author.id === message.author.id })
     .next.then (msg => msg.content);
 
   if (!cancelReason)
@@ -63,9 +63,9 @@ import * as M from '../common/Meetup';
     })
   ]);
 
-  message.reply (
+  message.reply ({ embeds: [
     new MessageEmbed ({
       description: `❌ **${meetup.title}** was cancelled`
     })
-  );
+  ] });
 }

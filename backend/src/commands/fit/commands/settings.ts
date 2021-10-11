@@ -30,7 +30,7 @@ export async function settings (message: Message) : Promise<void> {
 
   await message.channel.send (actions.toString ());
   const action = await message.channel
-    .createMessageCollector (m => m.author.id === message.author.id)
+    .createMessageCollector ({ filter: m => m.author.id === message.author.id })
     .next.then (actions.parse);
 
   if (!action)
@@ -59,7 +59,7 @@ const setMaxHeartrate = async (user: User.Authorized, message: Message) => {
   await message.channel.send (prompt.toString ());
   
   const input = await message.channel
-    .createMessageCollector (m => m.author.id === message.author.id)
+    .createMessageCollector ({ filter: m => m.author.id === message.author.id })
     .next.then (msg => msg.content.toLowerCase ());
 
   if (input === 'remove') {
@@ -107,7 +107,7 @@ const setEmoji = async (user: User.Authorized, message: Message) => {
 
   await message.channel.send (emojiChoice.toString ());
   const emojis = await message.channel
-    .createMessageCollector (m => m.author.id === message.author.id)
+    .createMessageCollector ({ filter: m => m.author.id === message.author.id })
     .next.then (msg => msg.content.toLowerCase ());
 
   if (!emojis) {

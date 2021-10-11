@@ -50,7 +50,7 @@ export function Announcement (meetup: db.Meetup, reactions: Reaction[]) : Messag
   embed.addField ('Links', [
     linkify ('https://www.google.com', 'Add to Google Calendar'),
     meetup.links.map (l => linkify (l.url, l.label))
-  ]);
+  ].join ('\n'));
 
   reactions.forEach (reaction => {
     const label = `${reaction.emoji} ${reaction.name}`;

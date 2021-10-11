@@ -15,7 +15,7 @@ export function edit (meetup: db.Meetup, embed: MessageEmbed) : Promise<Message>
     case 'Inline':
       return Instance
         .fetchMessage (meetup.announcement.channelId, meetup.announcement.messageId)
-        .then (post => post.edit (embed));
+        .then (post => post.edit ({ embeds: [embed] }));
 
     case 'Announcement':
       throw new Error ('Not yet implemented');

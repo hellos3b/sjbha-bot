@@ -43,7 +43,7 @@ export async function init() : Promise<void> {
   Reaction$
     .filter (data => announcementIds.has (data.reaction.message.id))
     .filter (data => !data.user.bot)
-    .filter (data => [RsvpEmoji, MaybeEmoji].includes (data.reaction.emoji.name))
+    .filter (data => [RsvpEmoji, MaybeEmoji].includes (data.reaction.emoji.name || ''))
     .subscribe (({ type, reaction, user }) => 
       (type === 'add')
         ? onAddReaction (reaction, user)
@@ -81,7 +81,7 @@ async function initAnnouncement (meetup: db.Meetup) {
 
     // Update the post with the new RSVPs
     const embed = Announcement (meetup, Reactions (attending, maybes));
-    await message.edit (embed);
+    await message.edit ({ embeds: [embed] });
   }
 }
 
@@ -96,10 +96,14 @@ async function onRemoveReaction (reaction: MessageReaction) {
     return;
   }
 
-  const { yes, maybe } = await fetchRsvps (reaction.message);
+  const message = (reaction.message.partial)
+    ? await reaction.message.fetch ()
+    : reaction.message;
+  
+  const { yes, maybe } = await fetchRsvps (message);
 
   const embed = Announcement (meetup, Reactions (yes.users.cache, maybe.users.cache));
-  await reaction.message.edit (embed);
+  await reaction.message.edit ({ embeds: [embed] });
 }
 
 
@@ -115,7 +119,11 @@ async function onAddReaction (reaction: MessageReaction, user: User) {
     return;
   }
 
-  const { yes, maybe } = await fetchRsvps (reaction.message);
+  const message = (reaction.message.partial)
+    ? await reaction.message.fetch ()
+    : reaction.message;
+
+  const { yes, maybe } = await fetchRsvps (message);
 
   // If they click on an emoji and already have one selected
   // we'll remove the old one
@@ -129,7 +137,7 @@ async function onAddReaction (reaction: MessageReaction, user: User) {
   }
 
   const embed = Announcement (meetup, Reactions (yes.users.cache, maybe.users.cache));
-  await reaction.message.edit (embed);
+  await reaction.message.edit ({ embeds: [embed] });
 }
 
 

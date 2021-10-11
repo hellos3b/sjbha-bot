@@ -47,7 +47,7 @@ import { DateTime } from 'luxon';
   };
 
   const [announcement] = await Promise.all ([
-    message.channel.send (Announcement (meetup, [])),
+    message.channel.send ({ embeds: [Announcement (meetup, [])] }),
     message.delete ()
   ]);
   

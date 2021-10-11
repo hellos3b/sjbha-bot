@@ -135,14 +135,18 @@ function DirectoryEmbed (meetup: db.Meetup) : MessageEmbed {
 }
 
 async function post (content: string | MessageEmbed, id?: string) {
+  const sending = (typeof content === 'string')
+    ? { content }
+    : { embeds: [content] };
+
   if (id) {
     const message = await Instance.fetchMessage (channels.meetups_directory, id);
-    await message.edit (content);
+    await message.edit (sending);
     return id;
   }
   else {
     const channel = await Instance.fetchChannel (channels.meetups_directory);
-    const message = await channel.send (content);
+    const message = await channel.send (sending);
     return message.id;
   }
 }
