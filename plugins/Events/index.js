@@ -71,6 +71,10 @@ export default function(bastion, opt={}) {
 
             // Core of the command
             resolve: async function(context, message) {
+                if (config.ignore && config.ignore.includes (context.channelID)) {
+                    return;
+                }
+
                 if (message === "cancel") return this.route('cancel')
                 if (message === "mention") return this.route('mention')
                 if (message === "edit") return this.route('edit')

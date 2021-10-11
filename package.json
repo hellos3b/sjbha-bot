@@ -8,7 +8,8 @@
     "start": "node --trace-warnings -r babel-core/register app.js",
     "dev": "NODE_ENV=development node -r babel-core/register app.js --trace-warnings",
     "web": "NODE_ENV=web node -r babel-core/register app.js",
-    "admin": "NODE_ENV=admin node -r babel-core/register app.js"
+    "admin": "NODE_ENV=admin node -r babel-core/register app.js",
+    "deploy": "git push dokku legacy:master"
   },
   "dependencies": {
     "@shootismoke/convert": "^0.2.28",

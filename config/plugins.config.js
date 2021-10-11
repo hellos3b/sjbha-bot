@@ -61,6 +61,16 @@ export default bastion => ([
         announcementChannel: bastion.channels.announcement,
         compactChannel: bastion.channels.compact,
 
+        // new labs channels
+        ignore: [
+            "896966287727673354",
+            "896964467169038376",
+            "896964493005955093",
+            "896965403748749342",
+            "896964667237367818",
+            "896964692742914058"
+        ],
+
         // dev
         // compact: {"todayId":"598646940770631800","thisWeekId":"598646943412912139","nextWeekId":"598646944465813504","twoWeeksId":"598646945317388309","threeWeeksId":"598646946420359170","laterId":"598646962463571975"}
         // prod
