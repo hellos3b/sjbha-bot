@@ -33,5 +33,5 @@ export async function aqi (message: Message) : Promise<void> {
     .setDescription (locations.join ('\n'))
     .setFooter ('Based on a 10 minute average from Purple Air sensors');
 
-  message.channel.send (embed);
+  message.channel.send ({ embeds: [embed] });
 }

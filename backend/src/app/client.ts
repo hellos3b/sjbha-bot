@@ -8,7 +8,13 @@ import { MessageStream, WritableMessageStream } from '../utils/MessageStream';
 
 // Connect
 
-const client = new Client ();
+const client = new Client ({
+  intents: [
+    'GUILDS', 
+    'GUILD_MESSAGES', 
+    'DIRECT_MESSAGES'
+  ]
+});
 
 client.on ('ready', () => {
   console.log (`Bastion connected as '${client.user?.tag}' v${env.VERSION}`);
@@ -20,7 +26,7 @@ client.on ('ready', () => {
   }
 });
 
-client.on ('message', (msg: Message) => {
+client.on ('messageCreate', (msg: Message) => {
   if (msg.author.bot) return;
 
   Message$$.emit (msg);
@@ -57,7 +63,7 @@ export const Instance = {
   fetchChannel: async (channelId: string) : Promise<TextChannel> => {
     const channel = await client.channels.fetch (channelId);
     
-    if (channel.type !== 'dm' && channel.type !== 'text') {
+    if (!channel || channel.type !== 'DM' && channel.type !== 'GUILD_TEXT') {
       throw new Error ('Channel is not of type \'dm\' or \'text');
     }
 
