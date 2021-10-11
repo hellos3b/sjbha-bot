@@ -124,10 +124,10 @@ export const postWorkout = async (stravaId: number, activityId: number) : Promis
     const message = (workout.message_id)
       ? await Instance
         .fetchMessage (channels.strava, workout.message_id)
-        .then (message => message.edit (embed))
+        .then (message => message.edit ({ embeds: [embed] }))
       : await Instance
         .fetchChannel (channels.strava)
-        .then (c => c.send (embed));
+        .then (c => c.send ({ embeds: [embed] }));
 
     await workout
       .extend ({ message_id: message.id })

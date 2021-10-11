@@ -71,19 +71,19 @@ export class MessageStream extends Stream<Message> {
       const [_, route] = message.content.split (' ');
 
       switch (true) {
-        case (Boolean (route) && routes[route]):
+        case (route in routes):
           routes[route] (message);
           break;
 
-        case (Boolean (route) && routes['noMatch']):
+        case ('noMatch' in routes):
           routes.noMatch (message);
           break;
 
-        case (Boolean (routes.empty)):
+        case ('empty' in routes.empty):
           routes.empty (message);
           break;
 
-        case (Boolean (routes['*'])):
+        case ('*' in routes):
           routes['*'] (message);
           break;
       }
@@ -189,7 +189,7 @@ export class MessageStream extends Stream<Message> {
    * @returns 
    */
   dmsOnly () : MessageStream {
-    return this.filter (message => message.channel.type === 'dm');
+    return this.filter (message => message.channel.type === 'DM');
   }
 }
 

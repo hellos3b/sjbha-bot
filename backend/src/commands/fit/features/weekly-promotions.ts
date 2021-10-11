@@ -122,7 +122,7 @@ export const runPromotions = async () : Promise<void> => {
       }]
     });
 
-    await channel.send (embed);
+    await channel.send ({ embeds: [embed] });
   }
 }
 
