@@ -20,7 +20,7 @@ export const getOrThrow = (key: string) : string => required (key);
 
 export const HOSTNAME = required ('HOSTNAME');
 export const UI_HOSTNAME = required ('UI_HOSTNAME');
-export const HTTP_PORT = required ('VIRTUAL_PORT');
+export const HTTP_PORT = required ('HTTP_PORT');
 export const DISCORD_TOKEN = required ('DISCORD_TOKEN');
 
 export const SERVER_ID = optional ('SERVER_ID');

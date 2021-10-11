@@ -28,9 +28,11 @@ export function Announcement (meetup: db.Meetup, reactions: Reaction[]) : Messag
   embed.addField ('Organized By', `<@${meetup.organizerID}>`);
 
   switch (meetup.location.type) {
-    case 'Address':
-      embed.addField ('Location', `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent (meetup.location.value)}\n${meetup.location.comments}`);
+    case 'Address': {
+      const encoded = encodeURIComponent (meetup.location.value);
+      embed.addField ('Location', linkify (`https://www.google.com/maps/search/?api=1&query=${encoded}`, meetup.location.value) + `\n${meetup.location.comments}`);
       break;
+    }
 
     case 'Private':
       embed.addField ('Location', `${meetup.location.value}\n${meetup.location.comments}`);

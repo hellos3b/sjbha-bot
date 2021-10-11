@@ -1,0 +1,1 @@
+declare var __HOST__: string;
