@@ -4,6 +4,10 @@
   import Links from './form/Links.svelte';
   import GuestLimit from './form/GenerateCommand.svelte';
   import GenerateCommand from './form/GenerateCommand.svelte';
+  import { store } from './store';
+
+  // Debug logging store updates
+  $: console.log ($store);
 </script>
 
 

@@ -24,8 +24,8 @@
   }
 
   const handleNameChange = (link: Link) => (e: Event) => {
-    const name = (<HTMLInputElement>e.target).value;
-    $store.links = new Map($store.links).set (link.id, {...link, name})
+    const label = (<HTMLInputElement>e.target).value;
+    $store.links = new Map($store.links).set (link.id, {...link, label})
   }
 
   $: formOpen = list.length > 0;
@@ -57,7 +57,7 @@
         <input 
           type='text'
           name="link-name" 
-          value={link.name}
+          value={link.label}
           class:is-error={$errors.getLink (link.id)}
           on:input={handleNameChange (link)}/>
         

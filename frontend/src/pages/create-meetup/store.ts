@@ -12,8 +12,8 @@ export type Location = { type: string; value: string; comments: string; }
 export const Location = (type: string, value = '', comments = '') : Location =>
   ({ type, value, comments });
 
-export type Link = { id: symbol, url: string; name: string; }
-export const Link = (url = '', name = '') : Link => ({ id: Symbol ('ID'), url, name });
+export type Link = { id: symbol, url: string; label: string; }
+export const Link = (url = '', label = '') : Link => ({ id: Symbol ('ID'), url, label });
   
 export type Store = {
   title: string;
@@ -69,10 +69,9 @@ export const errors = derived (state, state$ => {
 
   const linkErrors = new Map<symbol, string> ();
   state$.links.forEach (link => {
-    if (link.name && !link.url)
+    if (link.label && !link.url)
       linkErrors.set (link.id, 'Don\'t forget to paste in the URL!');
     
-    console.log ('test link', link);
     if (link.url && !url.test (link.url))
       linkErrors.set (link.id, 'Are you sure you copied this right? The URL doesn\'t look valid');
   });
