@@ -64,6 +64,7 @@ export default function(bastion, opt={}) {
             // Command to start it
             command: config.command, 
             requires: ["Ask"],
+            ignore: config.ignore,
             // Optional help string for `!command help`
             help,
             // Show help string with empty `!command` (in case parameters are required)
@@ -71,10 +72,6 @@ export default function(bastion, opt={}) {
 
             // Core of the command
             resolve: async function(context, message) {
-                if (config.ignore && config.ignore.includes (context.channelID)) {
-                    return;
-                }
-
                 if (message === "cancel") return this.route('cancel')
                 if (message === "mention") return this.route('mention')
                 if (message === "edit") return this.route('edit')
