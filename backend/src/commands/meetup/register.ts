@@ -31,9 +31,11 @@ Message$
 
 import * as RSVP from './features/rsvps';
 import * as Directory from './features/directory';
+import * as EndMeetups from './features/end-meetups';
 
 Directory.init ();
 RSVP.init ();
+EndMeetups.init ();
 
 
 // Web API for editor

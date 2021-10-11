@@ -5,15 +5,9 @@ import { MessageEmbed } from 'discord.js';
 import * as db from '../db/meetups';
 import * as M from '../common/Meetup';
 import { DateTime } from 'luxon';
+import { queued } from '@sjbha/utils/queue';
 
 const MessageIds = Settings<string[]> ('meetup/directory-ids', []);
-
-// To avoid a scenario where we're doing multiple refreshes in a row,
-// -- for instance of two meetups were edited back to back --
-// we'll keep track of if we're in the middle of refresing 
-// and if so, queue one instead of running
-enum RefreshState { None, Running, Queued }
-let state = RefreshState.None;
 
 const intro = `
 **Welcome to <#${channels.meetups_directory}>!**
@@ -27,39 +21,32 @@ export async function init() : Promise<void> {
   await Promise.all ([onClientReady, onMongoDbReady]);
   await refresh ();
 
-  db.events.on ('add', queueRefresh);
-  db.events.on ('update', queueRefresh);
-  db.events.on ('edited', queueRefresh);
+  db.events.on ('add', runRefresh);
+  db.events.on ('update', runRefresh);
+  db.events.on ('edited', runRefresh);
 }
 
-async function queueRefresh() {
-  if (state !== RefreshState.None) {
-    state = RefreshState.Queued;
-    return;
-  }
-
-  state = RefreshState.Running;
-  await refresh ();
-
-  // @ts-expect-error It can be set to queued asynchronously
-  // If this was queued during the run, we'll run again
-  if (state === RefreshState.Queued) {
-    state = RefreshState.None;
-    queueRefresh ();
-  }
-  else {
-    state = RefreshState.None;
-  }
-  return;
-}
+const runRefresh = queued (refresh);
 
 // fetch all meetups from the DB
 // and update the directory channel in chronological order
 async function refresh () {
   // todo: add timestmap filter
-  const meetups = await db.find ().then (
-    models => models.sort ((a, b) => a.timestamp.localeCompare (b.timestamp))
-  );
+  const models = await db.find ().then (models => models.sort ((a, b) => a.timestamp.localeCompare (b.timestamp)));
+
+  const meetups = models.filter (meetup => {
+    if (meetup.state.type === 'Cancelled') {
+      const diff = DateTime.local ()
+        .diff (DateTime.fromISO (meetup.state.timestamp), 'hours')
+        .toObject ();
+
+      // We'll show cancelled meetups for 24 hours before hiding them
+      return (diff.hours && diff.hours <= 24)
+    }
+    else {
+      return true;
+    }
+  });
 
   const messageIds = await MessageIds.get ();
   const usedIds : string[] = [];
@@ -95,8 +82,8 @@ function DirectoryEmbed (meetup: db.Meetup) : MessageEmbed {
   switch (meetup.state.type) {
     case 'Cancelled': 
       return new MessageEmbed ({
-        description: `*${meetup.title} was cancelled by the organizer*`,
-        color:       '#454545'
+        description: `❌ *${meetup.title} was cancelled by the organizer*`,
+        color:       0x454545
       });
 
     case 'Ended':
