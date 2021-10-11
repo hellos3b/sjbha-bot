@@ -21,7 +21,7 @@ Message$
     'create': create, 
     'cancel': cancel, 
     'edit':   edit,
-    'empty':  msg => msg.reply (`Use this link to create a meetup: ${env.HOSTNAME}/meetup`)
+    'empty':  msg => msg.reply (`Use this link to create a meetup: ${env.UI_HOSTNAME}/meetup`)
   });
 
 

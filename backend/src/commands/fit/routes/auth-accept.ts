@@ -1,5 +1,5 @@
 import { Instance, Route } from '@sjbha/app';
-import { assert, defaulted, object, string } from 'superstruct';
+import { assert, defaulted, string, type } from 'superstruct';
 import superagent from 'superagent';
 import { AuthResponse } from '../common/StravaClient';
 
@@ -7,7 +7,7 @@ import { strava } from '../env';
 import * as User from '../db/user';
 import { MessageBuilder } from '@sjbha/utils/string-formatting';
 
-const StravaQuery = object ({
+const StravaQuery = type ({
   code:  defaulted (string (), () => ''),
   state: defaulted (string (), () => '')
 });
