@@ -1,4 +1,4 @@
-import { Instance, onClientReady, onMongoDbReady, Settings } from '@sjbha/app';
+import { env, Instance, onClientReady, onMongoDbReady, Settings } from '@sjbha/app';
 import { channels } from '@sjbha/config';
 import { MessageEmbed } from 'discord.js';
 
@@ -12,8 +12,7 @@ const MessageIds = Settings<string[]> ('meetup/directory-ids', []);
 const intro = `
 **Welcome to <#${channels.meetups_directory}>!**
 
-Meetups are created by members, and everyone is welcome to join.
-Click on the links to see full descriptions, location information, and always remember to RSVP!
+Meetups are created by members, and are open to all for joining! Click on the links to see full descriptions, location information, and always remember to RSVP!
 `;
 
 // Meant to be called when booting up
@@ -40,7 +39,7 @@ async function refresh () {
         .diff (DateTime.fromISO (meetup.state.timestamp), 'hours')
         .toObject ();
 
-      // We'll show cancelled meetups for 24 hours before hiding them
+      // Hide cancelled meetups 24 hours after being cancelled
       return (diff.hours && diff.hours <= 24)
     }
     else {
@@ -82,7 +81,7 @@ function DirectoryEmbed (meetup: db.Meetup) : MessageEmbed {
   switch (meetup.state.type) {
     case 'Cancelled': 
       return new MessageEmbed ({
-        description: `❌ *${meetup.title} was cancelled by the organizer*`,
+        description: `**${meetup.title}** was cancelled:\n> *${meetup.state.reason}*`,
         color:       0x454545
       });
 
@@ -96,8 +95,8 @@ function DirectoryEmbed (meetup: db.Meetup) : MessageEmbed {
       const link = (() : string => {
         switch (meetup.announcement.type) {
           // todo: this is incorrect
-          case 'Announcement': return `https://discord.com/channels/530586255197732868/${channels.meetups_directory}/${meetup.announcement.announcementId}`;
-          case 'Inline': return `https://discord.com/channels/530586255197732868/${meetup.announcement.channelId}/${meetup.announcement.messageId}`;
+          case 'Announcement': return `https://discord.com/channels/${env.SERVER_ID}/${channels.meetups_directory}/${meetup.announcement.announcementId}`;
+          case 'Inline': return `https://discord.com/channels/${env.SERVER_ID}/${meetup.announcement.channelId}/${meetup.announcement.messageId}`;
           case 'Pending': return '';
         }
       }) ();

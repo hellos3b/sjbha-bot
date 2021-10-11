@@ -19,8 +19,8 @@ const MeetupOptions = object ({
 
   links: optional (array (
     object ({
-      name: optional (string ()),
-      url:  url
+      label: optional (string ()),
+      url:   url
     })
   ))
 });

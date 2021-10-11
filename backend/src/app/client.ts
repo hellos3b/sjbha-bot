@@ -11,7 +11,9 @@ import * as env from './env';
 const client = new Client ({
   intents: [
     'GUILDS', 
-    'GUILD_MESSAGES', 
+    'GUILD_MESSAGES',
+    'GUILD_MESSAGE_REACTIONS', 
+    'GUILD_MEMBERS',
     'DIRECT_MESSAGES'
   ],
   partials: [

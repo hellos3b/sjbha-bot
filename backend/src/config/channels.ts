@@ -4,7 +4,7 @@ const production = {
   strava:            '450913008323919872',
   shitpost:          '506911331257942027',
   bot_admin:         '430517752546197509',
-  meetups_directory: ''
+  meetups_directory: '896964467169038376'
 };
 
 type Channels = typeof production;

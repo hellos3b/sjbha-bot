@@ -12,7 +12,11 @@ import { DateTime } from 'luxon';
 /**
  * Creates a new meetup
  */
- export async function create (message: Message) : Promise<void> {
+export async function create (message: Message) : Promise<void> {
+  // Guard for guild channels, lets us create threads
+  if (message.channel.type !== 'GUILD_TEXT')
+    return;
+
   const inputText = message.content.replace ('!meetup create', '');
   const messageOptions = (() : unknown | undefined => {
     try { return YAML.parse (inputText); }
@@ -33,7 +37,7 @@ import { DateTime } from 'luxon';
 
   const meetup : db.Meetup = {
     id:              nanoid (),
-    organizerId:     message.author.id,
+    organizerID:     message.author.id,
     title:           options.title,
     sourceChannelID: message.channel.id,
     createdAt:       DateTime.local ().toISO (),
@@ -50,9 +54,19 @@ import { DateTime } from 'luxon';
     message.channel.send ({ embeds: [Announcement (meetup, [])] }),
     message.delete ()
   ]);
+
+  const thread = await announcement.startThread ({
+    name:   `📅 ${meetup.title}`,
+    reason: 'Needed a separate thread for food',
+    
+    autoArchiveDuration: 60,
+  });
+
+  await thread.send ('This thread was automatically created for meetup discussion. Ask questions, make plans, and find people in this thread');
   
   await db.insert ({
     ...meetup,
+    threadID:     thread.id,
     announcement: { 
       type:      'Inline', 
       channelId: announcement.channel.id,

@@ -15,8 +15,11 @@ export const events = new EventEmitter<{
 export type Schema = {
   __version: 1;
   id: string;
-  organizerId: string;
+  organizerID: string;
   sourceChannelID: string;
+
+  /** threadID will be nullable until we get rid of all legacy meetups */
+  threadID?: string;
   createdAt: string;
   title: string;
   timestamp: string;
@@ -92,7 +95,7 @@ const migrate = (model: AllSchemas) : Schema => {
       id:              model.id,
       title:           model.options.name,
       description:     model.options.description,
-      organizerId:     model.userID,
+      organizerID:     model.userID,
       timestamp:       model.timestamp,
       sourceChannelID: model.sourceChannelID,
       createdAt:       '',

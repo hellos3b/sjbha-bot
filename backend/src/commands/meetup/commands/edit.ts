@@ -53,7 +53,7 @@ async function updateMeetup(message: Message) {
     return;
   }
 
-  if (meetup.organizerId !== message.author.id) {
+  if (meetup.organizerID !== message.author.id) {
     message.delete ();
     message.reply ('You cant edit the meetup because you are not the organizer');
     return;
@@ -61,7 +61,7 @@ async function updateMeetup(message: Message) {
 
   await db.update ({
     ...meetup,
-    organizerId: message.author.id,
+    organizerID: message.author.id,
     title:       options.title,
     // todo: verify date format 
     timestamp:   options.date,
@@ -100,7 +100,7 @@ async function updateMeetup(message: Message) {
 async function getEditLink(message: Message) {
   const userMeetups = await db.find ({
     state:       { type: 'Live' },
-    organizerId: message.author.id
+    organizerID: message.author.id
   });
   
   if (!userMeetups.length) {

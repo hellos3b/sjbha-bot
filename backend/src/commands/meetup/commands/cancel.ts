@@ -11,7 +11,7 @@ import * as M from '../common/Meetup';
  export async function cancel (message: Message) : Promise<void> {
   const userMeetups = await db.find ({
     state:       { type: 'Live' },
-    organizerId: message.author.id
+    organizerID: message.author.id
   });
   
   // Make sure they have any meetups they can cancel
@@ -63,9 +63,5 @@ import * as M from '../common/Meetup';
     })
   ]);
 
-  message.reply ({ embeds: [
-    new MessageEmbed ({
-      description: `❌ **${meetup.title}** was cancelled`
-    })
-  ] });
+  message.channel.send ({ content: `Cancelled **${meetup.title}**` });
 }

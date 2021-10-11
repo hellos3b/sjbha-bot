@@ -25,15 +25,15 @@ export function Announcement (meetup: db.Meetup, reactions: Reaction[]) : Messag
     color:       '#9b3128'
   });
 
-  embed.addField ('Organized By', `<@${meetup.organizerId}>`);
+  embed.addField ('Organized By', `<@${meetup.organizerID}>`);
 
   switch (meetup.location.type) {
     case 'Address':
-      embed.addField ('Location', `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent (meetup.location.value)}`);
+      embed.addField ('Location', `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent (meetup.location.value)}\n${meetup.location.comments}`);
       break;
 
     case 'Private':
-      embed.addField ('Location', meetup.location.value);
+      embed.addField ('Location', `${meetup.location.value}\n${meetup.location.comments}`);
       break;
 
     case 'Voice':
@@ -48,8 +48,8 @@ export function Announcement (meetup: db.Meetup, reactions: Reaction[]) : Messag
 
 
   embed.addField ('Links', [
+    ...meetup.links.map (l => linkify (l.url, l.label)),
     linkify ('https://www.google.com', 'Add to Google Calendar'),
-    meetup.links.map (l => linkify (l.url, l.label))
   ].join ('\n'));
 
   reactions.forEach (reaction => {

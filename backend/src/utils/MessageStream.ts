@@ -193,6 +193,10 @@ export class MessageStream extends Stream<Message> {
   dmsOnly () : MessageStream {
     return this.filter (message => message.channel.type === 'DM');
   }
+
+  guildOnly () : MessageStream {
+    return this.filter (message => message.channel.type === 'GUILD_TEXT');
+  }
 }
 
 export class WritableStream<T> extends Stream<T> {

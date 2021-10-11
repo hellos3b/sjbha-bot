@@ -14,4 +14,6 @@
 
 - You can't both rsvp & click maybe anymore
 
-⌛ Meetups are now listed in a "Meetup Directory" channel
+- Meetups are now listed in a "Meetup Directory" channel
+
+- Meetups now get a thread automatically created
