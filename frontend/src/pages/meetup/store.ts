@@ -16,6 +16,7 @@ export type Link = { id: symbol, url: string; label: string; }
 export const Link = (url = '', label = '') : Link => ({ id: Symbol ('ID'), url, label });
   
 export type Store = {
+  id?: string;
   title: string;
   date: string;
   description: string;
@@ -82,3 +83,35 @@ export const errors = derived (state, state$ => {
     valid:   !errors.size && !linkErrors.size
   }
 });
+
+export async function fetchMeetup (id: string) : Promise<void> {
+  const response = await fetch (`${__HOST__}/meetup/${id}`).then (r => r.json());
+
+  let location: Location | null = null;
+  state.set ({
+    id: id,
+    title: response.title,
+    description: response.description,
+    date: response.timestamp,
+    location: (() : Location | null => {
+      switch (response.location.type) {
+        case 'Voice':
+          return { type: 'voice', value: '', comments: '' };
+        
+        case 'Address':
+        case 'Private':
+          return {
+            type: (response.location.type === 'Address')
+              ? 'address'
+              : 'private',
+            value: response.location.value,
+            comments: response.location.comments
+          };
+
+        default:
+          return null;
+      }
+    })(),
+    links: new Map()
+  });
+}

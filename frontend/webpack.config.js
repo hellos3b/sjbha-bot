@@ -2,6 +2,7 @@ const path = require ('path');
 const HTMLPlugin = require ('html-webpack-plugin');
 const sveltePreprocess = require("svelte-preprocess");
 const { readdirSync, statSync } = require('fs');
+const { DefinePlugin } = require('webpack');
 
 // This is the sub path that github uses
 const PUBLIC_PATH = '/sjbha-bot/';
@@ -56,6 +57,14 @@ module.exports = (_, argv) => {
         filename: 'index.html',
         inject: true,
         chunks: ['home']
+      }),
+
+      new DefinePlugin ({
+        '__HOST__': JSON.stringify(
+          (argv.mode === 'production')
+            ? 'https://www.s3bby.com/bored-bot'
+            : 'http://0.0.0.0:5000'
+        )
       }),
 
       // 

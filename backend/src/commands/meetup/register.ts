@@ -16,14 +16,7 @@ const labs_category = (env.IS_PRODUCTION)
 Message$
   .startsWith ('!meetup')
   .guildOnly ()
-  .filter (message => {
-    if (message.channel.type === 'GUILD_TEXT') {
-      console.log (message.channel.parentId);
-      return message.channel.parentId === labs_category;
-    }
-
-    return false;
-  })
+  .filter (message => message.channel.type === 'GUILD_TEXT' && message.channel.parentId === labs_category)
   .routes ({ 
     'create': create, 
     'cancel': cancel, 

@@ -3,7 +3,7 @@ import { EventEmitter } from 'tsee';
 
 import { db } from '@sjbha/app';
 
-const collection = db<AllSchemas> ('meetups');
+const collection = db<AllSchemas> ('meetups-labs');
 
 export const events = new EventEmitter<{
   'add': (meetup: Meetup) => void;

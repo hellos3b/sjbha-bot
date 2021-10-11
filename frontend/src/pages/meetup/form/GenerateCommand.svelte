@@ -28,7 +28,9 @@
     if (validLinks.length)
       output.links = validLinks;
 
-    return '!meetup create' + '\n' + YAML.stringify (output);
+    return (store.id)
+      ? `!meetup edit\n${YAML.stringify({id: store.id, ...output})}`
+      : `!meetup create\n${YAML.stringify(output)}`;
   }
 </script>
 

@@ -3,8 +3,11 @@ import Hapi from '@hapi/hapi';
 import { HOSTNAME, HTTP_PORT } from './env';
 
 const server = Hapi.server ({
-  port: HTTP_PORT,
-  host: '0.0.0.0'
+  port:   HTTP_PORT,
+  host:   '0.0.0.0',
+  routes: {
+    cors: true
+  }
 });
 
 server

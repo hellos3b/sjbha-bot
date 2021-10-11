@@ -72,26 +72,23 @@ async function updateMeetup(message: Message) {
 
 
   // Update the post
-  switch (meetup.announcement.type) {
-    case 'Inline': {
-      const message = await Instance.fetchMessage (meetup.announcement.channelId, meetup.announcement.messageId);
-      const reactions = await fetchReactions (message);
-      await message.edit ({ embeds: [Announcement (meetup, reactions)] });
-      break;
+  const original = await (async () : Promise<Message> => {
+    switch (meetup.announcement.type) {
+      case 'Inline': {
+        const message = await Instance.fetchMessage (meetup.announcement.channelId, meetup.announcement.messageId);
+        const reactions = await fetchReactions (message);
+        await message.edit ({ embeds: [Announcement (meetup, reactions)] });
+        return message;
+      }
+
+      default:
+        throw new Error ('Editing of non inline meetups is not yet supported');
     }
-  }
+  }) ();
 
   // Let the user know it has been done!
   await message.delete ();
-  message.channel.send ({ embeds: [
-    new MessageEmbed ({
-      description: `✨ **${meetup.title}** was updated`
-      // todo: display a diff
-      // \nChanged ` + changed
-      //   .map (key => '`' + key + '`')
-      //   .join (', ')
-    })
-  ] });
+  original.reply ({ content: `**${meetup.title}** was edited by <@${message.author.id}>` });
 }
 
 
