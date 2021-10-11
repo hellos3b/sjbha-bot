@@ -16,12 +16,19 @@ const labs_category = (env.IS_PRODUCTION)
 Message$
   .startsWith ('!meetup')
   .guildOnly ()
-  .filter (message => message.channel.type === 'GUILD_TEXT' && message.channel.parentId === labs_category)
+  .filter (message => {
+    if (message.channel.type === 'GUILD_TEXT') {
+      console.log (message.channel.parentId);
+      return message.channel.parentId === labs_category;
+    }
+
+    return false;
+  })
   .routes ({ 
     'create': create, 
     'cancel': cancel, 
     'edit':   edit,
-    'empty':  msg => msg.reply ('Use this link to create a meetup: https://hellos3b.github.io/sjbha-bot/create-meetup/')
+    'empty':  msg => msg.reply (`Use this link to create a meetup: ${env.HOSTNAME}/meetup`)
   });
 
 

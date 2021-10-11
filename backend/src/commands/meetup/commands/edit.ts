@@ -122,7 +122,7 @@ async function getEditLink(message: Message) {
   if (!meetup)
     return;
 
-  const editUrl = env.UI_HOSTNAME + '/meetup#' + meetup.id;
+  const editUrl = `${env.UI_HOSTNAME}/meetup#${meetup.id}`;
 
   message.channel.send ({ embeds: [
     new MessageEmbed ({
