@@ -6,3 +6,5 @@ public
 
 _plugins
 
+# bugs from ts-node-dev or something
+report*json

@@ -68,18 +68,20 @@ export class MessageStream extends Stream<Message> {
    */
    routes (routes: Record<'noMatch' | 'empty' | '*' | string, Listener<Message>>) : Unsubscribe {
     return this.subscribe (message => {
-      const [_, route] = message.content.split (' ');
+      const [_, route] = message.content
+        .replace (/\n/g, ' ')
+        .split (' ');
 
       switch (true) {
         case (route in routes):
           routes[route] (message);
           break;
 
-        case ('noMatch' in routes):
+        case (Boolean (route) && ('noMatch' in routes)):
           routes.noMatch (message);
           break;
 
-        case ('empty' in routes.empty):
+        case (!route && ('empty' in routes)):
           routes.empty (message);
           break;
 
@@ -191,16 +193,28 @@ export class MessageStream extends Stream<Message> {
   dmsOnly () : MessageStream {
     return this.filter (message => message.channel.type === 'DM');
   }
+
+  guildOnly () : MessageStream {
+    return this.filter (message => message.channel.type === 'GUILD_TEXT');
+  }
 }
 
 export class WritableStream<T> extends Stream<T> {
   emit (value: T) : void {
     this.listeners.forEach (l => l (value));
   }
+
+  get readonly () : Stream<T> {
+    return this;
+  }
 }
 
 export class WritableMessageStream extends MessageStream {
   emit (message: Message) : void {
     this.listeners.forEach (l => l (message));
+  }
+
+  get readonly () : MessageStream {
+    return this;
   }
 }

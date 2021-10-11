@@ -1,13 +1,22 @@
 export * as env from './env';
 
-export { db } from './mongodb';
+export { 
+  db,
+  onMongoDbReady
+} from './mongodb';
 
 export { 
+  onClientReady,
   Instance, 
-  Message$ 
+  Message$,
+  Reaction$
 } from './client';
 
 export { 
   Route,
-  router
+  Router
 } from './hapi';
+
+export {
+  Settings
+} from './settings';

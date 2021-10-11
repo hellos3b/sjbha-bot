@@ -13,7 +13,7 @@ server
 
 export type Route = Hapi.Lifecycle.Method | Hapi.HandlerDecorations;
 
-export const router = {
+export const Router = {
   get: (path: string, handler: Route) : void => {
     server.route ({ method: 'GET', path, handler });
   },
