@@ -108,7 +108,7 @@ export async function balance (message: Message) : Promise<void> {
   embed.addField ('Moderate', moderate.toFixed (1), true);
   embed.addField ('Vigorous', vigorous.toFixed (1), true);
 
-  message.channel.send (embed);
+  message.channel.send ({ embeds: [embed] });
 }
 
 /**

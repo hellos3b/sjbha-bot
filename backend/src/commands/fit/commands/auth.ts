@@ -37,7 +37,7 @@ export async function auth (message: Message) : Promise<void> {
 
   message.author.send (dm.toString ());
 
-  if (message.channel.type !== 'dm') {
+  if (message.channel.type !== 'DM') {
     message.reply ('Check your DMs for instructions on how to connect with strava');
   }
 }

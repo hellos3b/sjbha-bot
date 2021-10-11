@@ -191,7 +191,7 @@ export class MessageStream extends Stream<Message> {
    * @returns 
    */
   dmsOnly () : MessageStream {
-    return this.filter (message => message.channel.type === 'dm');
+    return this.filter (message => message.channel.type === 'DM');
   }
 }
 

@@ -9,7 +9,16 @@ import * as env from './env';
 // Connect
 
 const client = new Client ({
-  partials: ['MESSAGE', 'CHANNEL', 'REACTION']
+  intents: [
+    'GUILDS', 
+    'GUILD_MESSAGES', 
+    'DIRECT_MESSAGES'
+  ],
+  partials: [
+    'MESSAGE', 
+    'CHANNEL', 
+    'REACTION'
+  ]
 });
 
 client.on ('ready', () => {
@@ -22,8 +31,7 @@ client.on ('ready', () => {
   }
 });
 
-
-client.on ('message', (msg: Message) => {
+client.on ('messageCreate', (msg: Message) => {
   if (msg.author.bot) return;
 
   Message$$.emit (msg);
@@ -99,7 +107,7 @@ export namespace Instance {
   export async function fetchChannel(channelId: string) : Promise<TextChannel> {
     const channel = await client.channels.fetch (channelId);
     
-    if (channel.type !== 'dm' && channel.type !== 'text') {
+    if (!channel || channel.type !== 'DM' && channel.type !== 'GUILD_TEXT') {
       throw new Error ('Channel is not of type \'dm\' or \'text');
     }
 

@@ -47,7 +47,7 @@ export async function leaders (message: Message) : Promise<void> {
     embed.addField (activity, leaders);
   }
 
-  message.channel.send (embed);
+  message.channel.send ({ embeds: [embed] });
 }
 
 const WorkoutCollection = (workouts: Workout.Model[]) => ({
