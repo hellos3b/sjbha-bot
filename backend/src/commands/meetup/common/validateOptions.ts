@@ -47,7 +47,7 @@ export function validateOptions (opt: unknown) : MeetupOptions | ValidationError
   if (opt.description && opt.description.length > MAX_DESCRIPTION_SIZE)
     return new ValidationError ('Description is too long');
 
-  if (opt.location_type) {
+  if (opt.location_type && opt.location_type !== 'voice') {
     if (!opt.location)
       return new ValidationError ('Location is missing');
 
