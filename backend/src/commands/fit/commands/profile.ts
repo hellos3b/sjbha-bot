@@ -19,7 +19,7 @@ export async function profile (message: Message) : Promise<void> {
 
   const member = option (message.member);
 
-  const username = member.flatMap (m => option (m.nickname)).getOrElse (() => message.author.username);
+  const username = member.map (m => m.displayName).getOrElse (() => message.author.username);
   const displayColor = member.map (m => m.displayColor).getOrElse (() => 0xcccccc);
 
   const embed = new MessageEmbed ();

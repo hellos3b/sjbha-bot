@@ -10,6 +10,21 @@ import { balance } from './commands/balance';
 import { leaders } from './commands/leaders';
 import { settings } from './commands/settings'
 
+Message$.startsWith ('!members').subscribe (async message => {
+  const testIds = [
+    '145398757582700544',
+    '125829654421438464',
+    '187593148065644544'
+  ];
+
+
+  const members = await MemberList.fetch (testIds);
+
+  message.reply (testIds.map (id => members.nickname (id)).join (', '));
+
+
+})
+
 Message$
   .startsWith ('!fit')
   .restrictToChannel (channels.strava)
@@ -51,6 +66,7 @@ Message$
 import { authAccept } from './routes/auth-accept';
 import { newWorkout } from './routes/activity-webhook';
 import { verifyToken } from './routes/verify-token';
+import { MemberList } from './common/MemberList';
 
 Router.get ('/fit/accept', authAccept);
 Router.get ('/fit/api/webhook', verifyToken);

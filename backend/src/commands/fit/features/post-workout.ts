@@ -39,7 +39,7 @@ export const postWorkout = async (stravaId: number, activityId: number) : Promis
   const [activity, streams] = await Promise.all ([
     client.getActivity (activityId),
     client.getActivityStreams (activityId).catch (_ => [])
-  ]);
+  ]).catch (e => { throw new Error (`Failed to fetch Activity '${stravaId}:${activityId}' -- ${e instanceof Error ? e.message : 'Unknown Reason'}`) });
 
   console.log ('ACTIVITY', activity);
   
@@ -91,7 +91,7 @@ export const postWorkout = async (stravaId: number, activityId: number) : Promis
   const weeklyExp = workout.totalExp + expSoFar;
   const member = await Instance.fetchMember (user.discordId);
 
-  const nickname = member.map (m => m.nickname)
+  const nickname = member.map (m => m.displayName)
     .getOrElseValue ('Unknown');
   const avatar = member.map (m => m.user.displayAvatarURL ())
     .getOrElseValue ('https://discordapp.com/assets/322c936a8c8be1b803cd94861bdfa868.png');
