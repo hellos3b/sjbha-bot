@@ -20,7 +20,7 @@ export class MemberList {
 
   nickname = (discordId: string, orDefault = 'unknown') : string =>
     option (this.memberById.get (discordId))
-      .flatMap (m => option (m.nickname))
+      .map (m => m.displayName)
       .getOrElse (() => orDefault);
 
   static fetch = async (discordIds: string[]) : Promise<MemberList> => {

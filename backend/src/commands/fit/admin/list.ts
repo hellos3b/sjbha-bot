@@ -27,7 +27,7 @@ export async function list (message: Message) : Promise<void> {
 
 const formatRow = async (workout: Workout.Model) : Promise<string[]> => {
   const member = await Instance.fetchMember (workout.discord_id);
-  const username = member.map (m => m.nickname).getOrElseValue ('<unknown>');
+  const username = member.map (m => m.displayName).getOrElseValue ('<unknown>');
   
   const timestamp = workout.started.toFormat ('hh:mma');
 
