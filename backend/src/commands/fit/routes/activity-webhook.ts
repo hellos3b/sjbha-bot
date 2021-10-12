@@ -61,7 +61,18 @@ const postWithDelay = async (athleteId: number, activityId: number) => {
 
   // Wait a minute before posting
   await wait (60 * 1000);
-  await postWorkout (athleteId, activityId);
+  
+  try {
+    await postWorkout (athleteId, activityId);
+  }
+  catch (e) {
+    if (e instanceof Error) {
+      console.error (`Failed to post workout (athleteId:${athleteId}|activityId:${activityId}) ${e.message}`);
+    }
+    else {
+      console.error (`Failed to post workout ${athleteId}/${activityId} for unknown reasons`, e);
+    }
+  }
 
   pending.delete (activityId);
 }

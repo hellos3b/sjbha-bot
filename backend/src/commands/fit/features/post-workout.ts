@@ -39,7 +39,7 @@ export const postWorkout = async (stravaId: number, activityId: number) : Promis
   const [activity, streams] = await Promise.all ([
     client.getActivity (activityId),
     client.getActivityStreams (activityId).catch (_ => [])
-  ]);
+  ]).catch (e => { throw new Error (`Failed to fetch Activity '${stravaId}:${activityId}' -- ${e instanceof Error ? e.message : 'Unknown Reason'}`) });
 
   console.log ('ACTIVITY', activity);
   
