@@ -1,14 +1,17 @@
 import { onMongoDbReady } from '@sjbha/app';
 import { queued } from '@sjbha/utils/queue';
 import { DateTime } from 'luxon';
+
 import * as db from '../db/meetups';
+import schedule from 'node-schedule';
 
 // Start the scheduler
 export async function init() : Promise<void> {
   await onMongoDbReady; 
   await endMeetups ();
 
-  // todo: Schedule.on (endMeetup)
+  // Check every hour
+  schedule.scheduleJob ('0 * * * *', () => runEndMeetups ());
   db.events.on ('edited', runEndMeetups);
 }
 
