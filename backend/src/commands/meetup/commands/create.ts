@@ -50,19 +50,21 @@ export async function create (message: Message) : Promise<void> {
     announcement:    { type: 'Pending', channelId: message.channel.id }
   };
 
-  const [announcement] = await Promise.all ([
-    message.channel.send ({ embeds: [Announcement (meetup, [])] }),
-    message.delete ()
-  ]);
+  const dateShort = DateTime
+    .fromISO (meetup.timestamp)
+    .toFormat ('MMM dd');
 
-  const thread = await announcement.startThread ({
-    name:   `📅 ${meetup.title}`,
-    reason: 'Needed a separate thread for food',
+  const thread = await message.channel.threads.create ({
+    name:   `📅  ${meetup.title} - ${dateShort}`,
+    reason: 'Meetup discussion thread',
     
     autoArchiveDuration: 60,
   });
 
-  await thread.send ('This thread was automatically created for meetup discussion. Ask questions, make plans, and find people in this thread');
+  const [announcement] = await Promise.all ([
+    thread.send ({ embeds: [Announcement (meetup, [])] }),
+    message.delete ()
+  ]);
   
   await db.insert ({
     ...meetup,

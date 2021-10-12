@@ -11,6 +11,7 @@ services:
       HTTP_PORT: 5000
     networks:
       - nginx-proxy
+    restart: always
 
 networks:
   nginx-proxy:

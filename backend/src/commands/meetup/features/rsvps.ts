@@ -1,5 +1,5 @@
 import { Instance, onClientReady, onMongoDbReady, Reaction$ } from '@sjbha/app';
-import { Collection, Message, MessageReaction, User } from 'discord.js';
+import { Collection, Message, MessageEmbed, MessageReaction, User } from 'discord.js';
 import * as db from '../db/meetups';
 import { Announcement, Reaction } from '../common/Announcement';
 
@@ -28,6 +28,7 @@ export async function init() : Promise<void> {
     await initAnnouncement (meetup);
   }
 
+  
   // Begin listening to events
   db.events.on ('add', initAnnouncement);
   db.events.on ('update', meetup => {
@@ -60,7 +61,15 @@ async function initAnnouncement (meetup: db.Meetup) {
   if (announcement.type === 'Inline') {
     announcementIds.add (announcement.messageId);
 
-    const message = await Instance.fetchMessage (announcement.channelId, announcement.messageId);
+    const message = await Instance
+      .fetchMessage (announcement.channelId, announcement.messageId)
+      .catch (e => (e instanceof Error) ? e : new Error ('Unknown Error'));
+
+    if (message instanceof Error) {
+      console.error (`Failed to initialize RSVPS for meetup '${meetup.title}': Could not fetch message. Error reason: ${message.message}`);
+      return;
+    }
+
     const { yes, maybe } = await fetchRsvps (message);
 
     // On old messages, the users aren't cached by default
@@ -68,6 +77,7 @@ async function initAnnouncement (meetup: db.Meetup) {
       yes.users.fetch (), 
       maybe.users.fetch ()
     ]);
+
     const maybes = maybe.users.cache.filter (u => !u.bot);
     const attending = yes.users.cache.filter (u => !u.bot);
 
@@ -81,8 +91,18 @@ async function initAnnouncement (meetup: db.Meetup) {
 
     // Update the post with the new RSVPs
     const embed = Announcement (meetup, Reactions (attending, maybes));
-    await message.edit ({ embeds: [embed] });
+    await update (message, embed);
   }
+}
+
+// Edits the announcement post
+// will unarchive the thread first otherwise an error gets thrown when editing
+async function update (message: Message, embed: MessageEmbed) {
+  if (message.channel.isThread () && message.channel.archived) {
+    await message.channel.setArchived (false);
+  }
+
+  await message.edit ({ embeds: [embed] });
 }
 
 // When a user removes a reaction
@@ -103,7 +123,7 @@ async function onRemoveReaction (reaction: MessageReaction) {
   const { yes, maybe } = await fetchRsvps (message);
 
   const embed = Announcement (meetup, Reactions (yes.users.cache, maybe.users.cache));
-  await reaction.message.edit ({ embeds: [embed] });
+  await update (message, embed);
 }
 
 
@@ -115,7 +135,6 @@ async function onAddReaction (reaction: MessageReaction, user: User) {
   });
 
   if (!meetup) {
-    console.log ('no meetup found', reaction.message.id, announcementIds);
     return;
   }
 
@@ -137,7 +156,15 @@ async function onAddReaction (reaction: MessageReaction, user: User) {
   }
 
   const embed = Announcement (meetup, Reactions (yes.users.cache, maybe.users.cache));
-  await reaction.message.edit ({ embeds: [embed] });
+  await update (message, embed);
+
+
+  // Notify everyone that someone has RSVP'd
+  if (reaction.emoji.name === RsvpEmoji) {
+    // console.log ('onAddReaction', reaction.emoji.name, message.thread);
+    // const thread = await Instance.fetchChannel (message.channelId);
+    message.channel.send (`${RsvpEmoji} <@${user.id}> just RSVP'd for the meetup!`);
+  }
 }
 
 

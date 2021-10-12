@@ -2,7 +2,7 @@
   import Details from './form/Details.svelte';
   import Location from './form/Location.svelte';
   import Links from './form/Links.svelte';
-  import GuestLimit from './form/GenerateCommand.svelte';
+  // import GuestLimit from './form/GenerateCommand.svelte';
   import GenerateCommand from './form/GenerateCommand.svelte';
   import { fetchMeetup, store } from './store';
 
@@ -10,7 +10,7 @@
 
   if (window.location.hash) {
     const id = window.location.hash.substr (1);
-    
+
     fetchMeetup (id)
       .then (_ => { state = 'ready'; })
       .catch (_ => { state = 'could-not-load'; });

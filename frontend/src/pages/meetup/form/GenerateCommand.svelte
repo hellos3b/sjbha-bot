@@ -29,7 +29,7 @@
       output.links = validLinks;
 
     return (store.id)
-      ? `!meetup edit\n${YAML.stringify({id: store.id, ...output})}`
+      ? `!meetup edit\n${YAML.stringify(output)}`
       : `!meetup create\n${YAML.stringify(output)}`;
   }
 </script>

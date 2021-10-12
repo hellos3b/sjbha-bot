@@ -15,13 +15,27 @@ const labs_category = (env.IS_PRODUCTION)
 
 Message$
   .startsWith ('!meetup')
-  .guildOnly ()
-  .filter (message => message.channel.type === 'GUILD_TEXT' && message.channel.parentId === labs_category)
-  .routes ({ 
-    'create': create, 
-    'cancel': cancel, 
-    'edit':   edit,
-    'empty':  msg => msg.reply (`Use this link to create a meetup: ${env.UI_HOSTNAME}/meetup`)
+  .subscribe (message => {
+    const [, route] = message.content
+      .replace (/\n/g, ' ')
+      .split (' ');
+ 
+    const isGuild = (message.channel.type === 'GUILD_TEXT' && message.channel.parentId === labs_category);
+    const isThread = message.channel.isThread ();
+
+    switch (true) {
+      case (isGuild && route === 'create'):
+        return create (message);
+
+      case (isGuild):
+        return message.reply (`Use this link to create a meetup: ${env.UI_HOSTNAME}/meetup`);
+
+      case (isThread && route === 'edit'):
+        return edit (message);
+
+      case (isThread && route === 'cancel'):
+        return cancel (message);
+    }
   });
 
 
