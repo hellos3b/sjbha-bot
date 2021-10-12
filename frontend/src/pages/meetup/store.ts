@@ -87,9 +87,8 @@ export const errors = derived (state, state$ => {
 export async function fetchMeetup (id: string) : Promise<void> {
   const response = await fetch (`${__HOST__}/meetup/${id}`).then (r => r.json());
 
-  let location: Location | null = null;
   state.set ({
-    id: id,
+    id,
     title: response.title,
     description: response.description,
     date: response.timestamp,

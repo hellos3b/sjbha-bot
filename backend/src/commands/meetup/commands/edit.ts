@@ -2,7 +2,6 @@ import { Message, MessageEmbed } from 'discord.js';
 import YAML from 'yaml';
 
 import { env, Instance } from '@sjbha/app';
-import MultiChoice from '@sjbha/utils/multi-choice';
 
 import * as db from '../db/meetups';
 import * as M from '../common/Meetup';
@@ -14,36 +13,33 @@ import { fetchReactions } from '../features/rsvps';
 // If used alone (!meetup edit) will query user to pick a meetup
 // If passed with options (!meetup edit id: __) will try to update the meetup
 export async function edit (message: Message) : Promise<void> {
+  if (!message.channel.isThread ()) {
+    message.reply ('To edit a meetup, use `!meetup edit` inside the meetup\'s thread');
+    return;
+  }
+
+  const meetup = await db.findOne ({ threadID: message.channelId });
+
+  if (!meetup) {
+    message.reply ('Hm, it doesnt look like this thread is for a meetup');
+    return;
+  }
+
   message.content.split (' ').length > 2
-    ? updateMeetup (message)
-    : getEditLink (message);
+    ? updateMeetup (message, meetup)
+    : getEditLink (message, meetup);
 }
 
 
 // Updates the announcement
-async function updateMeetup(message: Message) {
+async function updateMeetup(message: Message, meetup: db.Meetup) {
   const inputText = message.content.replace ('!meetup edit', '');
-  const { id, ...parsed } = YAML.parse (inputText);
-
-  if (!id) {
-    message.delete ();
-    message.reply ('Invalid meetup options, you didnt provide an ID of a meetup to edit. Make sure to use the edit page and copy the whole text');
-    return;
-  }
-
+  const parsed = YAML.parse (inputText);
   const options = validateOptions (parsed);
 
   if (options instanceof ValidationError) {
     message.delete ();
     message.reply (options.error);
-    return;
-  }
-
-  const meetup = await db.findOne ({ id });
-
-  if (!meetup) {
-    message.delete ();
-    message.reply ('Not a valid meetup ID, make sure to copy from the editor exactly');
     return;
   }
 
@@ -59,7 +55,7 @@ async function updateMeetup(message: Message) {
     return;
   }
 
-  await db.update ({
+  const updated = await db.update ({
     ...meetup,
     organizerID: message.author.id,
     title:       options.title,
@@ -72,58 +68,42 @@ async function updateMeetup(message: Message) {
 
 
   // Update the post
-  const original = await (async () : Promise<Message> => {
-    switch (meetup.announcement.type) {
-      case 'Inline': {
-        const message = await Instance.fetchMessage (meetup.announcement.channelId, meetup.announcement.messageId);
-        const reactions = await fetchReactions (message);
-        await message.edit ({ embeds: [Announcement (meetup, reactions)] });
-        return message;
+  switch (updated.announcement.type) {
+    case 'Inline': {
+      const post = await Instance.fetchMessage (updated.announcement.channelId, updated.announcement.messageId);
+
+      if (post.channel.isThread () && post.channel.archived) {
+        await post.channel.setArchived (false);
       }
 
-      default:
-        throw new Error ('Editing of non inline meetups is not yet supported');
+      const reactions = await fetchReactions (post);
+      await post.edit ({ embeds: [Announcement (updated, reactions)] });
+      break;
     }
-  }) ();
+  }
 
   // Let the user know it has been done!
   await message.delete ();
-  original.reply ({ content: `**${meetup.title}** was edited by <@${message.author.id}>` });
+  message.channel.send ({ embeds: [
+    new MessageEmbed ({
+      description: `✨ **${meetup.title}** was updated`
+      // todo: display a diff
+      // \nChanged ` + changed
+      //   .map (key => '`' + key + '`')
+      //   .join (', ')
+    })
+  ] });
 }
 
 
 // Asks the user to pick a meetup from a list,
 // and then generates a link that will preload data into the UI
-async function getEditLink(message: Message) {
-  const userMeetups = await db.find ({
-    state:       { type: 'Live' },
-    organizerID: message.author.id
-  });
-  
-  if (!userMeetups.length) {
-    message.reply ('You have no meetups to edit');
-
-    return;
-  }
-
-  // Pick a meetup they want to cancel
-  const meetupPicker = MultiChoice.create <db.Meetup> (
-    'Which meetup would you like to edit?',
-    userMeetups.map (meetup => MultiChoice.opt (meetup.title, meetup))
-  );
-
-  await message.reply (meetupPicker.toString ());
-  const interaction = message.channel.createMessageCollector ({ filter: m => m.author.id === message.author.id });
-  const meetup = await interaction.next.then (meetupPicker.parse);
-
-  if (!meetup)
-    return;
-
-  const editUrl = `${env.UI_HOSTNAME}/meetup#${meetup.id}`;
+async function getEditLink(message: Message, meetup: db.Meetup) {
+  const editUrl = env.UI_HOSTNAME + '/meetup#' + meetup.id;
 
   message.channel.send ({ embeds: [
     new MessageEmbed ({
-      description: `:pencil2: [Click here to edit '**${meetup.title}**'](${editUrl})`,
+      description: `:pencil2: [Edit '**${meetup.title}**'](${editUrl})`,
       color:       '#d7d99e'
     })
   ] });
