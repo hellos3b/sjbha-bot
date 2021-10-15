@@ -33,23 +33,26 @@ async function refresh () {
     .local ()
     .minus ({ days: 1 });
     
-  const models = await db
-    .find ({ timestamp: { $gt: after.toISO () } })
-    .then (models => models.sort ((a, b) => a.timestamp.localeCompare (b.timestamp)));
+  const models = await db.find ({ timestamp: { $gt: after.toISO () } });
 
-  const meetups = models.filter (meetup => {
-    if (meetup.state.type === 'Cancelled') {
-      const diff = DateTime.local ()
-        .diff (DateTime.fromISO (meetup.state.timestamp), 'hours')
-        .toObject ();
+  const meetups = models
+    .sort ((a, b) => a.timestamp.localeCompare (b.timestamp))
+    .filter (meetup => {
+      if (meetup.state.type === 'Archived') {
+        return false;
+      }
+      else if (meetup.state.type === 'Cancelled') {
+        const diff = DateTime.local ()
+          .diff (DateTime.fromISO (meetup.state.timestamp), 'hours')
+          .toObject ();
 
-      // Hide cancelled meetups 24 hours after being cancelled
-      return (diff.hours && diff.hours <= 24)
-    }
-    else {
-      return true;
-    }
-  });
+        // Hide cancelled meetups 24 hours after being cancelled
+        return (diff.hours && diff.hours <= 24)
+      }
+      else {
+        return true;
+      }
+    });
 
   const messageIds = await MessageIds.get ();
   const usedIds : string[] = [];
@@ -114,6 +117,9 @@ function DirectoryEmbed (meetup: db.Meetup) : MessageEmbed {
         'description': `${M.timestring (meetup)}\n[Click here to view details and to RSVP](${link})`
       });
     } 
+
+    default:
+      throw new Error ('Cant render an Archived meetup');
   }
 }
 

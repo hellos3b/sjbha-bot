@@ -37,6 +37,7 @@ export type Schema = {
   state: 
     | { type: 'Live' }
     | { type: 'Ended' }
+    | { type: 'Archived'}
     | { type: 'Cancelled', reason: string, timestamp: string };
 }
 

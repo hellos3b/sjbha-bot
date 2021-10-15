@@ -20,7 +20,10 @@ const runEndMeetups = queued (endMeetups);
 // and mark any old ones as "done"
 async function endMeetups () {
   const meetups = await db.find ({
-    'state.type': 'Live'
+    $or: [
+      { 'state.type': 'Live' },
+      { 'state.type': 'Ended' }
+    ]
   });
 
   for (const meetup of meetups) {
@@ -29,8 +32,13 @@ async function endMeetups () {
       .diff (timestamp, 'hours')
       .toObject ();
 
-    // We mark 4 hour old meetups as ended
-    if (diff.hours && diff.hours >= 4) {
+    if (diff.hours && diff.hours >= 24) {
+      await db.update ({
+        ...meetup,
+        state: { type: 'Archived' }
+      });
+    }
+    else if (diff.hours && diff.hours >= 4) {
       await db.update ({
         ...meetup,
         state: { type: 'Ended' }
