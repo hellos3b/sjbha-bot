@@ -27,14 +27,16 @@ Message$
       switch (route) {
         case 'create':
           return create (message);
-        
+        case 'help':
+          return help (message);
+        case undefined:
+          return message.reply ('Click here to create a meetup: https://hellos3b.github.io/sjbha-bot/meetup');
+      
         // old commands
         case 'edit':
           return message.reply ('Editing a meetup is now done inside the Meetup thread');
-
         case 'cancel':
           return message.reply ('Canceling a meetup is now done inside the Meetup thread');
-
         case 'mention':
           return message.reply ('Mentioning a meetup is now done inside the Meetup thread');
       }
@@ -49,8 +51,10 @@ Message$
           return cancel (message);
         case 'announce':
           return announce (message);
-        case 'message':
-          return message.reply ('Mentioning a meetup has been changed to `!meetup announce <Message>`');
+        case 'help':
+          return help (message);
+        case 'mention':
+          return message.reply ('Mentioning a meetup has been changed to `!meetup announce`');
       }
     }
   });
@@ -80,5 +84,6 @@ EndMeetups.init ();
 
 // Web API for editor
 import { meetup } from './routes/meetup';
+import { help } from './commands/help';
 
 Router.get ('/meetup/{id}', meetup);

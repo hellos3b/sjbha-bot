@@ -39,7 +39,7 @@ export async function create (message: Message) : Promise<void> {
     name:   M.threadTitle (options.title, options.date),
     reason: 'Meetup discussion thread',
     
-    autoArchiveDuration: 60,
+    autoArchiveDuration: 1440,
   });
 
   const meetup : db.Meetup = {
