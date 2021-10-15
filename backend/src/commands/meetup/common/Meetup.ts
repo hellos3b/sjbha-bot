@@ -1,29 +1,7 @@
-import { Instance } from '@sjbha/app';
-import { Message, MessageEmbed } from 'discord.js';
 import { DateTime } from 'luxon';
 import * as db from '../db/meetups';
 import { MeetupOptions } from './validateOptions';
 
-/**
- * Edits the announcement message
- * @param meetup  The meetup to edit
- * @param embed   The new embed
- * @returns A reference to the message that has been edited
- */
-export function edit (meetup: db.Meetup, embed: MessageEmbed) : Promise<Message> {
-  switch (meetup.announcement.type) {
-    case 'Inline':
-      return Instance
-        .fetchMessage (meetup.announcement.channelId, meetup.announcement.messageId)
-        .then (post => post.edit ({ embeds: [embed] }));
-
-    case 'Announcement':
-      throw new Error ('Not yet implemented');
-
-    case 'Pending':
-      throw new Error ('Cant edit a meetup that hasnt been posted');
-  }
-}
 
 /**
  * Used in create & edit, this just formats
@@ -46,6 +24,7 @@ export function location (options: MeetupOptions) : db.Meetup['location'] {
   }
 }
 
+
 /**
  * Formats the timestamp from the meetup into a nice string
  * @param meetup 
@@ -56,4 +35,15 @@ export function timestring (meetup: db.Meetup) : string {
     weekday: 'long', month:   'long',  day:     '2-digit', 
     hour:    '2-digit', minute:  '2-digit' 
   });
+}
+
+
+/**
+ * Format the title that is used for the meetup thread
+ * @param meetup 
+ * @returns 
+ */
+export function threadTitle (title: string, timestamp: string) : string {
+  const dateShort = DateTime.fromISO (timestamp).toFormat ('MMM dd');
+  return `🗓️  ${dateShort} - ${title}`;
 }

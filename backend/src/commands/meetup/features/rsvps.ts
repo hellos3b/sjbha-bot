@@ -1,16 +1,15 @@
-import { Instance, onClientReady, onMongoDbReady, Reaction$ } from '@sjbha/app';
-import { Collection, Message, MessageEmbed, MessageReaction, User } from 'discord.js';
+import { Instance, onClientReady, onMongoDbReady } from '@sjbha/app';
+import { MessageEmbed } from 'discord.js';
 import * as db from '../db/meetups';
-import { Announcement, Reaction } from '../common/Announcement';
 
-export const RsvpEmoji =  '✅';
-export const MaybeEmoji = '🤔';
+type Unbind = () => void;
+
 
 // We'll maintain a cache of meetup IDs that we care about
 // so when a message reaction comes in we can quickly deny it.
 // We get reactions on every message in the server so it
 // would be a waste to do a DB lookup every time
-const announcementIds = new Set<string> ();
+const listeners = new Map<string, Unbind> ();
 
 
 // Meant to be called when booting up
@@ -20,182 +19,83 @@ export async function init() : Promise<void> {
   await Promise.all ([onClientReady, onMongoDbReady]);
   
   const meetups = await db.find ({
-    'state.type':        'Live',
-    'announcement.type': 'Inline'
+    'state.type': 'Live'
   });
 
   for (const meetup of meetups) {
-    await initAnnouncement (meetup);
+    try {
+      const unbind = await initListeners (meetup);
+      listeners.set (meetup.id, unbind);
+    }
+    catch (e) {
+      const error = (e instanceof Error) ? e.message : 'Unknown Reason';
+      console.error (`Could not setup RSVP listeners for ${meetup.title} (${meetup.id}): ${error}`)
+    }
   }
 
-  
-  // Begin listening to events
-  db.events.on ('add', initAnnouncement);
-  db.events.on ('update', meetup => {
-    const messageId = (meetup.announcement.type === 'Inline')
-      ? meetup.announcement.messageId
-      : '';
-
-    if (meetup.state.type !== 'Live') {
-      announcementIds.delete (messageId);
-    }
-  });
-
-  Reaction$
-    .filter (data => announcementIds.has (data.reaction.message.id))
-    .filter (data => !data.user.bot)
-    .filter (data => [RsvpEmoji, MaybeEmoji].includes (data.reaction.emoji.name || ''))
-    .subscribe (({ type, reaction, user }) => 
-      (type === 'add')
-        ? onAddReaction (reaction, user)
-        : onRemoveReaction (reaction)
-    );
+  db.events.on ('add', initListeners);
+  db.events.on ('update', prune);
 }
 
 
-// Add a message ID to the cache to listen to new reactions
-// and clean up any double RSVP's
-async function initAnnouncement (meetup: db.Meetup) {
-  const announcement = meetup.announcement;
+// Checks if the meetup is still considered live
+// otherwise stops listening to reactions
+function prune (meetup: db.Meetup) {
+  if (meetup.state.type !== 'Live') {
+    const unbind = listeners.get (meetup.id);
+    unbind && unbind ();
+    listeners.delete (meetup.id);
+  }
+}
 
-  if (announcement.type === 'Inline') {
-    announcementIds.add (announcement.messageId);
 
-    const message = await Instance
-      .fetchMessage (announcement.channelId, announcement.messageId)
-      .catch (e => (e instanceof Error) ? e : new Error ('Unknown Error'));
+// Initializes the collectors that will listen 
+// to the clicks on the buttons of the meetup
+async function initListeners (meetup: db.Meetup) : Promise<Unbind> {
+  console.log (`Listening to RSVPs for '${meetup.title}'`);
 
-    if (message instanceof Error) {
-      console.error (`Failed to initialize RSVPS for meetup '${meetup.title}': Could not fetch message. Error reason: ${message.message}`);
+  const message = await Instance.fetchMessage (meetup.threadID, meetup.announcementID);
+  const collector = message.channel.createMessageComponentCollector ();
+
+  collector.on ('collect', async i => {
+    // Get the latest model
+    const state = await db.findOne ({ id: meetup.id });
+
+    if (!state)
       return;
+
+    console.log (`${i.user.username} Clicked on ${i.customId} for '${state.title}'`);
+
+    if (i.customId === 'rsvp' && !state.rsvps.includes (i.user.id)) {
+      await db.update ({
+        ...meetup,
+        rsvps:  state.rsvps.concat (i.user.id),
+        maybes: state.maybes.filter (id => id !== i.user.id)
+      });
+
+      i.channel && i.channel.send (`✅ <@${i.user.id}> is attending!`);
+      i.deferUpdate ();
     }
-
-    const { yes, maybe } = await fetchRsvps (message);
-
-    // On old messages, the users aren't cached by default
-    await Promise.all ([
-      yes.users.fetch (), 
-      maybe.users.fetch ()
-    ]);
-
-    const maybes = maybe.users.cache.filter (u => !u.bot);
-    const attending = yes.users.cache.filter (u => !u.bot);
-
-    // If anyone is RSVP'd to both yes & maybe, remove their maybe vote
-    for (const [_, user] of attending) {
-      if (maybes.has (user.id)) {
-        await maybe.users.remove (user.id);
-        maybes.delete (user.id);
-      }
+    else if (i.customId === 'maybe' && !state.maybes.includes (i.user.id)) {
+      await db.update ({
+        ...meetup,
+        rsvps:  state.rsvps.filter (id => id !== i.user.id),
+        maybes: state.maybes.concat (i.user.id)
+      });
+      i.deferUpdate ();
     }
-
-    // Update the post with the new RSVPs
-    const embed = Announcement (meetup, Reactions (attending, maybes));
-    await update (message, embed);
-  }
-}
-
-// Edits the announcement post
-// will unarchive the thread first otherwise an error gets thrown when editing
-async function update (message: Message, embed: MessageEmbed) {
-  if (message.channel.isThread () && message.channel.archived) {
-    await message.channel.setArchived (false);
-  }
-
-  await message.edit ({ embeds: [embed] });
-}
-
-// When a user removes a reaction
-async function onRemoveReaction (reaction: MessageReaction) {
-  const meetup = await db.findOne ({
-    'state.type':             'Live',
-    'announcement.messageId': reaction.message.id
+    else if (i.customId === 'remove') {
+      await db.update ({
+        ...meetup,
+        rsvps:  state.rsvps.filter (id => id !== i.user.id),
+        maybes: state.maybes.filter (id => id !== i.user.id)
+      });
+      i.deferUpdate ();
+    }
+    else {
+      i.deferUpdate ();
+    }
   });
 
-  if (!meetup) {
-    return;
-  }
-
-  const message = (reaction.message.partial)
-    ? await reaction.message.fetch ()
-    : reaction.message;
-  
-  const { yes, maybe } = await fetchRsvps (message);
-
-  const embed = Announcement (meetup, Reactions (yes.users.cache, maybe.users.cache));
-  await update (message, embed);
+  return () => { collector.stop (); }
 }
-
-
-// When a user adds a reaction
-async function onAddReaction (reaction: MessageReaction, user: User) {
-  const meetup = await db.findOne ({
-    'state.type':             'Live',
-    'announcement.messageId': reaction.message.id
-  });
-
-  if (!meetup) {
-    return;
-  }
-
-  const message = (reaction.message.partial)
-    ? await reaction.message.fetch ()
-    : reaction.message;
-
-  const { yes, maybe } = await fetchRsvps (message);
-
-  // If they click on an emoji and already have one selected
-  // we'll remove the old one
-  if (reaction.emoji.name === RsvpEmoji && maybe.users.cache.has (user.id)) {
-    await maybe.users.remove (user.id);
-    maybe.users.cache.delete (user.id);
-  }
-  else if (reaction.emoji.name === MaybeEmoji && yes.users.cache.has (user.id)) {
-    await yes.users.remove (user.id);
-    yes.users.cache.delete (user.id);
-  }
-
-  const embed = Announcement (meetup, Reactions (yes.users.cache, maybe.users.cache));
-  await update (message, embed);
-
-
-  // Notify everyone that someone has RSVP'd
-  if (reaction.emoji.name === RsvpEmoji) {
-    // console.log ('onAddReaction', reaction.emoji.name, message.thread);
-    // const thread = await Instance.fetchChannel (message.channelId);
-    message.channel.send (`${RsvpEmoji} <@${user.id}> just RSVP'd for the meetup!`);
-  }
-}
-
-
-// Fetches the current RSVP list from the message
-// Digs through the cache first, if missing in the cache
-// then will initialize the reaction itself
-async function fetchRsvps (message: Message) {
-  const yes = message.reactions.cache.get (RsvpEmoji)
-    ?? await message.react (RsvpEmoji);
-
-  const maybe = message.reactions.cache.get (MaybeEmoji)
-    ?? await message.react (MaybeEmoji);
-
-  return { yes, maybe };
-}
-
-
-/**
- * Fetch the RSVPs on the list as Reactions that can be passed in
- * to the Announcement embed
- * @param message The reference to the announcement post
- * @returns 
- */
-export async function fetchReactions (message: Message) : Promise<Reaction[]> {
-  const { yes, maybe } = await fetchRsvps (message);
-  return Reactions (yes.users.cache, maybe.users.cache);
-}
-
-
-// Convert user collections to reactions for the embed
-const Reactions = (attending: Collection<string, User>, maybes: Collection<string, User>) : Reaction[] => [
-  { emoji: RsvpEmoji, name: 'Attending', users: attending.filter (u => !u.bot).map (u => u.username) },
-  { emoji: MaybeEmoji, name: 'Maybe', users: maybes.filter (u => !u.bot).map (u => u.username) }
-];

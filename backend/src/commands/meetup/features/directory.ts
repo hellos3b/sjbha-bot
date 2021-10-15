@@ -22,30 +22,37 @@ export async function init() : Promise<void> {
 
   db.events.on ('add', runRefresh);
   db.events.on ('update', runRefresh);
-  db.events.on ('edited', runRefresh);
 }
 
-const runRefresh = queued (refresh);
+export const runRefresh = queued (refresh);
 
 // fetch all meetups from the DB
 // and update the directory channel in chronological order
 async function refresh () {
-  // todo: add timestmap filter
-  const models = await db.find ().then (models => models.sort ((a, b) => a.timestamp.localeCompare (b.timestamp)));
+  const after = DateTime
+    .local ()
+    .minus ({ days: 1 });
+    
+  const models = await db.find ({ timestamp: { $gt: after.toISO () } });
 
-  const meetups = models.filter (meetup => {
-    if (meetup.state.type === 'Cancelled') {
-      const diff = DateTime.local ()
-        .diff (DateTime.fromISO (meetup.state.timestamp), 'hours')
-        .toObject ();
+  const meetups = models
+    .sort ((a, b) => a.timestamp.localeCompare (b.timestamp))
+    .filter (meetup => {
+      if (meetup.state.type === 'Archived') {
+        return false;
+      }
+      else if (meetup.state.type === 'Cancelled') {
+        const diff = DateTime.local ()
+          .diff (DateTime.fromISO (meetup.state.timestamp), 'hours')
+          .toObject ();
 
-      // Hide cancelled meetups 24 hours after being cancelled
-      return (diff.hours && diff.hours <= 24)
-    }
-    else {
-      return true;
-    }
-  });
+        // Hide cancelled meetups 24 hours after being cancelled
+        return (diff.hours && diff.hours <= 24)
+      }
+      else {
+        return true;
+      }
+    });
 
   const messageIds = await MessageIds.get ();
   const usedIds : string[] = [];
@@ -92,14 +99,7 @@ function DirectoryEmbed (meetup: db.Meetup) : MessageEmbed {
       });
 
     case 'Live': {
-      const link = (() : string => {
-        switch (meetup.announcement.type) {
-          // todo: this is incorrect
-          case 'Announcement': return `https://discord.com/channels/${env.SERVER_ID}/${channels.meetups_directory}/${meetup.announcement.announcementId}`;
-          case 'Inline': return `https://discord.com/channels/${env.SERVER_ID}/${meetup.announcement.channelId}/${meetup.announcement.messageId}`;
-          case 'Pending': return '';
-        }
-      }) ();
+      const link = `https://discord.com/channels/${env.SERVER_ID}/${meetup.threadID}/${meetup.announcementID}`;
 
       // How long ago the meetup was created
       const age = DateTime.local ()
@@ -117,6 +117,9 @@ function DirectoryEmbed (meetup: db.Meetup) : MessageEmbed {
         'description': `${M.timestring (meetup)}\n[Click here to view details and to RSVP](${link})`
       });
     } 
+
+    default:
+      throw new Error ('Cant render an Archived meetup');
   }
 }
 

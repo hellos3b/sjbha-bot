@@ -1,13 +1,11 @@
 import { Message, MessageEmbed } from 'discord.js';
 import YAML from 'yaml';
 
-import { env, Instance } from '@sjbha/app';
+import { env } from '@sjbha/app';
 
 import * as db from '../db/meetups';
 import * as M from '../common/Meetup';
 import { validateOptions, ValidationError } from '../common/validateOptions';
-import { Announcement } from '../common/Announcement';
-import { fetchReactions } from '../features/rsvps';
 
 
 // If used alone (!meetup edit) will query user to pick a meetup
@@ -66,24 +64,8 @@ async function updateMeetup(message: Message, meetup: db.Meetup) {
     location:    M.location (options)
   });
 
-
-  // Update the post
-  switch (updated.announcement.type) {
-    case 'Inline': {
-      const post = await Instance.fetchMessage (updated.announcement.channelId, updated.announcement.messageId);
-
-      if (post.channel.isThread () && post.channel.archived) {
-        await post.channel.setArchived (false);
-      }
-
-      const reactions = await fetchReactions (post);
-      await post.edit ({ embeds: [Announcement (updated, reactions)] });
-      break;
-    }
-  }
-
   // Let the user know it has been done!
-  await message.delete ();
+  message.delete ();
   message.channel.send ({ embeds: [
     new MessageEmbed ({
       description: `✨ **${meetup.title}** was updated`
@@ -93,6 +75,9 @@ async function updateMeetup(message: Message, meetup: db.Meetup) {
       //   .join (', ')
     })
   ] });
+
+  message.channel.isThread () &&
+    message.channel.setName (M.threadTitle (updated.title, updated.timestamp));
 }
 
 
