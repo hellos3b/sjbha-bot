@@ -23,6 +23,11 @@ export async function edit (message: Message) : Promise<void> {
     return;
   }
 
+  if (meetup.organizerID !== message.author.id) {
+    message.reply ('You do not have permissions to edit this meetup');
+    return;
+  }
+
   message.content.split (' ').length > 2
     ? updateMeetup (message, meetup)
     : getEditLink (message, meetup);
@@ -35,6 +40,11 @@ async function updateMeetup(message: Message, meetup: db.Meetup) {
   const mention = `<@${message.author.id}>`;
 
   message.delete ();
+
+  if (meetup.organizerID !== message.author.id) {
+    message.channel.send (`${mention} - You do not have permissions to edit this meetup`);
+    return;
+  }
 
   const parsed = (() : unknown | undefined => {
     try { return YAML.parse (inputText); }

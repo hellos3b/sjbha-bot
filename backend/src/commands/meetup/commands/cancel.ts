@@ -14,11 +14,15 @@ export async function cancel (message: Message) : Promise<void> {
     return;
   }
 
-  console.log (message.channelId, message.channel.id);
   const meetup = await db.findOne ({ threadID: message.channelId });
   
   if (!meetup) {
     message.reply ('Hm, it doesnt look like this thread is for a meetup');
+    return;
+  }
+
+  if (meetup.organizerID !== message.author.id) {
+    message.reply ('You do not have permissions to cancel this meetup');
     return;
   }
 
