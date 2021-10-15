@@ -38,10 +38,7 @@ async function refresh () {
   const meetups = models
     .sort ((a, b) => a.timestamp.localeCompare (b.timestamp))
     .filter (meetup => {
-      if (meetup.state.type === 'Archived') {
-        return false;
-      }
-      else if (meetup.state.type === 'Cancelled') {
+      if (meetup.state.type === 'Cancelled') {
         const diff = DateTime.local ()
           .diff (DateTime.fromISO (meetup.state.timestamp), 'hours')
           .toObject ();
