@@ -68,7 +68,6 @@ export async function render (meetup: db.Meetup) : Promise<Message> {
         return { embeds: [embed], components: [] };
       }
 
-      case 'Archived':
       case 'Ended': {
         const embed = new MessageEmbed ({
           color:       '#9b3128',
