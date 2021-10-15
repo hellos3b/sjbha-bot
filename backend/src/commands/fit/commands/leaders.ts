@@ -4,7 +4,7 @@ import { DateTime, Interval } from 'luxon';
 import * as R from 'ramda';
 
 import { Workouts, sumExp, Exp, Workout } from '../db/workout';
-import { MemberList } from '../common/MemberList';
+import { MemberList } from '../../../utils/MemberList';
 
 export async function leaders (message: Message) : Promise<void> {
   const lastThirtyDays = Interval.before (DateTime.local (), { days: 30 });

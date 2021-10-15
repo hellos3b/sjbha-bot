@@ -1,15 +1,24 @@
-import { Message, MessageEmbed } from 'discord.js';
+import { Message } from 'discord.js';
 import { DateTime } from 'luxon';
 
 import * as db from '../db/meetups';
-import * as M from '../common/Meetup';
 
 /**
  * Cancel a meetup
  */
 export async function cancel (message: Message) : Promise<void> {
+  console.log (`${message.author.username} is trying to Cancel a meetup`);
+
   if (!message.channel.isThread ()) {
     message.reply ('To cancel a meetup, use `!meetup cancel <reason>` in the meetup\'s thread');
+    return;
+  }
+
+  console.log (message.channelId, message.channel.id);
+  const meetup = await db.findOne ({ threadID: message.channelId });
+  
+  if (!meetup) {
+    message.reply ('Hm, it doesnt look like this thread is for a meetup');
     return;
   }
 
@@ -21,31 +30,15 @@ export async function cancel (message: Message) : Promise<void> {
     return;
   }
 
-  const meetup = await db.findOne ({ threadID: message.channelId });
-  
-  if (!meetup) {
-    message.reply ('Hm, it doesnt look like this thread is for a meetup');
-    return;
-  }
-
-  const posting = new MessageEmbed ({
-    title:       `📅  **CANCELLED**: ~~${meetup.title}~~`,
-    color:       '#9b3128',
-    description: `> ${reason}`
+  await db.update ({
+    ...meetup,
+    state: { 
+      type:      'Cancelled', 
+      reason:    reason, 
+      timestamp: DateTime.local ().toISO () 
+    }
   });
 
-  await Promise.all ([
-    M.edit (meetup, posting),
-    db.update ({
-      ...meetup,
-      state: { 
-        type:      'Cancelled', 
-        reason:    reason, 
-        timestamp: DateTime.local ().toISO () 
-      }
-    })
-  ]);
-
+  await message.channel.setName (`(Cancelled) - ${meetup.title}`);
   await message.channel.send ({ content: 'This meetup has been cancelled' });
-  await message.channel.setArchived (true);
 }

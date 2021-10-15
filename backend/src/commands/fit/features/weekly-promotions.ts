@@ -9,7 +9,7 @@ import { channels, roles } from '@sjbha/config';
 import { Workout, Workouts, sumExp, belongsTo } from '../db/workout';
 import * as User from '../db/user';
 import { previousWeek } from '../common/week';
-import { MemberList } from '../common/MemberList';
+import { MemberList } from '../../../utils/MemberList';
 import { getRank } from '../common/ranks';
 
 const MINIMUM_EXP_FOR_PROMOTION = 150;

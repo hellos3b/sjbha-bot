@@ -12,7 +12,6 @@ export async function init() : Promise<void> {
 
   // Check every hour
   schedule.scheduleJob ('0 * * * *', () => runEndMeetups ());
-  db.events.on ('edited', runEndMeetups);
 }
 
 const runEndMeetups = queued (endMeetups);

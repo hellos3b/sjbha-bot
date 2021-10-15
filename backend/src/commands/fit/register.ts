@@ -66,7 +66,7 @@ Message$
 import { authAccept } from './routes/auth-accept';
 import { newWorkout } from './routes/activity-webhook';
 import { verifyToken } from './routes/verify-token';
-import { MemberList } from './common/MemberList';
+import { MemberList } from '../../utils/MemberList';
 
 Router.get ('/fit/accept', authAccept);
 Router.get ('/fit/api/webhook', verifyToken);

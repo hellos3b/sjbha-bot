@@ -109,7 +109,7 @@ export namespace Instance {
   export async function fetchChannel(channelId: string) : Promise<TextChannel> {
     const channel = await client.channels.fetch (channelId);
     
-    if (!channel || channel.type !== 'DM' && channel.type !== 'GUILD_TEXT') {
+    if (!channel || channel.type !== 'DM' && channel.type !== 'GUILD_TEXT' && channel.type !== 'GUILD_PUBLIC_THREAD') {
       throw new Error ('Channel is not of type \'dm\' or \'text');
     }
 
