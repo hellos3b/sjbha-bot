@@ -32,24 +32,34 @@ export async function edit (message: Message) : Promise<void> {
 // Updates the announcement
 async function updateMeetup(message: Message, meetup: db.Meetup) {
   const inputText = message.content.replace ('!meetup edit', '');
-  const parsed = YAML.parse (inputText);
+  const mention = `<@${message.author.id}>`;
+
+  message.delete ();
+
+  const parsed = (() : unknown | undefined => {
+    try { return YAML.parse (inputText); }
+    catch (e) { return undefined; }
+  }) ();
+
+  if (!parsed) {
+    message.channel.send (`${mention} - Hm the meetup options are in an invalid format. Make sure you're copy and pasting the whole command correctly.`);
+    return;
+  }
+
   const options = validateOptions (parsed);
 
   if (options instanceof ValidationError) {
-    message.delete ();
-    message.reply (options.error);
+    message.channel.send (`${mention} - Something is wrong with the options in your command. Make sure to copy and paste everything from the UI! (${options.error})`);
     return;
   }
 
   if (meetup.state.type !== 'Live') {
-    message.delete ();
-    message.reply ('That meetup cant be edited because it has already ended or has been cancelled');
+    message.channel.send (`${mention} That meetup cant be edited because it has already ended or has been cancelled`);
     return;
   }
 
   if (meetup.organizerID !== message.author.id) {
-    message.delete ();
-    message.reply ('You cant edit the meetup because you are not the organizer');
+    message.channel.send ('You cant edit the meetup because you are not the organizer');
     return;
   }
 
@@ -65,7 +75,6 @@ async function updateMeetup(message: Message, meetup: db.Meetup) {
   });
 
   // Let the user know it has been done!
-  message.delete ();
   message.channel.send ({ embeds: [
     new MessageEmbed ({
       description: `✨ **${meetup.title}** was updated`
