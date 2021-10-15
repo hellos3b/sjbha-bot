@@ -1,5 +1,5 @@
 import { DateTime } from 'luxon';
-import { object, string, enums, array, pattern, optional, assert, Infer, StructError } from 'superstruct';
+import { object, string, enums, array, pattern, optional, assert, Infer, StructError, type } from 'superstruct';
 
 const MAX_DESCRIPTION_SIZE = 1600;
 
@@ -8,7 +8,7 @@ const url = pattern (string (), /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}
 const ISOstring = pattern (string (), /\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+/);
 
 export type MeetupOptions = Infer<typeof MeetupOptions>;
-const MeetupOptions = object ({
+const MeetupOptions = type ({
   title:       string (),
   description: optional (string ()),
   date:        ISOstring,

@@ -13,25 +13,29 @@ import { validateOptions, ValidationError } from '../common/validateOptions';
  * Creates a new meetup
  */
 export async function create (message: Message) : Promise<void> {
+  const inputText = message.content.replace ('!meetup create', '');
+  const mention = `<@${message.author.id}>`;
+
+  message.delete ();
+
   // Guard for guild channels, lets us create threads
   if (message.channel.type !== 'GUILD_TEXT')
     return;
 
-  const inputText = message.content.replace ('!meetup create', '');
   const messageOptions = (() : unknown | undefined => {
     try { return YAML.parse (inputText); }
     catch (e) { return undefined; }
   }) ();
 
   if (!messageOptions) {
-    message.reply ('Hm couldn\'t understand the options -- Make sure you\'re copy and pasting the whole command correctly.');
+    message.channel.send (`${mention} - Hm the meetup options are in an invalid format. Make sure you're copy and pasting the whole command correctly.`);
     return;
   }
 
   const options = validateOptions (messageOptions);
   
   if (options instanceof ValidationError) {
-    message.reply (options.error);
+    message.channel.send (`${mention} - Something is wrong with the options in your command. Make sure to copy and paste everything from the UI! (${options.error})`);
     return;
   }
 
