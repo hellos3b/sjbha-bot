@@ -81,7 +81,11 @@ export async function render (meetup: db.Meetup) : Promise<Message> {
 
   if (meetup.announcementID) {
     const message = await Instance.fetchMessage (meetup.threadID, meetup.announcementID);
-    await message.edit (announcement);
+    
+    if (message.channel.isThread ()) {
+      message.channel.archived && await message.channel.setArchived (false);
+      await message.edit (announcement);
+    }
 
     return message;
   }

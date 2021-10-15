@@ -47,6 +47,25 @@ export type HelpOptions = {
   commands?: {
     [key: string]: string
   }
+  sections?: {
+    title: string;
+    commands: Record<string, string>;
+  }[];
+}
+
+export const Section = (title: string, commands: Record<string, string>) : string => {
+  const keys = Object.keys (commands);
+  const longestCmdLength = keys.reduce ((len, word) => word.length > len ? word.length : len, 0);
+  const padEnd = longestCmdLength + 2;
+
+  const section = new MessageBuilder ();
+  section.append (`# ${title}`);
+
+  keys.forEach (k => {
+    section.append ('  ' + k.padEnd (padEnd) + commands[k]);
+  });
+
+  return section.toString ();
 }
 
 export const help = (options: HelpOptions) : string => {
@@ -60,17 +79,16 @@ export const help = (options: HelpOptions) : string => {
   output.append ('  ' + options.usage);
 
   if (options.commands) {
-    const commands = options.commands;
-    const keys = Object.keys (options.commands);
-    const longestCmdLength = keys.reduce ((len, word) => word.length > len ? word.length : len, 0);
-    const padEnd = longestCmdLength + 2;
-
+    const commands = Section ('Commands', options.commands);
     output.space ();
-    output.append ('# Commands');
-    keys.forEach (k => {
-      output.append ('  ' + k.padEnd (padEnd) + commands[k]);
-    });
+    output.append (commands.toString ());
   }
+
+  options.sections && options.sections.forEach (section => {
+    const sect = Section (section.title, section.commands);
+    output.space ();
+    output.append (sect.toString ());
+  });
 
   const preface = options.preface || '';
 
