@@ -1,9 +1,11 @@
-import { onMongoDbReady } from '@sjbha/app';
-import { queued } from '@sjbha/utils/queue';
 import { DateTime } from 'luxon';
+import schedule from 'node-schedule';
+
+import { Instance, onMongoDbReady } from '@sjbha/app';
+import { queued } from '@sjbha/utils/queue';
 
 import * as db from '../db/meetups';
-import schedule from 'node-schedule';
+import * as M from '../common/Meetup';
 
 // Start the scheduler
 export async function init() : Promise<void> {
@@ -24,16 +26,25 @@ async function endMeetups () {
   });
 
   for (const meetup of meetups) {
-    const timestamp = DateTime.fromISO (meetup.timestamp);
+    const meetupDay = DateTime
+      .fromISO (meetup.timestamp)
+      .set ({ hour: 0, minute: 0, second: 0 });
+
     const diff = DateTime.local ()
-      .diff (timestamp, 'hours')
+      .set ({ hour: 0, minute: 0, second: 0 })
+      .diff (meetupDay, 'days')
       .toObject ();
 
-    if (diff.hours && diff.hours >= 4) {
+    if (diff.days && diff.days > 0) {
       await db.update ({
         ...meetup,
         state: { type: 'Ended' }
       });
+
+      const thread = await Instance.fetchChannel (meetup.threadID);
+      if (thread.isThread ()) {
+        thread.setName (`(Ended) ${M.threadTitle (meetup.title, meetup.timestamp)}`);
+      }
     }
   }
 }

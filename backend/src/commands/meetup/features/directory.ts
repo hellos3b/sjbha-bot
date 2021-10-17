@@ -29,9 +29,8 @@ export const runRefresh = queued (refresh);
 // fetch all meetups from the DB
 // and update the directory channel in chronological order
 async function refresh () {
-  const after = DateTime
-    .local ()
-    .minus ({ days: 1 });
+  const after = DateTime.local ()
+    .set ({ hour: 0, minute: 0, second: 0 });
     
   const models = await db.find ({ timestamp: { $gt: after.toISO () } });
 
@@ -47,7 +46,7 @@ async function refresh () {
         return (diff.hours && diff.hours <= 24)
       }
       else {
-        return true;
+        return meetup.state.type !== 'Ended';
       }
     });
 
@@ -89,12 +88,6 @@ function DirectoryEmbed (meetup: db.Meetup) : MessageEmbed {
         color:       0x454545
       });
 
-    case 'Ended':
-      return new MessageEmbed ({
-        description: `*${meetup.title} has ended*`,
-        color:       '#454545'
-      });
-
     case 'Live': {
       const link = `https://discord.com/channels/${env.SERVER_ID}/${meetup.threadID}/${meetup.announcementID}`;
 
@@ -115,8 +108,8 @@ function DirectoryEmbed (meetup: db.Meetup) : MessageEmbed {
       });
     } 
 
-    default:
-      throw new Error ('Cant render an Archived meetup');
+    case 'Ended':
+      throw new Error ('Ended meetups should not show up in directory');
   }
 }
 
