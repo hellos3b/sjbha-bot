@@ -1,11 +1,13 @@
+import { MessageEmbed, MessageOptions } from 'discord.js';
+import { DateTime } from 'luxon';
+
 import { env, Instance, onClientReady, onMongoDbReady, Settings } from '@sjbha/app';
 import { channels } from '@sjbha/config';
-import { MessageEmbed } from 'discord.js';
+import { queued } from '@sjbha/utils/queue';
 
 import * as db from '../db/meetups';
 import * as M from '../common/Meetup';
-import { DateTime } from 'luxon';
-import { queued } from '@sjbha/utils/queue';
+
 
 const MessageIds = Settings<string[]> ('meetup/directory-ids', []);
 
@@ -54,18 +56,22 @@ async function refresh () {
   const usedIds : string[] = [];
 
   // Post introduction message
-  const id = messageIds.shift ();
-  const introId = await post (intro, id);
+  const introId = await postOrEdit (
+    { content: intro, embeds: [] }, 
+    messageIds.shift ()
+  );
+
   usedIds.push (introId);
 
 
-  // Post each meetup
-  for (const meetup of meetups) {
-    const id = messageIds.shift ();
-    const usedId = await post (DirectoryEmbed (meetup), id);
-    usedIds.push (usedId);
-  }
+  // Post 10 directory postings per message until all are used up
+  const embeds = meetups.map (DirectoryEmbed);
 
+  while (embeds.length) {
+    const group = embeds.splice (0, 10);
+    const id = await postOrEdit ({ embeds: group }, messageIds.shift ());
+    usedIds.push (id);
+  }
 
   // Get rid of any ones we haven't used yet
   await Promise.all (
@@ -113,19 +119,15 @@ function DirectoryEmbed (meetup: db.Meetup) : MessageEmbed {
   }
 }
 
-async function post (content: string | MessageEmbed, id?: string) {
-  const sending = (typeof content === 'string')
-    ? { content }
-    : { embeds: [content] };
-
+async function postOrEdit (payload: MessageOptions, id?: string) {
   if (id) {
     const message = await Instance.fetchMessage (channels.meetups_directory, id);
-    await message.edit (sending);
+    await message.edit (payload);
     return id;
   }
   else {
     const channel = await Instance.fetchChannel (channels.meetups_directory);
-    const message = await channel.send (sending);
+    const message = await channel.send (payload);
     return message.id;
   }
 }
