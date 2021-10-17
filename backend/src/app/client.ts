@@ -1,4 +1,4 @@
-import { Client, Message, GuildMember, TextChannel, MessageReaction, User } from 'discord.js';
+import { Client, Message, GuildMember, TextChannel, MessageReaction, User, ThreadChannel } from 'discord.js';
 import { none, option, Option } from 'ts-option';
 
 import { WritableMessageStream, WritableStream } from '../utils/MessageStream';
@@ -106,11 +106,14 @@ export namespace Instance {
     return [...members.values ()];
   }
 
-  export async function fetchChannel(channelId: string) : Promise<TextChannel> {
+  export async function fetchChannel(channelId: string) : Promise<TextChannel | ThreadChannel> {
     const channel = await client.channels.fetch (channelId);
     
-    if (!channel || channel.type !== 'DM' && channel.type !== 'GUILD_TEXT' && channel.type !== 'GUILD_PUBLIC_THREAD') {
-      throw new Error ('Channel is not of type \'dm\' or \'text');
+    if (!channel) {
+      throw new Error (`Could not fetchChannel() '${channelId}': Channel does not exist`);
+    }
+    if (channel.type !== 'DM' && channel.type !== 'GUILD_TEXT' && channel.type !== 'GUILD_PUBLIC_THREAD') {
+      throw new Error (`Could not fetchChannel() '${channelId}': Channel is a dm or text channel (got type: ${channel.type}) `);
     }
 
     return channel as TextChannel;

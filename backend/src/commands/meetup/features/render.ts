@@ -33,7 +33,10 @@ export async function init () : Promise<void> {
 }
 
 export async function refresh () : Promise<void> {
-  const meetups = await db.find ();
+  const meetups = await db.find ({
+    'state.type': 'Live'
+  });
+  
   meetups.forEach (render);  
 }
 
@@ -79,21 +82,30 @@ export async function render (meetup: db.Meetup) : Promise<Message> {
     }
   }) ();
 
-  if (meetup.announcementID) {
-    const message = await Instance.fetchMessage (meetup.threadID, meetup.announcementID);
-    
-    if (message.channel.isThread ()) {
-      message.channel.archived && await message.channel.setArchived (false);
-      await message.edit (announcement);
+  try {
+    if (meetup.announcementID) {
+      const message = await Instance.fetchMessage (meetup.threadID, meetup.announcementID);
+      
+      if (message.channel.isThread ()) {
+        message.channel.archived && await message.channel.setArchived (false);
+        await message.edit (announcement);
+      }
+
+      return message;
     }
+    else {
+      const thread = await Instance.fetchChannel (meetup.threadID);
+      const message = await thread.send (announcement);
 
-    return message;
+      return message;
+    }
   }
-  else {
-    const thread = await Instance.fetchChannel (meetup.threadID);
-    const message = await thread.send (announcement);
+  catch (e) {
+    const message = (e instanceof Error)
+      ? e.message
+      : 'Unknown Error';
 
-    return message;
+    throw new Error (`Failed to render() meetup '${meetup.title}' because: ${message}`);
   }
 }
 
