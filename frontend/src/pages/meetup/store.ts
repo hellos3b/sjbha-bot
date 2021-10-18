@@ -20,6 +20,7 @@ export type Store = {
   title: string;
   date: string;
   description: string;
+  category: string;
   location: Location | null;
   links: Map<symbol, Link>;
 }
@@ -28,9 +29,10 @@ const state = writable<Store> ({
   title: '',
   date:  DateTime.now ()
     .set ({ minute: 0 })  // Looks better in the input field
-    .plus ({ hours: 1 })  // Prevents 'Meetup is in the past' error on load
+    .plus ({ hours: 2 })  // Prevents 'Meetup is in the past' error on load
     .toISO (),
   description: '',
+  category: 'default',
   location:    null,
   links:       new Map ()
 });
@@ -92,6 +94,7 @@ export async function fetchMeetup (id: string) : Promise<void> {
     title: response.title,
     description: response.description,
     date: response.timestamp,
+    category: response.category,
     location: (() : Location | null => {
       switch (response.location.type) {
         case 'Voice':

@@ -21,6 +21,7 @@ export const meetup : Route = async req => {
     'title',
     'timestamp',
     'description',
+    'category',
     'links',
     'location'
   );

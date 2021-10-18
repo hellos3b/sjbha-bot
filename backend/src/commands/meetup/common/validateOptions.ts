@@ -17,7 +17,8 @@ const MeetupOptions = type ({
   location_type:     optional (enums (['address', 'private', 'voice'])),
   location_comments: optional (string ()),
 
-  links: optional (array (
+  category: optional (string ()),
+  links:    optional (array (
     object ({
       label: optional (string ()),
       url:   url

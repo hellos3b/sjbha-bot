@@ -4,8 +4,23 @@
   import Legend from '../components/Legend.svelte';
   import Textfield from '../components/Textfield.svelte';
   import Textarea from '../components/Textarea.svelte';
+  import Category from '../components/Category.svelte';
   
   import StartTime from './StartTime.svelte';
+
+  const categories = [
+    { label: 'default', emoji: '🗓️' },
+    { label: 'food', emoji: '🍔' },
+    { label: 'drinks', emoji: '🍺' },
+    { label: 'fitness', emoji: '💪' },
+    { label: 'voice', emoji: '🔊' },
+    { label: 'gaming', emoji: '🎮' },
+    { label: 'outdoors', emoji: '🌲' },
+    { label: 'concert', emoji: '🎵' },
+    { label: 'holiday', emoji: '🎉' },
+    { label: 'volunteer', emoji: '🎗️' },
+    { label: 'pet', emoji: '🐕' }
+  ];
 </script>
 
 <section name='details'>
@@ -30,5 +45,23 @@
       limit={MAX_DESCRIPTION_LENGTH} 
       rows={8}
       bind:value={$store.description}/>
+
+    <label for='categories'>Category</label>
+    <div class='categories'>
+      {#each categories as category (category.label)}
+        <Category 
+          emoji={category.emoji} 
+          label={category.label}
+          selected={category.label === $store.category}
+          on:click={() => store.set ('category', category.label)}
+          />
+      {/each}
+    </div>
   </fieldset>  
 </section>
+
+<style>
+  .categories {
+    margin-top: 12px;
+  }
+</style>
