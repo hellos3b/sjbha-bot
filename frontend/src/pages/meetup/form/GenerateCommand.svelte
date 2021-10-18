@@ -8,6 +8,7 @@
 
     output.title = store.title;
     output.date = DateTime.fromISO (store.date).toUTC ().toISO ();
+    output.category = store.category;
 
     if (store.description)
       output.description = store.description;

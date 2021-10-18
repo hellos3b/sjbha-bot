@@ -1,5 +1,4 @@
 import { env, Message$, Router } from '@sjbha/app';
-import * as db from './db/meetups';
 
 // Commands
 
@@ -71,6 +70,9 @@ Message$
     'refresh': refresh
   });
 
+
+// Services
+
 import * as RSVP from './features/rsvps';
 import * as Directory from './features/directory';
 import * as EndMeetups from './features/end-meetups';
@@ -83,6 +85,7 @@ EndMeetups.init ();
 
 
 // Web API for editor
+
 import { meetup } from './routes/meetup';
 import { help } from './commands/help';
 

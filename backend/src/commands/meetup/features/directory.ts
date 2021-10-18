@@ -6,8 +6,6 @@ import { channels } from '@sjbha/config';
 import { queued } from '@sjbha/utils/queue';
 
 import * as db from '../db/meetups';
-import * as M from '../common/Meetup';
-
 
 const MessageIds = Settings<string[]> ('meetup/directory-ids', []);
 
