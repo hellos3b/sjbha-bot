@@ -31,10 +31,14 @@ export const runRefresh = queued (refresh);
 // fetch all meetups from the DB
 // and update the directory channel in chronological order
 async function refresh () {
-  const after = DateTime.local ()
-    .set ({ hour: 0, minute: 0, second: 0 });
-    
-  const models = await db.find ({ timestamp: { $gt: after.toISO () } });
+  const models = await db.find ({ 
+    timestamp: { 
+      $gt: DateTime
+        .local ()
+        .set ({ hour: 0, minute: 0, second: 0 })
+        .toISO () 
+    } 
+  });
 
   const meetups = models
     .sort ((a, b) => a.timestamp.localeCompare (b.timestamp))
@@ -87,31 +91,49 @@ async function refresh () {
 
 // Creates the individual embeds that are used in the directory channel
 function DirectoryEmbed (meetup: db.Meetup) : MessageEmbed {
+  const link = `https://discord.com/channels/${env.SERVER_ID}/${meetup.threadID}/${meetup.announcementID}`;
+
   switch (meetup.state.type) {
     case 'Cancelled': 
       return new MessageEmbed ({
-        description: `**${meetup.title}** was cancelled:\n> *${meetup.state.reason}*`,
+        description: `**${meetup.title}** was cancelled:\n> *${meetup.state.reason}*\n[Link to Thread](${link})`,
         color:       0x454545
       });
 
     case 'Live': {
-      const link = `https://discord.com/channels/${env.SERVER_ID}/${meetup.threadID}/${meetup.announcementID}`;
-
       // How long ago the meetup was created
       const age = DateTime.local ()
         .diff (DateTime.fromISO (meetup.createdAt), 'hours')
         .toObject ();
 
       const isNew = age.hours && age.hours < 24;
-  
-      return new MessageEmbed ({
-        'color':  (isNew) ? '#e04007' : '#eeeeee',
-        'author': { 
-          name:    meetup.title,
-          iconURL: (isNew) ? 'https://imgur.com/hs5YKXS.png' : ''
-        },
-        'description': `${M.timestring (meetup)}\n[Click here to view details and to RSVP](${link})`
+
+      const timestamp = DateTime.fromISO (meetup.timestamp).toLocaleString ({
+        weekday: 'long', month:   'long',  day:     '2-digit', 
+        hour:    '2-digit', minute:  '2-digit' 
       });
+
+      const emoji = {
+        food:      '🍔',
+        drinks:    '🍺',
+        fitness:   '💪',
+        voice:     '🔊',
+        gaming:    '🎮',
+        outdoors:  '🌲',
+        concert:   '🎵',
+        holiday:   '🎉',
+        volunteer: '🎗️',
+        pet:       '🐕'  
+      }[meetup.category] || '🗓️';
+  
+      const embed = new MessageEmbed ({
+        'color':       (isNew) ? 0xe04007 : 0xeeeeee,
+        'description': `**${emoji} ${meetup.title}**\n${timestamp}\n[Click here to view details and to RSVP](${link})`
+      });
+
+      isNew && embed.setThumbnail ('https://imgur.com/aeovsXo.png');
+
+      return embed;
     } 
 
     case 'Ended':

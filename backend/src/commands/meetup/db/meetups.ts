@@ -24,6 +24,7 @@ export type Schema = {
   timestamp: string;
   description: string;
   links: { label?: string; url: string; }[];
+  category: string;
 
   rsvps: string[];
   maybes: string[];

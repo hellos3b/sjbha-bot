@@ -40,7 +40,7 @@ export async function create (message: Message) : Promise<void> {
   }
 
   const thread = await message.channel.threads.create ({
-    name:   M.threadTitle (options.title, options.date),
+    name:   `🗓️  ${M.threadTitle (options.title, options.date)}`,
     reason: 'Meetup discussion thread',
     
     autoArchiveDuration: 1440,
@@ -54,6 +54,7 @@ export async function create (message: Message) : Promise<void> {
     threadID:        thread.id,
     announcementID:  '',
     createdAt:       DateTime.local ().toISO (),
+    category:        options.category || 'default',
     // todo: verify date format 
     timestamp:       options.date,
     description:     options.description || '',

@@ -96,7 +96,7 @@ async function updateMeetup(message: Message, meetup: db.Meetup) {
   ] });
 
   message.channel.isThread () &&
-    message.channel.setName (M.threadTitle (updated.title, updated.timestamp));
+    message.channel.setName (`🗓️  ${M.threadTitle (updated.title, updated.timestamp)}`);
 }
 
 
