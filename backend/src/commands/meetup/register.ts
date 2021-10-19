@@ -77,11 +77,22 @@ import * as RSVP from './features/rsvps';
 import * as Directory from './features/directory';
 import * as EndMeetups from './features/end-meetups';
 import * as Render from './features/render';
+import * as KeepAlive from './features/keep-alive';
 
+// Keeps the announcement Embed up to date
 Render.init ();
+
+// Listen to RSVP buttons and update meetup
 RSVP.init ();
+
+// Keeps a compact view in #meetups-directory up to date
 Directory.init ();
+
+// Auto end meetups after a certain period
 EndMeetups.init ();
+
+// Keeps threads open while a meetup is live
+KeepAlive.init ();
 
 
 // Web API for editor
