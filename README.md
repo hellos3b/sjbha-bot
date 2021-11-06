@@ -18,6 +18,12 @@ In order to run the bot, you will need to create a `.env` file in the root direc
 npm run dev
 ```
 
+note: One may run into the following [error](https://stackoverflow.com/questions/11928013/node-env-is-not-recognized-as-an-internal-or-external-command-operable-comman) when attempting to execute `npm run dev` on Windows:
+```
+"NODE_ENV" is not recognized as an internal or external command, operable command or batch file.
+```
+The above error is due to the fact that the npm script relies on Linux based commands. To resolve this issue, one can install a [Windows Node environment package](https://github.com/laggingreflex/win-node-env) using `npm install -g win-node-env`.
+
 note: run commands via `_help` instead of `!help`. Change the symbol by adding the '--symbol=' switch after 'npm run dev'
 
 Hit up @s3b if you want access to the dev server. Will provide you a .env file with the dev keys
