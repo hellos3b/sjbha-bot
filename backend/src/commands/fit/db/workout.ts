@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import { db } from '@sjbha/app';
+import { MongoDb } from '@sjbha/app';
 import { DateTime, Interval } from 'luxon';
 import { FilterQuery, FindOneOptions } from 'mongodb';
 import { variantModule, TypeNames, VariantOf, match } from 'variant';
@@ -7,7 +7,8 @@ import { activityEmoji, EmojiSet } from '../common/activity-emoji';
 import { Activity } from '../common/StravaClient';
 import * as User from './user';
 
-const collection = db<Model> ('fit-exp');
+const getCollection = () =>
+  MongoDb.getCollection<Model> ('fit-exp');
 
 export type Schema = {
   readonly __version: 1;
@@ -77,7 +78,8 @@ export namespace Workout {
   });
 
   export const findOne = async (q: FilterQuery<Schema>, opt: FindOneOptions<Schema> = {}) : Promise<Model | null> => {
-    const model = await collection ().findOne (q, opt);
+    const collection = await getCollection ();
+    const model = await collection.findOne (q, opt);
   
     return (model)
       ? migrate (model)
@@ -86,7 +88,8 @@ export namespace Workout {
 
 
   const save = async (workout: Schema) : Promise<Model> => {
-    await collection ().replaceOne (
+    const collection = await getCollection ();
+    await collection.replaceOne (
       { activity_id: workout.activity_id },
       workout,
       { upsert: true }
@@ -96,7 +99,8 @@ export namespace Workout {
   }
 
   export const deleteOne = async (workout: Model) : Promise<Model> => {
-    await collection ().deleteOne ({ activity_id: workout.activity_id });
+    const collection = await getCollection ();
+    await collection.deleteOne ({ activity_id: workout.activity_id });
 
     return workout;
   }
@@ -130,10 +134,13 @@ export const Workouts = (query: FilterQuery<Schema> = {}, options: FindOneOption
     { ...options, limit }
   ),
 
-  find: () => collection ()
-    .find (query, options)
-    .toArray ()
-    .then (a => a.map (migrate))
+  find: async () => {
+    const collection = await getCollection ();
+    return collection
+      .find (query, options)
+      .toArray ()
+      .then (a => a.map (migrate))
+  }
 });
 
 export const belongsTo = (user: User.Authorized) => (workout: Workout.Model) : boolean => workout.discord_id === user.discordId;

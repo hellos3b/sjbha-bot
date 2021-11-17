@@ -1,5 +1,4 @@
-import { Instance, onClientReady, onMongoDbReady } from '@sjbha/app';
-import { MessageEmbed } from 'discord.js';
+import { Instance } from '@sjbha/app';
 import * as db from '../db/meetups';
 
 type Unbind = () => void;
@@ -16,8 +15,6 @@ const listeners = new Map<string, Unbind> ();
 // fetches all relevant meetups from the DB and makes sure their
 // RSVP lists are updated
 export async function init() : Promise<void> {
-  await Promise.all ([onClientReady, onMongoDbReady]);
-  
   const meetups = await db.find ({
     'state.type': 'Live'
   });

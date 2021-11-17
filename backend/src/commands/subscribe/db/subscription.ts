@@ -1,8 +1,10 @@
-import { db } from '@sjbha/app';
+import { MongoDb } from '@sjbha/app';
+import { Collection } from 'mongodb';
 
 export interface Subscription {
   name: string;
   id  : string;
 }
 
-export const Subscriptions = db<Subscription> ('subscriptions');
+export const Subscriptions = () : Promise<Collection<Subscription>> => 
+  MongoDb.getCollection<Subscription> ('subscriptions');
