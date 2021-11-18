@@ -46,10 +46,10 @@ export default function(bastion, opt={}) {
         await compact.update(bastion, config, events.map( e => new Event(e, config)))        
     }
 
-    // bastion.on('schedule-hourly', async function() {
-    //     log("Updating compact events on schedule")
-    //     updateCompact()
-    // })
+    bastion.on('schedule-hourly', async function() {
+        log("Updating compact events on schedule")
+        updateCompact()
+    })
 
     // Set up calendar UI
     bastion.app.use('/public', express.static(path.join(__dirname, 'ui', 'public')))
