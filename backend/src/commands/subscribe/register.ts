@@ -9,16 +9,16 @@ import { add } from './admin/add-tag';
 import { remove } from './admin/remove-tag';
 import { help } from './admin/help';
 
-const sub = Command.makeFiltered({
-  filter: Command.Filter.startsWith('!subscribe'),
+const sub = Command.makeFiltered ({
+  filter:   Command.Filter.startsWith ('!subscribe'),
   callback: message => 
-    match (Command.route(message))
-    .with (__.nullish, () => list(message))
-    .otherwise (() => subscribe(message))
+    match (Command.route (message))
+    .with (__.nullish, () => list (message))
+    .otherwise (() => subscribe (message))
 });
 
-const unsub = Command.makeFiltered({
-  filter: Command.Filter.startsWith ('!unsubscribe'),
+const unsub = Command.makeFiltered ({
+  filter:   Command.Filter.startsWith ('!unsubscribe'),
   callback: unsubscribe
 });
 
@@ -29,10 +29,10 @@ const admin = Command.makeFiltered ({
   ),
 
   callback: message => 
-    match (Command.route(message))
-    .with ("add", () => add(message))
-    .with ("remove", () => remove(message))
-    .otherwise(() => help(message))
+    match (Command.route (message))
+    .with ('add', () => add (message))
+    .with ('remove', () => remove (message))
+    .otherwise (() => help (message))
 });
 
 export const command = Command.combine (sub, unsub, admin);
