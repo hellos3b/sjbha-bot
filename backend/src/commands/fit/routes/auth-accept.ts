@@ -1,5 +1,4 @@
-import Hapi from '@hapi/hapi';
-import { Instance } from '@sjbha/app';
+import { Instance, Route } from '@sjbha/app';
 import { assert, defaulted, string, type } from 'superstruct';
 import superagent from 'superagent';
 import { AuthResponse } from '../common/StravaClient';
@@ -17,7 +16,7 @@ const StravaQuery = type ({
  * After a user accepts on Strava's integrations hook, it will redirect us with an access code and the state we passed (auth token)
  * This route will verify the auth, and then initialize the user's account with defaults
  */
-export const authAccept = async (req: Hapi.Request) : Promise<string> => {
+export const authAccept : Route = async req => {
   const params = req.query;
 
   // Validate request query

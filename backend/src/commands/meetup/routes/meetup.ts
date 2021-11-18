@@ -1,10 +1,10 @@
 import Boom from '@hapi/boom';
-import Hapi from '@hapi/hapi';
+import { Route } from '@sjbha/app';
 
 import * as db from '../db/meetups';
 import { pick } from '@sjbha/utils/object';
 
-export const meetup = async (req: Hapi.Request) : Promise<unknown> => {
+export const meetup : Route = async req => {
   const id = req.params.id;
 
   if (!id)

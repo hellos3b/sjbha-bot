@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon';
 import schedule from 'node-schedule';
 
-import { Instance } from '@sjbha/app';
+import { Instance, onMongoDbReady } from '@sjbha/app';
 import { queued } from '@sjbha/utils/queue';
 
 import * as db from '../db/meetups';
@@ -9,6 +9,7 @@ import * as M from '../common/Meetup';
 
 // Start the scheduler
 export async function init() : Promise<void> {
+  await onMongoDbReady; 
   await endMeetups ();
 
   // Check every hour

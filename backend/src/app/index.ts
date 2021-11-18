@@ -1,7 +1,22 @@
 export * as env from './env';
-export * as MongoDb from './MongoDb';
-export * as DiscordClient from './DiscordClient';
-export * as HapiServer from './HapiServer';
-export * as Settings from './Settings';
 
-export { Instance } from './DiscordClient';
+export { 
+  db,
+  onMongoDbReady
+} from './mongodb';
+
+export { 
+  onClientReady,
+  Instance, 
+  Message$,
+  Reaction$
+} from './client';
+
+export { 
+  Route,
+  Router
+} from './hapi';
+
+export {
+  Settings
+} from './settings';

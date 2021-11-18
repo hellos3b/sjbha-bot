@@ -6,8 +6,7 @@ import { Subscriptions } from '../db/subscription';
  */
 export async function unsubscribe (message: Message) : Promise<void> {
   const [_, name] = message.content.split (' ');
-  const collection = await Subscriptions ();
-  const sub = await collection.findOne ({ name: name.toLowerCase () });
+  const sub = await Subscriptions ().findOne ({ name: name.toLowerCase () });
 
   if (!sub) {
     message.reply (`No subscription named '${name}' found. Use '!subscribe' to view a list of possible subscriptions`);

@@ -3,7 +3,6 @@ import { Subscriptions } from '../db/subscription';
 
 export async function remove (message: Message) : Promise<void> {
   const [_, __, name] = message.content.split (' ');
-  const collection = await Subscriptions ();
 
   if (!name) {
     message.reply ('Failed to remove tag: Missing role name to remove. Usage: `!subscribe remove {role}`');
@@ -11,7 +10,7 @@ export async function remove (message: Message) : Promise<void> {
     return;
   }
   
-  const sub = await collection.findOne ({ name });
+  const sub = await Subscriptions ().findOne ({ name });
 
   if (!sub) {
     message.reply (`Can't remove subscription: No subscription named '${name}' exists`);
@@ -19,7 +18,7 @@ export async function remove (message: Message) : Promise<void> {
     return;
   }
 
-  await collection.deleteOne ({ name });
+  await Subscriptions ().deleteOne ({ name });
 
   message.channel.send (`Removed ${name} from subscriptions`);
 }

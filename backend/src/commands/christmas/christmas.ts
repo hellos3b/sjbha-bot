@@ -1,6 +1,5 @@
-import * as Command from '@sjbha/utils/Command';
 import { env } from '@sjbha/app';
-import { match, __ } from 'ts-pattern';
+import { Message } from 'discord.js';
 import { DateObjectUnits, DateTime } from 'luxon';
 
 const festivize = (msg: string) => `🎄☃️☃️🎄🎁 ${msg} 🎁🎄☃️☃️🎄`;
@@ -10,7 +9,7 @@ const resetTime : DateObjectUnits = {
   hour: 0, minute: 0, second: 0, millisecond: 0
 };
 
-const daysUntilChristmas = () => {
+export async function christmas (message : Message) : Promise<void> {
   const now = DateTime
     .local ()
     .setZone (env.TIME_ZONE)
@@ -30,17 +29,11 @@ const daysUntilChristmas = () => {
       .diff (now, 'days');
   }
 
-  return Math.floor (diff.days);
+  const daysLeft = Math.floor (diff.days);
+
+  const reply = (daysLeft === 0) 
+    ? festivize ('!!TODAY IS CHRISTMAS!!')
+    : festivize (`ONLY ${daysLeft} ${pluralize ('DAY', daysLeft)} UNTIL CHRISTMAS!!`);
+
+  message.channel.send (reply);
 }
-
-export const command = Command.makeFiltered ({
-  filter: Command.Filter.startsWith('!christmas'),
-  callback: message => {
-    const reply = match(daysUntilChristmas())
-      .with(0, () => festivize('!!TODAY IS CHRISTMAS!!'))
-      .with(__, val => `ONLY ${val} ${pluralize ('DAY', val)} UNTIL CHRISTMAS!!`)
-      .exhaustive();
-
-    message.channel.send(reply);
-  }
-});

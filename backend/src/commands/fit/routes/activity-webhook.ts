@@ -1,4 +1,4 @@
-import Hapi from '@hapi/hapi';
+import { Route } from '@sjbha/app';
 import { wait } from '@sjbha/utils/wait';
 import { postWorkout } from '../features/post-workout';
 
@@ -11,7 +11,7 @@ const pending = new Set<number> ();
  * After a user accepts on Strava's integrations hook, it will redirect us with an access code and the state we passed (auth token)
  * This route will verify the auth, and then initialize the user's account with defaults
  */
-export const newWorkout = async (req: Hapi.Request) : Promise<string> => {
+export const newWorkout : Route = async req => {
   const params = req.payload as Webhook;
 
   console.log ('Webhook Request', params);

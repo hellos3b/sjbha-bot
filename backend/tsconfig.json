@@ -6,7 +6,7 @@
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "target": "ESNext",
+    "target": "ES2019",
     "outDir": "build",
     "baseUrl": "src",
     "paths": {

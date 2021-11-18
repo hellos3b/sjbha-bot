@@ -1,27 +1,25 @@
-import { string } from 'superstruct';
-import * as MongoDb from './MongoDb';
+import { db } from './mongodb';
 
 type Setting = { key: string; data: unknown; }
-const getCollection = async () => 
-  MongoDb.getCollection <Setting>('settings');
+const collection = db<Setting> ('settings');
 
 interface Settings<T> {
   get: () => Promise<T>;
   save: (model: T) => Promise<void>;
 }
 
-export const get = async <T>(key: string, defaults: T): Promise<T> => {
-  const settings = await getCollection();
-  const result = await settings.findOne ({ key });
+export const Settings = <T>(key: string, defaults: T): Settings<T> => ({
+  async get() : Promise<T> {
+    const result = await collection ().findOne ({ key });
 
-  return result ? (result.data as T) : defaults;
-}
+    return result ? (result.data as T) : defaults;
+  },
 
-export const save = async <T>(key: string, data: T): Promise<void> => {
-  const settings = await getCollection();
-  settings.replaceOne (
-    { key }, 
-    { key, data }, 
-    { upsert: true }
-  );
-}
+  async save(data: T) : Promise<void> {
+    await collection ().replaceOne (
+      { key }, 
+      { key, data }, 
+      { upsert: true }
+    );
+  }
+});

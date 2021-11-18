@@ -1,4 +1,4 @@
-import { Instance } from '@sjbha/app';
+import { Instance, onClientReady, onMongoDbReady } from '@sjbha/app';
 import { Message, MessageActionRow, MessageButton, MessageEmbed, MessageOptions } from 'discord.js';
 import { DateTime } from 'luxon';
 
@@ -26,6 +26,7 @@ const linkify = (url: string, name?: string) : string =>
   (!name) ? url : `[${name}](${url})`;
 
 export async function init () : Promise<void> {
+  await Promise.all ([onClientReady, onMongoDbReady]);
   await refresh ();
 
   db.events.on ('update', render);

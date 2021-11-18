@@ -1,13 +1,13 @@
 import { MessageEmbed, MessageOptions } from 'discord.js';
 import { DateTime } from 'luxon';
 
-import { env, Instance, Settings } from '@sjbha/app';
+import { env, Instance, onClientReady, onMongoDbReady, Settings } from '@sjbha/app';
 import { channels } from '@sjbha/config';
 import { queued } from '@sjbha/utils/queue';
 
 import * as db from '../db/meetups';
 
-const settingsKey = 'meetup/directory-ids';
+const MessageIds = Settings<string[]> ('meetup/directory-ids', []);
 
 const intro = `
 **Welcome to <#${channels.meetups_directory}>!**
@@ -17,6 +17,7 @@ Meetups are created by members, and are open to all for joining! Click on the li
 
 // Meant to be called when booting up
 export async function init() : Promise<void> {
+  await Promise.all ([onClientReady, onMongoDbReady]);
   await refresh ();
 
   db.events.on ('add', runRefresh);
@@ -53,7 +54,7 @@ async function refresh () {
       }
     });
 
-  const messageIds = await Settings.get <string[]> (settingsKey, []);
+  const messageIds = await MessageIds.get ();
   const usedIds : string[] = [];
 
   // Post introduction message
@@ -82,7 +83,7 @@ async function refresh () {
     )
   );
 
-  await Settings.save (settingsKey, usedIds);
+  await MessageIds.save (usedIds);
 }
 
 

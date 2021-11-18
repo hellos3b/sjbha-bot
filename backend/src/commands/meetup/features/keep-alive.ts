@@ -1,11 +1,13 @@
 import schedule from 'node-schedule';
 import { ThreadChannel } from 'discord.js';
-import { Instance } from '@sjbha/app';
+import { Instance, onClientReady, onMongoDbReady } from '@sjbha/app';
 
 import * as db from '../db/meetups';
 
 // Start the scheduler
 export async function init() : Promise<void> {
+  await Promise.all ([onClientReady, onMongoDbReady]);
+
   // Check every hour
   schedule.scheduleJob ('10 * * * *', openAllThreads);
 }
