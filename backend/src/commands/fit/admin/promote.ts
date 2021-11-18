@@ -7,5 +7,5 @@ import { runPromotions } from '../features/weekly-promotions';
  */
  export async function promote (message: Message) : Promise<void> {
   message.reply ('Beginning promotions');
-  await runPromotions ();
+  await runPromotions (message.client);
 }
