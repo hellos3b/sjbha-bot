@@ -1,5 +1,6 @@
-import { Router, Message$ } from '@sjbha/app';
+import { match, __ } from 'ts-pattern';
 import { channels } from '@sjbha/config';
+import * as Command from '@sjbha/utils/Command';
 
 // Bot
 
@@ -10,39 +11,32 @@ import { balance } from './commands/balance';
 import { leaders } from './commands/leaders';
 import { settings } from './commands/settings'
 
-Message$.startsWith ('!members').subscribe (async message => {
-  const testIds = [
-    '145398757582700544',
-    '125829654421438464',
-    '187593148065644544'
-  ];
+const fit = Command.makeFiltered ({
+  filter: Command.Filter.and (
+    Command.Filter.startsWith ('!fit'),
+    Command.Filter.inChannel (channels.strava)
+  ),
 
+  callback: message =>
+    match (Command.route (message))
+    .with ('auth', () => auth(message))
+    .with ('profile', () => profile(message))
+    .with ('balance', () => balance(message))
+    .with ('leaders', () => leaders(message))
+    .with ('help', () => help (message))
+    .with ('settings', () => message.reply ('Settings menu is available only in DMs'))
+    .with (__.nullish, () => help (message))
+    .run()
+});
 
-  const members = await MemberList.fetch (testIds);
+const settingsCommand = Command.makeFiltered ({
+  filter: Command.Filter.and (
+    Command.Filter.equals ('!fit settings'),
+    Command.Filter.dmsOnly()
+  ),
 
-  message.reply (testIds.map (id => members.nickname (id)).join (', '));
-
-
-})
-
-Message$
-  .startsWith ('!fit')
-  .restrictToChannel (channels.strava)
-  .routes ({
-    auth:     auth,
-    profile:  profile,
-    balance:  balance,
-    leaders:  leaders,
-    help:     help,
-    empty:    help,
-    settings: message => message.reply ('Settings menu is available only in DMs')
-  });
-
-
-Message$
-  .equals ('!fit settings')
-  .dmsOnly ()
-  .subscribe (settings);
+  callback: settings
+});
 
 // Admin Commands
 
@@ -51,23 +45,45 @@ import { list } from './admin/list';
 import { remove } from './admin/remove';
 import { promote } from './admin/promote';
 
-Message$
-  .startsWith ('$fit')
-  .adminOnly ()
-  .routes ({
-    post:    post,
-    list:    list,
-    remove:  remove,
-    promote: promote
-  });
+const admin = Command.makeFiltered ({
+  filter: Command.Filter.and (
+    Command.Filter.equals ('$fit'),
+    Command.Filter.inChannel (channels.bot_admin)
+  ),
+
+  callback: message =>
+    match (Command.route (message))
+    .with ('post', () => post(message))
+    .with ('list', () => list(message))
+    .with ('remove', () => remove(message))
+    .with ('promote', () => promote(message))
+    .run()
+});
+
+export const command = Command.combine (fit, settingsCommand, admin);
 
 // Web API
 
 import { authAccept } from './routes/auth-accept';
 import { newWorkout } from './routes/activity-webhook';
 import { verifyToken } from './routes/verify-token';
-import { MemberList } from '../../utils/MemberList';
 
-Router.get ('/fit/accept', authAccept);
-Router.get ('/fit/api/webhook', verifyToken);
-Router.post ('/fit/api/webhook', newWorkout);
+export const routes = [
+  {
+    method: 'GET',
+    path: '/fit/accept',
+    handler: authAccept
+  },
+
+  {
+    method: 'GET',
+    path: '/fit/api/webhook',
+    handler: verifyToken
+  },
+
+  {
+    method: 'POST',
+    path: '/fit/api/webhook',
+    handler: newWorkout
+  }
+];

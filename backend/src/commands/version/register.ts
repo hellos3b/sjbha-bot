@@ -1,6 +1,8 @@
-import { Message$ } from '@sjbha/app';
+import * as Command from '@sjbha/utils/Command';
 import { env } from '@sjbha/app';
 
-Message$
-  .startsWith ('!version')
-  .replyWith (`BoredBot v${env.VERSION}`);
+export const command = Command.makeFiltered ({
+  filter: Command.Filter.startsWith ('!version'),
+
+  callback: message => message.channel.send (`BoredBot v${env.VERSION}`)
+});

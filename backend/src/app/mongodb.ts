@@ -1,23 +1,64 @@
-import { Collection, MongoClient } from 'mongodb';
-import { MONGO_URL } from './env';
+import { Collection, Db, MongoClient } from 'mongodb';
+import { createNanoEvents } from 'nanoevents';
 
-type Ref = { instance?: MongoClient; };
-const client: Ref = {};
+type Events = {
+  connect: (client: MongoClient) => void;
+  connectFail: (error: Error) => void;
+}
 
-const loader = MongoClient
-  .connect (MONGO_URL, { useUnifiedTopology: true })
-  .then (r => { client.instance = r; })
-  .then (_ => { console.log ('Connected to mongodb'); })
-  .catch (_ => { console.warn ('MongoDB failed to connect, some things may not work.\n(Make sure the db is running with \'npm run db\') ', MONGO_URL) })
+export const events = createNanoEvents<Events> ();
 
-export const onMongoDbReady : Promise<void> = loader.then (_ => { /** */ });
+type Instance =
+  | { tag: 'Connecting' }
+  | { tag: 'Connected', instance: MongoClient }
+  | { tag: 'Failed', error: Error };
 
-export function db<T>(name: string) {
-  return () : Collection<T> => {
-    if (!client.instance) {
-      throw new Error ('Mongo DB Client is not connected, yet something tried to access the client. \n(It may be an issue with whitelist for network access - VPN can cause an error connected)');
-    }
+let mongoClient: Instance = { tag: 'Connecting' };
 
-    return client.instance.db ().collection <T> (name);
+export const connect = async (url: string) : Promise<MongoClient> => {
+  try {
+    const client = await MongoClient.connect (url, { useUnifiedTopology: true });
+    mongoClient = { tag: 'Connected', instance: client };
+    events.emit ('connect', client);
+    return client;
   }
+  catch (e) {
+    const error = (e instanceof Error) ? e : new Error ('Unknown error occured');
+    mongoClient = { tag: 'Failed', error };
+    events.emit ('connectFail', error);
+    throw error;
+  }
+}
+
+const awaitClientConnect = async () => 
+  new Promise <MongoClient> ((resolve, reject) => {
+    const listeners = [
+      events.on ('connect', client => {
+        listeners.forEach (f => f ());
+        resolve (client);
+      }),
+
+      events.on ('connectFail', error => {
+        listeners.forEach (f => f ());
+        reject (error);
+      })
+    ];
+  });
+
+export const getDb = async () : Promise<Db> => {
+  switch (mongoClient.tag) {
+    case 'Connecting':
+      return awaitClientConnect ().then (client => client.db ());
+
+    case 'Connected':
+      return mongoClient.instance.db ();
+
+    case 'Failed':
+      throw mongoClient.error;
+  }  
+}
+
+export const getCollection = async <T = unknown>(name: string) : Promise<Collection<T>> => {
+  const db = await getDb ();
+  return db.collection<T> (name);
 }
