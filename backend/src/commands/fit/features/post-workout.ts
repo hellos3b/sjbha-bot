@@ -1,9 +1,8 @@
 import { DateTime, Duration } from 'luxon';
 import { Option, option, none, some } from 'ts-option';
 import { just, match } from 'variant';
-import { EmbedField, MessageEmbed } from 'discord.js';
+import * as Discord from 'discord.js';
 
-import { Instance } from '@sjbha/app';
 import { channels } from '@sjbha/config';
 
 import { 
@@ -16,6 +15,7 @@ import {
 import * as User from '../db/user';
 import { Workout, Exp, sumExp, Workouts } from '../db/workout';
 import { currentWeek } from '../common/week';
+import { env } from '@sjbha/app';
 
 /**
  * When a new workout gets recorded we post it to the #strava channel with these steps:
@@ -26,7 +26,7 @@ import { currentWeek } from '../common/week';
  *
  * If the workout has already been posted once, the previous message will get edited instead
  */
-export const postWorkout = async (stravaId: number, activityId: number) : Promise<void> => {
+export const postWorkout = async (client: Discord.Client, stravaId: number, activityId: number) : Promise<void> => {
   // Fetch the updated user & activity data
   const user = await User.findOne ({ stravaId });
 
@@ -34,15 +34,13 @@ export const postWorkout = async (stravaId: number, activityId: number) : Promis
     throw new Error ('Could not post workout: User is not authorized (strava ID: ' + stravaId + ')');
   }
 
-  const client = await StravaClient.authenticate (user.refreshToken);
+  const strava = await StravaClient.authenticate (user.refreshToken);
 
   const [activity, streams] = await Promise.all ([
-    client.getActivity (activityId),
-    client.getActivityStreams (activityId).catch (_ => [])
+    strava.getActivity (activityId),
+    strava.getActivityStreams (activityId).catch (_ => [])
   ]).catch (e => { throw new Error (`Failed to fetch Activity '${stravaId}:${activityId}' -- ${e instanceof Error ? e.message : 'Unknown Reason'}`) });
 
-  console.log ('ACTIVITY', activity);
-  
   // We're only going to update or post activities from this week
   // which will prevent spam if a really old activity gets updated
   // (and it simplifies the "weekly exp" part of the activity post)
@@ -89,17 +87,21 @@ export const postWorkout = async (stravaId: number, activityId: number) : Promis
   );
   
   const weeklyExp = workout.totalExp + expSoFar;
-  const member = await Instance.fetchMember (user.discordId);
+  const member = await client.guilds
+    .fetch (env.SERVER_ID)
+    .then (guild => guild.members.fetch (user.discordId))
+    .then (option, () => none);
 
   const nickname = member.map (m => m.displayName)
     .getOrElseValue ('Unknown');
+
   const avatar = member.map (m => m.user.displayAvatarURL ())
     .getOrElseValue ('https://discordapp.com/assets/322c936a8c8be1b803cd94861bdfa868.png');
 
   // Create an embed that shows the name of the activity,
   // Some highlighted stats from the recording
   // And the user's Exp progress
-  const embed = new MessageEmbed ({
+  const embed = new Discord.MessageEmbed ({
     color: member.map (m => m.displayColor)
       .getOrElseValue (0xffffff),
     title:       activity.name,
@@ -118,16 +120,22 @@ export const postWorkout = async (stravaId: number, activityId: number) : Promis
 
 
   try {
+    const channel = await client.channels.fetch (channels.strava);
+
+    if (!channel?.isText ()) {
+      throw new Error ('Failed to find fitness channel');
+    }
+    
     // If the workout has a message id, that means it's been posted before
     // and instead of creating yet another post we'll just edit the message
     // This lets people fix the title / activity type even after the workout has been posted
+    const post = { embeds: [embed] };
+
     const message = (workout.message_id)
-      ? await Instance
-        .fetchMessage (channels.strava, workout.message_id)
-        .then (message => message.edit ({ embeds: [embed] }))
-      : await Instance
-        .fetchChannel (channels.strava)
-        .then (c => c.send ({ embeds: [embed] }));
+      ? await channel.messages
+        .fetch (workout.message_id)
+        .then (msg => msg.edit (post))
+      : await channel.send (post);
 
     await workout
       .extend ({ message_id: message.id })
@@ -252,9 +260,9 @@ const justDid = (activity: Activity) : string => match (activity, {
  * @param activity 
  * @returns An array of fields to use in the embed
  */
-const activityStats = (activity: Activity) : EmbedField[] => {
+const activityStats = (activity: Activity) : Discord.EmbedField[] => {
   const field = <A>(name: string, value: (a: A) => string) => 
-    (a: A) : EmbedField => ({ name, value: value (a), inline: true });
+    (a: A) : Discord.EmbedField => ({ name, value: value (a), inline: true });
 
   // Total amount of time that elapsed while the activity was recording
   const elapsed = field ('Elapsed', (a: Activity) => format.duration (a.elapsed_time)) (activity);
@@ -277,7 +285,7 @@ const activityStats = (activity: Activity) : EmbedField[] => {
   const hasElevation = activity.total_elevation_gain > 0;
   const isWorkout = (type: WorkoutType) => activity.workout_type === type;
 
-  const activitySpecific : Option<EmbedField>[] = match (activity, {
+  const activitySpecific : Option<Discord.EmbedField>[] = match (activity, {
     // We want to show GPS activity first unless the activity is marked as a workout, 
     // then we show the HR stats instead
     Run: _ => [
@@ -333,7 +341,7 @@ const activityStats = (activity: Activity) : EmbedField[] => {
   // Remove any nones
   const fields = activitySpecific
     .map (opt => opt.orNull)
-    .filter ((i): i is EmbedField => Boolean (i));
+    .filter ((i): i is Discord.EmbedField => Boolean (i));
 
   return [elapsed, ...fields];
 }

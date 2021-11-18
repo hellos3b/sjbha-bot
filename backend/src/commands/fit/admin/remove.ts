@@ -1,6 +1,5 @@
 import { Message } from 'discord.js';
 
-import { Instance } from '@sjbha/app';
 import { MessageBuilder } from '@sjbha/utils/string-formatting';
 import { channels } from '@sjbha/config';
 
@@ -43,8 +42,17 @@ const usage = 'Usage: `$fit remove {activityId}`';
 
   reply.append (`Removing **${activity_name}**:`);
 
+  const stravaChannel = await message.client.channels.fetch (channels.strava);
+
+  if (!stravaChannel?.isText ()) {
+    message.reply ('Failed to fetch strava channel');
+
+    return;
+  }
+
   const results = await Promise.all ([
-    Instance.fetchMessage (channels.strava, message_id)
+    stravaChannel.messages
+      .fetch (message_id)
       .then (message => message.delete ())
       .then (_ => `> Deleted message ${message_id}`)
       .catch (error => `X Failed to delete message: ${error.message || 'Unknown error'}`),

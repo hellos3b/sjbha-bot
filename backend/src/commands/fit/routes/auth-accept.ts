@@ -1,12 +1,15 @@
 import Hapi from '@hapi/hapi';
-import { Instance } from '@sjbha/app';
+import * as Discord from 'discord.js';
 import { assert, defaulted, string, type } from 'superstruct';
 import superagent from 'superagent';
+
 import { AuthResponse } from '../common/StravaClient';
 
 import { strava } from '../env';
 import * as User from '../db/user';
 import { MessageBuilder } from '@sjbha/utils/string-formatting';
+import { env } from '@sjbha/app';
+import { none, option } from 'ts-option';
 
 const StravaQuery = type ({
   code:  defaulted (string (), () => ''),
@@ -17,7 +20,7 @@ const StravaQuery = type ({
  * After a user accepts on Strava's integrations hook, it will redirect us with an access code and the state we passed (auth token)
  * This route will verify the auth, and then initialize the user's account with defaults
  */
-export const authAccept = async (req: Hapi.Request) : Promise<string> => {
+export const authAccept = (client: Discord.Client) => async (req: Hapi.Request) : Promise<string> => {
   const params = req.query;
 
   // Validate request query
@@ -65,7 +68,9 @@ export const authAccept = async (req: Hapi.Request) : Promise<string> => {
   });
 
   // Send an update to the user
-  const member = await Instance.fetchMember (user.discordId);
+  const member = await client.guilds.fetch (env.SERVER_ID)
+    .then (guild => guild.members.fetch (user.discordId))
+    .then (option, () => none);
 
   member.map (member => {
     const intro = new MessageBuilder ();

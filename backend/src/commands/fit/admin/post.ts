@@ -20,7 +20,7 @@ export async function post (message: Message) : Promise<void> {
 
   message.reply ('Posting workout!');
   
-  postWorkout (+stravaId, +activityId)
+  postWorkout (message.client, +stravaId, +activityId)
     .catch (e => {
       console.error (e);
       message.reply ('Failed to post: ' + e.message)

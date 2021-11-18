@@ -1,4 +1,4 @@
-import { Instance } from '@sjbha/app';
+import * as Discord from 'discord.js';
 import * as db from '../db/meetups';
 
 type Unbind = () => void;
@@ -10,31 +10,6 @@ type Unbind = () => void;
 // would be a waste to do a DB lookup every time
 const listeners = new Map<string, Unbind> ();
 
-
-// Meant to be called when booting up
-// fetches all relevant meetups from the DB and makes sure their
-// RSVP lists are updated
-export async function init() : Promise<void> {
-  const meetups = await db.find ({
-    'state.type': 'Live'
-  });
-
-  for (const meetup of meetups) {
-    try {
-      const unbind = await initListeners (meetup);
-      listeners.set (meetup.id, unbind);
-    }
-    catch (e) {
-      const error = (e instanceof Error) ? e.message : 'Unknown Reason';
-      console.error (`Could not setup RSVP listeners for ${meetup.title} (${meetup.id}): ${error}`)
-    }
-  }
-
-  db.events.on ('add', initListeners);
-  db.events.on ('update', prune);
-}
-
-
 // Checks if the meetup is still considered live
 // otherwise stops listening to reactions
 function prune (meetup: db.Meetup) {
@@ -45,13 +20,23 @@ function prune (meetup: db.Meetup) {
   }
 }
 
-
 // Initializes the collectors that will listen 
 // to the clicks on the buttons of the meetup
-async function initListeners (meetup: db.Meetup) : Promise<Unbind> {
+const createRsvpListener = async (client: Discord.Client, meetup: db.Meetup) : Promise<Unbind> => {
   console.log (`Listening to RSVPs for '${meetup.title}'`);
 
-  const message = await Instance.fetchMessage (meetup.threadID, meetup.announcementID);
+  const channel = await client.channels.fetch (meetup.threadID);
+
+  if (!channel?.isThread ()) {
+    throw new Error (`Meetups thread does not exist or is not a thread (id: ${meetup.threadID})`);
+  }
+
+  const message = await channel.messages.fetch (meetup.announcementID);
+
+  if (!message) {
+    throw new Error (`Could not find Announcement message (id: ${meetup.announcementID})`)
+  }
+
   const collector = message.channel.createMessageComponentCollector ();
 
   collector.on ('collect', async i => {
@@ -95,4 +80,30 @@ async function initListeners (meetup: db.Meetup) : Promise<Unbind> {
   });
 
   return () => { collector.stop (); }
+}
+
+const initRsvpListeners = (client: Discord.Client) => 
+  async (meetup: db.Meetup) => {
+    try {
+      const unbind = await createRsvpListener (client, meetup);
+      listeners.set (meetup.id, unbind);
+    }
+    catch (e) {
+      const error = (e instanceof Error) ? e.message : 'Unknown Reason';
+      console.error (`Could not setup RSVP listeners for ${meetup.title} (${meetup.id}): ${error}`)
+    } 
+  }
+
+// Meant to be called when booting up
+// fetches all relevant meetups from the DB and makes sure their
+// RSVP lists are updated
+export const startWatching = async (client: Discord.Client) : Promise<void> => {
+  const meetups = await db.find ({
+    'state.type': 'Live'
+  });
+
+  await Promise.all (meetups.map (initRsvpListeners (client)));
+
+  db.events.on ('add', initRsvpListeners (client));
+  db.events.on ('update', prune);
 }

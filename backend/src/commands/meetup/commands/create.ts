@@ -5,7 +5,7 @@ import { DateTime } from 'luxon';
 
 import * as db from '../db/meetups';
 import * as M from '../common/Meetup';
-import { render } from '../features/render';
+import { render } from '../features/RenderAnnouncement';
 import { validateOptions, ValidationError } from '../common/validateOptions';
 
 
@@ -65,7 +65,7 @@ export async function create (message: Message) : Promise<void> {
     state:           { type: 'Live' }
   };
 
-  const post = await render (meetup);
+  const post = await render (message.client, meetup);
 
   db.insert ({ 
     ...meetup,

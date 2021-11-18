@@ -6,14 +6,13 @@
     "node": ">= 16"
   },
   "scripts": {
-    "start": "node build/main.js",
+    "start": "node build/Main.js",
     "dev": "ts-node-dev src/Main.ts",
     "build": "tsc",
     "deploy": "docker-compose --context s3bby up --build --remove-orphans -d",
     "db": "docker compose -f docker-compose.db.yml up",
-    "@comment test": "test commands still WIP, doesnt exist yet",
-    "test": "jest --setupFiles dotenv/config",
-    "test:watch": "jest --setupFiles dotenv/config --watch"
+    "test": "jest",
+    "test:watch": "jest --watch"
   },
   "keywords": [],
   "author": "",
@@ -58,6 +57,7 @@
     "@typescript-eslint/parser": "^4.25.0",
     "eslint": "^7.27.0",
     "jest": "^27.3.1",
+    "mongodb-memory-server": "^8.0.2",
     "nodemon": "^2.0.15",
     "ts-jest": "^27.0.7",
     "ts-node": "^10.4.0",
