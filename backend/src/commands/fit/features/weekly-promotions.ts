@@ -1,9 +1,8 @@
 import * as R from 'ramda';
-import { MessageEmbed, GuildMember } from 'discord.js';
+import * as Discord from 'discord.js';
 import { DateTime } from 'luxon';
 import schedule from 'node-schedule';
 
-import { Instance } from '@sjbha/app';
 import { channels, roles } from '@sjbha/config';
 
 import { Workout, Workouts, sumExp, belongsTo } from '../db/workout';
@@ -15,18 +14,15 @@ import { getRank } from '../common/ranks';
 const MINIMUM_EXP_FOR_PROMOTION = 150;
 const MAX_FITSCORE = 100;
 
-/** The time when the weekly update gets posted */
-const weekly_post_time = DateTime
-  .local ()
-  .set ({ weekday: 1, hour: 8, minute: 0, second: 0 })
-  .toLocal ();
+const fetchStravaChannel = async (client: Discord.Client) => {
+  const channel = await client.channels.fetch (channels.strava);
 
-schedule.scheduleJob ({
-  dayOfWeek: weekly_post_time.weekday,
-  hour:      weekly_post_time.hour,
-  minute:    weekly_post_time.minute,
-  second:    weekly_post_time.second
-}, () => { runPromotions () });
+  if (!channel?.isText ()) {
+    throw new Error ('Could not find channel or channel is not a text channel');
+  }
+
+  return channel;
+}
 
 /**
  * Once a week we tally up how much exp a user's gained in a week,
@@ -36,7 +32,7 @@ schedule.scheduleJob ({
  * If they reach `MINIMUM_EXP_FOR_PROMOTION` they will go up 5points,
  * and if they don't reach it then they lose 0-5 fit score based on how much they gained
  */
-export const runPromotions = async () : Promise<void> => {
+export const runPromotions = async (client: Discord.Client) : Promise<void> => {
   const lastWeek = previousWeek ();
 
   console.log ('Begin promotions: Fetching all users and workouts from week ' + lastWeek.toString ());
@@ -55,8 +51,8 @@ export const runPromotions = async () : Promise<void> => {
   console.log ('Fetching all members and channel from discord');
 
   const [members, channel] = await Promise.all ([
-    MemberList.fetch (promoters.map (p => p.user.discordId)),
-    Instance.fetchChannel (channels.strava)
+    MemberList.fetch (client, promoters.map (p => p.user.discordId)),
+    fetchStravaChannel (client)
   ]);
 
   console.log (`Promoting ${promoters.length} users who recorded ${allWorkouts.length} workouts`);  
@@ -113,7 +109,7 @@ export const runPromotions = async () : Promise<void> => {
   const chunkSize = 20;
 
   for (let i = 0; i < rows.length; i += chunkSize) {
-    const embed = new MessageEmbed ({
+    const embed = new Discord.MessageEmbed ({
       color:  0xffd700,
       footer: { text: lastWeek.toFormat ('MMM dd') },
       fields: [{
@@ -176,7 +172,7 @@ const UserPromoter = (user: User.Authorized) : UserPromoter => {
  * Set the role the user has been awarded.
  * User can only have 1 role at a time, so we'll remove the others
  */
-const setFitRole = (member: GuildMember, roleId: string) : Promise<void[]> => 
+const setFitRole = (member: Discord.GuildMember, roleId: string) : Promise<void[]> => 
   Promise.all (
     [roles.certified_swole, roles.max_effort, roles.break_a_sweat]
       .map (async role => {
@@ -188,3 +184,18 @@ const setFitRole = (member: GuildMember, roleId: string) : Promise<void[]> =>
         }
       })
   );
+
+export const startSchedule = (client: Discord.Client) : void => {
+  // The time when the weekly update gets posted
+  const weekly_post_time = DateTime
+    .local ()
+    .set ({ weekday: 1, hour: 8, minute: 0, second: 0 })
+    .toLocal ();
+
+  schedule.scheduleJob ({
+    dayOfWeek: weekly_post_time.weekday,
+    hour:      weekly_post_time.hour,
+    minute:    weekly_post_time.minute,
+    second:    weekly_post_time.second
+  }, () => { runPromotions (client) });
+}

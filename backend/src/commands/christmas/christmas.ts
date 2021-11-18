@@ -34,13 +34,13 @@ const daysUntilChristmas = () => {
 }
 
 export const command = Command.makeFiltered ({
-  filter: Command.Filter.startsWith('!christmas'),
+  filter:   Command.Filter.startsWith ('!christmas'),
   callback: message => {
-    const reply = match(daysUntilChristmas())
-      .with(0, () => festivize('!!TODAY IS CHRISTMAS!!'))
-      .with(__, val => `ONLY ${val} ${pluralize ('DAY', val)} UNTIL CHRISTMAS!!`)
-      .exhaustive();
+    const reply = match (daysUntilChristmas ())
+      .with (0, () => festivize ('!!TODAY IS CHRISTMAS!!'))
+      .with (__, val => `ONLY ${val} ${pluralize ('DAY', val)} UNTIL CHRISTMAS!!`)
+      .exhaustive ();
 
-    message.channel.send(reply);
+    message.channel.send (reply);
   }
 });

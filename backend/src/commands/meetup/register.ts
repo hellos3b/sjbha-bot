@@ -1,14 +1,25 @@
-import { env } from '@sjbha/app';
-import * as Command from '@sjbha/utils/Command';
 import * as Discord from 'discord.js';
 import { match, __ } from 'ts-pattern';
+import { DiscordClient, env } from '@sjbha/app';
+import * as Command from '@sjbha/utils/Command';
 import { channels } from '@sjbha/config';
 
 import { create } from './commands/create';
 import { cancel } from './commands/cancel';
 import { edit } from './commands/edit';
 import { announce } from './commands/announce';
+import { help } from './commands/help';
 import { refresh } from './admin/refresh';
+
+import * as UpdateRsvps from './features/UpdateRsvps';
+import * as Directory from './features/Directory';
+import * as EndMeetups from './features/EndMeetup';
+import * as Render from './features/RenderAnnouncement';
+import * as KeepThreadsOpen from './features/KeepThreadsOpen';
+
+import { meetup } from './routes/meetup';
+
+const client = DiscordClient.getInstance ();
 
 // This will restrict the meetup channel to a category
 // for when labs mode is active (meaning we're testing it in only a few channels)
@@ -74,36 +85,22 @@ export const command = Command.combine (
   admin
 );
 
-// Services
-
-import * as RSVP from './features/rsvps';
-import * as Directory from './features/directory';
-import * as EndMeetups from './features/end-meetups';
-import * as Render from './features/render';
-import * as KeepAlive from './features/keep-alive';
-
-export const startup = (client: Discord.Client) : void => {
+export const startup = () : void => {
   // Keeps the announcement Embed up to date
-  Render.init ();
+  Render.init (client);
 
   // Listen to RSVP buttons and update meetup
-  RSVP.init ();
+  UpdateRsvps.startWatching (client);
 
   // Keeps a compact view in #meetups-directory up to date
-  Directory.init ();
+  Directory.startListening (client);
 
   // Auto end meetups after a certain period
-  EndMeetups.init ();
+  EndMeetups.init (client);
 
   // Keeps threads open while a meetup is live
-  KeepAlive.init ();
+  KeepThreadsOpen.startSchedule (client);
 }
-
-
-// Web API for editor
-
-import { meetup } from './routes/meetup';
-import { help } from './commands/help';
 
 export const routes = [
   {

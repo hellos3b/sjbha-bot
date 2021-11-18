@@ -8,22 +8,25 @@ import { MemberList } from '../../../utils/MemberList';
 
 export async function leaders (message: Message) : Promise<void> {
   const lastThirtyDays = Interval.before (DateTime.local (), { days: 30 });
-  const allWorkouts = await Workouts ()
+  const allWorkouts = 
+    await Workouts ()
     .during (lastThirtyDays)
     .find ()
     .then (list => list.filter (w => isType (w.exp, Exp.hr)))
     .then (WorkoutCollection);
 
-  const members = await MemberList.fetch (allWorkouts.discordIds);
+  const members = 
+    await MemberList.fetch (message.client, allWorkouts.discordIds);
 
-  const embed = new MessageEmbed ({
-    color:       0xffd700,
-    title:       'Leaders',
-    description: 'Top EXP Earners in the last 30 days, per activity',
-    footer:      {
-      text: '*Only HR activities are considered for leaders'
-    }
-  });
+  const embed = 
+    new MessageEmbed ({
+      color:       0xffd700,
+      title:       'Leaders',
+      description: 'Top EXP Earners in the last 30 days, per activity',
+      footer:      {
+        text: '*Only HR activities are considered for leaders'
+      }
+    });
 
   for (const activity of allWorkouts.activityTypes) {
     const workouts = allWorkouts.filterType (activity);

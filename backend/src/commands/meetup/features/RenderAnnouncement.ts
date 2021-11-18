@@ -1,5 +1,4 @@
-import { Instance } from '@sjbha/app';
-import { Message, MessageActionRow, MessageButton, MessageEmbed, MessageOptions } from 'discord.js';
+import { Message, MessageActionRow, MessageButton, MessageEmbed, MessageOptions, Client } from 'discord.js';
 import { DateTime } from 'luxon';
 
 import { MemberList } from '@sjbha/utils/MemberList';
@@ -25,28 +24,29 @@ const actions = new MessageActionRow ().addComponents (RsvpButton, MaybeButton, 
 const linkify = (url: string, name?: string) : string =>
   (!name) ? url : `[${name}](${url})`;
 
-export async function init () : Promise<void> {
-  await refresh ();
+export const init = async (client: Client) : Promise<void> => {
+  await refresh (client);
 
-  db.events.on ('update', render);
+  db.events.on ('update', () => render);
 }
 
-export async function refresh () : Promise<void> {
+export async function refresh (client: Client) : Promise<void> {
   const meetups = await db.find ({
     'state.type': 'Live'
   });
   
-  meetups.forEach (render);  
+  meetups.forEach (meetup => render (client, meetup));  
 }
 
-export async function render (meetup: db.Meetup) : Promise<Message> {
+export const render = async (client: Client, meetup: db.Meetup) : Promise<Message> => {
   const announcement = await (async () : Promise<MessageOptions> => {
     switch (meetup.state.type) {
       case 'Live': {
-        const members = await MemberList.fetch ([
-          ...meetup.rsvps,
-          ...meetup.maybes
-        ]);
+        const members = 
+          await MemberList.fetch (client, [
+            ...meetup.rsvps,
+            ...meetup.maybes
+          ]);
 
         const embed = Announcement (
           meetup,
@@ -82,18 +82,21 @@ export async function render (meetup: db.Meetup) : Promise<Message> {
   }) ();
 
   try {
+    const thread = await client.channels.fetch (meetup.threadID);
+
+    if (!thread?.isThread ()) {
+      throw new Error (`Channel with id '${meetup.threadID}' does not exist or is not a thread`);
+    }
+
+    thread.archived && await thread.setArchived (false);
+
     if (meetup.announcementID) {
-      const message = await Instance.fetchMessage (meetup.threadID, meetup.announcementID);
-      
-      if (message.channel.isThread ()) {
-        message.channel.archived && await message.channel.setArchived (false);
-        await message.edit (announcement);
-      }
+      const message = await thread.messages.fetch (meetup.announcementID);
+      await message.edit (announcement);
 
       return message;
     }
     else {
-      const thread = await Instance.fetchChannel (meetup.threadID);
       const message = await thread.send (announcement);
 
       return message;

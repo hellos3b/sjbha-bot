@@ -1,4 +1,4 @@
-import { Collection, Db, MongoClient } from 'mongodb';
+import { Collection, Db, MongoClient, } from 'mongodb';
 import { createNanoEvents } from 'nanoevents';
 
 type Events = {
@@ -27,6 +27,12 @@ export const connect = async (url: string) : Promise<MongoClient> => {
     mongoClient = { tag: 'Failed', error };
     events.emit ('connectFail', error);
     throw error;
+  }
+}
+
+export const disconnect = async () : Promise<void> => {
+  if (mongoClient.tag === 'Connected' && mongoClient.instance.isConnected ()) {
+    await mongoClient.instance.close ();
   }
 }
 

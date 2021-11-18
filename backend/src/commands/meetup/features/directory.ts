@@ -1,7 +1,7 @@
-import { MessageEmbed, MessageOptions } from 'discord.js';
+import * as Discord from 'discord.js';
 import { DateTime } from 'luxon';
 
-import { env, Instance, Settings } from '@sjbha/app';
+import { env, Settings } from '@sjbha/app';
 import { channels } from '@sjbha/config';
 import { queued } from '@sjbha/utils/queue';
 
@@ -15,84 +15,61 @@ const intro = `
 Meetups are created by members, and are open to all for joining! Click on the links to see full descriptions, location information, and always remember to RSVP!
 `;
 
-// Meant to be called when booting up
-export async function init() : Promise<void> {
-  await refresh ();
+export const findDirectoryMeetups = (now: DateTime) : Promise<db.Meetup[]> => {
+  const beginning = now.set ({ hour: 0, minute: 0, second: 0 }).toISO ();
 
-  db.events.on ('add', runRefresh);
-  db.events.on ('update', runRefresh);
+  return db.find ({ 
+    $or: [
+      { 
+        'state.type': 'Live',
+        timestamp:    { $gt: beginning },
+      },
+      
+      {
+        'state.type':      'Cancelled',
+        'state.timestamp': { $gt: beginning }
+      }
+    ]
+  });
 }
 
-export const runRefresh = queued (refresh);
+const getDirectoryChannel = async (client: Discord.Client) => {
+  const channel = await client.channels.fetch (channels.meetups_directory);
 
-// fetch all meetups from the DB
-// and update the directory channel in chronological order
-async function refresh () {
-  const models = await db.find ({ 
-    timestamp: { 
-      $gt: DateTime
-        .local ()
-        .set ({ hour: 0, minute: 0, second: 0 })
-        .toISO () 
-    } 
-  });
-
-  const meetups = models
-    .sort ((a, b) => a.timestamp.localeCompare (b.timestamp))
-    .filter (meetup => {
-      if (meetup.state.type === 'Cancelled') {
-        const diff = DateTime.local ()
-          .diff (DateTime.fromISO (meetup.state.timestamp), 'hours')
-          .toObject ();
-
-        // Hide cancelled meetups 24 hours after being cancelled
-        return (diff.hours && diff.hours <= 24)
-      }
-      else {
-        return meetup.state.type !== 'Ended';
-      }
-    });
-
-  const messageIds = await Settings.get <string[]> (settingsKey, []);
-  const usedIds : string[] = [];
-
-  // Post introduction message
-  const introId = await postOrEdit (
-    { content: intro, embeds: [] }, 
-    messageIds.shift ()
-  );
-
-  usedIds.push (introId);
-
-
-  // Post 10 directory postings per message until all are used up
-  const embeds = meetups.map (DirectoryEmbed);
-
-  while (embeds.length) {
-    const group = embeds.splice (0, 10);
-    const id = await postOrEdit ({ embeds: group }, messageIds.shift ());
-    usedIds.push (id);
+  if (!channel || !channel.isText ()) {
+    throw new Error ('Could not fetch meetups_directory channel');
   }
 
-  // Get rid of any ones we haven't used yet
-  await Promise.all (
-    messageIds.map (leftover => 
-      Instance.fetchMessage (channels.meetups_directory, leftover)
-        .then (message => message.delete ())
-    )
-  );
-
-  await Settings.save (settingsKey, usedIds);
+  return channel;
 }
 
+const postOrEdit = async (client: Discord.Client, messageOptions: Discord.MessageOptions, messageId?: string) => {
+  const channel = await getDirectoryChannel (client);
+
+  if (messageId) {
+    const message = await channel.messages.fetch (messageId);
+    await message.edit (messageOptions);
+    return messageId;
+  }
+  else {
+    const message = await channel.send (messageOptions);
+    return message.id;
+  }
+}
+
+const deleteMessage = async (client: Discord.Client, messageId: string) => {
+  const channel = await getDirectoryChannel (client);
+  const message = await channel.messages.fetch (messageId);
+  return message.delete ();
+}
 
 // Creates the individual embeds that are used in the directory channel
-function DirectoryEmbed (meetup: db.Meetup) : MessageEmbed {
+function DirectoryEmbed (meetup: db.Meetup) : Discord.MessageEmbed {
   const link = `https://discord.com/channels/${env.SERVER_ID}/${meetup.threadID}/${meetup.announcementID}`;
 
   switch (meetup.state.type) {
     case 'Cancelled': 
-      return new MessageEmbed ({
+      return new Discord.MessageEmbed ({
         description: `**${meetup.title}** was cancelled:\n> *${meetup.state.reason}*\n[Link to Thread](${link})`,
         color:       0x454545
       });
@@ -123,7 +100,7 @@ function DirectoryEmbed (meetup: db.Meetup) : MessageEmbed {
         pet:       '🐕'  
       }[meetup.category] || '🗓️';
   
-      const embed = new MessageEmbed ({
+      const embed = new Discord.MessageEmbed ({
         'color':       (isNew) ? 0xe04007 : 0xeeeeee,
         'description': `**${emoji} ${meetup.title}**\n${timestamp}\n[Click here to view details and to RSVP](${link})`
       });
@@ -138,15 +115,46 @@ function DirectoryEmbed (meetup: db.Meetup) : MessageEmbed {
   }
 }
 
-async function postOrEdit (payload: MessageOptions, id?: string) {
-  if (id) {
-    const message = await Instance.fetchMessage (channels.meetups_directory, id);
-    await message.edit (payload);
-    return id;
+
+// fetch all meetups from the DB
+// and update the directory channel in chronological order
+export const refresh = async (client: Discord.Client, now: DateTime) : Promise<void> => {
+  const meetups = await findDirectoryMeetups (now);
+  const messageIds = await Settings.get <string[]> (settingsKey, []);
+  const usedIds : string[] = [];
+
+  // Post introduction message
+  const introId = await postOrEdit (
+    client,
+    { content: intro, embeds: [] }, 
+    messageIds.shift ()
+  );
+
+  usedIds.push (introId);
+
+  // Post 10 directory postings per message until all are used up
+  const embeds = meetups.map (DirectoryEmbed);
+
+  while (embeds.length) {
+    const group = embeds.splice (0, 10);
+    const id = await postOrEdit (client, { embeds: group }, messageIds.shift ());
+    usedIds.push (id);
   }
-  else {
-    const channel = await Instance.fetchChannel (channels.meetups_directory);
-    const message = await channel.send (payload);
-    return message.id;
-  }
+
+  // Get rid of any ones we haven't used yet
+  await Promise.all (
+    messageIds.map (leftover => deleteMessage (client, leftover))
+  );
+
+  await Settings.save (settingsKey, usedIds);
+}
+
+// Meant to be called when booting up
+export const startListening = async (client: Discord.Client) : Promise<void> => {
+  await refresh (client, DateTime.local ());
+
+  const queueRefresh = queued (() => refresh (client, DateTime.local ()))
+
+  db.events.on ('add', queueRefresh);
+  db.events.on ('update', queueRefresh);
 }

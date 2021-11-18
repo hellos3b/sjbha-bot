@@ -1,4 +1,5 @@
 import Hapi from '@hapi/hapi';
+import * as Discord from 'discord.js';
 import { wait } from '@sjbha/utils/wait';
 import { postWorkout } from '../features/post-workout';
 
@@ -11,7 +12,7 @@ const pending = new Set<number> ();
  * After a user accepts on Strava's integrations hook, it will redirect us with an access code and the state we passed (auth token)
  * This route will verify the auth, and then initialize the user's account with defaults
  */
-export const newWorkout = async (req: Hapi.Request) : Promise<string> => {
+export const newWorkout = (client: Discord.Client) => async (req: Hapi.Request) : Promise<string> => {
   const params = req.payload as Webhook;
 
   console.log ('Webhook Request', params);
@@ -45,10 +46,10 @@ export const newWorkout = async (req: Hapi.Request) : Promise<string> => {
 
   // New workouts have a minor delay before being submitted
   if (params.aspect_type === 'create') {
-    postWithDelay (params.owner_id, params.object_id);
+    postWithDelay (client, params.owner_id, params.object_id);
   }
   else {
-    postWorkout (params.owner_id, params.object_id);
+    postWorkout (client, params.owner_id, params.object_id);
   }
 
   return 'Done!'
@@ -56,14 +57,14 @@ export const newWorkout = async (req: Hapi.Request) : Promise<string> => {
 
 
 // Adds a small buffer to the first post
-const postWithDelay = async (athleteId: number, activityId: number) => {
+const postWithDelay = async (client: Discord.Client, athleteId: number, activityId: number) => {
   pending.add (activityId);
 
   // Wait a minute before posting
   await wait (60 * 1000);
   
   try {
-    await postWorkout (athleteId, activityId);
+    await postWorkout (client, athleteId, activityId);
   }
   catch (e) {
     if (e instanceof Error) {
