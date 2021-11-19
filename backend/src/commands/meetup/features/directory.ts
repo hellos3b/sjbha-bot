@@ -3,7 +3,7 @@ import { DateTime } from 'luxon';
 
 import { env, Settings } from '@sjbha/app';
 import { channels } from '@sjbha/config';
-import { queued } from '@sjbha/utils/queue';
+import * as Format from '@sjbha/utils/string-formatting';
 import * as Log from '@sjbha/utils/Log';
 
 import * as db from '../db/meetups';
@@ -83,10 +83,15 @@ function DirectoryEmbed (meetup: db.Meetup) : Discord.MessageEmbed {
 
       const isNew = age.hours && age.hours < 24;
 
-      const timestamp = DateTime.fromISO (meetup.timestamp).toLocaleString ({
-        weekday: 'long', month:   'long',  day:     '2-digit', 
-        hour:    '2-digit', minute:  '2-digit' 
-      });
+      const fullTime = Format.time (
+        DateTime.fromISO (meetup.timestamp),
+        Format.TimeFormat.Full
+      );
+
+      const relativeTime = Format.time (
+        DateTime.fromISO (meetup.timestamp),
+        Format.TimeFormat.Relative
+      );
 
       const emoji = {
         food:      '🍔',
@@ -103,7 +108,7 @@ function DirectoryEmbed (meetup: db.Meetup) : Discord.MessageEmbed {
   
       const embed = new Discord.MessageEmbed ({
         'color':       (isNew) ? 0xe04007 : 0xeeeeee,
-        'description': `**${emoji} ${meetup.title}**\n${timestamp}\n[Click here to view details and to RSVP](${link})`
+        'description': `**${emoji} ${meetup.title}**\n${fullTime} (${relativeTime})\n[Click here to view details and to RSVP](${link})`
       });
 
       isNew && embed.setThumbnail ('https://imgur.com/aeovsXo.png');

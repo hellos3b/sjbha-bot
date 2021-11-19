@@ -2,6 +2,7 @@ import { Message, MessageActionRow, MessageButton, MessageEmbed, MessageOptions,
 import { DateTime } from 'luxon';
 
 import { MemberList } from '@sjbha/utils/MemberList';
+import * as Format from '@sjbha/utils/string-formatting';
 import * as db from '../db/meetups';
 
 const RsvpButton = new MessageButton ()
@@ -134,11 +135,10 @@ function Announcement (meetup: db.Meetup, rsvps?: string[], maybes?: string[]) :
     embed.addField ('Location', locationText + '\n' + meetup.location.comments);
   }
 
-  embed.addField ('Time', DateTime.fromISO (meetup.timestamp).toLocaleString ({
-    weekday: 'long', month:   'long',  day:     '2-digit', 
-    hour:    '2-digit', minute:  '2-digit' 
-  }))
-
+  embed.addField ('Time', Format.time (
+    DateTime.fromISO (meetup.timestamp),
+    Format.TimeFormat.Full
+  ));
 
   embed.addField ('Links', [
     ...meetup.links.map (l => linkify (l.url, l.label)),

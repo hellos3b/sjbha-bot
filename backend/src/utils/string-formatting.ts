@@ -1,3 +1,6 @@
+import { DateTime } from 'luxon';
+import { match } from 'ts-pattern';
+
 type Stringable = number | string;
 
 export const code = (content: Stringable, format = '') : string => ['```' + format, content, '```'].join ('\n');
@@ -6,6 +9,27 @@ export const inlineCode = (content: Stringable) : string => '`' + content + '`';
 
 export const template = (content: string) => (filler: Record<string, number | string>) : string => 
   content.replace (/{([A-z]+)}/g, (match, idx) => (filler[idx]) ? filler[idx].toString () : match);
+
+export enum TimeFormat { 
+  Full = 'Full', 
+  Relative = 'Relative'
+}
+
+/**
+ * Formats a luxon date object into a timestamp format
+ * that discord will parse in a cool way
+ * 
+ * @see https://discord.com/developers/docs/reference#message-formatting-formats
+ */
+export const time = (date: DateTime, style: TimeFormat) : string => {
+  const seconds = Math.floor (date.toMillis () / 1000);
+  const styleChar = match (style)
+    .with (TimeFormat.Full, () => 'F')
+    .with (TimeFormat.Relative, () => 'R')
+    .exhaustive ();
+
+  return `<t:${seconds}:${styleChar}>`;
+}
 
 export class MessageBuilder {
   private value = '';
