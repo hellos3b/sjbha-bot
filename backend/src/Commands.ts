@@ -1,7 +1,7 @@
 import * as Command from './utils/Command';
 
 import * as Aqi from './commands/aqi/register';
-import * as Christmas from './commands/christmas/Christmas';
+import * as Christmas from './commands/christmas/register';
 import * as Fit from './commands/Fit/register';
 import * as Meetup from './commands/meetup/register';
 import * as Pong from './commands/pong/Pong';
