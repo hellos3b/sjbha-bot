@@ -9,7 +9,6 @@
     "start": "node build/Main.js",
     "dev": "ts-node-dev src/Main.ts",
     "build": "tsc",
-    "deploy": "docker-compose --context s3bby up --build --remove-orphans -d",
     "db": "docker compose -f docker-compose.db.yml up",
     "test": "jest",
     "test:watch": "jest --watch"

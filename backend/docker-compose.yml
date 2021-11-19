@@ -4,7 +4,7 @@ services:
   bored_bot:
     container_name: bored_bot
     build: .
-    env_file: /etc/sjbha.s3bby.env
+    env_file: .env.prod
     environment:
       NODE_ENV: production
       HOSTNAME: https://www.s3bby.com/bored-bot
