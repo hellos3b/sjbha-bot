@@ -1,4 +1,4 @@
-import * as MongoDb from './mongodb';
+import * as MongoDb from './MongoDb';
 
 type Setting = { key: string; data: unknown; }
 const getCollection = async () => 
