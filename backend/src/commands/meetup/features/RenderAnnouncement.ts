@@ -4,6 +4,7 @@ import { DateTime } from 'luxon';
 import { MemberList } from '@sjbha/utils/MemberList';
 import * as Format from '@sjbha/utils/string-formatting';
 import * as db from '../db/meetups';
+import { option } from 'ts-option';
 
 const RsvpButton = new MessageButton ()
   .setCustomId ('rsvp')
@@ -28,6 +29,31 @@ const linkify = (url: string, name?: string) : string =>
 const mapsLink = (query: string) : string => {
   const encoded = encodeURIComponent (query);
   return `https://www.google.com/maps/search/?api=1&query=${encoded}`;
+}
+
+const gcalLink = (meetup: db.Meetup) : string => {
+  const encodeDate = (timestamp: DateTime) =>
+    timestamp.toISO().replace(/(-|:|\.)/g, '');
+
+  const ts = DateTime.fromISO (meetup.timestamp);
+
+  const options = {
+    action: "TEMPLATE",
+    text: meetup.title,
+    dates: encodeDate(ts) + '/' + encodeDate(ts.plus({ hour: 2 })),
+    details: meetup.description,
+    location: option(meetup.location)
+      .filter (loc => loc.autoLink)
+      .map (loc => loc.value)
+      .getOrElseValue (""),
+    trp: true
+  }
+
+  const query = Object.entries(options)
+    .map(([ key, value ]) => `${key}=${encodeURIComponent(value)}`)
+    .join('&');
+
+  return `https://calendar.google.com/calendar/render?${query}`;
 }
 
 export async function refresh (client: Client) : Promise<void> {
@@ -142,7 +168,7 @@ function Announcement (meetup: db.Meetup, rsvps?: string[], maybes?: string[]) :
 
   embed.addField ('Links', [
     ...meetup.links.map (l => linkify (l.url, l.label)),
-    linkify ('https://www.google.com', 'Add to Google Calendar'),
+    linkify (gcalLink(meetup), 'Add to Google Calendar'),
   ].join ('\n'));
 
   const withCount = (count: number) => 
