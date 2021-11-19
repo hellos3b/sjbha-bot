@@ -56,13 +56,62 @@ const gcalLink = (meetup: db.Meetup) : string => {
   return `https://calendar.google.com/calendar/render?${query}`;
 }
 
-export async function refresh (client: Client) : Promise<void> {
-  const meetups = await db.find ({
-    'state.type': 'Live'
+/**
+ * This is the Announcement embed
+ * 
+ * @param meetup 
+ * @param reactions 
+ * @returns 
+ */
+function Announcement (meetup: db.Meetup, rsvps?: string[], maybes?: string[]) : MessageEmbed {
+  const embed = new MessageEmbed ({
+    title:       meetup.title,
+    description: meetup.description,
+    color:       '#9b3128'
   });
-  
-  meetups.forEach (meetup => render (client, meetup));  
+
+  embed.addField ('Organizer', `<@${meetup.organizerID}>`);
+
+  if (meetup.location) {
+    const locationText = (meetup.location.autoLink)
+      ? linkify (mapsLink (meetup.location.value), meetup.location.value)
+      : meetup.location.value;
+
+    embed.addField ('Location', locationText + '\n' + meetup.location.comments);
+  }
+
+  embed.addField ('Time', Format.time (
+    DateTime.fromISO (meetup.timestamp),
+    Format.TimeFormat.Full
+  ));
+
+  embed.addField ('Links', [
+    ...meetup.links.map (l => linkify (l.url, l.label)),
+    linkify (gcalLink(meetup), 'Add to Google Calendar'),
+  ].join ('\n'));
+
+  const withCount = (count: number) => 
+    (count > 0) ? `(${count})` : '';
+
+  rsvps && embed.addField (
+    `✅ Attending ${withCount (rsvps.length)}`,
+    (rsvps.length)
+      ? rsvps.map (name => `> ${name}`).join ('\n')
+      : '-',
+    true
+  );
+
+  maybes && embed.addField (
+    `🤔 Maybe ${withCount (maybes.length)}`,
+    (maybes.length)
+      ? maybes.map (name => `> ${name}`).join ('\n')
+      : '-',
+    true
+  );
+
+  return embed;
 }
+
 
 export const render = async (client: Client, meetup: db.Meetup) : Promise<Message> => {
   const announcement = await (async () : Promise<MessageOptions> => {
@@ -137,60 +186,13 @@ export const render = async (client: Client, meetup: db.Meetup) : Promise<Messag
   }
 }
 
-/**
- * This is the Announcement embed
- * 
- * @param meetup 
- * @param reactions 
- * @returns 
- */
-function Announcement (meetup: db.Meetup, rsvps?: string[], maybes?: string[]) : MessageEmbed {
-  const embed = new MessageEmbed ({
-    title:       meetup.title,
-    description: meetup.description,
-    color:       '#9b3128'
+
+export async function refresh (client: Client) : Promise<void> {
+  const meetups = await db.find ({
+    'state.type': 'Live'
   });
-
-  embed.addField ('Organizer', `<@${meetup.organizerID}>`);
-
-  if (meetup.location) {
-    const locationText = (meetup.location.autoLink)
-      ? linkify (mapsLink (meetup.location.value), meetup.location.value)
-      : meetup.location.value;
-
-    embed.addField ('Location', locationText + '\n' + meetup.location.comments);
-  }
-
-  embed.addField ('Time', Format.time (
-    DateTime.fromISO (meetup.timestamp),
-    Format.TimeFormat.Full
-  ));
-
-  embed.addField ('Links', [
-    ...meetup.links.map (l => linkify (l.url, l.label)),
-    linkify (gcalLink(meetup), 'Add to Google Calendar'),
-  ].join ('\n'));
-
-  const withCount = (count: number) => 
-    (count > 0) ? `(${count})` : '';
-
-  rsvps && embed.addField (
-    `✅ Attending ${withCount (rsvps.length)}`,
-    (rsvps.length)
-      ? rsvps.map (name => `> ${name}`).join ('\n')
-      : '-',
-    true
-  );
-
-  maybes && embed.addField (
-    `🤔 Maybe ${withCount (maybes.length)}`,
-    (maybes.length)
-      ? maybes.map (name => `> ${name}`).join ('\n')
-      : '-',
-    true
-  );
-
-  return embed;
+  
+  meetups.forEach (meetup => render (client, meetup));  
 }
 
 export const init = async (client: Client) : Promise<void> => {

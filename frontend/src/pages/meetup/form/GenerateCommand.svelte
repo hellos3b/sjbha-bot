@@ -39,11 +39,30 @@
   import Textarea from '../components/Textarea.svelte';
 
   let open = false;
+  let copied = false;
 
   const openModal = () => { open = true; }
-  const close = () => { open = false; }
+  const close = () => {
+    copied = false; 
+    open = false; 
+  }
 
   $: command = buildCommand ($store);
+
+  $: helpText = ($store.id)
+    ? "Here is your meetup command! All you need to do next is copy & paste this command into any channel. Try to pick a channel that's most relevant to the meetup!"
+    : "Here is your edit command! To update your meetup, just copy & paste this text into the meetup's thread.";
+
+  const copyToClipboard = () => {
+    var sampleTextarea = document.createElement("textarea");
+    document.body.appendChild(sampleTextarea);
+    sampleTextarea.value = command; //save main text in it
+    sampleTextarea.select(); //select textarea contenrs
+    document.execCommand("copy");
+    document.body.removeChild(sampleTextarea);
+
+    copied = true;
+  }
 </script>
 
 
@@ -70,10 +89,21 @@
       </header>
 
       <p class='pad-v'>
-        Here is your meetup command! All you need to do next is copy & paste this command into any channel. Try to pick a channel that's most relevant to the meetup!
+        {helpText}
       </p>
 
       <Textarea readonly={true} value={command} rows={10}/>
+
+      {#if copied}
+        <p class='copied pad-v'>Copied to Clipboard!</p>
+      {/if}
+
+      <button class='flex pad mt-2' on:click|preventDefault={copyToClipboard}>
+        <span class="material-icons">
+          content_copy
+        </span>
+        Copy to Clipboard
+      </button>
     </div>
   </aside>
 {/if}
@@ -98,6 +128,15 @@
   button:disabled {
     cursor: not-allowed;
     opacity: 0.5;
+  }
+
+  .copied { color: var(--primary); }
+
+  .flex {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    grid-gap: 12px;
   }
 
   @media only screen and (min-width: 640px) {
