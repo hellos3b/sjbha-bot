@@ -1,5 +1,4 @@
 import { Message } from 'discord.js';
-import { DateTime } from 'luxon';
 
 import * as Render from '../features/RenderAnnouncement';
 import * as Directory from '../features/Directory';
@@ -9,7 +8,7 @@ import * as Directory from '../features/Directory';
  */
 export async function refresh (message: Message) : Promise<void> {
   Render.refresh (message.client);
-  Directory.refresh (message.client, DateTime.now ());
+  Directory.refresh (message.client);
 
   message.reply ('Refreshing the meetups');
 }

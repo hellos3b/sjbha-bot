@@ -1,7 +1,7 @@
 import { Message, Client } from 'discord.js';
 import { table } from 'table';
 import { env } from '@sjbha/app';
-import * as format from '@sjbha/utils/string-formatting';
+import * as format from '@sjbha/utils/Format';
 
 import { Workouts, Workout } from '../db/workout';
 import { none, option } from 'ts-option';

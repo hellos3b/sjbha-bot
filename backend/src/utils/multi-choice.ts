@@ -1,6 +1,6 @@
 import { Message } from 'discord.js';
 import { option, Option } from 'ts-option';
-import { MessageBuilder } from './string-formatting';
+import { MessageBuilder } from './Format';
 
 export type Choice<T> = {
   readonly label: string;

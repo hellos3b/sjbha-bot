@@ -3,7 +3,7 @@ import * as yup from 'yup';
 import { Message } from 'discord.js';
 
 import MultiChoice from '@sjbha/utils/multi-choice';
-import { MessageBuilder, inlineCode } from '@sjbha/utils/string-formatting';
+import { MessageBuilder, inlineCode } from '@sjbha/utils/Format';
 
 import * as User from '../db/user';
 

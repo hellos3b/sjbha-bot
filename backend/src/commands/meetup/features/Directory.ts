@@ -3,7 +3,7 @@ import { DateTime } from 'luxon';
 
 import { env, Settings } from '@sjbha/app';
 import { channels } from '@sjbha/config';
-import * as Format from '@sjbha/utils/string-formatting';
+import * as Format from '@sjbha/utils/Format';
 import * as Log from '@sjbha/utils/Log';
 
 import * as db from '../db/meetups';
@@ -15,24 +15,6 @@ const intro = `
 
 Meetups are created by members, and are open to all for joining! Click on the links to see full descriptions, location information, and always remember to RSVP!
 `;
-
-export const findDirectoryMeetups = (now: DateTime) : Promise<db.Meetup[]> => {
-  const beginning = now.set ({ hour: 0, minute: 0, second: 0 }).toISO ();
-
-  return db.find ({ 
-    $or: [
-      { 
-        'state.type': 'Live',
-        timestamp:    { $gt: beginning },
-      },
-      
-      {
-        'state.type':      'Cancelled',
-        'state.timestamp': { $gt: beginning }
-      }
-    ]
-  });
-}
 
 const getDirectoryChannel = async (client: Discord.Client) => {
   const channel = await client.channels.fetch (channels.meetups_directory);
@@ -122,10 +104,32 @@ function DirectoryEmbed (meetup: db.Meetup) : Discord.MessageEmbed {
 }
 
 
+const findDirectoryMeetups = () : Promise<db.Meetup[]> => {
+  const beginning = 
+    DateTime
+    .local ()
+    .set ({ hour: 0, minute: 0, second: 0 })
+    .toISO ();
+
+  return db.find ({ 
+    $or: [
+      { 
+        'state.type': 'Live',
+        timestamp:    { $gt: beginning },
+      },
+      
+      {
+        'state.type':      'Cancelled',
+        'state.timestamp': { $gt: beginning }
+      }
+    ]
+  });
+}
+
 // fetch all meetups from the DB
 // and update the directory channel in chronological order
-export const refresh = async (client: Discord.Client, now: DateTime, repost = false) : Promise<void> => {
-  const meetups = await findDirectoryMeetups (now);
+export const refresh = async (client: Discord.Client, repost = false) : Promise<void> => {
+  const meetups = await findDirectoryMeetups ();
   const messageIds = await Settings.get <string[]> (settingsKey, []);
   const usedIds : string[] = [];
 
@@ -171,16 +175,16 @@ export const refresh = async (client: Discord.Client, now: DateTime, repost = fa
 
 // Meant to be called when booting up
 export const startListening = async (client: Discord.Client) : Promise<void> => {
-  let task = refresh (client, DateTime.local ());
+  let task = refresh (client);
 
   db.events.on ('update', () => {
     const prev = task;
-    task = prev.then (() => refresh (client, DateTime.local (), false));
+    task = prev.then (() => refresh (client, false));
   });
 
   db.events.on ('add',  () => {
     const prev = task;
-    task = prev.then (() => refresh (client, DateTime.local (), true));
+    task = prev.then (() => refresh (client, true));
   });
 
   Log.started ('Meetup Directory waiting for changes');

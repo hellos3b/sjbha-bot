@@ -5,9 +5,11 @@ import * as Discord from 'discord.js';
 import * as Meetups from '../db/meetups';
 import * as EndMeetup from './EndMeetup';
 
-Settings.defaultZoneName = 'America/Los_Angeles';
 
 const now = DateTime.local (2021, 11, 15, 17, 0, 0, 0);
+
+Settings.now = () => now.toMillis ();
+Settings.defaultZoneName = 'America/Los_Angeles';
 
 const meetupDefaults = Meetups.Meetup ({
   id:              'default',
@@ -64,7 +66,7 @@ describe ('meetup/EndMeetup', () => {
     } as unknown as Discord.Client;
 
     // Run an end job on all meetups
-    await EndMeetup.endMeetups (mockClient, now);
+    await EndMeetup.endMeetups (mockClient);
   });
 
   it ('doesn\'t end future meetups', async () => {

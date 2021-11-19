@@ -1,5 +1,5 @@
 import { env } from '@sjbha/app';
-import * as format from '@sjbha/utils/string-formatting';
+import * as format from '@sjbha/utils/Format';
 import { strava } from '../env';
 import * as User from '../db/user';
 import { Message } from 'discord.js';

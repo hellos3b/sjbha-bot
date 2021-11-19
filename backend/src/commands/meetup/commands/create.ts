@@ -6,7 +6,7 @@ import { DateTime } from 'luxon';
 import * as db from '../db/meetups';
 import * as M from '../common/Meetup';
 import { render } from '../features/RenderAnnouncement';
-import { validateOptions, ValidationError } from '../common/validateOptions';
+import { parse } from '../common/MeetupOptions';
 
 
 /**
@@ -32,10 +32,10 @@ export async function create (message: Message) : Promise<void> {
     return;
   }
 
-  const options = validateOptions (messageOptions);
+  const options = parse (messageOptions);
   
-  if (options instanceof ValidationError) {
-    message.channel.send (`${mention} - Something is wrong with the options in your command. Make sure to copy and paste everything from the UI! (${options.error})`);
+  if (options.failed) {
+    message.channel.send (`${mention} - Something is wrong with the options in your command. Make sure to copy and paste everything from the UI! (${options.message})`);
     return;
   }
 

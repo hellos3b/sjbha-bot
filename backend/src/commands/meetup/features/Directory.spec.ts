@@ -5,9 +5,11 @@ import { DateTime, Settings } from 'luxon';
 import * as Meetups from '../db/meetups';
 import * as Directory from './Directory';
 
-Settings.defaultZoneName = 'America/Los_Angeles';
-
 const now = DateTime.local (2021, 11, 15, 17, 0, 0, 0);
+const yesterday = now.minus ({ day: 1 });
+
+Settings.now = () => now.toMillis ();
+Settings.defaultZoneName = 'America/Los_Angeles';
 
 const meetupDefaults = Meetups.Meetup ({
   id:              Math.random ().toString (),
@@ -79,50 +81,53 @@ beforeAll (async () => {
 afterAll (() => MongoMemoryServer.teardown ());
 
 describe ('meetup/Directory', () => {
-  const directory = {
-    embeds:    [] as Discord.MessageEmbed[],
-    findTitle: function (title: string) {
-      return this.embeds.find (
-        embed => embed.description?.includes (title)
-      );
-    }
-  };
+  const directoryChannel = {
+    _embeds_: [] as Discord.MessageEmbed[],
 
-  const ignore = () => { /** noop */ };
-
-  const channel = {
-    isText:   () => true,
-    messages: { fetch: ignore },
-    send:     (options: Discord.MessageOptions) => {
+    send: function (options: Discord.MessageOptions) {
       const embeds = (options.embeds || []) as Discord.MessageEmbed[];
-      directory.embeds = directory.embeds.concat (embeds);
-      return { id: '' };
-    }
+      this._embeds_ = this._embeds_.concat (embeds);
+      return { id: 'any' };
+    },
+
+    isText:   () => true,
+    messages: { fetch: () => { /** noop */ } },
   }
 
   const client = { 
-    channels: { fetch: () => Promise.resolve (channel) } 
+    channels: { fetch: () => Promise.resolve (directoryChannel) } 
   } as unknown as Discord.Client;
 
-  beforeAll (() => Directory.refresh (client, now));
+  // Refresh the Directory
+  beforeAll (() => Directory.refresh (client));
 
-  it ('gets today live', async () => {
-    expect (directory.findTitle ('today/live')).toBeTruthy ();
+  it ('shows live meetups from today', () => {
+    const post = directoryChannel._embeds_
+      .find (e => e.description?.includes ('today/live'));
+    expect (post).toBeTruthy ();
   });
 
-  it ('gets tomorrow live', async () => {
-    expect (directory.findTitle ('tomorrow/live')).toBeTruthy ();
+  it ('shoes upcoming meetups', () => {
+    const post = directoryChannel._embeds_
+      .find (e => e.description?.includes ('tomorrow/live'));
+    expect (post).toBeTruthy ();
+  });
+  
+  it ('doesnt show meetups that have ended', () => {
+    const post = directoryChannel._embeds_
+      .find (e => e.description?.includes ('yesterday/ended'));
+    expect (post).toBeFalsy ();
   });
 
-  it ('gets cancelled if it was cancelled today', async () => {
-    expect (directory.findTitle ('today/cancelled')).toBeTruthy ();
+  it ('shows cancelled meetups if it was cancelled today', async () => {
+    const post = directoryChannel._embeds_
+      .find (e => e.description?.includes ('today/cancelled'));
+    expect (post).toBeTruthy ();
   });
 
-  it ('doesn\'t get ended meetups', async () => {
-    expect (directory.findTitle ('yesterday/ended')).toBeFalsy ();
-  });
-
-  it ('doesn\'t get meetups cancelled before today', async () => {
-    expect (directory.findTitle ('yesterday/cancelled')).toBeFalsy ();
+  it ('doesnt show meetups that were cancelled before today', () => {
+    const post = directoryChannel._embeds_
+      .find (e => e.description?.includes ('yesterday/cancelled'));
+    expect (post).toBeFalsy ();
   });
 });

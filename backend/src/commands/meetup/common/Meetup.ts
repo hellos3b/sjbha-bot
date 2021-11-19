@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon';
 import { option } from 'ts-option';
 import * as db from '../db/meetups';
-import { MeetupOptions } from './validateOptions';
+import { MeetupOptions } from './MeetupOptions';
 
 
 /**
@@ -18,7 +18,7 @@ export function location (options: MeetupOptions) : db.Meetup['location'] {
         .getOrElseValue (true) 
     };
   }
- else {
+  else {
     return undefined;
   }
 }

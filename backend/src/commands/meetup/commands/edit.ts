@@ -5,7 +5,7 @@ import { env } from '@sjbha/app';
 
 import * as db from '../db/meetups';
 import * as M from '../common/Meetup';
-import { validateOptions, ValidationError } from '../common/validateOptions';
+import { parse } from '../common/MeetupOptions';
 
 
 // If used alone (!meetup edit) will query user to pick a meetup
@@ -56,10 +56,10 @@ async function updateMeetup(message: Message, meetup: db.Meetup) {
     return;
   }
 
-  const options = validateOptions (parsed);
+  const options = parse (parsed);
 
-  if (options instanceof ValidationError) {
-    message.channel.send (`${mention} - Something is wrong with the options in your command. Make sure to copy and paste everything from the UI! (${options.error})`);
+  if (options.failed) {
+    message.channel.send (`${mention} - Something is wrong with the options in your command. Make sure to copy and paste everything from the UI! (${options.message})`);
     return;
   }
 

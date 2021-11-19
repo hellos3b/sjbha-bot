@@ -7,7 +7,7 @@ import { AuthResponse } from '../common/StravaClient';
 
 import { strava } from '../env';
 import * as User from '../db/user';
-import { MessageBuilder } from '@sjbha/utils/string-formatting';
+import { MessageBuilder } from '@sjbha/utils/Format';
 import { env } from '@sjbha/app';
 import { none, option } from 'ts-option';
 

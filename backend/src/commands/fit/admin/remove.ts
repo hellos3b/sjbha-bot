@@ -1,6 +1,6 @@
 import { Message } from 'discord.js';
 
-import { MessageBuilder } from '@sjbha/utils/string-formatting';
+import { MessageBuilder } from '@sjbha/utils/Format';
 import { channels } from '@sjbha/config';
 
 import { Workout } from '../db/workout';

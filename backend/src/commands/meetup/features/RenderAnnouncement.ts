@@ -2,7 +2,7 @@ import { Message, MessageActionRow, MessageButton, MessageEmbed, MessageOptions,
 import { DateTime } from 'luxon';
 
 import { MemberList } from '@sjbha/utils/MemberList';
-import * as Format from '@sjbha/utils/string-formatting';
+import * as Format from '@sjbha/utils/Format';
 import * as db from '../db/meetups';
 import { option } from 'ts-option';
 
@@ -33,25 +33,25 @@ const mapsLink = (query: string) : string => {
 
 const gcalLink = (meetup: db.Meetup) : string => {
   const encodeDate = (timestamp: DateTime) =>
-    timestamp.toISO().replace(/(-|:|\.)/g, '');
+    timestamp.toISO ().replace (/(-|:|\.)/g, '');
 
   const ts = DateTime.fromISO (meetup.timestamp);
 
   const options = {
-    action: "TEMPLATE",
-    text: meetup.title,
-    dates: encodeDate(ts) + '/' + encodeDate(ts.plus({ hour: 2 })),
-    details: meetup.description,
-    location: option(meetup.location)
+    action:   'TEMPLATE',
+    text:     meetup.title,
+    dates:    encodeDate (ts) + '/' + encodeDate (ts.plus ({ hour: 2 })),
+    details:  meetup.description,
+    location: option (meetup.location)
       .filter (loc => loc.autoLink)
       .map (loc => loc.value)
-      .getOrElseValue (""),
+      .getOrElseValue (''),
     trp: true
   }
 
-  const query = Object.entries(options)
-    .map(([ key, value ]) => `${key}=${encodeURIComponent(value)}`)
-    .join('&');
+  const query = Object.entries (options)
+    .map (([key, value]) => `${key}=${encodeURIComponent (value)}`)
+    .join ('&');
 
   return `https://calendar.google.com/calendar/render?${query}`;
 }
@@ -87,7 +87,7 @@ function Announcement (meetup: db.Meetup, rsvps?: string[], maybes?: string[]) :
 
   embed.addField ('Links', [
     ...meetup.links.map (l => linkify (l.url, l.label)),
-    linkify (gcalLink(meetup), 'Add to Google Calendar'),
+    linkify (gcalLink (meetup), 'Add to Google Calendar'),
   ].join ('\n'));
 
   const withCount = (count: number) => 

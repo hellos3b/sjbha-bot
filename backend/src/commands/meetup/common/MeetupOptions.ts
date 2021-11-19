@@ -1,5 +1,7 @@
 import { DateTime } from 'luxon';
 import { object, string, array, pattern, optional, assert, Infer, StructError, type, boolean } from 'superstruct';
+import { option } from 'ts-option';
+import * as db from '../db/meetups';
 
 const MAX_DESCRIPTION_SIZE = 1600;
 
@@ -26,35 +28,55 @@ const MeetupOptions = type ({
   ))
 });
 
+type ParseResult =
+  | { failed: false } & MeetupOptions
+  | { failed: true, message: string }
 
-export function validateOptions (opt: unknown) : MeetupOptions | ValidationError {
+const Failed = (message: string) : ParseResult =>
+  ({ failed: true, message });
+
+export function parse (opt: unknown) : ParseResult {
   if (!opt) {
     // todo fix error response
-    return new ValidationError ('Go to the meetup creator to enter some options');
+    return Failed ('Go to the meetup creator to enter some options');
   }
 
   try { assert (opt, MeetupOptions); }
   catch (e) {
     return (e instanceof StructError) 
-      ? new ValidationError (e.message)
-      : new ValidationError ('Could not parse your errors');
+      ? Failed (e.message)
+      : Failed ('Could not parse your errors');
   }
 
   const date = DateTime.fromISO (opt.date);
 
   if (date.toMillis () <= DateTime.utc ().toMillis ())
-    return new ValidationError ('Cant create a meetup that is set to the past');
+    return Failed ('Cant create a meetup that is set to the past');
     
   if (opt.description && opt.description.length > MAX_DESCRIPTION_SIZE)
-    return new ValidationError ('Description is too long');
+    return Failed ('Description is too long');
 
   if (opt.location_comments && opt.location_comments.length > 300)
-    return new ValidationError ('Location comments can only be 300 characters long');
+    return Failed ('Location comments can only be 300 characters long');
 
-  return opt;
+  return { failed: false, ...opt };
 }
 
-
-export class ValidationError {
-  constructor (public readonly error: string) {}
+/**
+ * Used in create & edit, this just formats
+ * @param type 
+ * @returns 
+ */
+ export const toLocation = (options: MeetupOptions) : db.Meetup['location'] => {
+  if (options.location) {
+    return {
+      value:    options.location,
+      comments: options.location_comments || '',
+      autoLink: option (options.location_linked)
+        .getOrElseValue (true) 
+    };
+  }
+  else {
+    return undefined;
+  }
 }

@@ -1,4 +1,4 @@
-import * as format from '@sjbha/utils/string-formatting';
+import * as format from '@sjbha/utils/Format';
 import { Message } from 'discord.js';
 
 /**

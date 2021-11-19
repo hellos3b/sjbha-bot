@@ -3,7 +3,7 @@ import { DateTime, Interval } from 'luxon';
 import * as R from 'ramda';
 import { isOfVariant, isType, lookup, variantList } from 'variant';
 
-import * as format from '@sjbha/utils/string-formatting';
+import * as format from '@sjbha/utils/Format';
 
 import * as User from '../db/user';
 import { Workouts, Exp } from '../db/workout';

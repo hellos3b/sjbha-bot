@@ -8,12 +8,12 @@ import * as M from '../common/Meetup';
 
 // Start the scheduler
 export async function init(client: Discord.Client) : Promise<void> {
-  await endMeetups (client, DateTime.local ());
+  await endMeetups (client);
 
   // Every day at midnight
   schedule.scheduleJob (
     '5 0 * * *', 
-    () => endMeetups (client, DateTime.local ())
+    () => endMeetups (client)
   );
 
   Log.started ('Meetup archiver scheduled to start');
@@ -21,9 +21,9 @@ export async function init(client: Discord.Client) : Promise<void> {
   
 // Check the timestamp for meetups
 // and mark any old ones as "done"
-export const endMeetups = async (client: Discord.Client, now: DateTime) : Promise<void> => {
+export const endMeetups = async (client: Discord.Client) : Promise<void> => {
   const midnight = 
-    now.set ({ hour: 0, minute: 0 }).toISO ();
+    DateTime.local ().set ({ hour: 0, minute: 0 }).toISO ();
 
   const meetups = await db.find ({
     'state.type': 'Live',
