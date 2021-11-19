@@ -1,6 +1,7 @@
 import { DateTime } from 'luxon';
 import schedule from 'node-schedule';
 import * as Discord from 'discord.js';
+import chalk from 'chalk';
 
 import * as db from '../db/meetups';
 import * as M from '../common/Meetup';
@@ -14,6 +15,8 @@ export async function init(client: Discord.Client) : Promise<void> {
     '0 * * * *', 
     () => endMeetups (client, DateTime.now ())
   );
+
+  console.log (chalk.magenta ('⧖'), 'Meetup Ender scheduled to start archiving');
 }
   
 // Check the timestamp for meetups

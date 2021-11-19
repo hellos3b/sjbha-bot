@@ -1,15 +1,24 @@
 import { FilterQuery } from 'mongodb';
-import { EventEmitter } from 'tsee';
+import { createNanoEvents } from 'nanoevents';
+import * as Log from '@sjbha/utils/Log';
 
 import { MongoDb } from '@sjbha/app';
 
 const getCollection = () =>
   MongoDb.getCollection<Schema> ('meetups-labs');
 
-export const events = new EventEmitter<{
+export const events = createNanoEvents<{
   'add': (meetup: Meetup) => void;
   'update': (meetup: Meetup) => void;
 }>();
+
+events.on ('add', meetup => {
+  Log.event (`Meetup '${meetup.title}' was added'`);
+});
+
+events.on ('update', meetup => {
+  Log.event (`Meetup '${meetup.title}' was updated'`);
+});
 
 export type Schema = {
   __version: 1;
@@ -26,15 +35,10 @@ export type Schema = {
   description: string;
   links: { label?: string; url: string; }[];
   category: string;
+  location?: { value: string; comments: string; autoLink: boolean; }
 
   rsvps: string[];
   maybes: string[];
-
-  location: 
-    | { type: 'None' }
-    | { type: 'Voice' }
-    | { type: 'Address'; value: string; comments: string; }
-    | { type: 'Private'; value: string; comments: string; };
 
   state: 
     | { type: 'Live' }
@@ -45,13 +49,13 @@ export type Schema = {
 export type Meetup = Omit<Schema, '__version'>;
 export const Meetup = (meetup: Meetup) : Meetup => ({ ...meetup });
 
-const schemaToMeetup = ({ __version, ...schema }: Schema) : Meetup => schema;
+const stripVersion = ({ __version, ...schema }: Schema) : Meetup => schema;
 
-const meetupToSchema = (meetup: Meetup) : Schema => ({ __version: 1, ...meetup });
+const addVersion1 = (meetup: Meetup) : Schema => ({ __version: 1, ...meetup });
 
 export async function insert(meetup: Meetup) : Promise<Meetup> {
   const collection = await getCollection ();
-  await collection.insertOne (meetupToSchema (meetup));
+  await collection.insertOne (addVersion1 (meetup));
   events.emit ('add', meetup);
 
   return meetup;
@@ -64,7 +68,7 @@ export async function insert(meetup: Meetup) : Promise<Meetup> {
  */
 export async function update(meetup: Meetup, silent = false) : Promise<Meetup> {
   const collection = await getCollection ();
-  await collection.replaceOne ({ id: meetup.id }, meetupToSchema (meetup));
+  await collection.replaceOne ({ id: meetup.id }, addVersion1 (meetup));
   !silent && events.emit ('update', meetup);
   
   return meetup;
@@ -75,7 +79,7 @@ export const find = async (q: FilterQuery<Schema> = {}) : Promise<Meetup[]> => {
   return collection
     .find (q, { projection: { _id: 0 } })
     .toArray ()
-    .then (meetups => meetups.map (schemaToMeetup));
+    .then (meetups => meetups.map (stripVersion));
 }
 
 export const findOne = async (q: FilterQuery<Schema> = {}) : Promise<Meetup | null> => {
@@ -85,5 +89,5 @@ export const findOne = async (q: FilterQuery<Schema> = {}) : Promise<Meetup | nu
   if (!result)
     return null;
 
-  return schemaToMeetup (result);
+  return stripVersion (result);
 }

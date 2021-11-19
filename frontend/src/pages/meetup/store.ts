@@ -1,16 +1,12 @@
 import { DateTime } from 'luxon';
 import { derived, writable } from 'svelte/store';
-import { address, voiceChat } from './form/LocationType';
+import { Option } from 'prelude-ts';
 
 export const MAX_DESCRIPTION_LENGTH = 1200;
 
 export const MAX_LOCATION_COMMENTS_LENGTH = 300;
 
 export const url = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/;
-
-export type Location = { type: string; value: string; comments: string; }
-export const Location = (type: string, value = '', comments = '') : Location =>
-  ({ type, value, comments });
 
 export type Link = { id: symbol, url: string; label: string; }
 export const Link = (url = '', label = '') : Link => ({ id: Symbol ('ID'), url, label });
@@ -21,7 +17,9 @@ export type Store = {
   date: string;
   description: string;
   category: string;
-  location: Location | null;
+  location: string;
+  location_comments: string;
+  location_linked: boolean;
   links: Map<symbol, Link>;
 }
 
@@ -33,7 +31,9 @@ const state = writable<Store> ({
     .toISO (),
   description: '',
   category: 'default',
-  location:    null,
+  location:    "",
+  location_comments: "",
+  location_linked: true,
   links:       new Map ()
 });
 
@@ -59,17 +59,6 @@ export const errors = derived (state, state$ => {
   if (state$.description.length > MAX_DESCRIPTION_LENGTH)
     errors.set ('description', 'Description is starting to get too long to fit');
 
-  if (state$.location && state$.location.type !== voiceChat.id) {
-    if (!state$.location.value.length)
-      errors.set ('location', 'Location is required');
-
-    else if (state$.location.type === address.id && url.test (state$.location.value))
-      errors.set ('location', 'You don\'t need to paste a link to the address, the bot will link it for you. All you need is the address');
-
-    else if (state$.location.comments.length > MAX_LOCATION_COMMENTS_LENGTH)
-      errors.set ('location', 'Comments are too long');
-  }
-
   const linkErrors = new Map<symbol, string> ();
   state$.links.forEach (link => {
     if (link.label && !link.url)
@@ -88,6 +77,7 @@ export const errors = derived (state, state$ => {
 
 export async function fetchMeetup (id: string) : Promise<void> {
   const response = await fetch (`${__HOST__}/meetup/${id}`).then (r => r.json());
+  const location = Option.ofNullable (response.location);
 
   state.set ({
     id,
@@ -95,25 +85,20 @@ export async function fetchMeetup (id: string) : Promise<void> {
     description: response.description,
     date: response.timestamp,
     category: response.category,
-    location: (() : Location | null => {
-      switch (response.location.type) {
-        case 'Voice':
-          return { type: 'voice', value: '', comments: '' };
-        
-        case 'Address':
-        case 'Private':
-          return {
-            type: (response.location.type === 'Address')
-              ? 'address'
-              : 'private',
-            value: response.location.value,
-            comments: response.location.comments
-          };
 
-        default:
-          return null;
-      }
-    })(),
+    location: location
+      .map(l => l.value)
+      .getOrElse(""),
+
+    location_comments: location
+      .map(l => l.comments)
+      .getOrElse (""),
+
+    location_linked: location
+      .map(l => l.autoLink)
+      .getOrElse (true),
+
+    // todo: map links to map
     links: new Map()
   });
 }

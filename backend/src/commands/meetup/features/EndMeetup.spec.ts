@@ -23,7 +23,7 @@ const meetupDefaults = Meetups.Meetup ({
   links:           [],
   rsvps:           [],
   maybes:          [],
-  location:        { type: 'None' },
+  location:        undefined,
   state:           { type: 'Live' }
 });
 

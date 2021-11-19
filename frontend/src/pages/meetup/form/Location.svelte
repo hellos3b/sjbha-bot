@@ -1,41 +1,38 @@
 <script lang='ts'>
-  import { Option, Vector } from 'prelude-ts';
-  import { LocationType, address, privateAddress, voiceChat } from './LocationType';
-  import {store, Location} from '../store';
+  import {store, MAX_LOCATION_COMMENTS_LENGTH} from '../store';
 
   import Legend from '../components/Legend.svelte';
-
-  import LocationTypeMenu, { openLocationTypeMenu } from './LocationTypeMenu.svelte';
-  import LocationFields from './LocationFields.svelte';
-
-  const changeType = (type: LocationType) : void => store.set ('location', Location (type.id));
-  const updateLocation = (location: Location) => store.set ('location', location);
-  const reset = () => store.set('location', null);
-
-  const locationTypes = Vector.of (address, privateAddress, voiceChat);
-
-  $: selected = Option
-    .ofNullable ($store.location)
-    .flatMap (a => locationTypes.find (b => a.type === b.id));
-
-  $: icon = selected
-    .map (l => l.icon)
-    .getOrElse ('place');
-
-  $: title = selected
-    .map (l => l.name)
-    .getOrElse ('Set a location');
+  import Textarea from '../components/Textarea.svelte';
+  import Textfield from '../components/Textfield.svelte';
+  import Checkbox from '../components/Checkbox.svelte';
   
-  $: active = selected.isSome();
-
+  $: console.log ($store.location_linked);
 </script>
 
 
 <section name='location'>
-  <Legend {icon} {title} {active} closeable={true} on:click={openLocationTypeMenu} on:close={reset} />
-  <LocationTypeMenu on:select={e => changeType (e.detail)}/>
+  <Legend icon='place' title='Location' active={true} />
+  
+  <fieldset class='pad-under'>
+    <p class='pad-v'>
+      You can enter either an address, a business name, or a general area that the meetup takes place in
+    </p>
 
-  {#if $store.location}
-    <LocationFields selected={$store.location} on:input={e => updateLocation (e.detail)}/>
-  {/if}
+    <Textfield 
+      label="Name or Address" 
+      name="location" 
+      placeholder="1234 Royroy lane, Hapas Brewing, West San Jose, ..."
+      bind:value={$store.location}/>
+
+    <Checkbox
+      label="Make location clickable to Google Maps"
+      name="autolink"
+      bind:value={$store.location_linked}/>
+
+    <Textarea 
+      label="Additional comments (optional)" 
+      placeholder='Do people need extra instructions for this location? Meeting spots, what to look for'
+      limit={MAX_LOCATION_COMMENTS_LENGTH}
+      bind:value={$store.location_comments}/>
+  </fieldset>
 </section>

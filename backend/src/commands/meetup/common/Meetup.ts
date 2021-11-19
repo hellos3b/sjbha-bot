@@ -1,4 +1,5 @@
 import { DateTime } from 'luxon';
+import { option } from 'ts-option';
 import * as db from '../db/meetups';
 import { MeetupOptions } from './validateOptions';
 
@@ -9,18 +10,16 @@ import { MeetupOptions } from './validateOptions';
  * @returns 
  */
 export function location (options: MeetupOptions) : db.Meetup['location'] {
-  switch (options.location_type) {
-    case 'address': 
-      return { type: 'Address', value: options.location || '', comments: options.location_comments || '' };
-    
-    case 'private':
-      return { type: 'Private', value: options.location || '', comments: options.location_comments || '' };
-
-    case 'voice':
-      return { type: 'Voice' };
-
-    default:
-      return { type: 'None' };
+  if (options.location) {
+    return {
+      value:    options.location,
+      comments: options.location_comments || '',
+      autoLink: option (options.location_linked)
+        .getOrElseValue (true) 
+    };
+  }
+ else {
+    return undefined;
   }
 }
 

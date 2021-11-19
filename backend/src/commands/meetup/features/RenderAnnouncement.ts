@@ -24,10 +24,9 @@ const actions = new MessageActionRow ().addComponents (RsvpButton, MaybeButton, 
 const linkify = (url: string, name?: string) : string =>
   (!name) ? url : `[${name}](${url})`;
 
-export const init = async (client: Client) : Promise<void> => {
-  await refresh (client);
-
-  db.events.on ('update', () => render);
+const mapsLink = (query: string) : string => {
+  const encoded = encodeURIComponent (query);
+  return `https://www.google.com/maps/search/?api=1&query=${encoded}`;
 }
 
 export async function refresh (client: Client) : Promise<void> {
@@ -127,20 +126,12 @@ function Announcement (meetup: db.Meetup, rsvps?: string[], maybes?: string[]) :
 
   embed.addField ('Organizer', `<@${meetup.organizerID}>`);
 
-  switch (meetup.location.type) {
-    case 'Address': {
-      const encoded = encodeURIComponent (meetup.location.value);
-      embed.addField ('Location', linkify (`https://www.google.com/maps/search/?api=1&query=${encoded}`, meetup.location.value) + `\n${meetup.location.comments}`);
-      break;
-    }
+  if (meetup.location) {
+    const locationText = (meetup.location.autoLink)
+      ? linkify (mapsLink (meetup.location.value), meetup.location.value)
+      : meetup.location.value;
 
-    case 'Private':
-      embed.addField ('Location', `${meetup.location.value}\n${meetup.location.comments}`);
-      break;
-
-    case 'Voice':
-      embed.addField ('Location', 'Voice Chat');
-      break;
+    embed.addField ('Location', locationText + '\n' + meetup.location.comments);
   }
 
   embed.addField ('Time', DateTime.fromISO (meetup.timestamp).toLocaleString ({
@@ -174,4 +165,10 @@ function Announcement (meetup: db.Meetup, rsvps?: string[], maybes?: string[]) :
   );
 
   return embed;
+}
+
+export const init = async (client: Client) : Promise<void> => {
+  await refresh (client);
+
+  db.events.on ('update', meetup => render (client, meetup));
 }

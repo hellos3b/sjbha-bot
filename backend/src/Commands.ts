@@ -1,12 +1,12 @@
-import * as Command from "./utils/Command";
+import * as Command from './utils/Command';
 
-import * as Aqi from "./commands/aqi/register";
-import * as Christmas from "./commands/christmas/Christmas";
-import * as Fit from "./commands/Fit/register";
-import * as Meetup from "./commands/Meetup/register";
-import * as Pong from "./commands/pong/Pong";
-import * as Subscribe from "./commands/subscribe/register";
-import * as Version from "./commands/version/register";
+import * as Aqi from './commands/aqi/register';
+import * as Christmas from './commands/christmas/Christmas';
+import * as Fit from './commands/Fit/register';
+import * as Meetup from './commands/meetup/register';
+import * as Pong from './commands/pong/Pong';
+import * as Subscribe from './commands/subscribe/register';
+import * as Version from './commands/version/register';
 
 export const run = Command.combine (
   Aqi.command,

@@ -4,6 +4,7 @@ import { DateTime } from 'luxon';
 import { env, Settings } from '@sjbha/app';
 import { channels } from '@sjbha/config';
 import { queued } from '@sjbha/utils/queue';
+import * as Log from '@sjbha/utils/Log';
 
 import * as db from '../db/meetups';
 
@@ -154,7 +155,9 @@ export const startListening = async (client: Discord.Client) : Promise<void> => 
   await refresh (client, DateTime.local ());
 
   const queueRefresh = queued (() => refresh (client, DateTime.local ()))
-
+  
   db.events.on ('add', queueRefresh);
   db.events.on ('update', queueRefresh);
+
+  Log.started ('Meetup Directory waiting for changes');
 }

@@ -63,7 +63,7 @@ module.exports = (_, argv) => {
         '__HOST__': JSON.stringify(
           (argv.mode === 'production')
             ? 'https://www.s3bby.com/bored-bot'
-            : 'http://0.0.0.0:5000'
+            : 'http://localhost:5000'
         )
       }),
 

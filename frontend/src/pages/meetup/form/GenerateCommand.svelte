@@ -14,11 +14,9 @@
       output.description = store.description;
     
     if (store.location) {
-      output.location_type = store.location.type;
-      output.location = store.location.value;
-
-      if (store.location.comments)
-        output.location_comments = store.location.comments;
+      output.location = store.location;
+      output.location_comments = store.location_comments;
+      output.location_linked = store.location_linked;
     }
 
     const validLinks = Array

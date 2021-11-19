@@ -1,5 +1,5 @@
 import { DateTime } from 'luxon';
-import { object, string, enums, array, pattern, optional, assert, Infer, StructError, type } from 'superstruct';
+import { object, string, array, pattern, optional, assert, Infer, StructError, type, boolean } from 'superstruct';
 
 const MAX_DESCRIPTION_SIZE = 1600;
 
@@ -14,8 +14,8 @@ const MeetupOptions = type ({
   date:        ISOstring,
 
   location:          optional (string ()),
-  location_type:     optional (enums (['address', 'private', 'voice'])),
   location_comments: optional (string ()),
+  location_linked:   optional (boolean ()),
 
   category: optional (string ()),
   links:    optional (array (
@@ -48,13 +48,8 @@ export function validateOptions (opt: unknown) : MeetupOptions | ValidationError
   if (opt.description && opt.description.length > MAX_DESCRIPTION_SIZE)
     return new ValidationError ('Description is too long');
 
-  if (opt.location_type && opt.location_type !== 'voice') {
-    if (!opt.location)
-      return new ValidationError ('Location is missing');
-
-    if (opt.location_comments && opt.location_comments.length > 300)
-      return new ValidationError ('Location comments can only be 300 characters long');
-  }
+  if (opt.location_comments && opt.location_comments.length > 300)
+    return new ValidationError ('Location comments can only be 300 characters long');
 
   return opt;
 }
