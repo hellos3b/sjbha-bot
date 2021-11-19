@@ -119,7 +119,7 @@ function DirectoryEmbed (meetup: db.Meetup) : Discord.MessageEmbed {
 
 // fetch all meetups from the DB
 // and update the directory channel in chronological order
-export const refresh = async (client: Discord.Client, now: DateTime) : Promise<void> => {
+export const refresh = async (client: Discord.Client, now: DateTime, repost = false) : Promise<void> => {
   const meetups = await findDirectoryMeetups (now);
   const messageIds = await Settings.get <string[]> (settingsKey, []);
   const usedIds : string[] = [];
@@ -132,6 +132,20 @@ export const refresh = async (client: Discord.Client, now: DateTime) : Promise<v
   );
 
   usedIds.push (introId);
+
+
+  // Take down the existing messages and repost
+  // so that people get notified of a new update on discord
+  if (repost) {
+    console.log ('Tearing down old meetups');
+    const channel = await getDirectoryChannel (client);
+
+    while (messageIds.length) {
+      const id = messageIds.shift ();
+      id && await channel.messages.fetch (id).then (msg => msg.delete ());
+    }
+  }
+
 
   // Post 10 directory postings per message until all are used up
   const embeds = meetups.map (DirectoryEmbed);
@@ -152,12 +166,17 @@ export const refresh = async (client: Discord.Client, now: DateTime) : Promise<v
 
 // Meant to be called when booting up
 export const startListening = async (client: Discord.Client) : Promise<void> => {
-  await refresh (client, DateTime.local ());
+  let task = refresh (client, DateTime.local ());
 
-  const queueRefresh = queued (() => refresh (client, DateTime.local ()))
-  
-  db.events.on ('add', queueRefresh);
-  db.events.on ('update', queueRefresh);
+  db.events.on ('update', () => {
+    const prev = task;
+    task = prev.then (() => refresh (client, DateTime.local (), false));
+  });
+
+  db.events.on ('add',  () => {
+    const prev = task;
+    task = prev.then (() => refresh (client, DateTime.local (), true));
+  });
 
   Log.started ('Meetup Directory waiting for changes');
 }
