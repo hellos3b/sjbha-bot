@@ -1,22 +1,22 @@
 import { DateTime } from 'luxon';
 import schedule from 'node-schedule';
 import * as Discord from 'discord.js';
-import chalk from 'chalk';
+import * as Log from '@sjbha/utils/Log';
 
 import * as db from '../db/meetups';
 import * as M from '../common/Meetup';
 
 // Start the scheduler
 export async function init(client: Discord.Client) : Promise<void> {
-  await endMeetups (client, DateTime.now ());
+  await endMeetups (client, DateTime.local ());
 
-  // Check every hour
+  // Every day at midnight
   schedule.scheduleJob (
-    '0 * * * *', 
-    () => endMeetups (client, DateTime.now ())
+    '0 0 * * *', 
+    () => endMeetups (client, DateTime.local ())
   );
 
-  console.log (chalk.magenta ('⧖'), 'Meetup Ender scheduled to start archiving');
+  Log.started ('Meetup archiver scheduled to start');
 }
   
 // Check the timestamp for meetups
