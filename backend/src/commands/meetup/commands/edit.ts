@@ -77,7 +77,7 @@ async function updateMeetup(message: Message, meetup: db.Meetup) {
     ...meetup,
     organizerID: message.author.id,
     title:       options.title,
-    // todo: verify date format 
+    category:    options.category || 'default',
     timestamp:   options.date,
     description: options.description || '',
     links:       options.links ?? [],
