@@ -1,5 +1,6 @@
 import schedule from 'node-schedule';
 import * as Discord from 'discord.js';
+import chalk from 'chalk';
 
 import * as db from '../db/meetups';
 
@@ -10,6 +11,8 @@ export async function startSchedule(client: Discord.Client) : Promise<void> {
     '10 * * * *', 
     () => openAllThreads (client)
   );
+
+  console.log (chalk.magenta ('⧖'), 'Meetup Thread watcher scheduled');
 }
 
 // Iterate over all Live meetups

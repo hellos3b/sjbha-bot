@@ -1,4 +1,5 @@
 import * as Discord from 'discord.js';
+import * as Log from '@sjbha/utils/Log';
 import * as db from '../db/meetups';
 
 type Unbind = () => void;
@@ -23,7 +24,7 @@ function prune (meetup: db.Meetup) {
 // Initializes the collectors that will listen 
 // to the clicks on the buttons of the meetup
 const createRsvpListener = async (client: Discord.Client, meetup: db.Meetup) : Promise<Unbind> => {
-  console.log (`Listening to RSVPs for '${meetup.title}'`);
+  Log.started (`Listening to RSVPs for '${meetup.title}'`);
 
   const channel = await client.channels.fetch (meetup.threadID);
 
@@ -46,7 +47,7 @@ const createRsvpListener = async (client: Discord.Client, meetup: db.Meetup) : P
     if (!state)
       return;
 
-    console.log (`${i.user.username} Clicked on ${i.customId} for '${state.title}'`);
+    Log.event (`${i.user.username} Clicked on ${i.customId} for '${state.title}'`);
 
     if (i.customId === 'rsvp' && !state.rsvps.includes (i.user.id)) {
       await db.update ({

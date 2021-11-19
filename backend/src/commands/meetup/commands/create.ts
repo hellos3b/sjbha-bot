@@ -67,7 +67,7 @@ export async function create (message: Message) : Promise<void> {
 
   const post = await render (message.client, meetup);
 
-  db.insert ({ 
+  await db.insert ({ 
     ...meetup,
     announcementID: post.id
   });

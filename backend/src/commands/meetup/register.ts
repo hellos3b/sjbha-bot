@@ -17,7 +17,7 @@ import * as EndMeetups from './features/EndMeetup';
 import * as Render from './features/RenderAnnouncement';
 import * as KeepThreadsOpen from './features/KeepThreadsOpen';
 
-import { meetup } from './routes/meetup';
+import { getMeetup } from './routes/get-meetup';
 
 const client = DiscordClient.getInstance ();
 
@@ -106,6 +106,6 @@ export const routes = [
   {
     method:  'GET',
     path:    '/meetup/{id}',
-    handler: meetup
+    handler: getMeetup
   }
 ];

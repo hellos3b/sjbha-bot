@@ -7,8 +7,6 @@ import * as db from '../db/meetups';
  * Cancel a meetup
  */
 export async function cancel (message: Message) : Promise<void> {
-  console.log (`${message.author.username} is trying to Cancel a meetup`);
-
   if (!message.channel.isThread ()) {
     message.reply ('To cancel a meetup, use `!meetup cancel <reason>` in the meetup\'s thread');
     return;
