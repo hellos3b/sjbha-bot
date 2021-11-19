@@ -1,6 +1,6 @@
 import { Message, MessageEmbed } from 'discord.js';
 import YAML from 'yaml';
-
+import { DateTime } from 'luxon';
 import { env } from '@sjbha/app';
 
 import * as db from '../db/meetups';
@@ -78,7 +78,7 @@ async function updateMeetup(message: Message, meetup: db.Meetup) {
     organizerID: message.author.id,
     title:       options.title,
     category:    options.category || 'default',
-    timestamp:   options.date,
+    timestamp:   DateTime.fromISO (options.date).toISO (),
     description: options.description || '',
     links:       options.links ?? [],
     location:    M.location (options)

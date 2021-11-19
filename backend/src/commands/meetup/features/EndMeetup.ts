@@ -12,7 +12,7 @@ export async function init(client: Discord.Client) : Promise<void> {
 
   // Every day at midnight
   schedule.scheduleJob (
-    '0 0 * * *', 
+    '5 0 * * *', 
     () => endMeetups (client, DateTime.local ())
   );
 
@@ -22,9 +22,12 @@ export async function init(client: Discord.Client) : Promise<void> {
 // Check the timestamp for meetups
 // and mark any old ones as "done"
 export const endMeetups = async (client: Discord.Client, now: DateTime) : Promise<void> => {
+  const midnight = 
+    now.set ({ hour: 0, minute: 0 }).toISO ();
+
   const meetups = await db.find ({
     'state.type': 'Live',
-    timestamp:    { $lt: now.set ({ hour: 0, minute: 0 }).toISO () }
+    timestamp:    { $lt: midnight }
   });
 
   for (const meetup of meetups) {

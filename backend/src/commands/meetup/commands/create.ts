@@ -55,8 +55,7 @@ export async function create (message: Message) : Promise<void> {
     announcementID:  '',
     createdAt:       DateTime.local ().toISO (),
     category:        options.category || 'default',
-    // todo: verify date format 
-    timestamp:       options.date,
+    timestamp:       DateTime.fromISO (options.date).toISO (),
     description:     options.description || '',
     links:           options.links ?? [],
     rsvps:           [],
