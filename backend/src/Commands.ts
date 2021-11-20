@@ -5,6 +5,7 @@ import * as Christmas from './commands/christmas/register';
 import * as Fit from './commands/fit/register';
 import * as Meetup from './commands/meetup/register';
 import * as Pong from './commands/pong/Pong';
+import * as RPS from './commands/throw/register';
 import * as Subscribe from './commands/subscribe/register';
 import * as Version from './commands/version/register';
 
@@ -14,6 +15,7 @@ export const run = Command.combine (
   Fit.command,
   Meetup.command,
   Pong.command,
+  RPS.command,
   Subscribe.command,
   Version.command
 )
