@@ -70,12 +70,11 @@ const admin = Command.makeFiltered ({
 export const command = Command.combine (fit, settingsCommand, admin);
 
 // Web API
-
 export const routes = [
   {
     method:  'GET',
     path:    '/fit/accept',
-    handler: authAccept
+    handler: authAccept (client)
   },
 
   {
