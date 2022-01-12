@@ -1,7 +1,7 @@
 import * as Discord from 'discord.js';
 import { match, __ } from 'ts-pattern';
 import { DiscordClient } from '@sjbha/app';
-import { channels } from '@sjbha/config';
+import { channels } from '@sjbha/server';
 import * as Command from '@sjbha/utils/Command';
 import * as Format from '@sjbha/utils/Format';
 

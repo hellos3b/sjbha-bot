@@ -3,7 +3,7 @@ import * as Discord from 'discord.js';
 import { DateTime } from 'luxon';
 import schedule from 'node-schedule';
 
-import { channels, roles } from '@sjbha/config';
+import { channels, roles } from '@sjbha/server';
 import { MemberList } from '@sjbha/utils/MemberList';
 
 import * as Workout from './Workout';

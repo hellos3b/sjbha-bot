@@ -5,18 +5,18 @@ moduleAlias.addAlias ('@sjbha', __dirname);
 import { Settings } from 'luxon';
 import Hapi from '@hapi/hapi';
 import chalk from 'chalk';
-import { channels } from './config';
+import { channels } from './server';
 import { DiscordClient, env, MongoDb } from './app';
 import * as Command from './utils/Command';
 
-import * as Aqi from './commands/aqi/register';
-import * as Christmas from './commands/christmas/register';
+import * as Aqi from './commands/aqi/Aqi';
+import * as Christmas from './commands/christmas/Christmas';
 import * as Fit from './commands/fit/Fit';
 import * as Meetup from './commands/meetup/register';
 import * as Pong from './commands/pong/Pong';
-import * as RPS from './commands/throw/register';
-import * as Subscribe from './commands/subscribe/register';
-import * as Version from './commands/version/register';
+import * as RPS from './commands/throw/Throw';
+import * as Subscribe from './commands/subscribe/Subscribe';
+import * as Version from './commands/version/Version';
 
 Settings.defaultZoneName = 'America/Los_Angeles';
 

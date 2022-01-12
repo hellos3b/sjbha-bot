@@ -1,4 +1,4 @@
-import { channels } from '@sjbha/config';
+import { channels } from '@sjbha/server';
 import { Message } from 'discord.js';
 
 type Listener<T> = (value: T) => void;
