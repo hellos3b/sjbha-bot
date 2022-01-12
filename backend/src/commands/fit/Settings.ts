@@ -1,16 +1,16 @@
-import { variantList,TypeNames, VariantOf, match } from 'variant';
+import { match } from 'ts-pattern';
 import * as yup from 'yup';
 import { Message } from 'discord.js';
 
-import MultiChoice from '@sjbha/utils/multi-choice';
+import MultiChoice from '@sjbha/utils/MultiChoice';
 import { MessageBuilder, inlineCode } from '@sjbha/utils/Format';
 
-import * as User from '../db/user';
+import * as User from './User';
 
-const SettingsMenu = variantList (['hr', 'emoji']);
-type SettingsMenu<T extends TypeNames<typeof SettingsMenu> = undefined>= VariantOf<typeof SettingsMenu, T>;
+export type options =
+  | 'hr' | 'emoji'
 
-export async function settings (message: Message) : Promise<void> {
+export const menu = async (message: Message) : Promise<void> => {
   const user = await User.findOne ({ discordId: message.author.id });
 
   if (!User.isAuthorized (user)) {
@@ -23,9 +23,9 @@ export async function settings (message: Message) : Promise<void> {
     ? 'Update Max Heartrate [Current: ' + user.maxHR + ']'
     : 'Set Max Heartrate (Needed for HR based exp)';
 
-  const actions = MultiChoice.create <SettingsMenu> ('What would you like to do?', [
-    MultiChoice.opt (hrText, SettingsMenu.hr),
-    MultiChoice.opt (`Select Emoji Set [Current: ${user.emojis}]`, SettingsMenu.emoji)
+  const actions = MultiChoice.create <options> ('What would you like to do?', [
+    MultiChoice.opt (hrText, 'hr'),
+    MultiChoice.opt (`Select Emoji Set [Current: ${user.emojis}]`, 'emoji')
   ]);
 
   await message.channel.send (actions.toString ());
@@ -33,28 +33,22 @@ export async function settings (message: Message) : Promise<void> {
     .createMessageCollector ({ filter: m => m.author.id === message.author.id })
     .next.then (actions.parse);
 
-  if (!action)
-    return;
-
-  match (action, {
-    hr:    _ => setMaxHeartrate (user, message),
-    emoji: _ => setEmoji (user, message)
-  });
+  match (action)
+    .with ('hr', _ => setMaxHeartrate (user, message))
+    .with ('emoji', _ => setEmoji (user, message))
+    .otherwise (() => { /** ignore */ });
 }
 
-const setMaxHeartrate = async (user: User.Authorized, message: Message) => {
+const setMaxHeartrate = async (user: User.authorized, message: Message) => {
+  const currentMax = user.maxHR || 'none'; 
   const maxRecorded = user.maxRecordedHR || 0;
-
-  const prompt = new MessageBuilder ();
-
-  prompt.append ('Your Max Heartrate is used to determine the intensity of your workout, and gives you double exp when you push yourself hard.');
-  prompt.space ();
-
-  prompt.append ('👉 **If you don\'t know your Max HR**, you can guesstimate it by using the formula `220 - (your age)`');
-  prompt.append ('👉 **If you want to un-set your Max HR**, then simply reply with "remove" and it will be removed')
-  prompt.space ();
-
-  prompt.append ('What do you want to set your max heartrate to?');
+  const prompt = new MessageBuilder ()
+    .append ('Your Max Heartrate is used to determine the intensity of your workout, and gives you double exp when you push yourself hard.')
+    .space ()
+    .append ('👉 **If you don\'t know your Max HR**, you can guesstimate it by using the formula `220 - (your age)`')
+    .append ('👉 **If you want to un-set your Max HR**, then simply reply with "remove" and it will be removed')
+    .space ()
+    .append ('What do you want to set your max heartrate to?');
 
   await message.channel.send (prompt.toString ());
   
@@ -68,13 +62,13 @@ const setMaxHeartrate = async (user: User.Authorized, message: Message) => {
       maxHR: undefined
     });
 
-    message.reply (`Your max heartrate has been updated! ${user.maxHR || 'none'} -> none`);
+    message.reply (`Your max heartrate has been updated! ${currentMax} -> none`);
 
     return;
   }
 
   try {
-    const hr = await yup
+    const maxHR = await yup
       .number ().typeError ('Sorry, that is not a valid heartrate')
       .required ()
       .integer ('Sorry, that is not a valid heartrate')
@@ -83,12 +77,8 @@ const setMaxHeartrate = async (user: User.Authorized, message: Message) => {
       .moreThan (maxRecorded, `Records show that you've recorded a workout that hit at least ${maxRecorded} once, so I believe ${input} might be too low.\nIf this is a mistake, please message the bot admin and we can update it manually`)
       .validate (input, { abortEarly: true });
 
-    await User.update ({
-      ...user,
-      maxHR: hr
-    });
-
-    message.reply (`Your max heartrate has been updated! ${inlineCode (user.maxHR || 'none')} -> ${inlineCode (hr)}`);
+    await User.update ({ ...user, maxHR });
+    message.reply (`Your max heartrate has been updated! ${inlineCode (currentMax)} -> ${inlineCode (maxHR)}`);
   }
   catch (e) {
     const reply = (e instanceof Error) ? e.message : 'Something unexpected happened';
@@ -96,8 +86,8 @@ const setMaxHeartrate = async (user: User.Authorized, message: Message) => {
   }
 }
 
-const setEmoji = async (user: User.Authorized, message: Message) => {
-  const emojiChoice = MultiChoice.create ('Which emoji set do you want to use when an activity posts?', [
+const setEmoji = async (user: User.authorized, message: Message) => {
+  const picker = MultiChoice.create ('Which emoji set do you want to use when an activity posts?', [
     MultiChoice.opt ('People - Default (🏃🚴🧘‍♂️🚶‍♂️🏋️‍♂️🧗‍♀️🤸‍♂️)', 'people-default'),
     MultiChoice.opt ('People - Female (🏃‍♀️🚴‍♀️🧘‍♀️🚶‍♀️🏋️‍♀️🧗‍♂️🤸‍♀️)', 'people-female'),
     MultiChoice.opt ('Objects (👟🚲☮️🥾🥾💪⛰️💦)', 'objects'),
@@ -105,19 +95,15 @@ const setEmoji = async (user: User.Authorized, message: Message) => {
     MultiChoice.opt ('Intensity Based Colors (​🟣​🟢​​🟡🟠🔴​​)', 'intensity-circle')
   ]);
 
-  await message.channel.send (emojiChoice.toString ());
+  await message.channel.send (picker.toString ());
+
   const emojis = await message.channel
     .createMessageCollector ({ filter: m => m.author.id === message.author.id })
-    .next.then (msg => msg.content.toLowerCase ());
+    .next
+    .then (picker.parse);
 
-  if (!emojis) {
-    return;
+  if (emojis) {
+    await User.update ({ ...user, emojis });
+    message.reply (`Your Emoji Set has been updated! ${inlineCode (user.emojis)} -> ${inlineCode (emojis)}`);
   }
-
-  await User.update ({
-    ...user,
-    emojis: emojis
-  });
-
-  message.reply (`Your Emoji Set has been updated! ${inlineCode (user.emojis)} -> ${inlineCode (emojis)}`);
 }

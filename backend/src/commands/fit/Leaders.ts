@@ -1,19 +1,34 @@
 import { Message, MessageEmbed } from 'discord.js';
-import { isType } from 'variant';
 import { DateTime, Interval } from 'luxon';
 import * as R from 'ramda';
 
-import { Workouts, sumExp, Exp, Workout } from '../db/workout';
-import { MemberList } from '../../../utils/MemberList';
+import { MemberList } from '@sjbha/utils/MemberList';
+import * as Workout from './Workout';
+import * as Exp from './Exp';
 
-export async function leaders (message: Message) : Promise<void> {
+const WorkoutCollection = (workouts: Workout.workout[]) => ({
+  discordIds:    R.uniq (workouts.map (w => w.discord_id)),
+  activityTypes: R.uniq (workouts.map (w => w.activity_type)),
+  count:         workouts.length,
+  exp:           workouts.map (w => Exp.total (w.exp)).reduce ((a, b) => a + b, 0),
+
+  filterType: (activityType: string) => WorkoutCollection (
+    workouts.filter (w => w.activity_type === activityType)
+  ),
+
+  filterUser: (discordId: string) => WorkoutCollection (
+    workouts.filter (w => w.discord_id === discordId)
+  )
+});
+
+// Leaders gets all workout types and shows the top 2 EXP earners in each category
+export async function leaderboard (message: Message) : Promise<void> {
   const lastThirtyDays = Interval.before (DateTime.local (), { days: 30 });
   const allWorkouts = 
-    await Workouts ()
-    .during (lastThirtyDays)
-    .find ()
-    .then (list => list.filter (w => isType (w.exp, Exp.hr)))
-    .then (WorkoutCollection);
+    await Workout
+      .find (Workout.during (lastThirtyDays))
+      .then (list => list.filter (w => Exp.isHr (w.exp)))
+      .then (WorkoutCollection);
 
   const members = 
     await MemberList.fetch (message.client, allWorkouts.discordIds);
@@ -52,18 +67,3 @@ export async function leaders (message: Message) : Promise<void> {
 
   message.channel.send ({ embeds: [embed] });
 }
-
-const WorkoutCollection = (workouts: Workout.Model[]) => ({
-  discordIds:    R.uniq (workouts.map (w => w.discord_id)),
-  activityTypes: R.uniq (workouts.map (w => w.activity_type)),
-  count:         workouts.length,
-  exp:           sumExp (workouts),
-
-  filterType: (activityType: string) => WorkoutCollection (
-    workouts.filter (w => w.activity_type === activityType)
-  ),
-
-  filterUser: (discordId: string) => WorkoutCollection (
-    workouts.filter (w => w.discord_id === discordId)
-  )
-});

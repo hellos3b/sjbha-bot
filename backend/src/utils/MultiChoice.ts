@@ -1,5 +1,4 @@
 import { Message } from 'discord.js';
-import { option, Option } from 'ts-option';
 import { MessageBuilder } from './Format';
 
 export type Choice<T> = {
@@ -17,16 +16,15 @@ export default class MultiChoice<T> {
     this.choices = choices;
   }
 
-  get = (index: number | string) : Option<T> => {
+  get = (index: number | string) : T | null => {
     const choice = (typeof index === 'string') ? parseInt (index) : index;
-
-    return option (this.choices[choice]).map (o => o.value);
+    return this.choices[choice]?.value ?? null;
   }
 
   parse = (message: Message) : T | null => 
     (message.content === 'cancel')
       ? null
-      : this.get (message.content).orNull
+      : this.get (message.content)
 
   toString() : string {
     const msg = new MessageBuilder ();
