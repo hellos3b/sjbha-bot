@@ -1,62 +1,51 @@
-import { command } from "@sjbha/commands/pong/Pong";
-import * as DiscordJs from "discord.js";
-import { match, __ } from "ts-pattern";
+import * as DiscordJs from 'discord.js';
+import { __ } from 'ts-pattern';
 
-type t = (message: DiscordJs.Message) => void;
+type command = (message: DiscordJs.Message) => void;
 
-export const make = (callback: t): t => callback;
+export const make = (callback: command): command => callback;
 
 export namespace Filter {
-  export type t = (message: DiscordJs.Message) => boolean;
+  export type filter = (message: DiscordJs.Message) => boolean;
 
-  export const and = (...filters: t[]) : t => {
-    return message => filters.every(f => f(message));
-  }
+  export const and = (...filters: filter[]) : filter => message => 
+    filters.every (f => f (message))
+
+  export const or = (...filters: filter[]) : filter => message =>
+    filters.some (f => f (message));
 
   /**
    * Filters for messages that start with a string.
    * You can pass in additional aliases
    */
-  export const startsWith = (...instigators: string[]) : t => {
-    return message => {
+  export const startsWith = (...instigators: string[]) : filter => message => {
       const [first] = message.content.split (' ');
 
       return instigators.map (s => s.toLowerCase ())
         .includes (first.toLowerCase ());
     }
-  }
 
-  export const inChannel = (channelId: string, replyWith?: string) : t => {
-    return message => {
+  export const inChannel = (channelId: string, replyWith?: string) : filter => message => {
       if (message.channel.id === channelId) {
         return true;
       }
       
-      replyWith && message.channel.send(replyWith);
+      replyWith && message.channel.send (replyWith);
       return false;
     }
-  }
 
-  export const dmsOnly = () : t => {
-    return message => message.channel.type === "DM";
-  }
+  export const dmsOnly = () : filter => message => message.channel.type === 'DM'
 
-  export const equals = (str: string) : t => {
-    return message => message.content === str;
-  }
+  export const equals = (str: string) : filter => message => message.content === str
 
 }
 
 export const makeFiltered = (opt: {
-  filter: Filter.t,
-  callback: t
-}) : t => {
-  return message => opt.filter(message) && opt.callback(message);
-}
+  filter: Filter.filter,
+  callback: command
+}) : command => message => opt.filter (message) && opt.callback (message)
 
-export const combine = (...commands: t[]) : t => {
-  return message => commands.forEach (command => command(message))
-}
+export const combine = (...commands: command[]) : command => message => commands.forEach (command => command (message))
 
 export const route = (message: DiscordJs.Message) : string | undefined => {
   const [_, route] = message.content

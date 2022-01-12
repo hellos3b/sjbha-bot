@@ -1,9 +1,7 @@
 import { DateTime, Duration, Interval } from 'luxon';
 
-/**
- * A week is an interval that starts on Monday at 1am
- * This method is for finding that timestamp based on any date
- */
+// A week is an interval that starts on Monday at 1am
+// This method is for finding that timestamp based on any date
 const getStartOfWeek = (date: DateTime) => {
   // If the timestamp is on Sunday, use the previous monday
   if (date.weekday === 0) {
@@ -22,13 +20,14 @@ const getStartOfWeek = (date: DateTime) => {
     .set ({ hour: 1, minute: 0, second: 0 });  
 }
 
-const weekFromDate = (date: DateTime) : Interval => Interval.after (
-  getStartOfWeek (date),
-  Duration.fromObject ({ days: 7 })
-);
+const weekFromDate = (date: DateTime) : Interval => 
+  Interval.after (
+    getStartOfWeek (date),
+    Duration.fromObject ({ days: 7 })
+  );
 
-export const currentWeek = () : Interval => 
+export const current = () : Interval => 
   weekFromDate (DateTime.local ());
 
-export const previousWeek = () : Interval =>
+export const previous = () : Interval =>
   weekFromDate (DateTime.local ().minus ({ days: 7 }));

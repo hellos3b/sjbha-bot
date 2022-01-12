@@ -4,15 +4,61 @@ import { DateTime } from 'luxon';
 import schedule from 'node-schedule';
 
 import { channels, roles } from '@sjbha/config';
+import { MemberList } from '@sjbha/utils/MemberList';
 
-import { Workout, Workouts, sumExp, belongsTo } from '../db/workout';
-import * as User from '../db/user';
-import { previousWeek } from '../common/week';
-import { MemberList } from '../../../utils/MemberList';
-import { getRank } from '../common/ranks';
+import * as Workout from './Workout';
+import * as User from './User';
+import * as Exp from './Exp';
+import * as Week from './Week';
+import * as Rank from './Rank';
 
 const MINIMUM_EXP_FOR_PROMOTION = 150;
 const MAX_FITSCORE = 100;
+
+
+/** Utility for keeping track of user's diff */
+type UserPromoter = {
+  // Reference to the user, up to date with the latest fitScore
+  user: User.authorized;
+  // Which direction the fit score changed and by how much
+  change: number;
+
+  // Increase / decrease the user's fitScore
+  promote: (workouts: Workout.workout[]) => void;
+};
+
+
+const UserPromoter = (user: User.authorized) : UserPromoter => {
+  let draft: User.authorized = { ...user };
+
+  return {
+    get user() {
+      return draft;
+    },
+
+    get change() {
+      return draft.fitScore - user.fitScore;
+    },
+
+    promote: workouts => {
+      const exp = workouts.map (w => Exp.total (w.exp)).reduce ((a, b) => a + b, 0);
+      let score = draft.fitScore;
+
+      if (exp >= MINIMUM_EXP_FOR_PROMOTION) {
+        score = user.fitScore + 5;
+      }
+      else {
+        const missedBy = 1 - (exp / MINIMUM_EXP_FOR_PROMOTION);
+        score -= missedBy * 5;
+      }
+
+      draft = {
+        ...draft,
+        fitScore: R.clamp (0, MAX_FITSCORE, score)
+      };
+    }
+  }
+};
 
 const fetchStravaChannel = async (client: Discord.Client) => {
   const channel = await client.channels.fetch (channels.strava);
@@ -25,6 +71,23 @@ const fetchStravaChannel = async (client: Discord.Client) => {
 }
 
 /**
+ * Set the role the user has been awarded.
+ * User can only have 1 role at a time, so we'll remove the others
+ */
+const updateRoles = (member: Discord.GuildMember, roleId: string) : Promise<void[]> => 
+  Promise.all (
+   [roles.certified_swole, roles.max_effort, roles.break_a_sweat]
+     .map (async role => {
+       if (role === roleId && member.roles.cache.has (role)) {
+         await member.roles.add (role);
+       }
+       else if (role !== roleId && member.roles.cache.has (role)) {
+         await member.roles.remove (role);
+       }
+     })
+  );
+
+/**
  * Once a week we tally up how much exp a user's gained in a week,
  * and either increase or decrease their `fitScore`
  * then post everyone's promotion status
@@ -33,7 +96,7 @@ const fetchStravaChannel = async (client: Discord.Client) => {
  * and if they don't reach it then they lose 0-5 fit score based on how much they gained
  */
 export const runPromotions = async (client: Discord.Client) : Promise<void> => {
-  const lastWeek = previousWeek ();
+  const lastWeek = Week.previous ();
 
   console.log ('Begin promotions: Fetching all users and workouts from week ' + lastWeek.toString ());
 
@@ -41,9 +104,7 @@ export const runPromotions = async (client: Discord.Client) : Promise<void> => {
     User.find ()
       .then (u => u.filter (User.isAuthorized)),
 
-    Workouts ()
-      .during (lastWeek)
-      .find ()
+    Workout.find (Workout.during (lastWeek))
   ]);
 
   const promoters = users.map (UserPromoter);
@@ -61,7 +122,7 @@ export const runPromotions = async (client: Discord.Client) : Promise<void> => {
   // and save it to the database
   await Promise.all (
     promoters.map (async promoter => {
-      const workouts = allWorkouts.filter (belongsTo (promoter.user));
+      const workouts = allWorkouts.filter (Workout.belongsTo (promoter.user));
       promoter.promote (workouts);
 
       console.log (`Saving ${promoter.user.discordId} (${members.nickname (promoter.user.discordId)})`);
@@ -74,10 +135,9 @@ export const runPromotions = async (client: Discord.Client) : Promise<void> => {
         : '';
 
       members.get (promoter.user.discordId)
-        .map (m => setFitRole (m, userRole));
+        .map (m => updateRoles (m, userRole));
     })
   );
-
 
   // Format each result type into a row 
   // that we'll display all one after another in an embed
@@ -93,7 +153,7 @@ export const runPromotions = async (client: Discord.Client) : Promise<void> => {
         : (user.fitScore === 0 && change < 0) ? '🥺'
         : '🔻';
           
-      const rank = getRank (user.fitScore);
+      const rank = Rank.fromScore (user.fitScore);
       const nickname = members.nickname (user.discordId);
       
       // add a plus sign if change is positive
@@ -121,69 +181,6 @@ export const runPromotions = async (client: Discord.Client) : Promise<void> => {
     await channel.send ({ embeds: [embed] });
   }
 }
-
-/** Utility for keeping track of user's diff */
-type UserPromoter = {
-
-  /** Reference to the user, up to date with the latest fitScore */
-  user: User.Authorized;
-
-  /** Which direction the fit score changed and by how much */
-  change: number;
-
-  /** Increase / decrease the user's fitScore */
-  promote: (workouts: Workout.Model[]) => void;
-};
-
-const UserPromoter = (user: User.Authorized) : UserPromoter => {
-  let draft: User.Authorized = { ...user };
-
-  return {
-    get user() {
-      return draft;
-    },
-
-    get change() {
-      return draft.fitScore - user.fitScore;
-    },
-
-    promote: workouts => {
-      const exp = sumExp (workouts);
-      let score = draft.fitScore;
-
-      if (exp >= MINIMUM_EXP_FOR_PROMOTION) {
-        score = user.fitScore + 5;
-      }
-      else {
-        const missedBy = 1 - (exp / MINIMUM_EXP_FOR_PROMOTION);
-        score -= missedBy * 5;
-      }
-
-      draft = {
-        ...draft,
-        fitScore: R.clamp (0, MAX_FITSCORE, score)
-      };
-    }
-  }
-};
-
-
-/**
- * Set the role the user has been awarded.
- * User can only have 1 role at a time, so we'll remove the others
- */
-const setFitRole = (member: Discord.GuildMember, roleId: string) : Promise<void[]> => 
-  Promise.all (
-    [roles.certified_swole, roles.max_effort, roles.break_a_sweat]
-      .map (async role => {
-        if (role === roleId && member.roles.cache.has (role)) {
-          await member.roles.add (role);
-        }
-        else if (role !== roleId && member.roles.cache.has (role)) {
-          await member.roles.remove (role);
-        }
-      })
-  );
 
 export const startSchedule = (client: Discord.Client) : void => {
   // The time when the weekly update gets posted

@@ -9,11 +9,11 @@ const ranks = [
   'Golden Eagle'
 ];
 
-const no_rank = 'Bushtit';
+const none = 'Bushtit';
 
-export const getRank = (score: number) : string => {
+export const fromScore = (score: number) : string => {
   if (score === 0)
-    return no_rank;
+    return none;
 
   // Each rank is 20 points
   const rankLevel = Math.floor (score / 20);
@@ -23,10 +23,10 @@ export const getRank = (score: number) : string => {
   // Each rank is split into quarters represented by division
   const remainder = score % 20;
   const division = 
-    (remainder < 5) ? 'I' 
-    : (remainder < 10) ? 'II' 
-    : (remainder < 15) ? 'III' 
-    : 'IV';
+    (remainder < 5) ? 'I' : 
+    (remainder < 10) ? 'II' : 
+    (remainder < 15) ? 'III' : 
+    'IV';
   
   return rank + ' ' + division;
 }
