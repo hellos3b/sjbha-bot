@@ -9,6 +9,26 @@ import * as StravaAPI from './StravaAPI';
 
 // The authorization data given from strava
 
+// Strava URL for first step in OAuth flow
+// you send the user here where they get prompted to "Authorize with BoredBot"
+export const oauthUrl = (authToken: string) : string => {
+  const params = {
+    client_id:       StravaAPI.clientId (),
+    redirect_uri:    env.HAPI_HOST + '/fit/accept',
+    scope:           'read,activity:read_all,profile:read_all', 
+    state:           authToken,
+    response_type:   'code',
+    approval_prompt: 'force'
+  };
+
+  const query = 
+    Object.entries (params)
+    .map (([key, value]) => key + '=' + value)
+    .join ('&');
+    
+  return `http://www.strava.com/oauth/authorize?${query}`;
+}
+
 
 // When a user wants to start using the bot with their discord account,
 // they need to complete onboarding which will
@@ -17,7 +37,7 @@ import * as StravaAPI from './StravaAPI';
 // 3. Save the tokens into the DB and let them know it's completed
 export async function onBoarding (message: DiscordJs.Message) : Promise<void> {
   const user = await User.init (message.author.id);
-  const url = StravaAPI.oauthUrl (user.authToken);
+  const url = oauthUrl (user.authToken);
   
   const onboarding = new format.MessageBuilder ()
     .append ('Welcome to the fitness channel!').space ()

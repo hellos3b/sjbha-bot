@@ -1,4 +1,5 @@
 import { match } from 'ts-pattern';
+import { add } from 'ramda';
 import type * as Activity from './Activity';
 import type * as StravaAPI from './StravaAPI';
 
@@ -23,6 +24,9 @@ export const total = (exp: exp) : number =>
     .with ({ type: 'hr' }, ({ moderate, vigorous }) => moderate + vigorous)
     .with ({ type: 'time' }, ({ exp }) => exp)
     .exhaustive ();
+
+export const sum = (exp: exp[]) : number =>
+  exp.map (total).reduce (add, 0);
   
 export const isHr = (exp: exp) : exp is hr =>
   exp.type === 'hr';

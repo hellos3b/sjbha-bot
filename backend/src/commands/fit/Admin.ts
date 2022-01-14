@@ -3,8 +3,8 @@ import { table } from 'table';
 import * as format from '@sjbha/utils/Format';
 import { env } from '@sjbha/app';
 
-import * as Member from '@sjbha/Member';
-import * as ActivityEmbed from './ActivityEmbed';
+import * as Member from '@sjbha/Guild';
+import * as WorkoutEmbed from './WorkoutEmbed';
 import * as Exp from './Exp';
 import * as Workout from './Workout';
 import * as Promotions from './Promotions';
@@ -21,7 +21,7 @@ export const listWorkouts = async (message: DiscordJs.Message) : Promise<void> =
   const workouts = await Workout.find ({}, { limit: 20 });
 
   const row = async (workout: Workout.workout) => {
-    const member = await Member.fetch (workout.discord_id, message.client);
+    const member = await Member.member (workout.discord_id, message.client);
 
     return [
       workout.activity_id.toString (),
@@ -30,7 +30,7 @@ export const listWorkouts = async (message: DiscordJs.Message) : Promise<void> =
       Exp.total (workout.exp).toFixed (1),
       workout.activity_name
     ]
-  }
+  };
 
   const rows = await Promise.all (workouts.map (row));
 
@@ -55,10 +55,11 @@ export const post = async (message: DiscordJs.Message) : Promise<void> => {
 
   message.reply ('Posting workout!');
   
-  try { ActivityEmbed.post (message.client, +stravaId, +activityId) } 
-  catch (e) {
-    console.error (e);
-    message.reply ('Failed to post');
+  const error = await WorkoutEmbed.post (message.client, +stravaId, +activityId);
+
+  if (error) {
+    console.error ('Could not post workout', error);
+    message.reply (error.message);
   }
 }
 
@@ -74,14 +75,13 @@ export async function remove (message: DiscordJs.Message) : Promise<void> {
   if (isNaN (+activityId)) 
     return withReply (`Invalid activityId '${activityId}': ${usage}`, message);
 
-  try {
-    const name = await ActivityEmbed.remove (+activityId, message.client);
-    message.reply (`Removed activity '${name}'`);
+  const result = await WorkoutEmbed.remove (+activityId, message.client);
+  if (result instanceof Error) {
+    console.error (result);
+    message.reply (result.message);
   }
-  catch (e) {
-    const err = (e instanceof Error) ? e.message : 'Unknown Reason';
-    console.error (`Failed to remove activity '${activityId}': ${err}`);
-    message.reply (`Failed to remove activity '${activityId}': ${err}`);
+  else {
+    message.reply (`Removed activity '${result}'`);
   }
 }
 

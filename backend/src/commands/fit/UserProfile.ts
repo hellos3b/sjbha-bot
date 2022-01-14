@@ -8,12 +8,7 @@ import * as Workout from './Workout';
 import * as Week from './Week';
 import * as Rank from './Rank';
 import * as EmojiSet from './EmojiSet';
-
-
-// Rounds and shortens an EXP value for display
-const formatExp = (amt: number) => 
- (amt >= 1000) ? (amt / 1000).toFixed (1) + 'k'
-   : amt.toFixed (1)
+import * as Format from './Format';
 
 export const render = async (message: Message) : Promise<void> => {
   const user = await User.findOne ({ discordId: message.author.id });
@@ -38,7 +33,7 @@ export const render = async (message: Message) : Promise<void> => {
   embed.addField ('Rank', `${rank} (${score})`, true);
   
   // Lifetime EXP gained
-  embed.addField ('Total EXP', formatExp (user.xp), true);
+  embed.addField ('Total EXP', Format.exp (user.xp), true);
 
   // All workouts in the last 30 days
   const lastThirtyDays = Interval.before (DateTime.local (), { days: 30 });
@@ -52,7 +47,7 @@ export const render = async (message: Message) : Promise<void> => {
   
   // Collection of workouts that apply to this week's promotion
   const weekly = profileWorkouts.filter (w => w.timestamp >= weekStart.toISO ());
-  embed.addField ('Weekly EXP', formatExp (Workout.exp (weekly)), true); 
+  embed.addField ('Weekly EXP', Format.exp (Workout.exp (weekly)), true); 
 
   // The user's most recently recorded workout
   const mostRecentWorkout = option (profileWorkouts)
