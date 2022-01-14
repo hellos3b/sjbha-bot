@@ -2,7 +2,7 @@ import * as Discord from 'discord.js';
 import { match, __ } from 'ts-pattern';
 import { DiscordClient, env } from '@sjbha/app';
 import * as Command from '@sjbha/utils/Command';
-import { channels } from '@sjbha/config';
+import { channels } from '@sjbha/server';
 
 import { create } from './commands/create';
 import { cancel } from './commands/cancel';

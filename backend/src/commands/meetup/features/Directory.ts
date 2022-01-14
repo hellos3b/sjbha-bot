@@ -2,7 +2,7 @@ import * as Discord from 'discord.js';
 import { DateTime } from 'luxon';
 
 import { env, Settings } from '@sjbha/app';
-import { channels } from '@sjbha/config';
+import { channels } from '@sjbha/server';
 import * as Format from '@sjbha/utils/Format';
 import * as Log from '@sjbha/utils/Log';
 

@@ -1,6 +1,31 @@
 import * as Discord from 'discord.js';
 
+type ReactionEvent = { 
+  type: 'add' | 'remove'; 
+  reaction: Discord.MessageReaction; 
+  user: Discord.User; 
+};
+
+type ClientOptions = {
+  token: string;
+  onReady: (client: Discord.Client) => void;
+  onMessage: (message: Discord.Message) => void;
+  onReaction: (event: ReactionEvent) => void;
+}
+
 // Connect
+const fetchPartials = async (
+  reaction: Discord.MessageReaction | Discord.PartialMessageReaction,
+  user: Discord.User | Discord.PartialUser
+) => {
+  // If either of these are partial, fetch them
+  const [reaction2, user2] = await Promise.all ([
+    (reaction.partial) ? reaction.fetch () : Promise.resolve (reaction),
+    (user.partial) ? user.fetch () : Promise.resolve (user)
+  ]);
+
+  return [reaction2, user2] as const;
+}
 
 const client = new Discord.Client ({
   intents: [
@@ -16,32 +41,6 @@ const client = new Discord.Client ({
     'REACTION'
   ]
 });
-
-const fetchPartials = async (
-  reaction: Discord.MessageReaction | Discord.PartialMessageReaction,
-  user: Discord.User | Discord.PartialUser
-) => {
-  // If either of these are partial, fetch them
-  const [reaction2, user2] = await Promise.all ([
-    (reaction.partial) ? reaction.fetch () : Promise.resolve (reaction),
-    (user.partial) ? user.fetch () : Promise.resolve (user)
-  ]);
-
-  return [reaction2, user2] as const;
-}
-
-type ReactionEvent = { 
-  type: 'add' | 'remove'; 
-  reaction: Discord.MessageReaction; 
-  user: Discord.User; 
-};
-
-type ClientOptions = {
-  token: string;
-  onReady: (client: Discord.Client) => void;
-  onMessage: (message: Discord.Message) => void;
-  onReaction: (event: ReactionEvent) => void;
-}
 
 export const connect = ({ token, onReady, onMessage, onReaction }: ClientOptions) : void => {
   client.on ('ready', () => onReady (client));

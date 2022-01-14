@@ -1,9 +1,9 @@
-import { channels } from '@sjbha/config';
+import { channels } from '@sjbha/server';
 import * as Command from '@sjbha/utils/Command';
-import { match, select, __ } from 'ts-pattern';
+import { match, __ } from 'ts-pattern';
 
-import { profile } from './Profile';
-import { rockPaperScissors } from './RockPaperScissors';
+import * as Profile from './Profile';
+import * as RockPaperScissors from './RockPaperScissors';
 
 // Rock paper scissors!
 export const command = Command.makeFiltered ({
@@ -14,7 +14,6 @@ export const command = Command.makeFiltered ({
 
   callback: async message =>
     match (Command.route (message))
-    .with (__.nullish, () => profile (message))
-    .with (select (), hand => rockPaperScissors (message, hand || ''))
-    .run ()
+    .with (__.nullish, () => Profile.render (message))
+    .otherwise (hand => RockPaperScissors.play (message, hand ?? ''))
 })

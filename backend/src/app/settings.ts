@@ -1,6 +1,10 @@
 import * as MongoDb from './MongoDb';
 
-type Setting = { key: string; data: unknown; }
+type Setting = { 
+  key: string; 
+  data: unknown; 
+}
+
 const getCollection = async () => 
   MongoDb.getCollection <Setting> ('settings');
 

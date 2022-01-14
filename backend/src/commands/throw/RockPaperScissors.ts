@@ -1,25 +1,50 @@
+import { match } from 'ts-pattern';
 import * as Discord from 'discord.js';
 import { DateTime } from 'luxon';
-import { match } from 'ts-pattern';
 
-import * as Format from '@sjbha/utils/Format'
-import * as Game from './Game';
-import * as Streaks from './Streak';
+import * as Format from '@sjbha/utils/Format';
+import * as Streak from './Streak';
 
 const COOLDOWN_MINUTES = 60;
-export const rockPaperScissors = async (message: Discord.Message, handString: string) : Promise<void> => {
-  const hand = {
-    'rock':     Game.Hand.Rock,
-    'scissors': Game.Hand.Scissors,
-    'paper':    Game.Hand.Paper
-  }[handString];
 
-  if (hand === undefined) {
+type hand =
+  | 'rock'
+  | 'paper'
+  | 'scissors'
+
+type result =
+  | 'win'
+  | 'tie'
+  | 'loss'
+
+const hands : hand[] = ['rock', 'paper', 'scissors'];
+
+const checkResult = (a: hand, b: hand) : result => {
+  const wins = (a2: hand, b2: hand) =>
+    match ([a2, b2])
+    .with (['rock', 'scissors'], () => true)
+    .with (['paper', 'rock'], () => true)
+    .with (['scissors', 'paper'], () => true)
+    .otherwise (() => false);
+
+  return (wins (a, b)) ? 'win'
+    : (wins (b, a)) ? 'loss'
+    : 'tie';
+}
+
+const randomHand = ()  =>
+  hands[Math.floor (Math.random ()*3)];
+
+const validHand = (str: hand | string) : str is hand =>
+  hands.includes (<hand>str);
+
+export const play = async (message: Discord.Message, hand: string) : Promise<void> => {
+  if (!validHand (hand)) {
     message.reply ('Not a valid hand - Allowed options: "rock", "paper", "scissors"')
     return;
   }
 
-  const streak = await Streaks.findOrCreate (message.author.id);
+  const streak = await Streak.findOrMake (message.author.id);
   
   if (streak.cooldown) {
     const cooldown = DateTime.fromISO (streak.cooldown);
@@ -33,14 +58,13 @@ export const rockPaperScissors = async (message: Discord.Message, handString: st
     }
   }
 
-  const bot = Game.randomHand ();
-  const botHand = Game.toString (bot);
+  const bot = randomHand ();
 
-  switch (Game.checkResult (hand, bot)) {
-    case Game.Result.Win: {
+  switch (checkResult (hand, bot)) {
+    case 'win': {
       const currentStreak = streak.currentStreak + 1;
 
-      const update = await Streaks.update ({
+      const update = await Streak.update ({
         ...streak,
         bestStreak:    Math.max (streak.bestStreak, currentStreak),
         currentStreak: currentStreak
@@ -53,14 +77,14 @@ export const rockPaperScissors = async (message: Discord.Message, handString: st
         .when (s => s > update.bestStreak, () => '⭐ New Personal Record!')
         .run ();
 
-      message.reply (`🏆 Bot throws ${botHand}, you win!\nCurrent Streak: **${update.currentStreak}** ${stats}`);
+      message.reply (`🏆 Bot throws ${bot}, you win!\nCurrent Streak: **${update.currentStreak}** ${stats}`);
       return;
     }
     
-    case Game.Result.Lose: {
+    case 'loss': {
       const cooldown = DateTime.local ();
 
-      await Streaks.update ({
+      await Streak.update ({
         ...streak,
         currentStreak: 0,
         cooldown:      cooldown.toISO ()
@@ -75,12 +99,12 @@ export const rockPaperScissors = async (message: Discord.Message, handString: st
 
       const cooldownTarget = cooldown.plus ({ minutes: COOLDOWN_MINUTES });
 
-      message.reply (`🌧️ Bot throws ${botHand}, you lost. ${stats}\nCan play again ${Format.time (cooldownTarget, Format.TimeFormat.Relative)}`);
+      message.reply (`🌧️ Bot throws ${bot}, you lost. ${stats}\nCan play again ${Format.time (cooldownTarget, Format.TimeFormat.Relative)}`);
       return;
     }
 
-    case Game.Result.Tie: {
-      message.reply (`🏳️ Bot also throws ${botHand}`);
+    case 'tie': {
+      message.reply (`🏳️ Bot also throws ${bot}`);
       return;
     }
   }

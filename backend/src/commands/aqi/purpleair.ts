@@ -1,39 +1,76 @@
 import { convert } from '@shootismoke/convert';
 import superagent from 'superagent';
 import * as R from 'ramda';
-import { variantList, TypeNames, VariantOf } from 'variant';
 
-export interface Response {
-  readonly results: SensorData[];
+
+// A readable impression of the aqi number
+export type level =
+  | 'good'
+  | 'sketchy'
+  | 'bad'
+  | 'terrible'
+
+export type sensorData = {
+  ID: number;
+  // Each sensor has two readings (channel A | B)
+  // and if theres a ParentID then that means we're looking at channel B
+  ParentID?: number;
+  // Needs to be JSON Stringified
+  Stats: string;
 }
 
-export interface SensorData {
-
-  /** The Sensor ID */
-  readonly ID: number;
-
-  /** The sensor ID of the parent if it's channel B */
-  readonly ParentID?: number;
-
-  /** Needs to be JSON Stringified */
-  readonly Stats: string;
-}
-
-export interface SensorStats {
-
-  /** Real time PM2.5 value */
+// Comes in the 'Stats' field of sensor data
+type sensorStats = {
+  // Real time PM2.5 value
   readonly v: number;
-
-  /** Short term (10 minute average) */
+  // Short term (10 minute average)
   readonly v1: number;
 }
 
-/**
- * A PurpleAir Sensor
- */
+export type response = {
+  results: sensorData[];
+}
+
+const DTSJ = 'Downtown San Jose';
+const ESJ = 'East San Jose';
+const SSJ = 'South San Jose';
+const SC = 'Santa Clara';
+const MV = 'Mountain View';
+const SM = 'San Mateo';
+
+const sensors = [
+  { id: 56013, location: DTSJ },
+  { id: 64381, location: DTSJ },
+  { id: 64881, location: DTSJ },
+  { id: 20757, location: ESJ },
+  { id: 64881, location: ESJ },
+  { id: 56007, location: ESJ },
+  { id: 15245, location: SSJ },
+  { id: 54205, location: SSJ },
+  { id: 54205, location: SSJ },
+  { id: 19313, location: SC },
+  { id: 70615, location: SC },
+  { id: 60819, location: SC },
+  { id: 38607, location: MV },
+  { id: 62249, location: MV },
+  { id: 60819, location: MV },
+  { id: 60115, location: SM },
+  { id: 59143, location: SM },
+  { id: 67283, location: SM }
+];
+
+export const locations = [DTSJ, ESJ, SSJ, SC, MV, SM];
+
+export const sensorIds = sensors.map (_ => _.id);
+
+export const sensorsByLocation = (location: string) : number[] => 
+  sensors.filter (source => source.location === location)
+    .map (source => source.id);
+
+// A PurpleAir Sensor
 class Sensor {
   constructor (
-    private readonly data: SensorData
+    private readonly data: sensorData
   ) {}
 
   /**
@@ -51,7 +88,7 @@ class Sensor {
    */
   getAQI () : Error | number {
     try {
-      const stats: SensorStats = JSON.parse (this.data.Stats);
+      const stats: sensorStats = JSON.parse (this.data.Stats);
 
       return convert ('pm25', 'raw', 'usaEpa', stats.v1);
     }
@@ -113,7 +150,7 @@ export class SensorCollection {
     const response = await superagent
       .get ('https://www.purpleair.com/json')
       .query ({ show: ids.join ('|') })
-      .then (r => <Response>r.body);
+      .then (r => <response>r.body);
   
     const sensors = response.results.map (s => new Sensor (s));
   
@@ -121,34 +158,22 @@ export class SensorCollection {
   }
 }
 
-/**
- * A readable impression of the aqi number
- */
-const Level = variantList ([
-  'good',
-  'sketchy',
-  'bad',
-  'terrible'
-]);
-
-export type Level<T extends TypeNames<typeof Level> = undefined>= VariantOf<typeof Level, T>;
-
 export class AQI {
   constructor (
     public readonly value: number
   ) {}
 
-  get level () : Level {
+  get level () : level {
     if (this.value < 50)
-      return Level.good ();
+      return 'good';
 
     if (this.value < 100)
-      return Level.sketchy ();
-
+      return 'sketchy';
+      
     if (this.value < 150)
-      return Level.bad ();
+      return 'bad';
 
-    return Level.terrible ();
+    return 'terrible';
   }
 
   toString () : string {

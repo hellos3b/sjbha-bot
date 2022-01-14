@@ -1,33 +1,29 @@
 import { MongoDb } from '@sjbha/app';
 import { Collection } from 'mongodb';
 
-export type Streak = {
+export type streak = {
   userId: string;
   bestStreak: number;
   currentStreak: number;
   cooldown?: string;
 }
 
-const Streak = (userId: string) => ({ userId, bestStreak: 0, currentStreak: 0 });
+const make = (userId: string) => ({ userId, bestStreak: 0, currentStreak: 0 });
 
-const getCollection = () : Promise<Collection<Streak>> => 
-  MongoDb.getCollection<Streak> ('rps-streak');
+const getCollection = () : Promise<Collection<streak>> => 
+  MongoDb.getCollection<streak> ('rps-streak');
 
-export const findOrCreate = async (userId: string) : Promise<Streak> => {
-  const streaks = 
-    await getCollection ();
+export const findOrMake = async (userId: string) : Promise<streak> => {
+  const collection = await getCollection ();
+  const streak = await collection.findOne ({ userId });
 
-  const streak =
-    await streaks.findOne ({ userId });
-
-  return streak ?? Streak (userId);
+  return streak ?? make (userId);
 }
 
-export const update = async (streak: Streak) : Promise<Streak> => {
-  const streaks = 
-    await getCollection ();
+export const update = async (streak: streak) : Promise<streak> => {
+  const collection = await getCollection ();
 
-  await streaks.replaceOne (
+  await collection.replaceOne (
     { userId: streak.userId }, 
     streak, 
     { upsert: true }
