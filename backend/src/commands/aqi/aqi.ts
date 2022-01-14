@@ -2,7 +2,7 @@ import * as Command from '@sjbha/utils/Command';
 import { channels } from '@sjbha/server';
 
 import * as DiscordJs from 'discord.js';
-import * as PurpleAir from './PurpleAir';
+import * as PurpleAir from './purpleair';
 
 const aqi = async (message: DiscordJs.Message) : Promise<void> => {
   const sensors = await PurpleAir.SensorCollection.fetchIds (PurpleAir.sensorIds);

@@ -2,7 +2,7 @@ import Hapi from '@hapi/hapi';
 import * as Discord from 'discord.js';
 import { wait } from '@sjbha/utils/wait';
 
-import * as ActivityEmbed from './ActivityEmbed';
+import * as WorkoutEmbed from './WorkoutEmbed';
 
 // Whenever an activity is created/updated/deleted, 
 // we get notified via a webhook with this event data
@@ -35,7 +35,7 @@ const post = async (client: Discord.Client, athleteId: number, activityId: numbe
   
   try {
     delay && await wait (delay);
-    await ActivityEmbed.post (client, athleteId, activityId);
+    await WorkoutEmbed.post (client, athleteId, activityId);
   }
   catch (e) {
     const message = (e instanceof Error) ? e.message : '(unknown reasons)';

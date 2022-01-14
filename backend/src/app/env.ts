@@ -18,7 +18,7 @@ export const getOrThrow = (key: string) : string => required (key);
 
 // Env Variables
 
-export const HOSTNAME = required ('HOSTNAME');
+export const HAPI_HOST = required ('HAPI_HOST');
 export const UI_HOSTNAME = required ('UI_HOSTNAME');
 export const HTTP_PORT = required ('HTTP_PORT');
 export const DISCORD_TOKEN = required ('DISCORD_TOKEN');

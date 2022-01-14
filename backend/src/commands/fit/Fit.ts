@@ -64,11 +64,11 @@ const settings = Command.makeFiltered ({
 // Admin Commands
 const admin = Command.makeFiltered ({
   filter: Filter.and (
-    Filter.equals ('$fit'),
+    Filter.startsWith ('$fit'),
     Filter.inChannel (channels.bot_admin)
   ),
 
-  callback: message =>
+  callback: message => 
     match (Command.route (message))
     .with ('post', () => Admin.post (message))
     .with ('list', () => Admin.listWorkouts (message))

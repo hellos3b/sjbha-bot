@@ -2,8 +2,6 @@
 import { MongoDb } from '@sjbha/app';
 import { DateTime, Interval } from 'luxon';
 import { FilterQuery, FindOneOptions } from 'mongodb';
-import { match } from 'ts-pattern';
-import { get, emojiSet } from './EmojiSet';
 import * as Activity from './Activity';
 import * as User from './User';
 import * as WorkoutMigration from './WorkoutMigration';
