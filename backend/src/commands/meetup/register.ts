@@ -36,7 +36,7 @@ const meetupGlobal = Command.makeFiltered ({
     .with ('cancel', () => message.reply ('Canceling a meetup is now done inside the Meetup thread'))
     .with ('mention', () => message.reply ('Mentioning a meetup is now done inside the Meetup thread'))
     .with (__.nullish, () => message.reply ('Click here to create a meetup: https://hellos3b.github.io/sjbha-bot/meetup'))
-    .run ()
+    .otherwise (() => message.reply ('Click here to create a meetup: https://hellos3b.github.io/sjbha-bot/meetup'))
 });
 
 const meetupWrongChannel = Command.makeFiltered ({
@@ -47,17 +47,6 @@ const meetupWrongChannel = Command.makeFiltered ({
   ),
 
   callback: message => message.reply (`!meetup command is now restricted to <#${channels.meetups}>`)
-});
-
-// todo: Delete!
-const tmpForceAdd = Command.makeFiltered ({
-  filter: Command.Filter.and (
-    Command.Filter.startsWith ('$add'),
-    message => message.channel.isThread (),
-    message => message.author.id === '125829654421438464'
-  ),
-
-  callback: add
 });
 
 const meetupManage = Command.makeFiltered ({
@@ -73,7 +62,7 @@ const meetupManage = Command.makeFiltered ({
     .with ('announce', () => announce (message))
     .with ('help', () => help (message))
     .with ('mention', () => message.reply ('Mentioning a meetup has been changed to `!meetup announce`'))
-    .run ()
+    .otherwise (() => { /** ignore */ })
 })
 
 const admin = Command.makeFiltered ({
@@ -85,11 +74,10 @@ const admin = Command.makeFiltered ({
   callback: message =>
     match (Command.route (message))
     .with ('refresh', () => refresh (message))
-    .run ()
+    .otherwise (() => { /** ignore */ })
 });
 
 export const command = Command.combine (
-  tmpForceAdd,
   meetupWrongChannel,
   meetupGlobal,
   meetupManage, 
