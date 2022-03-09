@@ -39,10 +39,22 @@ const meetupGlobal = Command.makeFiltered ({
     .run ()
 });
 
+const meetupWrongChannel = Command.makeFiltered ({
+  filter: Command.Filter.and (
+    Command.Filter.startsWith ('!meetup'),
+    message => !message.channel.isThread (),
+    message => !Command.Filter.inChannel (channels.meetups) (message)
+  ),
+
+  callback: message => message.reply (`!meetup command is now restricted to <#${channels.meetups}>`)
+});
+
+// todo: Delete!
 const tmpForceAdd = Command.makeFiltered ({
   filter: Command.Filter.and (
     Command.Filter.startsWith ('$add'),
-    message => message.channel.isThread ()
+    message => message.channel.isThread (),
+    message => message.author.id === '125829654421438464'
   ),
 
   callback: add
@@ -78,6 +90,7 @@ const admin = Command.makeFiltered ({
 
 export const command = Command.combine (
   tmpForceAdd,
+  meetupWrongChannel,
   meetupGlobal,
   meetupManage, 
   admin
