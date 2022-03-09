@@ -9,7 +9,7 @@ import { channels } from './server';
 import { DiscordClient, env, MongoDb } from './app';
 import * as Command from './utils/Command';
 
-import * as Aqi from './commands/aqi/Aqi';
+import * as Aqi from './commands/aqi/aqi';
 import * as Christmas from './commands/christmas/Christmas';
 import * as Fit from './commands/fit/Fit';
 import * as Meetup from './commands/meetup/register';

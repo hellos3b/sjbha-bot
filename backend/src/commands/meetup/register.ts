@@ -10,6 +10,7 @@ import { edit } from './commands/edit';
 import { announce } from './commands/announce';
 import { help } from './commands/help';
 import { refresh } from './admin/refresh';
+import { add } from './admin/add';
 
 import * as UpdateRsvps from './features/UpdateRsvps';
 import * as Directory from './features/Directory';
@@ -21,23 +22,10 @@ import { getMeetup } from './routes/get-meetup';
 
 const client = DiscordClient.getInstance ();
 
-// This will restrict the meetup channel to a category
-// for when labs mode is active (meaning we're testing it in only a few channels)
-const labs_category = (env.IS_PRODUCTION)
-  ? '896964395693924363'
-  : '861815673591562280';
-
-// Filter helpers
-const channelIsInLabs = (message: Discord.Message) => 
-  message.channel.type === 'GUILD_TEXT' && message.channel.parentId === labs_category;
-
-const messageIsInThread = (message: Discord.Message) => 
-  message.channel.isThread ();
-
 const meetupGlobal = Command.makeFiltered ({
   filter: Command.Filter.and (
     Command.Filter.startsWith ('!meetup'),
-    channelIsInLabs
+    Command.Filter.inChannel (channels.meetups)
   ),
 
   callback: message => 
@@ -51,10 +39,19 @@ const meetupGlobal = Command.makeFiltered ({
     .run ()
 });
 
+const tmpForceAdd = Command.makeFiltered ({
+  filter: Command.Filter.and (
+    Command.Filter.startsWith ('$add'),
+    message => message.channel.isThread ()
+  ),
+
+  callback: add
+});
+
 const meetupManage = Command.makeFiltered ({
   filter: Command.Filter.and (
     Command.Filter.startsWith ('!meetup'),
-    messageIsInThread
+    message => message.channel.isThread ()
   ),
 
   callback: message =>
@@ -80,6 +77,7 @@ const admin = Command.makeFiltered ({
 });
 
 export const command = Command.combine (
+  tmpForceAdd,
   meetupGlobal,
   meetupManage, 
   admin
