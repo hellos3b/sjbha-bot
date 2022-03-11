@@ -93,7 +93,7 @@ export const play = async (message: Discord.Message, hand: string) : Promise<voi
       const emojiHistory = history.map (h => ({
         'win':  '🏆',
         'tie':  '🏳️',
-        'loss': '💥'
+        'loss': '🟥'
       })[h]).join ('');
 
       const victoryScreen = `Final Streak: **${streak.currentStreak}**\n${emojiHistory}`;
