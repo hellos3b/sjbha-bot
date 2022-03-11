@@ -157,7 +157,7 @@ export const refresh = async (client: Discord.Client, repost = false) : Promise<
 
   // Post 10 directory postings per message until all are used up
   const embeds = meetups
-    .sort ((a, b) => a.timestamp > b.timestamp ? -1 : 1)
+    .sort ((a, b) => a.timestamp > b.timestamp ? 1 : -1)
     .map (DirectoryEmbed);
 
   while (embeds.length) {
