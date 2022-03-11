@@ -3,7 +3,8 @@ import * as Command from '@sjbha/utils/Command';
 import { match, __ } from 'ts-pattern';
 
 import * as Profile from './Profile';
-import * as RockPaperScissors from './RockPaperScissors';
+import * as RockPaperScissors from './game';
+import { leaderboard } from './leaderboard';
 
 // Rock paper scissors!
 export const command = Command.makeFiltered ({
@@ -15,5 +16,6 @@ export const command = Command.makeFiltered ({
   callback: async message =>
     match (Command.route (message))
     .with (__.nullish, () => Profile.render (message))
+    .with ('leaderboard', () => leaderboard (message))
     .otherwise (hand => RockPaperScissors.play (message, hand ?? ''))
 })

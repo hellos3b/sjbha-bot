@@ -29,6 +29,12 @@ export const findOrMake = async (userId: string) : Promise<streak> => {
     : migrate (streak);
 }
 
+export async function fetchAll () : Promise<streak[]> {
+  const collection = await getCollection ();
+  const streaks = await collection.find ().toArray ();
+  return streaks.map (migrate);
+}
+
 export const update = async (streak: streak) : Promise<streak> => {
   const collection = await getCollection ();
 

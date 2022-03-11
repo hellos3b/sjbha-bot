@@ -47,24 +47,26 @@ export const play = async (message: Discord.Message, hand: string) : Promise<voi
 
   const streak = await Streak.findOrMake (message.author.id);
   
-  if (streak.cooldown) {
-    const cooldown = DateTime.fromISO (streak.cooldown);
-    const diff = DateTime.local ().diff (cooldown, ['minutes']);
+  // if (streak.cooldown) {
+  //   const cooldown = DateTime.fromISO (streak.cooldown);
+  //   const diff = DateTime.local ().diff (cooldown, ['minutes']);
 
-    if (diff.minutes < COOLDOWN_MINUTES) {
-      const cooldownEnds = cooldown.plus ({ minutes: COOLDOWN_MINUTES });
+  //   if (diff.minutes < COOLDOWN_MINUTES) {
+  //     const cooldownEnds = cooldown.plus ({ minutes: COOLDOWN_MINUTES });
         
-      message.reply (`Cooldown: ${Format.time (cooldownEnds, Format.TimeFormat.Relative)}`);
-      return;
-    }
-  }
+  //     message.reply (`Cooldown: ${Format.time (cooldownEnds, Format.TimeFormat.Relative)}`);
+  //     return;
+  //   }
+  // }
 
   const bot = randomFrom (hands);
 
   switch (checkResult (hand, bot)) {
     case 'win': {
       const currentStreak = streak.currentStreak + 1;
-
+      const currentRecord = (await Streak.fetchAll ())
+        .reduce ((a, b) => a > b.bestStreak ? a : b.bestStreak, 0);
+      
       const update = await Streak.update ({
         ...streak,
         bestStreak:    Math.max (streak.bestStreak, currentStreak),
@@ -74,7 +76,13 @@ export const play = async (message: Discord.Message, hand: string) : Promise<voi
 
       const prString = update.currentStreak > streak.bestStreak ? '\n🎉 Personal Best' : '';
 
-      message.reply (`${handEmoji (hand)} \`BEATS\` ${handEmoji (bot)}\nStreak: **${update.currentStreak}** • Best: **${update.bestStreak}** ${prString}`);
+      await message.reply (`🟩${handEmoji (hand)} > ${handEmoji (bot)}🟥\nStreak: **${update.currentStreak}** • Best: **${update.bestStreak}** ${prString}`);
+      
+      if (currentStreak > currentRecord) {
+        const announcement = await message.reply (`🎖️ <@${message.author.id}> just set a new high score of **${currentStreak}**!`);
+        await announcement.pin ();
+      }
+
       return;
     }
     
@@ -98,7 +106,7 @@ export const play = async (message: Discord.Message, hand: string) : Promise<voi
 
       const victoryScreen = `Final Streak: **${streak.currentStreak}**\n${emojiHistory}`;
 
-      message.reply (`${handEmoji (hand)} \`LOSES TO\` ${handEmoji (bot)}\n\n${victoryScreen}\n\nCooldown: ${Format.time (cooldownTarget, Format.TimeFormat.Relative)}`);
+      message.reply (`🟥${handEmoji (hand)} < ${handEmoji (bot)}🟩\n\nYou Lost in ${history.length} turns\n${victoryScreen}\n\nCooldown: ${Format.time (cooldownTarget, Format.TimeFormat.Relative)}`);
       return;
     }
 
@@ -108,7 +116,7 @@ export const play = async (message: Discord.Message, hand: string) : Promise<voi
         history: [...streak.history, 'tie']
       });
 
-      message.reply (`${handEmoji (hand)} \`TIES\` ${handEmoji (bot)}\nStreak: **${streak.currentStreak}** • Best: **${streak.bestStreak}** `);
+      message.reply (`🏳️${handEmoji (hand)} - ${handEmoji (bot)}🏳️\nStreak: **${streak.currentStreak}** • Best: **${streak.bestStreak}** `);
       return;
     }
   }
