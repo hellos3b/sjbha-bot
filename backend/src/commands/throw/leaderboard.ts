@@ -13,7 +13,7 @@ export async function leaderboard(message: Discord.Message) : Promise<void> {
   for (const { userId, bestStreak } of streaks) {
     table += bestStreak.toString ().padEnd (3, ' ');
     table += members.get (userId)
-      .map (m => m.nickname)
+      .map (m => m.displayName)
       .getOrElseValue ('Someone');
     table += '\n';
   }
