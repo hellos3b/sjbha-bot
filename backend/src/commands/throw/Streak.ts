@@ -1,23 +1,32 @@
 import { MongoDb } from '@sjbha/app';
 import { Collection } from 'mongodb';
 
+export type result =
+  | 'win'
+  | 'tie'
+  | 'loss'
+
 export type streak = {
+  _v: 1;
   userId: string;
   bestStreak: number;
   currentStreak: number;
+  history: result[];
   cooldown?: string;
 }
 
-const make = (userId: string) => ({ userId, bestStreak: 0, currentStreak: 0 });
+const make = (userId: string) : streak => ({ _v: 1, userId, bestStreak: 0, currentStreak: 0, history: [] });
 
-const getCollection = () : Promise<Collection<streak>> => 
-  MongoDb.getCollection<streak> ('rps-streak');
+const getCollection = () : Promise<Collection<schema>> => 
+  MongoDb.getCollection<schema> ('rps-streak');
 
 export const findOrMake = async (userId: string) : Promise<streak> => {
   const collection = await getCollection ();
   const streak = await collection.findOne ({ userId });
 
-  return streak ?? make (userId);
+  return (!streak)
+    ? make (userId)
+    : migrate (streak);
 }
 
 export const update = async (streak: streak) : Promise<streak> => {
@@ -30,4 +39,25 @@ export const update = async (streak: streak) : Promise<streak> => {
   );
 
   return streak;
+}
+
+// Old versions in DB
+
+function migrate(streak: schema) : streak {
+  if (!('_v' in streak)) {
+    return { ...streak, _v: 1, history: [] };
+  }
+
+  return streak;
+} 
+
+type schema = 
+  | streak_v0
+  | streak;
+
+type streak_v0 = {
+  userId: string;
+  bestStreak: number;
+  currentStreak: number;
+  cooldown?: string;
 }

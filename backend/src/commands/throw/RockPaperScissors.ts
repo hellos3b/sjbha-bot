@@ -12,14 +12,9 @@ type hand =
   | 'paper'
   | 'scissors'
 
-type result =
-  | 'win'
-  | 'tie'
-  | 'loss'
-
 const hands : hand[] = ['rock', 'paper', 'scissors'];
 
-const checkResult = (a: hand, b: hand) : result => {
+const checkResult = (a: hand, b: hand) : Streak.result => {
   const wins = (a2: hand, b2: hand) =>
     match ([a2, b2])
     .with (['rock', 'scissors'], () => true)
@@ -32,11 +27,17 @@ const checkResult = (a: hand, b: hand) : result => {
     : 'tie';
 }
 
-const randomHand = ()  =>
-  hands[Math.floor (Math.random ()*3)];
+const randomFrom = <T>(arr: T[]) : T =>
+  arr[Math.floor (Math.random ()*arr.length)];
 
 const validHand = (str: hand | string) : str is hand =>
   hands.includes (<hand>str);
+
+const handEmoji = (hand: hand) : string => ({
+  'rock':     '✊',
+  'scissors': '✌️',
+  'paper':    '✋'
+})[hand];
 
 export const play = async (message: Discord.Message, hand: string) : Promise<void> => {
   if (!validHand (hand)) {
@@ -53,12 +54,12 @@ export const play = async (message: Discord.Message, hand: string) : Promise<voi
     if (diff.minutes < COOLDOWN_MINUTES) {
       const cooldownEnds = cooldown.plus ({ minutes: COOLDOWN_MINUTES });
         
-      message.reply (`You're on cooldown! You can play again ${Format.time (cooldownEnds, Format.TimeFormat.Relative)}`);
+      message.reply (`Cooldown: ${Format.time (cooldownEnds, Format.TimeFormat.Relative)}`);
       return;
     }
   }
 
-  const bot = randomHand ();
+  const bot = randomFrom (hands);
 
   switch (checkResult (hand, bot)) {
     case 'win': {
@@ -67,44 +68,50 @@ export const play = async (message: Discord.Message, hand: string) : Promise<voi
       const update = await Streak.update ({
         ...streak,
         bestStreak:    Math.max (streak.bestStreak, currentStreak),
-        currentStreak: currentStreak
+        currentStreak: currentStreak,
+        history:       [...streak.history, 'win']
       });
 
-      const stats =
-        match (update.currentStreak)
-        .with (update.bestStreak, () => 'tied with your best streak!')
-        .when (s => s < update.bestStreak, () => `Best Streak: **${update.bestStreak}**`)
-        .when (s => s > update.bestStreak, () => '⭐ New Personal Record!')
-        .run ();
+      const prString = update.currentStreak > streak.bestStreak ? '\n🎉 Personal Best' : '';
+      const player = randomFrom (['😏', '😁', '🙂']);
 
-      message.reply (`🏆 Bot throws ${bot}, you win!\nCurrent Streak: **${update.currentStreak}** ${stats}`);
+      message.reply (`${player}${handEmoji (hand)} 🏆 ${handEmoji (bot)}🤖\nStreak: **${update.currentStreak}** • Best: **${update.bestStreak}** ${prString}`);
       return;
     }
     
     case 'loss': {
       const cooldown = DateTime.local ();
+      const history = [...streak.history, 'loss'];
 
       await Streak.update ({
         ...streak,
         currentStreak: 0,
-        cooldown:      cooldown.toISO ()
+        cooldown:      cooldown.toISO (),
+        history:       []
       });
 
-      const stats = 
-        match (streak.currentStreak)
-        .with (streak.bestStreak, () => `Finished with a **${streak.currentStreak}** game streak, tied with your best streak`)
-        .when (s => s < streak.bestStreak, () =>  `Finished with a **${streak.currentStreak}** game streak (your best is still **${streak.bestStreak}**)`)
-        .when (s => s > streak.bestStreak, () => `Finished with a **${streak.currentStreak}** game streak, congrats on the new record!`)
-        .run ();
-
+      const player = randomFrom (['😭', '🥲', '☹️']);
       const cooldownTarget = cooldown.plus ({ minutes: COOLDOWN_MINUTES });
+      const emojiHistory = history.map (h => ({
+        'win':  '🏆',
+        'tie':  '🏳️',
+        'loss': '💥'
+      })[h]).join ('');
 
-      message.reply (`🌧️ Bot throws ${bot}, you lost. ${stats}\nCan play again ${Format.time (cooldownTarget, Format.TimeFormat.Relative)}`);
+      const victoryScreen = `Streak: **${streak.currentStreak}**\n\n${emojiHistory}`;
+
+      message.reply (`${player}${handEmoji (hand)} 💥 ${handEmoji (bot)}🤖\n${victoryScreen}\nCooldown: ${Format.time (cooldownTarget, Format.TimeFormat.Relative)}`);
       return;
     }
 
     case 'tie': {
-      message.reply (`🏳️ Bot also throws ${bot}`);
+      await Streak.update ({
+        ...streak,
+        history: [...streak.history, 'tie']
+      });
+
+      const player = randomFrom (['😐', '😯']);
+      message.reply (`${player}${handEmoji (hand)} 🏳️ ${handEmoji (bot)}🤖\nStreak: **${streak.currentStreak}** • Best: **${streak.bestStreak}** `);
       return;
     }
   }

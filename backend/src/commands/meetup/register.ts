@@ -1,6 +1,6 @@
 import * as Discord from 'discord.js';
 import { match, __ } from 'ts-pattern';
-import { DiscordClient, env } from '@sjbha/app';
+import { DiscordClient } from '@sjbha/app';
 import * as Command from '@sjbha/utils/Command';
 import { channels } from '@sjbha/server';
 
@@ -10,7 +10,6 @@ import { edit } from './commands/edit';
 import { announce } from './commands/announce';
 import { help } from './commands/help';
 import { refresh } from './admin/refresh';
-import { add } from './admin/add';
 
 import * as UpdateRsvps from './features/UpdateRsvps';
 import * as Directory from './features/Directory';
