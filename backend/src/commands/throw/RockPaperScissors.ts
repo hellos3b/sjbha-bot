@@ -73,9 +73,8 @@ export const play = async (message: Discord.Message, hand: string) : Promise<voi
       });
 
       const prString = update.currentStreak > streak.bestStreak ? '\n🎉 Personal Best' : '';
-      const player = randomFrom (['😏', '😁', '🙂']);
 
-      message.reply (`${player}${handEmoji (hand)} 🏆 ${handEmoji (bot)}🤖\nStreak: **${update.currentStreak}** • Best: **${update.bestStreak}** ${prString}`);
+      message.reply (`${handEmoji (hand)} \`BEATS\` ${handEmoji (bot)}\nStreak: **${update.currentStreak}** • Best: **${update.bestStreak}** ${prString}`);
       return;
     }
     
@@ -90,7 +89,6 @@ export const play = async (message: Discord.Message, hand: string) : Promise<voi
         history:       []
       });
 
-      const player = randomFrom (['😭', '🥲', '☹️']);
       const cooldownTarget = cooldown.plus ({ minutes: COOLDOWN_MINUTES });
       const emojiHistory = history.map (h => ({
         'win':  '🏆',
@@ -98,9 +96,9 @@ export const play = async (message: Discord.Message, hand: string) : Promise<voi
         'loss': '💥'
       })[h]).join ('');
 
-      const victoryScreen = `Streak: **${streak.currentStreak}**\n\n${emojiHistory}`;
+      const victoryScreen = `Final Streak: **${streak.currentStreak}**\n${emojiHistory}`;
 
-      message.reply (`${player}${handEmoji (hand)} 💥 ${handEmoji (bot)}🤖\n${victoryScreen}\nCooldown: ${Format.time (cooldownTarget, Format.TimeFormat.Relative)}`);
+      message.reply (`${handEmoji (hand)} \`LOSES TO\` ${handEmoji (bot)}\n\n${victoryScreen}\n\nCooldown: ${Format.time (cooldownTarget, Format.TimeFormat.Relative)}`);
       return;
     }
 
@@ -110,8 +108,7 @@ export const play = async (message: Discord.Message, hand: string) : Promise<voi
         history: [...streak.history, 'tie']
       });
 
-      const player = randomFrom (['😐', '😯']);
-      message.reply (`${player}${handEmoji (hand)} 🏳️ ${handEmoji (bot)}🤖\nStreak: **${streak.currentStreak}** • Best: **${streak.bestStreak}** `);
+      message.reply (`${handEmoji (hand)} \`TIES\` ${handEmoji (bot)}\nStreak: **${streak.currentStreak}** • Best: **${streak.bestStreak}** `);
       return;
     }
   }
