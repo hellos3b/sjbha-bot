@@ -2,7 +2,7 @@ import { DateTime } from 'luxon';
 import { derived, writable } from 'svelte/store';
 import { Option } from 'prelude-ts';
 
-export const MAX_DESCRIPTION_LENGTH = 1200;
+export const MAX_DESCRIPTION_LENGTH = 1000;
 
 export const MAX_LOCATION_COMMENTS_LENGTH = 300;
 

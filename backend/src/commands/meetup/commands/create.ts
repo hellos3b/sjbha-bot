@@ -64,10 +64,18 @@ export async function create (message: Message) : Promise<void> {
     state:           { type: 'Live' }
   };
 
-  const post = await render (message.client, meetup);
+  try {
+    const post = await render (message.client, meetup);
 
-  await db.insert ({ 
-    ...meetup,
-    announcementID: post.id
-  });
+    await db.insert ({ 
+      ...meetup,
+      announcementID: post.id
+    });
+  }
+  catch (e) {
+    const errId = Math.floor (Math.random () * 1000).toString ();
+    console.error ('Failed to create meetup (ERR ' + errId + ')', e);
+    await message.channel.send (`⚠️ Bot broke unexpectedly while trying to post meetup [ID ${errId}]`);
+    await thread.delete ();
+  }
 }
