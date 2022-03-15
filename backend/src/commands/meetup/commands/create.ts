@@ -74,6 +74,7 @@ export async function create (message: Message) : Promise<void> {
       announcementID: post.id
     });
 
+    await post.pin ();
     await thread.members.add (message.author.id);
   }
   catch (e) {
