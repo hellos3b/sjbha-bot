@@ -77,7 +77,7 @@ const activityStats = (activity: Activity.activity) : DiscordJs.EmbedField[] => 
   // falsy fields get filtered
   const fields =
     match (activity.type)
-    .with (type.Run, _ => 
+    .with (type.Ride, _ => 
       (workoutType === 'workout')
         ? [elapsed, maxHr, avgHr]
         : [elapsed, distance ?? maxHr, avgWatts ?? elevation ?? avgHr])
