@@ -41,7 +41,9 @@ const gcalLink = (meetup: db.Meetup) : string => {
     action:   'TEMPLATE',
     text:     meetup.title,
     dates:    encodeDate (ts) + '/' + encodeDate (ts.plus ({ hour: 2 })),
-    details:  meetup.description,
+    // todo: details can break if the description is long
+    // see: https://github.com/hellos3b/sjbha-bot/issues/135
+    // details:  meetup.description,
     location: option (meetup.location)
       .filter (loc => loc.autoLink)
       .map (loc => loc.value)
