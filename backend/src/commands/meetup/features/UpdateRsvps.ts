@@ -56,7 +56,9 @@ const createRsvpListener = async (client: Discord.Client, meetup: db.Meetup) : P
         maybes: state.maybes.filter (id => id !== i.user.id)
       });
 
-      i.channel && i.channel.send (`✅ <@${i.user.id}> is attending!`);
+      if (i.channel && i.channel.isThread ())
+        i.channel.members.add (i.user.id);
+
       i.deferUpdate ();
     }
     else if (i.customId === 'maybe' && !state.maybes.includes (i.user.id)) {

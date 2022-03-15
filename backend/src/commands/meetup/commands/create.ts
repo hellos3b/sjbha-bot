@@ -58,10 +58,12 @@ export async function create (message: Message) : Promise<void> {
     timestamp:       DateTime.fromISO (options.date).toISO (),
     description:     options.description || '',
     links:           options.links ?? [],
-    rsvps:           [],
-    maybes:          [],
-    location:        M.location (options),
-    state:           { type: 'Live' }
+    rsvps:           [
+      message.author.id
+    ],
+    maybes:   [],
+    location: M.location (options),
+    state:    { type: 'Live' }
   };
 
   try {
@@ -71,6 +73,8 @@ export async function create (message: Message) : Promise<void> {
       ...meetup,
       announcementID: post.id
     });
+
+    await thread.members.add (message.author.id);
   }
   catch (e) {
     const errId = Math.floor (Math.random () * 1000).toString ();
