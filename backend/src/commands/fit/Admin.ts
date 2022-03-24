@@ -1,13 +1,15 @@
 import * as DiscordJs from 'discord.js';
 import { table } from 'table';
 import * as format from '@sjbha/utils/Format';
-import { env } from '@sjbha/app';
+import { env, Log } from '@sjbha/app';
 
 import * as Member from '@sjbha/Guild';
 import * as WorkoutEmbed from './WorkoutEmbed';
 import * as Exp from './Exp';
 import * as Workout from './Workout';
 import * as Promotions from './Promotions';
+
+const log = Log.make ('fit:admin');
 
 // reply to a message but return void,
 // to simplify early exiting
@@ -18,6 +20,7 @@ const withReply = (content: string, message: DiscordJs.Message) : void => {
 
 // List all recent activities, in case you need to delete / edit one
 export const listWorkouts = async (message: DiscordJs.Message) : Promise<void> => {
+  log.command (message);
   const workouts = await Workout.find ({}, { limit: 20 });
 
   const row = async (workout: Workout.workout) => {
@@ -45,8 +48,10 @@ export const listWorkouts = async (message: DiscordJs.Message) : Promise<void> =
 // Manually post a workout (or update one if it got stuck)
 export const post = async (message: DiscordJs.Message) : Promise<void> => {
   const [/** !fit */, /** post */, stravaId, activityId] = message.content.split (' ');
-  const usage = 'Usage: `!fit post {stravaId} {activityId}`';
+  log.command (message, { stravaId, activityId });
 
+  const usage = 'Usage: `!fit post {stravaId} {activityId}`';
+  
   if (!stravaId || !activityId)
     return withReply (usage, message);
 
@@ -55,10 +60,10 @@ export const post = async (message: DiscordJs.Message) : Promise<void> => {
 
   message.reply ('Posting workout!');
   
-  const error = await WorkoutEmbed.post (message.client, +stravaId, +activityId);
+  const error = await WorkoutEmbed.post (message.client, +stravaId, +activityId, true);
 
   if (error) {
-    console.error ('Could not post workout', error);
+    log.error ('Activity failed to post', error);
     message.reply (error.message);
   }
 }
@@ -68,6 +73,7 @@ export const post = async (message: DiscordJs.Message) : Promise<void> => {
 export async function remove (message: DiscordJs.Message) : Promise<void> {
   const [/* !fit */, /* post */, activityId] = message.content.split (' ');
   const usage = 'Usage: `$fit remove {activityId}`';
+  log.command (message, { activityId });
 
   if (!activityId)
     return withReply (usage, message);
@@ -77,7 +83,6 @@ export async function remove (message: DiscordJs.Message) : Promise<void> {
 
   const result = await WorkoutEmbed.remove (+activityId, message.client);
   if (result instanceof Error) {
-    console.error (result);
     message.reply (result.message);
   }
   else {
@@ -89,6 +94,8 @@ export async function remove (message: DiscordJs.Message) : Promise<void> {
 // Force the promotions to happen
 // This should only be used in a dev environment because it's hard to reverse
  export const promote = async (message: DiscordJs.Message) : Promise<void> => {
+   log.command (message);
+
   if (env.IS_PRODUCTION) {
     message.reply ('Beginning promotions');
     await Promotions.runPromotions (message.client);

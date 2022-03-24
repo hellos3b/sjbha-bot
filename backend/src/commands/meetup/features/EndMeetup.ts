@@ -1,10 +1,12 @@
 import { DateTime } from 'luxon';
 import schedule from 'node-schedule';
 import * as Discord from 'discord.js';
-import * as Log from '@sjbha/utils/Log';
+import { Log } from '@sjbha/app';
 
 import * as db from '../db/meetups';
 import * as M from '../common/Meetup';
+
+const log = Log.make ('fit:end-meetup');
 
 // Start the scheduler
 export async function init(client: Discord.Client) : Promise<void> {
@@ -13,10 +15,13 @@ export async function init(client: Discord.Client) : Promise<void> {
   // Every day at midnight
   schedule.scheduleJob (
     '5 0 * * *', 
-    () => endMeetups (client)
+    () => {
+      Log.runWithContext (() => {
+        log.info ('Ending any finished meetups');
+        endMeetups (client);
+      });
+    }
   );
-
-  Log.started ('Meetup archiver scheduled to start');
 }
   
 // Check the timestamp for meetups
@@ -31,6 +36,8 @@ export const endMeetups = async (client: Discord.Client) : Promise<void> => {
   });
 
   for (const meetup of meetups) {
+    log.debug ('Meetup ended', { id: meetup.id, title: meetup.title });
+    
     await db.update ({
       ...meetup,
       state: { type: 'Ended' }

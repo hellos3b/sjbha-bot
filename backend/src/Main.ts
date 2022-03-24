@@ -4,9 +4,8 @@ moduleAlias.addAlias ('@sjbha', __dirname);
 
 import { Settings } from 'luxon';
 import Hapi from '@hapi/hapi';
-import chalk from 'chalk';
 import { channels } from './server';
-import { DiscordClient, env, MongoDb } from './app';
+import { DiscordClient, env, MongoDb, Log } from './app';
 import * as Command from './utils/Command';
 
 import * as Aqi from './commands/aqi/aqi';
@@ -19,6 +18,7 @@ import * as Subscribe from './commands/subscribe/Subscribe';
 import * as Version from './commands/version/Version';
 
 Settings.defaultZoneName = 'America/Los_Angeles';
+const log = Log.make ('main');
 
 const commands = Command.combine (
   Aqi.command,
@@ -41,11 +41,8 @@ const onStartup = [
   Meetup.startup
 ];
 
-const success = chalk.green ('✓');
-const failed = chalk.red ('X');
-
 const start = () => {
-  console.log (chalk.gray ('Starting App...'));
+  log.info ('Starting app');
 
   const webServer = 
     Hapi.server ({
@@ -56,20 +53,20 @@ const start = () => {
     
   webServer
     .start ()
-    .then (_ => console.log (success, 'Webserver running'));
+    .then (_ => log.info ('Webserver running'));
 
   webServer.route (routes);
 
   MongoDb
     .connect (env.MONGO_URL)
-    .then (_ => console.log (success, 'Connected to MongoDb'))
-    .catch (_ => { console.warn (failed, 'MongoDB failed to connect, some commands may not work.\n(Make sure the db is running with \'npm run db\') ', env.MONGO_URL) });
+    .then (_ => log.info ('Connected to MongoDb'))
+    .catch (_ => { log.error ('MongoDB failed to connect, some commands may not work.\n(Make sure the db is running with \'npm run db\') ') });
 
   DiscordClient.connect ({
     token: env.DISCORD_TOKEN,
 
     onReady: async client => {
-      console.log (success, `Bastion connected as '${client.user?.tag}' v${env.VERSION}`);
+      log.info ('Bastion connected', { tag: client.user?.tag, version: env.VERSION });
 
       if (env.IS_PRODUCTION) {
         const channel = await client.channels.fetch (channels.bot_admin);

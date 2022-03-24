@@ -1,5 +1,6 @@
 import Hapi from '@hapi/hapi';
 import * as Discord from 'discord.js';
+import { Log } from '@sjbha/app';
 import { wait } from '@sjbha/utils/wait';
 
 import * as WorkoutEmbed from './WorkoutEmbed';
@@ -15,10 +16,7 @@ export type event = {
   owner_id: number;
 }
 
-const warned = (value: string) : string => {
-  console.log (value);
-  return value;
-}
+const log = Log.make ('fit:activity-webhook');
 
 // When an activity is first posted as 'created',
 // We'll give the user some (n) amount of time to edit their activity
@@ -37,9 +35,8 @@ const post = async (client: Discord.Client, athleteId: number, activityId: numbe
     delay && await wait (delay);
     await WorkoutEmbed.post (client, athleteId, activityId);
   }
-  catch (e) {
-    const message = (e instanceof Error) ? e.message : '(unknown reasons)';
-    console.error (`Failed to post workout (athleteId:${athleteId}|activityId:${activityId}): ${message}`);
+  catch (error) {
+    log.error ('Workout failed to post', error);
   }
   finally {
     pending.delete (activityId); 
@@ -48,15 +45,19 @@ const post = async (client: Discord.Client, athleteId: number, activityId: numbe
 
 export const handleEvent = (client: Discord.Client) => async (req: Hapi.Request) : Promise<string> => {
   const params = req.payload as event;
-  console.log ('Webhook Request', params);
+  log.info ('Strava Webhook Request', params);
 
-  if (params.object_type === 'athlete')
-    return warned ('Ignore Athlete Update');
-
+  if (params.object_type === 'athlete') {
+    log.debug ('Ignoring athlete update')
+    return '';
+  }
+  
   // Do not have a current feature to delete
   // a posted workout, but it's on the TODO list
-  if (params.aspect_type === 'delete') 
-    return warned ('Delete not currently supported');
+  if (params.aspect_type === 'delete') {
+    log.debug ('No support for DELETE');
+    return '';
+  }
 
   const delay = (params.aspect_type === 'create') ? 60 * 1000 : 0;
   post (client, params.owner_id, params.object_id, delay);

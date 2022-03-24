@@ -1,13 +1,13 @@
 import * as Discord from 'discord.js';
 import { DateTime } from 'luxon';
 
-import { env, Settings } from '@sjbha/app';
+import { env, Settings, Log } from '@sjbha/app';
 import { channels } from '@sjbha/server';
 import * as Format from '@sjbha/utils/Format';
-import * as Log from '@sjbha/utils/Log';
 
 import * as db from '../db/meetups';
 
+const log = Log.make ('meetup:directory');
 const settingsKey = 'meetup/directory-ids';
 
 const intro = `
@@ -133,6 +133,8 @@ export const refresh = async (client: Discord.Client, repost = false) : Promise<
   const messageIds = await Settings.get <string[]> (settingsKey, []);
   const usedIds : string[] = [];
 
+  log.debug ('Refreshing meetups', { count: meetups.length });
+
   // Post introduction message
   const introId = await postOrEdit (
     client,
@@ -146,7 +148,7 @@ export const refresh = async (client: Discord.Client, repost = false) : Promise<
   // Take down the existing messages and repost
   // so that people get notified of a new update on discord
   if (repost) {
-    console.log ('Tearing down old meetups');
+    log.debug ('Deleting old messages to repost');
     const channel = await getDirectoryChannel (client);
 
     while (messageIds.length) {
@@ -171,6 +173,7 @@ export const refresh = async (client: Discord.Client, repost = false) : Promise<
     messageIds.map (leftover => deleteMessage (client, leftover))
   );
 
+  log.debug ('Directory was updated', { usedIds });
   await Settings.save (settingsKey, usedIds);
 }
 
@@ -179,14 +182,18 @@ export const startListening = async (client: Discord.Client) : Promise<void> => 
   let task = refresh (client);
 
   db.events.on ('update', () => {
-    const prev = task;
-    task = prev.then (() => refresh (client, false));
+    Log.runWithContext (() => {
+      log.info ('A meetup was updated, refreshing directory');
+      const prev = task;
+      task = prev.then (() => refresh (client, false));
+    });
   });
 
   db.events.on ('add',  () => {
-    const prev = task;
-    task = prev.then (() => refresh (client, true));
+    Log.runWithContext (() => {
+      log.info ('A meetup was added, refreshing directory');
+      const prev = task;
+      task = prev.then (() => refresh (client, true));
+    });
   });
-
-  Log.started ('Meetup Directory waiting for changes');
 }

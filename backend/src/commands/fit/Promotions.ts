@@ -4,6 +4,7 @@ import { DateTime } from 'luxon';
 import schedule from 'node-schedule';
 
 import { channels, roles } from '@sjbha/server';
+import { Log } from '@sjbha/app';
 import { MemberList } from '@sjbha/utils/MemberList';
 
 import * as Workout from './Workout';
@@ -15,6 +16,7 @@ import * as Rank from './Rank';
 const MINIMUM_EXP_FOR_PROMOTION = 150;
 const MAX_FITSCORE = 100;
 
+const log = Log.make ('fit:promotions');
 
 /** Utility for keeping track of user's diff */
 type UserPromoter = {
@@ -98,7 +100,7 @@ const updateRoles = (member: Discord.GuildMember, roleId: string) : Promise<void
 export const runPromotions = async (client: Discord.Client) : Promise<void> => {
   const lastWeek = Week.previous ();
 
-  console.log ('Begin promotions: Fetching all users and workouts from week ' + lastWeek.toString ());
+  log.debug ('Fetching promotions', { week: lastWeek.toString () });
 
   const [users, allWorkouts] = await Promise.all ([
     User.find ()
@@ -109,15 +111,15 @@ export const runPromotions = async (client: Discord.Client) : Promise<void> => {
 
   const promoters = users.map (UserPromoter);
 
-  console.log ('Fetching all members and channel from discord');
+  log.debug ('Fetching all members and channel from discord');
 
   const [members, channel] = await Promise.all ([
     MemberList.fetch (client, promoters.map (p => p.user.discordId)),
     fetchStravaChannel (client)
   ]);
 
-  console.log (`Promoting ${promoters.length} users who recorded ${allWorkouts.length} workouts`);  
-
+  log.debug ('Begin promoting users', { promoters: promoters.length, workouts: allWorkouts.length });
+  
   // Promote everyone based on their workouts for the week
   // and save it to the database
   await Promise.all (
@@ -125,7 +127,7 @@ export const runPromotions = async (client: Discord.Client) : Promise<void> => {
       const workouts = allWorkouts.filter (Workout.belongsTo (promoter.user));
       promoter.promote (workouts);
 
-      console.log (`Saving ${promoter.user.discordId} (${members.nickname (promoter.user.discordId)})`);
+      log.debug ('Updating User', { discordId: promoter.user.discordId, nickname: members.nickname (promoter.user.discordId) });
       await User.update (promoter.user);
 
       const userRole = 
@@ -168,18 +170,23 @@ export const runPromotions = async (client: Discord.Client) : Promise<void> => {
   // 20 is just a random number that fits under the limit
   const chunkSize = 20;
 
-  for (let i = 0; i < rows.length; i += chunkSize) {
-    const embed = new Discord.MessageEmbed ({
-      color:  0xffd700,
-      footer: { text: lastWeek.toFormat ('MMM dd') },
-      fields: [{
-        name:  'Promotions',
-        value: rows.slice (i, i + chunkSize).join ('\n')
-      }]
-    });
+  const embeds : Discord.MessageEmbed[] = [];
 
-    await channel.send ({ embeds: [embed] });
+  for (let i = 0; i < rows.length; i += chunkSize) {
+    embeds.push (
+      new Discord.MessageEmbed ({
+        color:  0xffd700,
+        footer: { text: lastWeek.toFormat ('MMM dd') },
+        fields: [{
+          name:  'Promotions',
+          value: rows.slice (i, i + chunkSize).join ('\n')
+        }]
+      })
+    );
   }
+
+  log.debug ('Sending promotion embeds', { count: embeds.length });
+  await channel.send ({ embeds });
 }
 
 export const startSchedule = (client: Discord.Client) : void => {
@@ -194,5 +201,10 @@ export const startSchedule = (client: Discord.Client) : void => {
     hour:      weekly_post_time.hour,
     minute:    weekly_post_time.minute,
     second:    weekly_post_time.second
-  }, () => { runPromotions (client) });
+  }, () => { 
+    Log.runWithContext (() => {
+      log.info ('Begin promoting on schedule');
+      runPromotions (client) 
+    });
+  });
 }

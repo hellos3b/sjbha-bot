@@ -1,8 +1,8 @@
 import { FilterQuery } from 'mongodb';
 import { createNanoEvents } from 'nanoevents';
-import * as Log from '@sjbha/utils/Log';
+import { MongoDb, Log } from '@sjbha/app';
 
-import { MongoDb } from '@sjbha/app';
+const log = Log.make ('fit:meetups');
 
 const getCollection = () =>
   MongoDb.getCollection<Schema> ('meetups-labs');
@@ -13,11 +13,11 @@ export const events = createNanoEvents<{
 }>();
 
 events.on ('add', meetup => {
-  Log.event (`Meetup '${meetup.title}' was added'`);
+  log.debug ('Inserting meetup', { id: meetup.id, title: meetup.title });
 });
 
 events.on ('update', meetup => {
-  Log.event (`Meetup '${meetup.title}' was updated'`);
+  log.debug ('Meetup was updated', { id: meetup.id, title: meetup.title });
 });
 
 export type Schema = {
