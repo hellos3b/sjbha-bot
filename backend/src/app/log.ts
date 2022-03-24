@@ -23,27 +23,29 @@ interface LogData {
   data: Record<string, unknown>;
 }
 
-function prettified ({ level, message, data } : LogData) {
+function prettified ({ level, message, module, data } : LogData) {
   const color =
-    (level === 'info') ? chalk.green :
-    (level === 'debug') ? chalk.magenta :
-    (level === 'error') ? chalk.red :
+    (level === 'info') ? chalk.cyan :
+    (level === 'debug') ? chalk.hex ('#ffa500') :
+    (level === 'error') ? chalk.redBright :
     chalk.white;
 
   console.log (
+    '[' + color (level.toUpperCase ()) + ']',
     chalk.gray (new Date ().toLocaleTimeString ()), 
-    color (level),
-    chalk.cyan (message)
+    chalk.magentaBright (module),
+    message
   );
 
   for (const key of Object.keys (data)) 
-    console.log ('    ', key+':', JSON.stringify (data[key], null, 2));
+    console.log ('    ', key+':', chalk.greenBright (JSON.stringify (data[key])));
 }
 
-function formatted ({ level, message, data }: LogData) {
+function formatted ({ level, module, message, data }: LogData) {
   const trace = traceContext.getStore () ?? '';
   console.log (logfmt.stringify ({ 
     level, 
+    module,
     message, 
     timestamp: new Date ().toISOString (), 
     trace, 
