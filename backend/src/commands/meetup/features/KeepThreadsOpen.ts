@@ -1,18 +1,23 @@
 import schedule from 'node-schedule';
 import * as Discord from 'discord.js';
-import chalk from 'chalk';
+import { Log } from '@sjbha/app';
 
 import * as db from '../db/meetups';
+
+const log = Log.make ('fit:keep-threads-open');
 
 // Start the scheduler
 export async function startSchedule(client: Discord.Client) : Promise<void> {
   // Check every hour
   schedule.scheduleJob (
     '10 * * * *', 
-    () => openAllThreads (client)
+    () => {
+      Log.runWithContext (() => {
+        log.info ('Scheluded: Checking all threads top be open');
+        openAllThreads (client);
+      });
+    }
   );
-
-  console.log (chalk.magenta ('⧖'), 'Meetup Thread watcher scheduled');
 }
 
 // Iterate over all Live meetups

@@ -1,6 +1,8 @@
 import * as Discord from 'discord.js';
-import * as Log from '@sjbha/utils/Log';
+import { Log } from '@sjbha/app';
 import * as db from '../db/meetups';
+
+const log = Log.make ('fit:update-rsvps');
 
 type Unbind = () => void;
 
@@ -24,8 +26,6 @@ function prune (meetup: db.Meetup) {
 // Initializes the collectors that will listen 
 // to the clicks on the buttons of the meetup
 const createRsvpListener = async (client: Discord.Client, meetup: db.Meetup) : Promise<Unbind> => {
-  Log.started (`Listening to RSVPs for '${meetup.title}'`);
-
   const channel = await client.channels.fetch (meetup.threadID);
 
   if (!channel?.isThread ()) {
@@ -47,39 +47,45 @@ const createRsvpListener = async (client: Discord.Client, meetup: db.Meetup) : P
     if (!state)
       return;
 
-    Log.event (`${i.user.username} Clicked on ${i.customId} for '${state.title}'`);
+    Log.runWithContext (async () => {
+      log.info ('User is updating their RSVP', { userId: i.user.id, username: i.user.username, thread: state.title, button: i.customId });
 
-    if (i.customId === 'rsvp' && !state.rsvps.includes (i.user.id)) {
-      await db.update ({
-        ...meetup,
-        rsvps:  state.rsvps.concat (i.user.id),
-        maybes: state.maybes.filter (id => id !== i.user.id)
-      });
+      if (i.customId === 'rsvp' && !state.rsvps.includes (i.user.id)) {
+        await db.update ({
+          ...meetup,
+          rsvps:  state.rsvps.concat (i.user.id),
+          maybes: state.maybes.filter (id => id !== i.user.id)
+        });
 
-      if (i.channel && i.channel.isThread ())
-        i.channel.members.add (i.user.id);
+        if (i.channel && i.channel.isThread ())
+          i.channel.members.add (i.user.id);
 
-      i.deferUpdate ();
-    }
-    else if (i.customId === 'maybe' && !state.maybes.includes (i.user.id)) {
-      await db.update ({
-        ...meetup,
-        rsvps:  state.rsvps.filter (id => id !== i.user.id),
-        maybes: state.maybes.concat (i.user.id)
-      });
-      i.deferUpdate ();
-    }
-    else if (i.customId === 'remove') {
-      await db.update ({
-        ...meetup,
-        rsvps:  state.rsvps.filter (id => id !== i.user.id),
-        maybes: state.maybes.filter (id => id !== i.user.id)
-      });
-      i.deferUpdate ();
-    }
-    else {
-      i.deferUpdate ();
-    }
+        i.deferUpdate ();
+        log.debug ('Added user to RSVP');
+      }
+      else if (i.customId === 'maybe' && !state.maybes.includes (i.user.id)) {
+        await db.update ({
+          ...meetup,
+          rsvps:  state.rsvps.filter (id => id !== i.user.id),
+          maybes: state.maybes.concat (i.user.id)
+        });
+        i.deferUpdate ();
+        log.debug ('Added user to Maybes');
+      }
+      else if (i.customId === 'remove') {
+        await db.update ({
+          ...meetup,
+          rsvps:  state.rsvps.filter (id => id !== i.user.id),
+          maybes: state.maybes.filter (id => id !== i.user.id)
+        });
+        i.deferUpdate ();
+        log.debug ('Removed users RSVP');
+      }
+      else {
+        log.debug ('Unrecognized action');
+        i.deferUpdate ();
+      }
+    });
   });
 
   return () => { collector.stop (); }
@@ -92,8 +98,7 @@ const initRsvpListeners = (client: Discord.Client) =>
       listeners.set (meetup.id, unbind);
     }
     catch (e) {
-      const error = (e instanceof Error) ? e.message : 'Unknown Reason';
-      console.error (`Could not setup RSVP listeners for ${meetup.title} (${meetup.id}): ${error}`)
+      log.error ('Failed to initialise RSVP listeners', e);
     } 
   }
 

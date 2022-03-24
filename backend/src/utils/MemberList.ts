@@ -1,6 +1,8 @@
 import * as Discord from 'discord.js';
 import { Option, option } from 'ts-option';
-import { env } from '@sjbha/app';
+import { env, Log } from '@sjbha/app';
+
+const log = Log.make ('utils:member-list');
 
 /**
  * Fetches members from an array of IDs, 
@@ -17,7 +19,10 @@ export class MemberList {
   nickname = (discordId: string, orDefault = 'unknown') : string =>
     option (this.members.get (discordId))
       .map (m => m.displayName)
-      .getOrElse (() => orDefault);
+      .getOrElse (() => {
+        log.debug ('Unable to find display name for member', { discordId });
+        return orDefault;
+      });
 
   static fetch = async (client: Discord.Client, discordIds: string[]) : Promise<MemberList> => {
     try {
@@ -27,9 +32,7 @@ export class MemberList {
       return new MemberList (members);
     }
     catch (e) {
-      console.error ('Failed to fetch member list');
-      console.error (e);
-
+      log.error ('Failed to fetch member list', e);
       return new MemberList (new Discord.Collection ());
     }
   }

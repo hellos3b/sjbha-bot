@@ -18,6 +18,7 @@
     "no-unneeded-ternary": "warn",
     "object-curly-spacing": ["warn", "always"],
     "semi-style": "warn",
+    "no-console": "error",
     "space-before-blocks": "warn",
     "space-in-parens": "warn",
     "spaced-comment": ["warn", "always"],

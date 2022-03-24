@@ -2,6 +2,7 @@ import { Message } from 'discord.js';
 import { nanoid } from 'nanoid';
 import YAML from 'yaml';
 import { DateTime } from 'luxon';
+import { Log } from '@sjbha/app';
 
 import * as db from '../db/meetups';
 import * as M from '../common/Meetup';
@@ -9,10 +10,13 @@ import { render } from '../features/RenderAnnouncement';
 import { parse } from '../common/MeetupOptions';
 
 
+const log = Log.make ('meetup:create');
+
 /**
  * Creates a new meetup
  */
 export async function create (message: Message) : Promise<void> {
+  log.command (message);
   const inputText = message.content.replace ('!meetup create', '');
   const mention = `<@${message.author.id}>`;
 
@@ -28,6 +32,7 @@ export async function create (message: Message) : Promise<void> {
   }) ();
 
   if (!messageOptions) {
+    log.debug ('Meetup options are malformed');
     message.channel.send (`${mention} - Hm the meetup options are in an invalid format. Make sure you're copy and pasting the whole command correctly.`);
     return;
   }
@@ -35,14 +40,14 @@ export async function create (message: Message) : Promise<void> {
   const options = parse (messageOptions);
   
   if (options.failed) {
+    log.debug ('Unable to parse meetup options', { reason: options.message });
     message.channel.send (`${mention} - Something is wrong with the options in your command. Make sure to copy and paste everything from the UI! (${options.message})`);
     return;
   }
 
   const thread = await message.channel.threads.create ({
-    name:   `🗓️  ${M.threadTitle (options.title, options.date)}`,
-    reason: 'Meetup discussion thread',
-    
+    name:                `🗓️  ${M.threadTitle (options.title, options.date)}`,
+    reason:              'Meetup discussion thread',
     autoArchiveDuration: 1440,
   });
 
@@ -78,9 +83,8 @@ export async function create (message: Message) : Promise<void> {
     await thread.members.add (message.author.id);
   }
   catch (e) {
-    const errId = Math.floor (Math.random () * 1000).toString ();
-    console.error ('Failed to create meetup (ERR ' + errId + ')', e);
-    await message.channel.send (`⚠️ Bot broke unexpectedly while trying to post meetup [ID ${errId}]`);
+    log.error ('Failed to create meetup', e);
+    await message.channel.send ('⚠️ Bot broke unexpectedly while trying to post meetup');
     await thread.delete ();
   }
 }

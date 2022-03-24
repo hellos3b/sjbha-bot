@@ -45,6 +45,7 @@
   "devDependencies": {
     "@types/hapi__hapi": "^20.0.8",
     "@types/jest": "^27.0.2",
+    "@types/logfmt": "^1.2.2",
     "@types/luxon": "^1.26.5",
     "@types/module-alias": "^2.0.0",
     "@types/mongodb": "^3.6.16",

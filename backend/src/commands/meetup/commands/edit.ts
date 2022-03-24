@@ -1,17 +1,21 @@
 import { Message, MessageEmbed } from 'discord.js';
 import YAML from 'yaml';
 import { DateTime } from 'luxon';
-import { env } from '@sjbha/app';
+import { env, Log } from '@sjbha/app';
 
 import * as db from '../db/meetups';
 import * as M from '../common/Meetup';
 import { parse } from '../common/MeetupOptions';
 
+const log = Log.make ('edit');
 
 // If used alone (!meetup edit) will query user to pick a meetup
 // If passed with options (!meetup edit id: __) will try to update the meetup
 export async function edit (message: Message) : Promise<void> {
+  log.command (message);
+
   if (!message.channel.isThread ()) {
+    log.debug ('This channel is not a thread', { channel: message.channelId });
     message.reply ('To edit a meetup, use `!meetup edit` inside the meetup\'s thread');
     return;
   }
@@ -19,11 +23,13 @@ export async function edit (message: Message) : Promise<void> {
   const meetup = await db.findOne ({ threadID: message.channelId });
 
   if (!meetup) {
+    log.debug ('No meetup associated with this thread');
     message.reply ('Hm, it doesnt look like this thread is for a meetup');
     return;
   }
 
   if (meetup.organizerID !== message.author.id) {
+    log.debug ('User does not have permissions to cancel', { organizer: meetup.organizerID });
     message.reply ('You do not have permissions to edit this meetup');
     return;
   }

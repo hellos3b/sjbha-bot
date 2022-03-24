@@ -1,4 +1,7 @@
 import * as Discord from 'discord.js';
+import * as Log from './log';
+
+const log = Log.make ('app:DiscordClient');
 
 type ReactionEvent = { 
   type: 'add' | 'remove'; 
@@ -47,27 +50,27 @@ export const connect = ({ token, onReady, onMessage, onReaction }: ClientOptions
 
   client.on ('messageCreate', message => {
     if (!message.author.bot) {
-      onMessage (message);
+      Log.runWithContext (() => onMessage (message));
     }
   });
 
   client.on ('messageReactionAdd', async (r, u) => {
     try {
       const [reaction, user] = await fetchPartials (r, u);
-      onReaction ({ type: 'add', reaction, user });
+      Log.runWithContext (() => onReaction ({ type: 'add', reaction, user }));
     }
     catch (e) {
-      console.error ('Failed to fetch partials');
+      log.error ('Failed to fetch partials');
     }
   });
 
   client.on ('messageReactionRemove', async (r, u) => {
     try {
       const [reaction, user] = await fetchPartials (r, u);
-      onReaction ({ type: 'remove', reaction, user });
+      Log.runWithContext (() => onReaction ({ type: 'remove', reaction, user }));
     }
     catch (e) {
-      console.error ('Failed to fetch partials');
+      log.error ('Failed to fetch partials');
     }
   });
 

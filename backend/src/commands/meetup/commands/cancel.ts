@@ -1,12 +1,16 @@
 import { Message } from 'discord.js';
 import { DateTime } from 'luxon';
-
+import { Log } from '@sjbha/app';
 import * as db from '../db/meetups';
+
+const log = Log.make ('meetup:cancel');
 
 /**
  * Cancel a meetup
  */
 export async function cancel (message: Message) : Promise<void> {
+  log.command (message);
+
   if (!message.channel.isThread ()) {
     message.reply ('To cancel a meetup, use `!meetup cancel <reason>` in the meetup\'s thread');
     return;

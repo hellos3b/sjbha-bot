@@ -1,6 +1,7 @@
 import { MongoMemoryServer } from 'mongodb-memory-server';
-import { MongoDb } from '@sjbha/app';
+import { MongoDb, Log } from '@sjbha/app';
 
+const log = Log.make ('mock:mongo-memory-server');
 let mongod: MongoMemoryServer | undefined = undefined;
 
 export const setup = async () : Promise<void> => {
@@ -11,7 +12,7 @@ export const setup = async () : Promise<void> => {
 
 export const teardown = async () : Promise<void> => {
   if (!mongod) {
-    console.warn ('Tried to tear down mongodb memory server, but server has not been started');
+    log.debug ('Tried to tear down mongodb memory server, but server has not been started');
     return;
   }
 

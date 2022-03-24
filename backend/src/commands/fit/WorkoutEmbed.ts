@@ -2,6 +2,7 @@ import { DateTime } from 'luxon';
 import { match, __ } from 'ts-pattern';
 import * as DiscordJs from 'discord.js';
 
+import { Log } from '@sjbha/app';
 import { channels } from '@sjbha/server';
 import * as Guild from '@sjbha/Guild';
 
@@ -14,6 +15,7 @@ import * as Exp from './Exp';
 import * as EmojiSet from './EmojiSet';
 import * as Format from './Format';
 
+const log = Log.make ('fit:workout-embed');
 const defaultAvatar = 'https://discordapp.com/assets/322c936a8c8be1b803cd94861bdfa868.png';
 
 const getStravaChannel = async (client: DiscordJs.Client) : Promise<DiscordJs.TextBasedChannels> => {
@@ -117,16 +119,25 @@ export const expSoFar = (workout: Workout.workout, workouts: Workout.workout[]) 
 // 3. Post it to #strava
 //
 // If the workout has already been posted once, the previous message will get edited instead
- export const post = async (client: DiscordJs.Client, stravaId: number, activityId: number) : Promise<Error | void> => {
+export const post = async (
+  client: DiscordJs.Client, 
+  stravaId: number, 
+  activityId: number, 
+  force=false
+) : Promise<Error | void> => {
   // Fetch the updated user & activity data
   const user = await User.findOne ({ stravaId });
-  if (!User.isAuthorized (user))
+  if (!User.isAuthorized (user)) {
+    log.debug ('User is not authorized with the bot', { stravaId });
     return new Error ('Could not post workout: User is not authorized (strava ID: ' + stravaId + ')');
+  }
 
   const member = await Guild.member (user.discordId, client);
-  if (!member)
+  if (!member) {
+    log.debug ('User is not a member of this discord');
     return new Error ('User is not a member of this discord anymore');
-    
+  }
+
   const accessToken = await StravaAPI.token (user.refreshToken);
 
   const data = await Promise.all ([
@@ -134,8 +145,10 @@ export const expSoFar = (workout: Workout.workout, workouts: Workout.workout[]) 
     StravaAPI.streams (activityId, accessToken).catch (_ => [])
   ]).catch (e => new Error (`Failed to fetch Activity '${stravaId}:${activityId}' -- ${e instanceof Error ? e.message : 'Unknown Reason'}`));
 
-  if (data instanceof Error)
+  if (data instanceof Error) {
+    log.error ('Failed fetching activity from the strava APIs', data);
     return data;
+  }
 
   const [activity, streams] = data;
 
@@ -145,8 +158,10 @@ export const expSoFar = (workout: Workout.workout, workouts: Workout.workout[]) 
   const thisWeek = Week.current ();
   const timestamp = DateTime.fromISO (activity.start_date);
 
-  if (!thisWeek.contains (timestamp))
+  if (!thisWeek.contains (timestamp) && !force) {
+    log.debug ('Activity falls outside of time bounds', { timestamp: timestamp.toString (), week: thisWeek.toString () });
     return new Error (`Not posting activity ${activityId}, activity is not from this week; ` + JSON.stringify ({ timestamp: timestamp.toString (), week: thisWeek.toString () }));
+  }
 
   // Get all the other activities the user recorded this week
   // so we can show their weekly progress in the post
@@ -159,8 +174,12 @@ export const expSoFar = (workout: Workout.workout, workouts: Workout.workout[]) 
   const workout = Workout.make (user.discordId, activity, exp);
   const previouslyRecorded = workoutsThisWeek.find (w => w.activity_id === activity.id);
 
-  if (!previouslyRecorded)
+  log.debug ('Activity EXP', exp);
+
+  if (!previouslyRecorded) {
+    log.debug ('New activity, adding EXP to user', { gained: Exp.total (exp) });
     await User.update ({ ...user, xp: user.xp + Exp.total (exp) });
+  }
 
   const expThisWeek = expSoFar (workout, workoutsThisWeek);
 
@@ -198,10 +217,12 @@ export const expSoFar = (workout: Workout.workout, workouts: Workout.workout[]) 
       ...workout,
       message_id: message.id
     }); 
+
+    log.debug ('New workout has been saved');
   }
-  catch (e) {
-    console.error ('Failed to post new Activity', e);
-    const reason = e instanceof Error ? e.message : 'Unknown Reason';
+  catch (error) {
+    log.error ('Activity failed to post', error);
+    const reason = error instanceof Error ? error.message : 'Unknown Reason';
     return new Error (reason);
   }
 }
@@ -211,33 +232,43 @@ export const expSoFar = (workout: Workout.workout, workouts: Workout.workout[]) 
 export const remove = async (activityId: number, client: DiscordJs.Client) : Promise<Error|string> => {
   const workout = await Workout.findOne ({ activity_id: +activityId });
 
-  if (!workout)
+  if (!workout) {
+    log.debug ('No activity found with ID', { activityId });
     return new Error (`No workout recorded with activity ID '${activityId}'`);
+  }
 
   const [user, channel] = await Promise.all ([
     User.findOne ({ discordId: workout.discord_id }),
     getStravaChannel (client)
   ]);
 
-  if (!User.isAuthorized (user))
+  if (!User.isAuthorized (user)) {
+    log.debug ('User has not authorized their strava account');
     return new Error ('User is not authorized');
+  }
 
   const message = await channel.messages.fetch (workout.message_id);
 
-  if (!message)
+  if (!message) {
+    log.debug ('There is no message with this id', { messageId: workout.message_id });
     return new Error ('Could not find message');
+  }
 
   try {
+    const expToRemove = Exp.total (workout.exp);
+
     await Promise.all ([
       message.delete (),
-      User.update ({ ...user, xp: user.xp - Exp.total (workout.exp) }),
+      User.update ({ ...user, xp: user.xp - expToRemove }),
       Workout.deleteOne (workout)
     ]);
 
+    log.debug ('Removed workout', { expRemoved: expToRemove });
     return workout.activity_name;
   }
-  catch (e) {
-    const reason = e instanceof Error ? e.message : 'Unknown Reason';
+  catch (error) {
+    const reason = error instanceof Error ? error.message : 'Unknown Reason';
+    log.error ('Failed removing the workout', error);
     return new Error (reason);
   }
 }
