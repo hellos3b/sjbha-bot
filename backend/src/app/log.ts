@@ -33,7 +33,7 @@ function prettified ({ level, message, module, data } : LogData) {
   console.log (
     '[' + color (level.toUpperCase ()) + ']',
     chalk.gray (new Date ().toLocaleTimeString ()), 
-    chalk.magentaBright (module),
+    chalk.bold (chalk.magentaBright (module)),
     message
   );
 
@@ -109,6 +109,6 @@ function traceId() {
  * 
  * Can be used to trace a reqeust's lifetime
  */
-export function runWithContext(callback: () => void) : void {
-  traceContext.run (traceId (), callback);
+export function runWithContext<T>(callback: () => T) : T {
+  return traceContext.run (traceId (), callback);
 }

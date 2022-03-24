@@ -16,9 +16,9 @@ const log = Log.make ('meetup:create');
  * Creates a new meetup
  */
 export async function create (message: Message) : Promise<void> {
+  log.command (message);
   const inputText = message.content.replace ('!meetup create', '');
   const mention = `<@${message.author.id}>`;
-  log.command (message);
 
   message.delete ();
 

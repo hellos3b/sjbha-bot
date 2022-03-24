@@ -98,7 +98,7 @@ function DirectoryEmbed (meetup: db.Meetup) : Discord.MessageEmbed {
       return embed;
     } 
 
-    case 'Ended':
+    case 'Ended': 
       throw new Error ('Ended meetups should not show up in directory');
   }
 }
@@ -133,7 +133,7 @@ export const refresh = async (client: Discord.Client, repost = false) : Promise<
   const messageIds = await Settings.get <string[]> (settingsKey, []);
   const usedIds : string[] = [];
 
-  log.debug ('Refreshing meetups', { count: meetups.length });
+  log.debug ('Meetups in directory', { count: meetups.length });
 
   // Post introduction message
   const introId = await postOrEdit (
@@ -173,25 +173,27 @@ export const refresh = async (client: Discord.Client, repost = false) : Promise<
     messageIds.map (leftover => deleteMessage (client, leftover))
   );
 
-  log.debug ('Directory was updated', { usedIds });
   await Settings.save (settingsKey, usedIds);
 }
 
 // Meant to be called when booting up
 export const startListening = async (client: Discord.Client) : Promise<void> => {
-  let task = refresh (client);
+  let task = Log.runWithContext (() => {
+    log.info ('Initializing directory on startup');
+    return refresh (client);
+  });
 
-  db.events.on ('update', () => {
+  db.events.on ('update', meetup => {
     Log.runWithContext (() => {
-      log.info ('A meetup was updated, refreshing directory');
+      log.info ('A meetup was updated', { id: meetup.id, title: meetup.title });
       const prev = task;
       task = prev.then (() => refresh (client, false));
     });
   });
 
-  db.events.on ('add',  () => {
+  db.events.on ('add',  meetup => {
     Log.runWithContext (() => {
-      log.info ('A meetup was added, refreshing directory');
+      log.info ('A meetup was added', { id: meetup.id, title: meetup.title });
       const prev = task;
       task = prev.then (() => refresh (client, true));
     });

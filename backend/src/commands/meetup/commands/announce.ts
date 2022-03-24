@@ -6,8 +6,8 @@ const log = Log.make ('meetup:announce');
 
 // Notify all RSVPs about details of the meetup
 export async function announce (message: Message) : Promise<void> {
-  log.info ('Meetup announcement', { user: message.author.id, username: message.author.username, message: message.content });
-
+  log.command (message);
+  
   if (!message.channel.isThread ()) {
     log.debug ('Used outside of a thread, cancelling', { channelId: message.channelId });
     message.reply ('Meetup announcements have to be done in the thread the meetup is');
