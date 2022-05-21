@@ -1,31 +1,30 @@
 import 'dotenv/config';
 import moduleAlias from 'module-alias';
-moduleAlias.addAlias ('@sjbha', __dirname);
+moduleAlias.addAlias('@sjbha', __dirname);
 
 import { Settings } from 'luxon';
 import Hapi from '@hapi/hapi';
 import { channels } from './server';
 import { DiscordClient, env, MongoDb, Log } from './app';
 import * as Command from './Command';
-
 import * as Aqi from './commands/aqi/aqi';
 import * as Christmas from './commands/christmas/Christmas';
 import * as Fit from './commands/fit/Fit';
 import * as Meetup from './commands/meetup/RegisterMeetup';
-import * as Pong from './commands/pong/Pong';
 import * as RPS from './commands/throw/Throw';
 import * as Subscribe from './commands/subscribe/Subscribe';
 import * as Version from './commands/version/Version';
 
-Settings.defaultZoneName = 'America/Los_Angeles';
-const log = Log.make ('main');
+import * as CommandRouter from './CommandRouter.bs';
 
-const commands = Command.combine (
+Settings.defaultZoneName = 'America/Los_Angeles';
+const log = Log.make('main');
+
+const commands = Command.combine(
   Aqi.command,
   Christmas.command,
   Fit.command,
   Meetup.command,
-  Pong.command,
   RPS.command,
   Subscribe.command,
   Version.command
@@ -42,45 +41,48 @@ const onStartup = [
 ];
 
 const start = () => {
-  log.info ('Starting app');
+  log.info('Starting app');
 
-  const webServer = 
-    Hapi.server ({
-      port:   env.HTTP_PORT,
-      host:   '0.0.0.0',
+  const webServer =
+    Hapi.server({
+      port: env.HTTP_PORT,
+      host: '0.0.0.0',
       routes: { cors: true }
     });
-    
-  webServer
-    .start ()
-    .then (_ => log.info ('Webserver running'));
 
-  webServer.route (routes);
+  webServer
+    .start()
+    .then(_ => log.info('Webserver running'));
+
+  webServer.route(routes);
 
   MongoDb
-    .connect (env.MONGO_URL)
-    .then (_ => log.info ('Connected to MongoDb'))
-    .catch (_ => { log.error ('MongoDB failed to connect, some commands may not work.\n(Make sure the db is running with \'npm run db\') ') });
+    .connect(env.MONGO_URL)
+    .then(_ => log.info('Connected to MongoDb'))
+    .catch(_ => { log.error('MongoDB failed to connect, some commands may not work.\n(Make sure the db is running with \'npm run db\') ') });
 
-  DiscordClient.connect ({
+  DiscordClient.connect({
     token: env.DISCORD_TOKEN,
 
     onReady: async client => {
-      log.info ('Bastion connected', { tag: client.user?.tag, version: env.VERSION });
+      log.info('Bastion connected', { tag: client.user?.tag, version: env.VERSION });
 
       if (env.IS_PRODUCTION) {
-        const channel = await client.channels.fetch (channels.bot_admin);
-        channel?.isText () && channel.send (`🤖 BoredBot Online! v${env.VERSION}`);
+        const channel = await client.channels.fetch(channels.bot_admin);
+        channel?.isText() && channel.send(`🤖 BoredBot Online! v${env.VERSION}`);
       }
 
-      onStartup.forEach (loader => loader (client));
+      onStartup.forEach(loader => loader(client));
     },
 
-    onMessage: commands,
+    onMessage: message => {
+      commands(message);
+      CommandRouter.run(message);
+    },
 
     onReaction: _ => _
   });
 }
 
 // GO!
-start ();
+start();

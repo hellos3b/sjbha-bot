@@ -10,3 +10,8 @@ _plugins
 
 # bugs from ts-node-dev or something
 report*json
+
+# rescript artifacts
+.merlin
+lib
+.bsb.lock

@@ -4,11 +4,13 @@ Readme WIP
 
 ## Versioning
 
+Before deploying, uptick the version of the bot and create a release.
+
 First, uptick the backed 
 
 ```sh
-cd backend
-npm version <patch|minor|major>
+cd bot
+pnpm version <patch|minor|major>
 
 # commit with version name
 git add .
@@ -25,16 +27,17 @@ Create a new tag with the same version name, click "Auto-generate Release notes"
 Make sure to have Docker installed and set up ssh auth keys for the host you want to deploy to
 
 ```sh
-cd ./backend
-DOCKER_HOST="ssh://username@host" docker compose build
-DOCKER_HOST="ssh://username@host" docker compose up -d
+cd ./bot
+$env:DOCKER_HOST="s3bby"
+docker compose build
+docker compose up -d
 ```
 
-## Deploy Frontend
+## Deploy Website
 
-Frontend uses github pages and is using an npm library to make everything easy
+The web uses github pages and is using an npm library to make everything easy
 
 ```sh
-cd ./frontend
-npm run deploy
+cd ./web
+pnpm deploy
 ```

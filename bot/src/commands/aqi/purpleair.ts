@@ -61,22 +61,22 @@ const sensors = [
 
 export const locations = [DTSJ, ESJ, SSJ, SC, MV, SM];
 
-export const sensorIds = sensors.map (_ => _.id);
+export const sensorIds = sensors.map(_ => _.id);
 
-export const sensorsByLocation = (location: string) : number[] => 
-  sensors.filter (source => source.location === location)
-    .map (source => source.id);
+export const sensorsByLocation = (location: string): number[] =>
+  sensors.filter(source => source.location === location)
+    .map(source => source.id);
 
 // A PurpleAir Sensor
 class Sensor {
-  constructor (
+  constructor(
     private readonly data: sensorData
-  ) {}
+  ) { }
 
   /**
    * Primary ID for the sensor
    */
-  get id (): number {
+  get id(): number {
     return this.data.ParentID || this.data.ID;
   }
 
@@ -86,22 +86,22 @@ class Sensor {
    * 
    * @returns The AQI of the sensor, or an error from parsing JSON
    */
-  getAQI () : Error | number {
+  getAQI(): Error | number {
     try {
-      const stats: sensorStats = JSON.parse (this.data.Stats);
+      const stats: sensorStats = JSON.parse(this.data.Stats);
 
-      return convert ('pm25', 'raw', 'usaEpa', stats.v1);
+      return convert('pm25', 'raw', 'usaEpa', stats.v1);
     }
     catch (e) {
-      return (e instanceof Error) ? e : new Error ('An error occured when trying to parse AQI stats');
+      return (e instanceof Error) ? e : new Error('An error occured when trying to parse AQI stats');
     }
   }
 }
 
 export class SensorCollection {
-  constructor (
+  constructor(
     private readonly sensors: Sensor[]
-  ) {}
+  ) { }
 
   /**
    * Picks a sub sample of sensors 
@@ -109,10 +109,10 @@ export class SensorCollection {
    * @param ids 
    * @returns 
    */
-  filter (ids: number[]) : SensorCollection {
-    const sensors = this.sensors.filter (sensor => ids.includes (sensor.id));
+  filter(ids: number[]): SensorCollection {
+    const sensors = this.sensors.filter(sensor => ids.includes(sensor.id));
 
-    return new SensorCollection (sensors);
+    return new SensorCollection(sensors);
   }
 
   /**
@@ -120,25 +120,25 @@ export class SensorCollection {
    * 
    * @returns The average AQI of all sensors in this collection
    */
-  getAverageAqi () : AQI {
+  getAverageAqi(): AQI {
     // A median filter removes noise from an array of values by calculating the median over triplets and creating a new array 
     const medianFilter = (arr: number[]) => {
       // Requires at least 3 to work
       if (arr.length < 3)
         return arr;
 
-      return arr.map ((v, idx) => arr.slice (idx, idx + 3))
-        .filter (v => v.length === 3)
-        .map (R.median);
+      return arr.map((_, idx) => arr.slice(idx, idx + 3))
+        .filter(v => v.length === 3)
+        .map(R.median);
     }
 
     const values = this.sensors
-      .map (s => s.getAQI ())
-      .filter ((s): s is number => typeof s === 'number');
+      .map(s => s.getAQI())
+      .filter((s): s is number => typeof s === 'number');
 
-    const smoothed = medianFilter (values);
+    const smoothed = medianFilter(values);
 
-    return new AQI (R.mean (smoothed));
+    return new AQI(R.mean(smoothed));
   }
 
   /**
@@ -146,37 +146,37 @@ export class SensorCollection {
    * 
    * @returns A Sensor manager
    */
-  static fetchIds = async (ids: number[]) : Promise<SensorCollection> => {
+  static fetchIds = async (ids: number[]): Promise<SensorCollection> => {
     const response = await superagent
-      .get ('https://www.purpleair.com/json')
-      .query ({ show: ids.join ('|') })
-      .then (r => <response>r.body);
-  
-    const sensors = response.results.map (s => new Sensor (s));
-  
-    return new SensorCollection (sensors);
+      .get('https://www.purpleair.com/json')
+      .query({ show: ids.join('|') })
+      .then(r => <response>r.body);
+
+    const sensors = response.results.map(s => new Sensor(s));
+
+    return new SensorCollection(sensors);
   }
 }
 
 export class AQI {
-  constructor (
+  constructor(
     public readonly value: number
-  ) {}
+  ) { }
 
-  get level () : level {
+  get level(): level {
     if (this.value < 50)
       return 'good';
 
     if (this.value < 100)
       return 'sketchy';
-      
+
     if (this.value < 150)
       return 'bad';
 
     return 'terrible';
   }
 
-  toString () : string {
-    return this.value.toFixed (0);
+  toString(): string {
+    return this.value.toFixed(0);
   }
 }
