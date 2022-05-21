@@ -6,12 +6,12 @@ import { Settings } from 'luxon';
 import Hapi from '@hapi/hapi';
 import { channels } from './server';
 import { DiscordClient, env, MongoDb, Log } from './app';
-import * as Command from './utils/Command';
+import * as Command from './Command';
 
 import * as Aqi from './commands/aqi/aqi';
 import * as Christmas from './commands/christmas/Christmas';
 import * as Fit from './commands/fit/Fit';
-import * as Meetup from './commands/meetup/register';
+import * as Meetup from './commands/meetup/RegisterMeetup';
 import * as Pong from './commands/pong/Pong';
 import * as RPS from './commands/throw/Throw';
 import * as Subscribe from './commands/subscribe/Subscribe';

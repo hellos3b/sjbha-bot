@@ -1,7 +1,8 @@
 import * as Discord from 'discord.js';
 import { match, __ } from 'ts-pattern';
 import { DiscordClient } from '@sjbha/app';
-import * as Command from '@sjbha/utils/Command';
+import * as Command from '@sjbha/Command';
+import { startsWith, inChannel } from '@sjbha/CommandFilter';
 import { channels } from '@sjbha/server';
 
 import { create } from './commands/create';
@@ -9,7 +10,7 @@ import { cancel } from './commands/cancel';
 import { edit } from './commands/edit';
 import { announce } from './commands/announce';
 import { help } from './commands/help';
-import { refresh } from './admin/refresh';
+import { refresh } from './AdminCommands';
 
 import * as UpdateRsvps from './features/UpdateRsvps';
 import * as Directory from './features/Directory';
@@ -21,11 +22,11 @@ import { getMeetup } from './routes/get-meetup';
 
 const client = DiscordClient.getInstance ();
 
-const meetupGlobal = Command.makeFiltered ({
-  filter: Command.Filter.and (
-    Command.Filter.startsWith ('!meetup'),
-    Command.Filter.inChannel (channels.meetups)
-  ),
+const meetupGlobal = Command.filtered ({
+  filters: [
+    startsWith ('!meetup'),
+    inChannel (channels.meetups)
+  ],
 
   callback: message => 
     match (Command.route (message))
@@ -38,21 +39,21 @@ const meetupGlobal = Command.makeFiltered ({
     .otherwise (() => message.reply ('Click here to create a meetup: https://hellos3b.github.io/sjbha-bot/meetup'))
 });
 
-const meetupWrongChannel = Command.makeFiltered ({
-  filter: Command.Filter.and (
-    Command.Filter.startsWith ('!meetup'),
+const meetupWrongChannel = Command.filtered ({
+  filters: [
+    startsWith ('!meetup'),
     message => !message.channel.isThread (),
-    message => !Command.Filter.inChannel (channels.meetups) (message)
-  ),
+    message => !inChannel (channels.meetups) (message)
+  ],
 
   callback: message => message.reply (`!meetup command is now restricted to <#${channels.meetups}>`)
 });
 
-const meetupManage = Command.makeFiltered ({
-  filter: Command.Filter.and (
-    Command.Filter.startsWith ('!meetup'),
+const meetupManage = Command.filtered ({
+  filters: [
+    startsWith ('!meetup'),
     message => message.channel.isThread ()
-  ),
+  ],
 
   callback: message =>
     match (Command.route (message))
@@ -64,11 +65,11 @@ const meetupManage = Command.makeFiltered ({
     .otherwise (() => { /** ignore */ })
 })
 
-const admin = Command.makeFiltered ({
-  filter: Command.Filter.and (
-    Command.Filter.startsWith ('$meetup'),
-    Command.Filter.inChannel (channels.bot_admin)
-  ),
+const admin = Command.filtered ({
+  filters: [
+    startsWith ('$meetup'),
+    inChannel (channels.bot_admin)
+  ],
 
   callback: message =>
     match (Command.route (message))
