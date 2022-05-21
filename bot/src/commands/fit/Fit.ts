@@ -2,7 +2,7 @@ import * as Discord from 'discord.js';
 import { match, __ } from 'ts-pattern';
 import { DiscordClient } from '@sjbha/app';
 import { channels } from '@sjbha/server';
-import * as Command from '@sjbha/utils/Command';
+import * as Command from '@sjbha/Command';
 import * as Format from '@sjbha/utils/Format';
 
 import * as Balance from './Balance';
@@ -31,7 +31,7 @@ const help = Format.help ({
   }
 });
 
-const fit = Command.makeFiltered ({
+const fit = Command.filtered ({
   filter: Filter.and (
     Filter.startsWith ('!fit'),
     Filter.inChannel (channels.strava)
@@ -49,7 +49,7 @@ const fit = Command.makeFiltered ({
     .run ()
 });
 
-const settings = Command.makeFiltered ({
+const settings = Command.filtered ({
   filter: Filter.and (
     Filter.or (
       Filter.equals ('!fit settings'),
@@ -62,7 +62,7 @@ const settings = Command.makeFiltered ({
 });
 
 // Admin Commands
-const admin = Command.makeFiltered ({
+const admin = Command.filtered ({
   filter: Filter.and (
     Filter.startsWith ('$fit'),
     Filter.inChannel (channels.bot_admin)

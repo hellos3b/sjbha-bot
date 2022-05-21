@@ -1,6 +1,6 @@
-import * as Command from '@sjbha/utils/Command';
+import * as Command from '@sjbha/Command';
 
-export const command = Command.makeFiltered ({
+export const command = Command.filtered ({
   filter:   Command.Filter.startsWith ('!pong'),
   callback: message => message.reply ('Ping?')
 });

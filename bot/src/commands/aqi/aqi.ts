@@ -1,4 +1,4 @@
-import * as Command from '@sjbha/utils/Command';
+import * as Command from '@sjbha/Command';
 import { channels } from '@sjbha/server';
 
 import * as DiscordJs from 'discord.js';
@@ -36,7 +36,7 @@ const aqi = async (message: DiscordJs.Message) : Promise<void> => {
   message.channel.send ({ embeds: [embed] });
 }
 
-export const command = Command.makeFiltered ({
+export const command = Command.filtered ({
   filter: Command.Filter.and (
     Command.Filter.startsWith ('!aqi'),
     Command.Filter.inChannel (

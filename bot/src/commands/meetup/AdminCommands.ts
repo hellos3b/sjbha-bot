@@ -1,7 +1,7 @@
 import { Message } from 'discord.js';
 
-import * as Render from '../features/RenderAnnouncement';
-import * as Directory from '../features/Directory';
+import * as Render from './features/RenderAnnouncement';
+import * as Directory from './features/Directory';
 
 /**
  * Update the cache, in case they fall out of sync (or did some DB editing)

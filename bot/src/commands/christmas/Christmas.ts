@@ -1,4 +1,4 @@
-import * as Command from '@sjbha/utils/Command';
+import * as Command from '@sjbha/Command';
 import { env } from '@sjbha/app';
 import { match, __ } from 'ts-pattern';
 import { DateObjectUnits, DateTime } from 'luxon';
@@ -33,7 +33,7 @@ const daysUntilChristmas = () => {
   return Math.floor (diff.days);
 }
 
-export const command = Command.makeFiltered ({
+export const command = Command.filtered ({
   filter:   Command.Filter.startsWith ('!christmas'),
   callback: message => {
     const reply = match (daysUntilChristmas ())
