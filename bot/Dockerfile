@@ -1,13 +1,18 @@
 # Builder
-FROM node:16-alpine as builder
+FROM node:16 as builder
 
 WORKDIR /app
 
+RUN npm install --global pnpm@6
+COPY pnpm-lock.yaml .
+RUN pnpm fetch
+
 # Copy files required to build
-COPY package*.json tsconfig.json ./ 
-COPY src/ ./src/
+ADD package*.json bsconfig.json tsconfig.json ./ 
+ADD src/ ./src/
 
-RUN npm install 
-RUN npm run build
+RUN pnpm install -r --offline 
+RUN pnpm build:re
+RUN pnpm build:ts
 
-CMD npm start
+ENTRYPOINT node build/Main.js

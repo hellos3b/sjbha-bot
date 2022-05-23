@@ -1,5 +1,6 @@
 import type * as DiscordJs from 'discord.js';
 import { __ } from 'ts-pattern';
+import * as Filter from "./CommandFilter";
 
 type command = (message: DiscordJs.Message) => void;
 
@@ -14,26 +15,29 @@ export function filtered(opt: {
   filter?: filter;
   filters?: filter[];
   callback: command;
-}) : command {
+}): command {
   return message => {
-    const filters: filter[] = [
+    const filters = Filter.and(
       opt.filter ?? (() => true),
       ...(opt.filters ?? [])
-    ];
+    );
 
-    if (Filter.and(...filters)(message))
-      opt.callback (message)
+    if (filters(message))
+      opt.callback(message)
   };
 }
 
-export function combine(...commands: command[]) : command { 
-  return message => commands.forEach (command => command (message));
+export function combine(...commands: command[]): command {
+  return message => commands.forEach(command => command(message));
 }
 
-export function route(message: DiscordJs.Message) : string | undefined {
+export function route(message: DiscordJs.Message): string | undefined {
   const [_, route] = message.content
-    .replace (/\n/g, ' ')
-    .split (' ');
+    .replace(/\n/g, ' ')
+    .split(' ');
 
   return route;
 }
+
+// Back compatibility
+export { Filter }

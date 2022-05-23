@@ -1,14 +1,13 @@
 {
-  "name": "frontend",
+  "name": "@hellos3b/sjbha-web",
   "version": "1.0.0",
   "description": "",
   "main": "webpack.config.js",
   "scripts": {
-    "dev": "webpack serve --open --mode=development --host 0.0.0.0",
+    "start": "webpack serve --open --mode=development --host 0.0.0.0",
     "build": "webpack --mode=production",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d build",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "deploy": "gh-pages -d build"
   },
   "keywords": [],
   "author": "",
