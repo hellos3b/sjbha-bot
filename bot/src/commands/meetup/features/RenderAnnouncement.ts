@@ -13,7 +13,7 @@ const RsvpButton = new MessageButton()
 
 const MaybeButton = new MessageButton()
   .setCustomId('maybe')
-  .setLabel('Maybe')
+  .setLabel('Interested')
   .setStyle('SECONDARY');
 
 const RemoveButton = new MessageButton()
@@ -104,7 +104,7 @@ function Announcement(meetup: db.Meetup, rsvps?: string[], maybes?: string[]): M
   );
 
   maybes && embed.addField(
-    `🤔 Maybe ${withCount(maybes.length)}`,
+    `🤔 Interested ${withCount(maybes.length)}`,
     (maybes.length)
       ? maybes.map(name => `> ${name}`).join('\n')
       : '-',
