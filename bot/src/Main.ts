@@ -7,7 +7,6 @@ import Hapi from '@hapi/hapi';
 import { channels } from './server';
 import { DiscordClient, env, MongoDb, Log } from './app';
 import * as Command from './Command';
-import * as Christmas from './commands/christmas/Christmas';
 import * as Fit from './commands/fit/Fit';
 import * as Meetup from './commands/meetup/RegisterMeetup';
 import * as RPS from './commands/throw/Throw';
@@ -19,7 +18,6 @@ Settings.defaultZoneName = 'America/Los_Angeles';
 const log = Log.make('main');
 
 const commands = Command.combine(
-  Christmas.command,
   Fit.command,
   Meetup.command,
   RPS.command,
