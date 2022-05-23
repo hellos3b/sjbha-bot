@@ -1,11 +1,17 @@
-type channel
+type user = {id: string, username: string}
+
+type channel = {id: string, name: string}
+
 type message = {
   content: string,
   channel: channel,
+  author: user,
 }
+
 type sendableMessage
 
 type embed
+type field
 type footer
 
 // message
@@ -22,8 +28,10 @@ external makeEmbed: (
   ~color: int=?,
   ~title: string=?,
   ~description: string=?,
+  ~fields: array<field>=?,
   ~footer: footer=?,
   unit,
 ) => embed = ""
 
 @obj external footer: (~text: string=?, unit) => footer = ""
+@obj external field: (~name: string, ~value: string, ~inline: bool=?, unit) => field = ""
