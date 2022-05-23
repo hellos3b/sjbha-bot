@@ -11,3 +11,5 @@ let uniq = arr => {
   arr->Array.forEach(item => values->Js.Dict.set(item, true))
   values->Js.Dict.keys
 }
+
+let joinList = (l: list<string>, joinWith: string) => l->List.toArray->Js.Array2.joinWith(joinWith)

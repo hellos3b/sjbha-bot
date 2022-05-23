@@ -12,7 +12,7 @@ import * as Meetup from './commands/meetup/RegisterMeetup';
 import * as RPS from './commands/throw/Throw';
 import * as Subscribe from './commands/subscribe/Subscribe';
 
-import * as Commands from './Commands.bs';
+import * as MainRescript from './MainRescript.bs';
 
 Settings.defaultZoneName = 'America/Los_Angeles';
 const log = Log.make('main');
@@ -70,7 +70,7 @@ const start = () => {
     },
 
     onMessage: message => {
-      Commands.run(message);
+      MainRescript.run(message);
       // todo: deprecate
       commands(message);
     },
