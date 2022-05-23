@@ -1,0 +1,15 @@
+sjbha:
+  server_id: "358442034790400000" 
+  channels: 
+    admin: "430517752546197509"
+    strava: "450913008323919872"
+    shitpost: "506911331257942027"
+    meetup_directory: "896964467169038376y"
+
+sjbha_dev:
+  server_id: "530586255197732868" 
+  channels: 
+    admin: "430517752546197509"
+    strava: "861815778281259008"
+    shitpost: "506911331257942027"
+    meetup_directory: "896964467169038376y"

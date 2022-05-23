@@ -1,4 +1,4 @@
-# @sjbha/backend
+# @hellos3b/sjbha-bot
 
 This is the SJBHA bot. Free to fork and use
 

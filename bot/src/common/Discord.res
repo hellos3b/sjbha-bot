@@ -1,33 +1,29 @@
-open Belt
-
-type message
-type embed
 type channel
+type message = {
+  content: string,
+  channel: channel,
+}
+type sendableMessage
+
+type embed
+type footer
 
 // message
-@send external reply: (message, string) => message = "reply"
-@get external channel: message => channel = "channel"
-@get external content: message => string = "content"
+@obj
+external makeMessage: (~content: string=?, ~embeds: array<embed>=?, unit) => sendableMessage = ""
+@send external reply: (message, sendableMessage) => message = "reply"
 
 // channel
-@send external sendOptions: (channel, {..}) => message = "send"
-
-let send = (channel, text) => channel->sendOptions({"content": text})
-let sendEmbed = (channel, embed) => channel->sendOptions({"embeds": [embed]})
+@send external send: (channel, sendableMessage) => message = "send"
 
 // embed
-external castEmbed: {..} => embed = "%identity"
+@obj
+external makeEmbed: (
+  ~color: int=?,
+  ~title: string=?,
+  ~description: string=?,
+  ~footer: footer=?,
+  unit,
+) => embed = ""
 
-let embed = (
-  ~color: option<int>=?,
-  ~title: option<string>=?,
-  ~description: option<string>=?,
-  ~footer: option<string>=?,
-  (),
-) =>
-  {
-    "color": color->Js.Nullable.fromOption,
-    "title": title->Js.Nullable.fromOption,
-    "description": description->Js.Nullable.fromOption,
-    "footer": footer->Option.map(f => {"text": f})->Js.Nullable.fromOption,
-  }->castEmbed
+@obj external footer: (~text: string=?, unit) => footer = ""

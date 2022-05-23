@@ -1,3 +1,6 @@
 open Discord
 
-let replyPing = message => message->reply("Ping?")->ignore
+let replyPing = message => {
+  let ping = makeMessage(~content="Ping?", ())
+  message->reply(ping)->ignore
+}
