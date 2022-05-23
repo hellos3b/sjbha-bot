@@ -5,9 +5,11 @@ let run = (message: Discord.message) => {
   let request = message->content->Js.String2.split(" ")->List.fromArray
 
   let command = switch request {
-  | list{"!pong"} => Pong.pong
+  | list{"!aqi"} => Aqi.post
+  | list{"!pong"} => Pong.replyPing
+  | list{"!version"} => Version.sendVersion
   | _ => ignore
   }
 
-  message->command
+  command(message)
 }

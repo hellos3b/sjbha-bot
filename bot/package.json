@@ -6,10 +6,10 @@
     "node": ">= 16"
   },
   "scripts": {
-    "start": "node build/Main.js",
-    "dev": "ts-node-dev src/Main.ts",
+    "start": "ts-node-dev src/Main.ts",
     "dev:re": "rescript build -w",
-    "build": "tsc",
+    "build:ts": "tsc",
+    "build:re": "rescript",
     "db": "docker compose -f docker-compose.db.yml up",
     "test": "jest",
     "test:watch": "jest --watch"
@@ -20,7 +20,9 @@
   "dependencies": {
     "@hapi/boom": "^9.1.2",
     "@hapi/hapi": "^20.1.3",
+    "@ryyppy/rescript-promise": "^2.1.0",
     "@shootismoke/convert": "^0.2.31",
+    "chalk": "^5.0.1",
     "discord.js": "^13.2.0",
     "dotenv": "^10.0.0",
     "fromnow": "^3.0.1",

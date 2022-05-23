@@ -7,27 +7,23 @@ import Hapi from '@hapi/hapi';
 import { channels } from './server';
 import { DiscordClient, env, MongoDb, Log } from './app';
 import * as Command from './Command';
-import * as Aqi from './commands/aqi/aqi';
 import * as Christmas from './commands/christmas/Christmas';
 import * as Fit from './commands/fit/Fit';
 import * as Meetup from './commands/meetup/RegisterMeetup';
 import * as RPS from './commands/throw/Throw';
 import * as Subscribe from './commands/subscribe/Subscribe';
-import * as Version from './commands/version/Version';
 
-import * as CommandRouter from './CommandRouter.bs';
+import * as Commands from './Commands.bs';
 
 Settings.defaultZoneName = 'America/Los_Angeles';
 const log = Log.make('main');
 
 const commands = Command.combine(
-  Aqi.command,
   Christmas.command,
   Fit.command,
   Meetup.command,
   RPS.command,
-  Subscribe.command,
-  Version.command
+  Subscribe.command
 );
 
 const routes = [
@@ -76,8 +72,9 @@ const start = () => {
     },
 
     onMessage: message => {
+      Commands.run(message);
+      // todo: deprecate
       commands(message);
-      CommandRouter.run(message);
     },
 
     onReaction: _ => _
