@@ -5,7 +5,6 @@ import Ban from '../plugins/Ban'
 import DuckHunt from '../plugins/DuckHunt'
 import Dungeon from '../plugins/Dungeon'
 import Echos from '../plugins/echos/Echos'
-import Events from '../plugins/Events'
 import Fools from '../plugins/Fools'
 import LaserTag from '../plugins/LaserTag'
 import Lotto from '../plugins/Lotto'
@@ -22,8 +21,6 @@ import Reddit from '../plugins/Reddit'
 import RoyRoyBucks from '../plugins/RoyRoyBucks'
 import Stats from '../plugins/Stats'
 import StockChart from '../plugins/StockChart'
-import Strava from '../plugins/Strava'
-import TLDR from '../plugins/Tldr'
 import Teams from '../plugins/Teams'
 import Trading from '../plugins/Trading'
 import Upvotes from '../plugins/Upvotes'
@@ -40,9 +37,6 @@ export default bastion => ([
     Ping,
     Echos,
     Poll,
-    TLDR(bastion, {
-        listRestrict: ["shitpost", "admin"]
-    }),
     Ban,
     Stats(bastion, {
         restrict: ["430517752546197509"]
@@ -53,36 +47,6 @@ export default bastion => ([
     StockChart(bastion, {
         restrict: ["stocks"]
     }),
-    // Strava(bastion, {
-    //     restrict: ["strava", "430517752546197509"]
-    // }),
-    // Events(bastion, {
-    //     command: "meetup",
-    //     announcementChannel: bastion.channels.announcement,
-    //     compactChannel: bastion.channels.compact,
-
-    //     // new labs channels
-    //     ignore: [
-    //         "896966287727673354",
-    //         "896964467169038376",
-    //         "896964493005955093",
-    //         "896965403748749342",
-    //         "896964667237367818",
-    //         "896964692742914058"
-    //     ],
-
-    //     // dev
-    //     // compact: {"todayId":"598646940770631800","thisWeekId":"598646943412912139","nextWeekId":"598646944465813504","twoWeeksId":"598646945317388309","threeWeeksId":"598646946420359170","laterId":"598646962463571975"}
-    //     // prod
-    //     compact: {
-    //         "todayId": "471806505365143552",
-    //         "thisWeekId": "471806506321575936",
-    //         "nextWeekId": "471806507093065749",
-    //         "twoWeeksId": "471806508041109504",
-    //         "threeWeeksId": "471806508913655828",
-    //         "laterId": "471806527603212298"
-    //     }
-    // }),
     Outbreak(bastion, {
         restrict: ["shitpost", "430517752546197509"]
     }),
