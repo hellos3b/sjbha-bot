@@ -48,16 +48,16 @@ const createRsvpListener = async (client: Discord.Client, meetup: db.Meetup): Pr
 
   collector.on('collect', async i => {
     // Get the latest model
-    const state = await db.findOne({ id: meetup.id });
+    const meetupState = await db.findOne({ id: meetup.id });
 
-    if (!state)
+    if (!meetupState)
       return;
 
     Log.runWithContext(async () => {
-      log.info('User is updating their RSVP', { userId: i.user.id, username: i.user.username, thread: state.title, button: i.customId });
+      log.info('User is updating their RSVP', { userId: i.user.id, username: i.user.username, thread: meetupState.title, button: i.customId });
       const prevState =
-        state.rsvps.includes(i.user.id) ? Rsvp.Attending
-          : state.maybes.includes(i.user.id) ? Rsvp.Interested
+        meetupState.rsvps.includes(i.user.id) ? Rsvp.Attending
+          : meetupState.maybes.includes(i.user.id) ? Rsvp.Interested
             : Rsvp.None;
 
       const nextState =
@@ -67,15 +67,15 @@ const createRsvpListener = async (client: Discord.Client, meetup: db.Meetup): Pr
 
       log.debug('Rsvp has been updated', { prevState, nextState });
 
-      const rsvps = (nextState === Rsvp.Attending)
-        ? state.rsvps.concat(i.user.id)
-        : state.rsvps.filter(id => id !== i.user.id);
+      const rsvps = meetupState.rsvps
+        .filter(id => id !== i.user.id)
+        .concat((nextState === Rsvp.Attending) ? [i.user.id] : []);
 
-      const maybes = (nextState === Rsvp.Interested)
-        ? state.maybes.concat(i.user.id)
-        : state.maybes.filter(id => id !== i.user.id);
+      const maybes = meetupState.maybes
+        .filter(id => id !== i.user.id)
+        .concat((nextState === Rsvp.Interested) ? [i.user.id] : []);
 
-      await db.update({ ...meetup, rsvps, maybes });
+      await db.update({ ...meetupState, rsvps, maybes });
       i.deferUpdate();
 
       // Announce the change
