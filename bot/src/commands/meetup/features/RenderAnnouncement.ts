@@ -3,6 +3,7 @@ import { DateTime } from 'luxon';
 
 import { MemberList } from '@sjbha/utils/MemberList';
 import * as Format from '@sjbha/utils/Format';
+import * as Env from '@sjbha/app/env';
 import * as db from '../db/meetups';
 import { option } from 'ts-option';
 
@@ -89,7 +90,7 @@ function Announcement(meetup: db.Meetup, rsvps?: string[], maybes?: string[]): M
 
   embed.addField('Links', [
     ...meetup.links.map(l => linkify(l.url, l.label)),
-    linkify(gcalLink(meetup), 'Add to Google Calendar'),
+    linkify(`${Env.HAPI_HOST}/meetup/${meetup.id}/gcal`, 'Add to Google Calendar'),
   ].join('\n'));
 
   const withCount = (count: number) =>
