@@ -21,7 +21,6 @@ import Reddit from '../plugins/Reddit'
 import RoyRoyBucks from '../plugins/RoyRoyBucks'
 import Stats from '../plugins/Stats'
 import StockChart from '../plugins/StockChart'
-import Teams from '../plugins/Teams'
 import Trading from '../plugins/Trading'
 import Upvotes from '../plugins/Upvotes'
 import UrbanDictionary from '../plugins/UrbanDictionary'
@@ -40,9 +39,6 @@ export default bastion => ([
     Ban,
     Stats(bastion, {
         restrict: ["430517752546197509"]
-    }),
-    Teams(bastion, {
-        listRestrict: ["shitpost", "admin"]
     }),
     StockChart(bastion, {
         restrict: ["stocks"]
