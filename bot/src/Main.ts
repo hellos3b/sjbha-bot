@@ -2,8 +2,11 @@ import 'dotenv/config';
 import moduleAlias from 'module-alias';
 moduleAlias.addAlias('@sjbha', __dirname);
 
+import * as Discord from "discord.js";
 import { Settings } from 'luxon';
 import Hapi from '@hapi/hapi';
+import { MessageHandler } from './MessageHandler';
+
 import { channels } from './server';
 import { DiscordClient, env, MongoDb, Log } from './app';
 import * as Command from './Command';
@@ -11,6 +14,10 @@ import * as Fit from './commands/fit/Fit';
 import * as Meetup from './commands/meetup/RegisterMeetup';
 import * as RPS from './commands/throw/Throw';
 import * as Subscribe from './commands/subscribe/Subscribe';
+
+import * as Pong from './commands/Pong';
+import * as Tldr from './commands/Tldr';
+import * as Version from './commands/Version';
 
 import * as MainRescript from './MainRescript.bs';
 
@@ -24,6 +31,17 @@ const commands = Command.combine(
   Subscribe.command
 );
 
+const createMessageHandler = (): MessageHandler => {
+  const handler = new MessageHandler();
+
+  handler.when(/^!pong$/i, () => Pong.cmdPong);
+  handler.when(/^!tldr$/i, () => Tldr.cmdList);
+  handler.when(/^!tldr (.*)/i, (note) => Tldr.cmdSave(note));
+  handler.when(/^!version/i, () => Version.cmdVersion);
+
+  return handler;
+}
+
 const routes = [
   ...Fit.routes,
   ...Meetup.routes
@@ -34,7 +52,7 @@ const onStartup = [
   Meetup.startup
 ];
 
-const start = () => {
+void function main() {
   log.info('Starting app');
 
   const webServer =
@@ -55,6 +73,8 @@ const start = () => {
     .then(_ => log.info('Connected to MongoDb'))
     .catch(_ => { log.error('MongoDB failed to connect, some commands may not work.\n(Make sure the db is running with \'npm run db\') ') });
 
+  const handler = createMessageHandler();
+
   DiscordClient.connect({
     token: env.DISCORD_TOKEN,
 
@@ -71,13 +91,10 @@ const start = () => {
 
     onMessage: message => {
       MainRescript.run(message);
-      // todo: deprecate
       commands(message);
+      handler.handle(message);
     },
 
     onReaction: _ => _
   });
-}
-
-// GO!
-start();
+}();

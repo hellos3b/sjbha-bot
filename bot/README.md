@@ -17,7 +17,7 @@ pnpm start
 First, create a [Docker Context](https://docs.docker.com/engine/context/working-with-contexts/) using your ssh host as a target. Then, pretending I named my context "s3bby":
 
 ```sh
-$env:DOCKER_HOST="s3bby"
+$env:DOCKER_CONTEXT="s3bby"
 docker compose build
 docker compose up -d
 ```

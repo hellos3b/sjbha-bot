@@ -9,10 +9,6 @@ let run = (message: Discord.message) => {
   let command = switch request {
   | list{"!aqi"} => Aqi.post
   | list{"!christmas"} => Christmas.daysLeft
-  | list{"!pong"} => Pong.replyPing
-  | list{"!tldr"} => Tldr.sendAll
-  | list{"!tldr", ...tldr} => Tldr.save(tldr->toString)
-  | list{"!version"} => Version.sendVersion
   | _ => ignore
   }
 

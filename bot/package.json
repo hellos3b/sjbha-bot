@@ -7,6 +7,7 @@
   },
   "scripts": {
     "start": "ts-node-dev src/Main.ts",
+    "start:prod": "node build/Main.js",
     "dev:re": "rescript build -w",
     "build:ts": "tsc",
     "build:re": "rescript",
@@ -27,6 +28,7 @@
     "discord.js": "^13.2.0",
     "dotenv": "^10.0.0",
     "fromnow": "^3.0.1",
+    "logfmt": "^1.3.2",
     "luxon": "^1.27.0",
     "minimist": "^1.2.5",
     "module-alias": "^2.2.2",
