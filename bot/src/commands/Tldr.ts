@@ -36,7 +36,7 @@ const Tldrs = {
 export const cmdList = async (message: DiscordJs.Message): Promise<void> => {
   const tldrs = await Tldrs.fetch();
 
-  const response = embed({
+  const response = new DiscordJs.MessageEmbed({
     title: `💬 TLDR`,
     color: EMBED_COLOR,
     fields: tldrs.map(tldr => {
@@ -51,8 +51,7 @@ export const cmdList = async (message: DiscordJs.Message): Promise<void> => {
 
 // create a new tldr into the database
 export const cmdSave = (note: string) => async (message: DiscordJs.Message) => {
-  if (!isGuildChannel(message.channel))
-    return;
+  if (!(message.channel instanceof DiscordJs.TextChannel)) return;
 
   await Tldrs.insert({
     message: note,
@@ -62,7 +61,7 @@ export const cmdSave = (note: string) => async (message: DiscordJs.Message) => {
     channel: message.channel.name
   });
 
-  const response = embed({
+  const response = new DiscordJs.MessageEmbed({
     description: `📌 TLDR Saved`,
     color: EMBED_COLOR
   });
