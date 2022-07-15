@@ -1,5 +1,9 @@
-import * as DiscordJs from "discord.js";
+import { Command } from "@sjbha/common/SlashCommand";
 
-export const cmdVersion = (message: DiscordJs.Message): void => {
-  message.channel.send(`BoredBot v${process.env.npm_package_version}`);
-}
+export default Command.make({
+  name: "version",
+  description: "Check which version the bot is currently running",
+  async execute(interaction) {
+    interaction.reply(`BoredBot v${process.env.npm_package_version}`);
+  }
+});

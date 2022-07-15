@@ -1,5 +1,9 @@
-import * as DiscordJs from "discord.js";
+import { Command } from "@sjbha/common/SlashCommand";
 
-export const cmdPong = (message: DiscordJs.Message): void => {
-  message.reply("Ping??");
-}
+export default Command.make({
+  name: "pong",
+  description: "Hello? Is the bot alive?",
+  async execute(interaction) {
+    interaction.reply("Ping?")
+  }
+});

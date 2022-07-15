@@ -1,13 +1,13 @@
 import { MongoDb } from "@sjbha/app";
-import { embed, isGuildChannel } from "@sjbha/utils/Discord";
 import { formatDistance } from "date-fns";
 import * as DiscordJs from "discord.js";
+import { Command, Option, SubCommand } from "@sjbha/common/SlashCommand";
 
 const COLLECTION = "tldrs";
 const MAX_TLDR_DISPLAY = 10;
 const EMBED_COLOR = 11393254;
 
-type Tldr = {
+interface Tldr {
   message: string;
   from: string;
   timestamp: Date;
@@ -32,39 +32,76 @@ const Tldrs = {
   }
 }
 
-// list out the most recent tldrs in an embed
-export const cmdList = async (message: DiscordJs.Message): Promise<void> => {
-  const tldrs = await Tldrs.fetch();
+const list = SubCommand.make({
+  name: "list",
+  description: "See a list of the most recent tldrs",
 
-  const response = new DiscordJs.MessageEmbed({
-    title: `💬 TLDR`,
-    color: EMBED_COLOR,
-    fields: tldrs.map(tldr => {
-      const timestamp = formatDistance(tldr.timestamp, new Date());
-      const value = `*${timestamp} • ${tldr.from} • <#${tldr.channelID}>*`;
-      return { name: tldr.message, value };
-    })
-  });
+  async execute(interaction) {
+    const tldrs = await Tldrs.fetch();
 
-  message.channel.send({ embeds: [response] });
-}
+    const response = new DiscordJs.MessageEmbed({
+      title: `💬 TLDR`,
+      color: EMBED_COLOR,
+      fields: tldrs.map(tldr => {
+        const timestamp = formatDistance(tldr.timestamp, new Date());
+        const value = `*${timestamp} • ${tldr.from} • <#${tldr.channelID}>*`;
+        return { name: tldr.message, value };
+      })
+    });
 
-// create a new tldr into the database
-export const cmdSave = (note: string) => async (message: DiscordJs.Message) => {
-  if (!(message.channel instanceof DiscordJs.TextChannel)) return;
+    interaction.reply({ embeds: [response] });
+  }
+});
 
-  await Tldrs.insert({
-    message: note,
-    from: message.author.username,
-    timestamp: new Date(),
-    channelID: message.channel.id,
-    channel: message.channel.name
-  });
+const Note = Option.make({
+  name: "note",
+  description: "The tldr you want to save",
+  required: true
+});
 
-  const response = new DiscordJs.MessageEmbed({
-    description: `📌 TLDR Saved`,
-    color: EMBED_COLOR
-  });
+const save = SubCommand.make({
+  name: "save",
+  description: "Save a new TLDR into sjbha history",
+  options: [Note],
 
-  message.reply({ embeds: [response] });
-}
+  async execute(interaction) {
+    if (!(interaction.channel instanceof DiscordJs.TextChannel)) return;
+
+    console.log("Save", interaction.channel);
+
+    const note = Note.getExn(interaction);
+    await Tldrs.insert({
+      message: note,
+      from: interaction.user.username,
+      timestamp: new Date(),
+      channelID: interaction.channel.id,
+      channel: interaction.channel.name
+    });
+
+    const response = new DiscordJs.MessageEmbed({
+      description: `📖 ${note}`,
+      color: EMBED_COLOR
+    });
+
+    interaction.reply({ embeds: [response] });
+  }
+})
+
+export default Command.make({
+  name: "tldr",
+  description: "Summarize things that happen on discord",
+  subcommands: [list, save],
+  async execute(interaction) {
+    if (!(interaction.channel instanceof DiscordJs.TextChannel)) return;
+
+    switch (interaction.options.getSubcommand()) {
+      case save.name:
+        save.execute(interaction);
+        break;
+
+      case list.name:
+        list.execute(interaction);
+        break;
+    }
+  }
+});

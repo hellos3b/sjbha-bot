@@ -2,10 +2,8 @@ import 'dotenv/config';
 import moduleAlias from 'module-alias';
 moduleAlias.addAlias('@sjbha', __dirname);
 
-import * as Discord from "discord.js";
 import { Settings } from 'luxon';
 import Hapi from '@hapi/hapi';
-import { MessageHandler } from './MessageHandler';
 
 import { channels } from './server';
 import { DiscordClient, env, MongoDb, Log } from './app';
@@ -14,11 +12,9 @@ import * as Fit from './commands/fit/Fit';
 import * as Meetup from './commands/meetup/RegisterMeetup';
 import * as RPS from './commands/throw/Throw';
 import * as Subscribe from './commands/subscribe/Subscribe';
+import * as CommandsNowSlashed from "./commands/CommandsNowSlashed";
 
-import * as Pong from './commands/Pong';
-import * as Tldr from './commands/Tldr';
-import * as Version from './commands/Version';
-
+import * as Manifest from "./Manifest";
 import * as MainRescript from './MainRescript.bs';
 
 Settings.defaultZoneName = 'America/Los_Angeles';
@@ -28,19 +24,9 @@ const commands = Command.combine(
   Fit.command,
   Meetup.command,
   RPS.command,
-  Subscribe.command
+  Subscribe.command,
+  CommandsNowSlashed.warn
 );
-
-const createMessageHandler = (): MessageHandler => {
-  const handler = new MessageHandler();
-
-  handler.when(/^!pong$/i, () => Pong.cmdPong);
-  handler.when(/^!tldr$/i, () => Tldr.cmdList);
-  handler.when(/^!tldr (.*)/i, (note) => Tldr.cmdSave(note));
-  handler.when(/^!version/i, () => Version.cmdVersion);
-
-  return handler;
-}
 
 const routes = [
   ...Fit.routes,
@@ -52,7 +38,7 @@ const onStartup = [
   Meetup.startup
 ];
 
-void function main() {
+void async function main() {
   log.info('Starting app');
 
   const webServer =
@@ -73,7 +59,8 @@ void function main() {
     .then(_ => log.info('Connected to MongoDb'))
     .catch(_ => { log.error('MongoDB failed to connect, some commands may not work.\n(Make sure the db is running with \'npm run db\') ') });
 
-  const handler = createMessageHandler();
+
+  const slashCommands = await Manifest.createSlashCommands();
 
   DiscordClient.connect({
     token: env.DISCORD_TOKEN,
@@ -92,9 +79,15 @@ void function main() {
     onMessage: message => {
       MainRescript.run(message);
       commands(message);
-      handler.handle(message);
     },
 
-    onReaction: _ => _
+    onReaction: _ => _,
+
+    onCommand: interaction => {
+      const command = slashCommands.get(interaction.commandName);
+      if (command) command.execute(interaction);
+    }
   });
+
+  Manifest.createSlashCommands();
 }();
