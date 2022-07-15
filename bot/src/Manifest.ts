@@ -25,7 +25,7 @@ export async function createSlashCommands(): Promise<Map<string, Command>> {
 
   try {
     await rest.put(
-      Routes.applicationGuildCommands("530596459486380032", Env.SERVER_ID),
+      Routes.applicationGuildCommands(Env.DISCORD_CLIENT_ID, Env.SERVER_ID),
       { body }
     );
 
