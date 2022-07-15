@@ -4,6 +4,7 @@ moduleAlias.addAlias('@sjbha', __dirname);
 
 import { Settings } from 'luxon';
 import Hapi from '@hapi/hapi';
+
 import { channels } from './server';
 import { DiscordClient, env, MongoDb, Log } from './app';
 import * as Command from './Command';
@@ -11,7 +12,9 @@ import * as Fit from './commands/fit/Fit';
 import * as Meetup from './commands/meetup/RegisterMeetup';
 import * as RPS from './commands/throw/Throw';
 import * as Subscribe from './commands/subscribe/Subscribe';
+import * as CommandsNowSlashed from "./commands/CommandsNowSlashed";
 
+import * as Manifest from "./Manifest";
 import * as MainRescript from './MainRescript.bs';
 
 Settings.defaultZoneName = 'America/Los_Angeles';
@@ -21,7 +24,8 @@ const commands = Command.combine(
   Fit.command,
   Meetup.command,
   RPS.command,
-  Subscribe.command
+  Subscribe.command,
+  CommandsNowSlashed.warn
 );
 
 const routes = [
@@ -34,7 +38,7 @@ const onStartup = [
   Meetup.startup
 ];
 
-const start = () => {
+void async function main() {
   log.info('Starting app');
 
   const webServer =
@@ -55,6 +59,9 @@ const start = () => {
     .then(_ => log.info('Connected to MongoDb'))
     .catch(_ => { log.error('MongoDB failed to connect, some commands may not work.\n(Make sure the db is running with \'npm run db\') ') });
 
+
+  const slashCommands = await Manifest.createSlashCommands();
+
   DiscordClient.connect({
     token: env.DISCORD_TOKEN,
 
@@ -71,13 +78,16 @@ const start = () => {
 
     onMessage: message => {
       MainRescript.run(message);
-      // todo: deprecate
       commands(message);
     },
 
-    onReaction: _ => _
-  });
-}
+    onReaction: _ => _,
 
-// GO!
-start();
+    onCommand: interaction => {
+      const command = slashCommands.get(interaction.commandName);
+      if (command) command.execute(interaction);
+    }
+  });
+
+  Manifest.createSlashCommands();
+}();

@@ -15,4 +15,4 @@ RUN pnpm install -r --offline
 RUN pnpm build:re
 RUN pnpm build:ts
 
-ENTRYPOINT node build/Main.js
+ENTRYPOINT pnpm start:prod
