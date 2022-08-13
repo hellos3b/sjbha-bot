@@ -32,7 +32,7 @@ export async function cancel (message: Message) : Promise<void> {
   const reason = reasonArr.join (' ');
 
   if (!reason) {
-    message.reply ('Please specific a reason for cancellation after the command: `!meetup cancel Some words why this meetup is beign cancelled`');
+    message.reply ('Please specific a reason for cancellation after the command: `!meetup cancel Some words why this meetup is being cancelled`');
     return;
   }
 
