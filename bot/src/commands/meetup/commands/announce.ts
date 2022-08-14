@@ -4,6 +4,8 @@ import * as db from '../db/meetups';
 
 const log = Log.make ('meetup:announce');
 
+const PINGS_PER_MENTION = 30;
+
 // Notify all RSVPs about details of the meetup
 export async function announce (message: Message) : Promise<void> {
   log.command (message);
@@ -43,7 +45,11 @@ export async function announce (message: Message) : Promise<void> {
       .map (id => `<@${id}>`)
       .join (' ');
 
-    await announcement.reply (`**☝️ Meetup Announcement from ${message.author.username}!**\n${pings}`);
+    for (let i = 0; i < pings.length; i += PINGS_PER_MENTION) {
+      const group = pings.slice (i, i + PINGS_PER_MENTION);
+      await announcement.reply (`**☝️ Meetup Announcement from ${message.author.username}!**\n${group}`);
+    }
+
     log.debug ('Pings were set', { users: rsvps.length });
   }
   else {
