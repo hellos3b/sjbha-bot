@@ -14,7 +14,14 @@ pnpm start
 
 ## Deploy Bot
 
-First, create a [Docker Context](https://docs.docker.com/engine/context/working-with-contexts/) using your ssh host as a target. Then, pretending I named my context "s3bby":
+The docker image copies over the built js files, so first build the entire project:
+
+```sh
+pnpm build:re
+pnpm build:ts
+```
+
+Next, create a [Docker Context](https://docs.docker.com/engine/context/working-with-contexts/) using your ssh host as a target. Then, pretending I named my context "s3bby":
 
 ```sh
 $env:DOCKER_CONTEXT="s3bby"
