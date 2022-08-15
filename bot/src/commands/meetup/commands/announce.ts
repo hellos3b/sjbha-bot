@@ -41,12 +41,13 @@ export async function announce (message: Message) : Promise<void> {
 
   if (announcement) {
     const rsvps = [...meetup.rsvps, ...meetup.maybes];
-    const pings = rsvps
-      .map (id => `<@${id}>`)
-      .join (' ');
+    const pings = rsvps.map (id => `<@${id}>`);
 
     for (let i = 0; i < pings.length; i += PINGS_PER_MENTION) {
-      const group = pings.slice (i, i + PINGS_PER_MENTION);
+      const group = pings
+        .slice (i, i + PINGS_PER_MENTION)
+        .join (' ');
+
       await announcement.reply (`**☝️ Meetup Announcement from ${message.author.username}!**\n${group}`);
     }
 
