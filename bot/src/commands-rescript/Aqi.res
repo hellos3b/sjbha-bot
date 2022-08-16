@@ -1,4 +1,6 @@
 open Belt
+open StdLib
+open Discord
 
 module Source = {
   type t = {id: string, location: string}
@@ -129,38 +131,31 @@ module Embed = {
     Source.forLocation(location)->Array.keepMap(s => aqiById->Js.Dict.get(s.id))->Aqi.average
 
   let make = (aqiById: Js.Dict.t<float>) => {
-    open Discord
     let totalAqi = aqiById->Js.Dict.values->Aqi.average->Js.Math.round
 
-    makeEmbed(
-      ~title=j`Air Quality Index • $totalAqi average`,
-      ~color=borderColor(totalAqi),
-      ~description=Source.locations
-      ->Array.map(location => {
-        let aqi = location->aqiForLocation(aqiById)->Js.Math.round
-        let emoji = icon(aqi)
-        j`$emoji **$location** $aqi`
-      })
-      ->Js.Array2.joinWith("\n"),
-      ~footer=footer(
-        ~text="Based on a 10 minute average from [these Purple Air sensors](https://www.google.com)",
-        (),
-      ),
+    Embed.make(
+      ~title = j`Air Quality Index • $totalAqi average`,
+      ~color = borderColor(totalAqi),
+      ~description = Source.locations
+        ->A.map (location => {
+          let aqi = location->aqiForLocation(aqiById)->Js.Math.round
+          let emoji = icon(aqi)
+          j`$emoji **$location** $aqi`
+        })
+        -> A.join ("\n"),
+      ~footer = Embed.footer("Based on a 10 minute average from [these Purple Air sensors](https://www.google.com)"),
       (),
     )
   }
 }
 
 let post = msg => {
-  open Promise
-  open Discord
-
   Source.items
-  ->Array.map(s => s.id)
-  ->Sensor.fetch
-  ->thenResolve(aqiById => {
-    let embed = makeMessage(~embeds=[Embed.make(aqiById)], ())
-    msg.channel->send(embed)
-  })
-  ->ignore
+    -> A.map(s => s.id)
+    -> Sensor.fetch
+    -> P.flatmap (aqiById => {
+      let embed = Message.make (~embeds=[Embed.make(aqiById)], ())
+      msg.channel->Channel.send (embed)
+    })
+    -> ignore
 }

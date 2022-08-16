@@ -11,27 +11,68 @@ type message = {
 type sendableMessage
 
 type embed
-type field
-type footer
+type field = {
+  name: string,
+  value: string,
+  inline: bool
+}
+
+type footer = {
+  text: string
+}
 
 // message
-@obj
-external makeMessage: (~content: string=?, ~embeds: array<embed>=?, unit) => sendableMessage = ""
-@send external reply: (message, sendableMessage) => message = "reply"
+module Message = {
+  type t = message
+  @obj external make: (~content: string=?, ~embeds: array<embed>=?, unit) => sendableMessage = ""
+  @send external reply: (t, sendableMessage) => t = "reply"
+}
 
 // channel
-@send external send: (channel, sendableMessage) => message = "send"
+module Channel = {
+  type t = channel
+  @send external send: (t, sendableMessage) => Message.t = "send"
+}
 
 // embed
-@obj
-external makeEmbed: (
-  ~color: int=?,
-  ~title: string=?,
-  ~description: string=?,
-  ~fields: array<field>=?,
-  ~footer: footer=?,
-  unit,
-) => embed = ""
+module Embed = {
+  type t = embed
+  @obj external make: (
+    ~color: int=?,
+    ~title: string=?,
+    ~description: string=?,
+    ~fields: array<field>=?,
+    ~footer: footer=?,
+    unit,
+  ) => t = ""
 
-@obj external footer: (~text: string=?, unit) => footer = ""
-@obj external field: (~name: string, ~value: string, ~inline: bool=?, unit) => field = ""
+  let footer = (text: string): footer => { text: text }
+  let field = (name: string, value: string, inline: bool) => {name: name, value: value, inline: inline}
+}
+
+module Interaction = {
+  type t
+  @send external reply: (t, string) => Message.t = "reply"
+}
+
+module Command = {
+  type t
+  type config = {
+    command: t,
+    interaction: Interaction.t => unit
+  }
+
+  @module("@discordjs/builders") @new external new_: unit => t = "SlashCommandBuilder"
+  @send external setName: (t, string) => t = "setName"
+  @send external setDescription: (t, string) => t = "setDescription"
+
+  let make = (~name: string, ~description: string): t =>
+    new_()
+      -> setName (name)
+      -> setDescription (description)
+
+  let config = (~command: t, ~interaction: Interaction.t => unit) => {
+    command: command,
+    interaction: interaction
+  }
+}

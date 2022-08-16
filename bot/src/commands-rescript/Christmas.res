@@ -36,6 +36,8 @@ let daysLeft = message => {
   | days => j`ONLY $days ${pluralize("DAY", days)} UNTIL CHRISTMAS!!`
   }
 
-  let remaining = makeMessage(~content, ())
-  message.channel->send(remaining)->ignore
+  let remaining = Message.make(~content, ())
+  message.channel
+    -> Channel.send (remaining)
+    -> ignore
 }

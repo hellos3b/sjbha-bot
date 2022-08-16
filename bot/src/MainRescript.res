@@ -1,15 +1,18 @@
-open Belt
+open StdLib
 open Discord
 
-let toString = (a: list<string>) => a->List.toArray->Js.Array2.joinWith(" ")
+let toString = (a: list<string>) => 
+  a->L.toArray->A.join (" ")
 
 let run = (message: Discord.message) => {
-  let request = message.content->Js.String2.split(" ")->List.fromArray
+  let request = message.content
+    -> String.split (" ")
+    -> A.toList
 
   let command = switch request {
-  | list{"!aqi"} => Aqi.post
-  | list{"!christmas"} => Christmas.daysLeft
-  | _ => ignore
+    | list{"!aqi"} => Aqi.post
+    | list{"!christmas"} => Christmas.daysLeft
+    | _ => ignore
   }
 
   command(message)
