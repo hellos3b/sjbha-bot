@@ -1,4 +1,6 @@
 open Belt
+open StdLib
+open Discord
 
 module Source = {
   type t = {id: string, location: string}
@@ -87,24 +89,24 @@ module Sensor = {
   let aqi = sensor => sensor->decodeStats->Option.map(s => Aqi.fromPm25(s.v1))
 
   // async
-  let fetch = (ids: array<string>): Js.Promise.t<Js.Dict.t<float>> => {
+  let fetch = (ids: array<string>): PR.t<Js.Dict.t<float>, exn> => {
     open SuperAgent
 
     get("https://www.purpleair.com/json")
-    ->query({
-      "show": ids->Array.joinWith("|", i => i),
-    })
-    ->toPromise
-    ->Promise.thenResolve(res => {
-      let byId = Js.Dict.empty()
-      res.body.results->Array.forEach(sensor => {
-        switch aqi(sensor) {
-        | Some(value) => byId->Js.Dict.set(sensor->id, value)
-        | None => ignore()
-        }
+      -> query ({
+        "show": ids->Array.joinWith("|", i => i),
       })
-      byId
-    })
+      -> run
+      -> PR.map (res => {
+        let byId = Js.Dict.empty()
+        res.body.results->Array.forEach(sensor => {
+          switch aqi(sensor) {
+          | Some(value) => byId->Js.Dict.set(sensor->id, value)
+          | None => ignore()
+          }
+        })
+        byId
+      })
   }
 }
 
@@ -129,38 +131,34 @@ module Embed = {
     Source.forLocation(location)->Array.keepMap(s => aqiById->Js.Dict.get(s.id))->Aqi.average
 
   let make = (aqiById: Js.Dict.t<float>) => {
-    open Discord
     let totalAqi = aqiById->Js.Dict.values->Aqi.average->Js.Math.round
 
-    makeEmbed(
-      ~title=j`Air Quality Index • $totalAqi average`,
-      ~color=borderColor(totalAqi),
-      ~description=Source.locations
-      ->Array.map(location => {
-        let aqi = location->aqiForLocation(aqiById)->Js.Math.round
-        let emoji = icon(aqi)
-        j`$emoji **$location** $aqi`
-      })
-      ->Js.Array2.joinWith("\n"),
-      ~footer=footer(
-        ~text="Based on a 10 minute average from [these Purple Air sensors](https://www.google.com)",
-        (),
-      ),
+    Embed.make(
+      ~title = j`Air Quality Index • $totalAqi average`,
+      ~color = borderColor(totalAqi),
+      ~description = Source.locations
+        ->A.map (location => {
+          let aqi = location->aqiForLocation(aqiById)->Js.Math.round
+          let emoji = icon(aqi)
+          j`$emoji **$location** $aqi`
+        })
+        -> A.join ("\n"),
+      ~footer = Embed.footer("Based on a 10 minute average from [these Purple Air sensors](https://www.google.com)"),
       (),
     )
   }
 }
 
 let post = msg => {
-  open Promise
-  open Discord
-
   Source.items
-  ->Array.map(s => s.id)
-  ->Sensor.fetch
-  ->thenResolve(aqiById => {
-    let embed = makeMessage(~embeds=[Embed.make(aqiById)], ())
-    msg.channel->send(embed)
-  })
-  ->ignore
+    -> A.map(s => s.id)
+    -> Sensor.fetch
+    -> PR.ifOk (aqiById => {
+      let embed = Message.make (~embeds=[Embed.make(aqiById)], ())
+      msg
+        -> Message.channel
+        -> Channel.send (embed)
+        -> done
+    })
+    -> ignore
 }
