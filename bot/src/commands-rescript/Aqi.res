@@ -89,24 +89,24 @@ module Sensor = {
   let aqi = sensor => sensor->decodeStats->Option.map(s => Aqi.fromPm25(s.v1))
 
   // async
-  let fetch = (ids: array<string>): Js.Promise.t<Js.Dict.t<float>> => {
+  let fetch = (ids: array<string>): PR.t<Js.Dict.t<float>, exn> => {
     open SuperAgent
 
     get("https://www.purpleair.com/json")
-    ->query({
-      "show": ids->Array.joinWith("|", i => i),
-    })
-    ->toPromise
-    ->Promise.thenResolve(res => {
-      let byId = Js.Dict.empty()
-      res.body.results->Array.forEach(sensor => {
-        switch aqi(sensor) {
-        | Some(value) => byId->Js.Dict.set(sensor->id, value)
-        | None => ignore()
-        }
+      -> query ({
+        "show": ids->Array.joinWith("|", i => i),
       })
-      byId
-    })
+      -> run
+      -> PR.map (res => {
+        let byId = Js.Dict.empty()
+        res.body.results->Array.forEach(sensor => {
+          switch aqi(sensor) {
+          | Some(value) => byId->Js.Dict.set(sensor->id, value)
+          | None => ignore()
+          }
+        })
+        byId
+      })
   }
 }
 
@@ -153,9 +153,12 @@ let post = msg => {
   Source.items
     -> A.map(s => s.id)
     -> Sensor.fetch
-    -> P.flatmap (aqiById => {
+    -> PR.ifOk (aqiById => {
       let embed = Message.make (~embeds=[Embed.make(aqiById)], ())
-      msg.channel->Channel.send (embed)
+      msg
+        -> Message.channel
+        -> Channel.send (embed)
+        -> done
     })
     -> ignore
 }

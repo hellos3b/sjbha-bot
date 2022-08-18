@@ -1,12 +1,12 @@
 open StdLib
 open Discord
 
-let command = Command.config(
-   ~command = Command.make (
+let command = SlashCommand.define (
+   ~command = SlashCommand.make (
       ~name = "pong",
-      ~description = "check if the bot is alive"
-   ),
+      ~description = "Check if the bot is alive",
+      ()),
 
    ~interaction = int =>
-      int->Interaction.reply ("Pong? From Rescript!")->done
+      int->Interaction.respond (Text("Pong? From Rescript!", Public))->done
 )

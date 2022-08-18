@@ -6,9 +6,7 @@ import { Log } from './app';
 
 import { Command } from './common/SlashCommand';
 
-import * as MainRescript from './MainRescript.bs';
 import * as ManifestRescript from './ManifestRescript.bs';
-import Tldr from './commands/Tldr';
 import { SlashCommandBuilder } from '@discordjs/builders';
 
 type execute = (i: CommandInteraction<CacheType>) => void;
@@ -19,7 +17,7 @@ type recommand = {
 
 const log = Log.make ('manifest');
 const commands: Command[] = [
-  Tldr
+  // Tldr
 ];
 
 const recommands: recommand[] = 
