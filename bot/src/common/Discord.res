@@ -135,6 +135,10 @@ module Interaction = {
   let getStringOption = (t: t, option: string): option<string> =>
     t.options->getString(option)
 
+  let getRequiredStringOption = (t: t, option: string) =>
+    t->getStringOption(option)
+      -> R.fromOption(#MISSING_OPTION(option))
+
   let respond = (t: t, response: Response.t): unit => {
     let message = Message.make(
       ~content = {
