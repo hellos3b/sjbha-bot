@@ -49,7 +49,7 @@ let listRecentTldrs = (interaction: Interaction.t): P.t<Response.t> => {
             -> setTitle (`💬 TLDR`)
             -> setColor (embed_color)
 
-         tldrs->A.forEach (tldr => {
+         A.forEach (tldrs, tldr => {
             let value = `*${Date.fromNow (tldr.timestamp)} • ${tldr.from} • <#${tldr.channelID}>*`
             embed->addField(tldr.message, value, Full)->ignore
          })
@@ -75,10 +75,9 @@ let listRecentTldrs = (interaction: Interaction.t): P.t<Response.t> => {
 // Saves a new tldr into the db
 let saveNewTldr = (interaction: Interaction.t): P.t<Response.t> => {
    let note = interaction
-      -> Interaction.getStringOption ("note")
-      -> R.fromOption (#MISSING_ARG("note"))
+      -> Interaction.getRequiredStringOption ("note")
 
-   let tldr = note->R.flatMapAsync(note => {
+   let savedTldr = note->R.flatMapAsync(note => {
       let tldr = {
          message: note,
          from: interaction.user.username,
@@ -90,7 +89,7 @@ let saveNewTldr = (interaction: Interaction.t): P.t<Response.t> => {
       Tldrs.insert (tldr)
    })
       
-   tldr->P.map (tldr => switch tldr {
+   savedTldr->P.map (tldr => switch tldr {
       | Ok(tldr) => {
          open Embed
          let embed = Embed.make ()
@@ -104,7 +103,7 @@ let saveNewTldr = (interaction: Interaction.t): P.t<Response.t> => {
          Response.Error("Unable to save TLDR")
       }
 
-      | Error(#MISSING_ARG(name)) => {
+      | Error(#MISSING_OPTION(name)) => {
          Response.Error(`Missing required option ${name}`)
       }
 
