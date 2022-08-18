@@ -20,15 +20,6 @@ type message = {
 type sendableMessage
 
 type embed
-type field = {
-  name: string,
-  value: string,
-  inline: bool
-}
-
-type footer = {
-  text: string
-}
 
 module User = {
   type t = user
@@ -82,29 +73,37 @@ module Channel = {
 // embed
 module Embed = {
   type t = embed
+  type field = {
+    name: string,
+    value: string,
+    inline: bool
+  }
+  type footer = {
+    text: string
+  }
 
-  type fieldBox =
+  type fieldBounds =
     | Inline
     | Full
 
-  @obj external make: (
-    ~color: int=?,
-    ~title: string=?,
-    ~description: string=?,
-    ~fields: array<field>=?,
-    ~footer: footer=?,
-    unit,
-  ) => t = ""
+  @module("discord.js") @new external make: unit => t = "MessageEmbed"
+  @send external setColor: (t, int) => t = "setColor"
+  @send external setTitle: (t, string) => t = "setTitle"
+  @send external setDescription: (t, string) => t = "setDescription"
+  @send external addField_: (t, field) => t = "addField"
+  @send external addFields: (t, array<field>) => t = "addFields"
+  @send external setFooter: (t, string) => t = "setFooter"
 
   let footer = (text: string): footer => { 
     text: text 
   }
 
-  let field = (name: string, value: string, box: fieldBox) => {
-    name: name, 
-    value: value, 
-    inline: box === Inline
-  }
+  let addField = (t: t, name: string, value: string, fieldBounds: fieldBounds) =>
+    t->addField_({
+      name: name,
+      value: value,
+      inline: fieldBounds === Inline
+    })
 }
 
 module Response = {
@@ -128,7 +127,7 @@ module Interaction = {
   }
 
   // bindings
-  @send external reply: (t, sendableMessage) => PR.t<Message.t, exn> = "reply"
+  @send external reply: (t, sendableMessage) => P.t<Message.t> = "reply"
   @send external getSubcommand: options => option<string> = "getSubcommand"
   @send external getString: (options, string) => option<string> = "getString"
   

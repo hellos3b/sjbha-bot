@@ -89,7 +89,7 @@ module Sensor = {
   let aqi = sensor => sensor->decodeStats->Option.map(s => Aqi.fromPm25(s.v1))
 
   // async
-  let fetch = (ids: array<string>): PR.t<Js.Dict.t<float>, exn> => {
+  let fetch = (ids: array<string>): P.t<Js.Dict.t<float>> => {
     open SuperAgent
 
     get("https://www.purpleair.com/json")
@@ -97,7 +97,7 @@ module Sensor = {
         "show": ids->Array.joinWith("|", i => i),
       })
       -> run
-      -> PR.map (res => {
+      -> P.map (res => {
         let byId = Js.Dict.empty()
         res.body.results->Array.forEach(sensor => {
           switch aqi(sensor) {
@@ -133,19 +133,19 @@ module Embed = {
   let make = (aqiById: Js.Dict.t<float>) => {
     let totalAqi = aqiById->Js.Dict.values->Aqi.average->Js.Math.round
 
-    Embed.make(
-      ~title = j`Air Quality Index • $totalAqi average`,
-      ~color = borderColor(totalAqi),
-      ~description = Source.locations
-        ->A.map (location => {
-          let aqi = location->aqiForLocation(aqiById)->Js.Math.round
-          let emoji = icon(aqi)
-          j`$emoji **$location** $aqi`
-        })
-        -> A.join ("\n"),
-      ~footer = Embed.footer("Based on a 10 minute average from [these Purple Air sensors](https://www.google.com)"),
-      (),
-    )
+    open Embed
+    Embed.make()
+      -> setTitle (j`Air Quality Index • $totalAqi average`)
+      -> setColor (borderColor(totalAqi))
+      -> setDescription (
+        Source.locations
+          ->A.map (location => {
+            let aqi = location->aqiForLocation(aqiById)->Js.Math.round
+            let emoji = icon(aqi)
+            j`$emoji **$location** $aqi`
+          })
+          -> A.join ("\n"))
+      -> setFooter ("Based on a 10 minute average from [these Purple Air sensors](https://www.google.com)")
   }
 }
 
@@ -153,12 +153,13 @@ let post = msg => {
   Source.items
     -> A.map(s => s.id)
     -> Sensor.fetch
-    -> PR.ifOk (aqiById => {
-      let embed = Message.make (~embeds=[Embed.make(aqiById)], ())
-      msg
-        -> Message.channel
-        -> Channel.send (embed)
-        -> done
-    })
-    -> ignore
+    -> P.run (
+      ~ok = aqiById => {
+        let embed = Message.make (~embeds=[Embed.make(aqiById)], ())
+        msg
+          -> Message.channel
+          -> Channel.send (embed)
+          -> done
+      },
+      ~catch = ignore)
 }
