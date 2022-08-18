@@ -46,17 +46,17 @@ function footer(text) {
         };
 }
 
-function field(name, value, box) {
-  return {
-          name: name,
-          value: value,
-          inline: box === /* Inline */0
-        };
+function addField(t, name, value, fieldBounds) {
+  return t.addField({
+              name: name,
+              value: value,
+              inline: fieldBounds === /* Inline */0
+            });
 }
 
 var Embed = {
   footer: footer,
-  field: field
+  addField: addField
 };
 
 var $$Response = {};
