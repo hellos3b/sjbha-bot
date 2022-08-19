@@ -23,6 +23,10 @@ module Text = {
    }
 }
 
+module SelectMenu = {
+   type t
+}
+
 module ActionRow = {
    type t
 

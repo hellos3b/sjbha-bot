@@ -1,10 +1,9 @@
 open StdLib
-open Discord
 
 let toString = (a: list<string>) => 
   a->L.toArray->A.join (" ")
 
-let run = (message: Discord.message) => {
+let run = (message: Discord.Message.t) => {
   let request = message.content
     -> String.split (" ")
     -> A.toList
