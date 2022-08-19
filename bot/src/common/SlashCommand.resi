@@ -11,6 +11,7 @@ let make: (
   ~name: string,
   ~description: string,
   ~subcommands: array<subcommandFactory>=?,
+  ~options: array<stringOptionFactory>=?,
   unit,
 ) => Discord.SlashCommandBuilder.t
 

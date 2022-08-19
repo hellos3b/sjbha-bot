@@ -10,5 +10,5 @@ external get: string => t = "get"
 @send external query: (t, {..}) => t = "query"
 @send external castToPromise: t => Promise.t<response<'a>> = "%identity"
 
-let run = (t: t): P.t<response<'a>> =>
+let run = (t: t): Promise.t<response<'a>> =>
    t->castToPromise

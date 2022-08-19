@@ -24,4 +24,4 @@ module Db = {
 }
 
 
-@module("../app/MongoDb") external getCollection: string => P.t<Collection.t> = "getCollection"
+@module("../app/MongoDb") external getCollection: string => Promise.t<Collection.t> = "getCollection"

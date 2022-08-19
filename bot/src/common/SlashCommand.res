@@ -18,6 +18,7 @@ let make = (
    ~name: string, 
    ~description: string,
    ~subcommands: array<subcommandFactory>=[],
+   ~options: array<stringOptionFactory>=[],
    () 
 ): SlashCommandBuilder.t => {
    let command = SlashCommandBuilder.make()
@@ -27,6 +28,11 @@ let make = (
    subcommands->A.forEach (builder => 
       command
          -> SlashCommandBuilder.addSubCommand (builder)
+         -> ignore)
+
+   options->A.forEach (builder =>
+      command
+         -> SlashCommandBuilder.addStringOption (builder)
          -> ignore)
 
    command
