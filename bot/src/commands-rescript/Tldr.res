@@ -115,6 +115,13 @@ let saveNewTldr = interaction => {
    })
 }
 
+// 
+// A TLDR lets users write small tidbits that are meant
+// to describe an event/interaction on the server
+//
+// Other users can then review the previous TLDRs
+// to sort of catch up on what has happened while they were offline
+//
 let command = SlashCommand.define (
    ~command = SlashCommand.make (
       ~name = "tldr",

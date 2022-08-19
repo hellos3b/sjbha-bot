@@ -5,6 +5,7 @@ module A = {
    include Belt.Array
 
    let join = Js.Array2.joinWith
+   let find = Js.Array2.find
 
    let toList = (a: array<'a>): list<'a> =>
       a->Belt.List.fromArray
@@ -63,7 +64,7 @@ module Promise = {
       t->Promise.catch(exn => f(exn)->resolve)
 
    let flatMap = Promise.then
-   
+
    let run = (promise, ~ok, ~catch) =>
       promise
          -> Promise.thenResolve (ok)
@@ -77,6 +78,12 @@ module L = {
 
 module O = {
    include Belt.Option
+
+   let alt = (a, b) =>
+      switch a {
+         | Some(_) as some => some
+         | None => b
+      }
 }
 
 module String = {

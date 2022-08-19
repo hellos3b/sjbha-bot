@@ -87,10 +87,11 @@ module Embed = {
     | Full
 
   @module("discord.js") @new external make: unit => t = "MessageEmbed"
+  @send external setAuthor_: (t, string, string) => t = "setAuthor"
   @send external setColor: (t, int) => t = "setColor"
   @send external setTitle: (t, string) => t = "setTitle"
   @send external setDescription: (t, string) => t = "setDescription"
-  @send external addField_: (t, field) => t = "addField"
+  @send external addField_: (t, string, string, bool) => t = "addField"
   @send external addFields: (t, array<field>) => t = "addFields"
   @send external setFooter: (t, string) => t = "setFooter"
 
@@ -99,11 +100,10 @@ module Embed = {
   }
 
   let addField = (t: t, name: string, value: string, fieldBounds: fieldBounds) =>
-    t->addField_({
-      name: name,
-      value: value,
-      inline: fieldBounds === Inline
-    })
+    t->addField_(name, value, fieldBounds === Inline)
+
+  let setAuthor = (t: t, name: string, icon: string) =>
+    t->setAuthor_(name, icon)
 }
 
 module Response = {
@@ -153,16 +153,18 @@ module Interaction = {
           | _ => []
         },
       ~ephemeral = switch response {
-          | Text(_, privacy) | Embed(_, privacy) => privacy === Public
+          | Text(_, privacy) | Embed(_, privacy) => privacy === Private
           | Error(_) => true
         },
       ())
+
+    Js.Console.log(message)
 
     t->reply(message)->ignore
   }
 
   let error = (t: t, exn: exn): unit => {
-     Js.Console.error2 ("Error happened when attempting to resolve", exn)
+     Js.Console.error2 ("An error occured when trying to response to a command. Exception:", exn)
      t->respond(Text("Something unexpected happened", Private))
   }
 }
