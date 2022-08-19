@@ -24,6 +24,10 @@ module Date = {
       formatDistance(t, make())
 }
 
+module Dict = {
+   include Js.Dict
+}
+
 module R = {
    include Belt.Result
 

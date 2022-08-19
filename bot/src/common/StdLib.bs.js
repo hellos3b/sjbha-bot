@@ -2,6 +2,7 @@
 'use strict';
 
 var Curry = require("rescript/lib/js/curry.js");
+var Js_dict = require("rescript/lib/js/js_dict.js");
 var $$Promise = require("@ryyppy/rescript-promise/src/Promise.bs.js");
 var Belt_List = require("rescript/lib/js/belt_List.js");
 var Belt_Array = require("rescript/lib/js/belt_Array.js");
@@ -105,6 +106,8 @@ var $$Date$1 = {
   fromNow: fromNow
 };
 
+var Dict = Js_dict;
+
 function fromOption(option, err) {
   if (option !== undefined) {
     return {
@@ -203,6 +206,7 @@ exports.done = done;
 exports.identity = identity;
 exports.A = A;
 exports.$$Date = $$Date$1;
+exports.Dict = Dict;
 exports.R = R;
 exports.P = P;
 exports.L = L;

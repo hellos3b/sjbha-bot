@@ -10,12 +10,12 @@ type tldr = {
 }
 
 module Tldrs = {
+   open MongoDb.Collection
    external unsafeCastTldrArray: {..} => array<tldr> = "%identity"
 
    let collection = lazy (MongoDb.getCollection ("tldrs"))
 
-   let fetchRecent = (count: int) => {
-      open MongoDb.Collection
+   let fetchRecent = count =>
       Lazy.force (collection)
          -> P.flatMap (collection => collection
             -> findAll
@@ -24,21 +24,18 @@ module Tldrs = {
             -> toArray)
          -> P.map (any => any->unsafeCastTldrArray->Ok)
          -> P.catch (_ => Error(#DATABASE_ERROR))
-   }
 
-   let insert = (tldr: tldr) => {
-      open MongoDb.Collection
+   let insert = tldr => 
       Lazy.force (collection)
          -> P.flatMap (insertOne(_, tldr))
          -> P.map (_ => Ok(tldr))
          -> P.catch (_ => Error(#DATABASE_ERROR))
-   }
 }
 
 let tldrs_count = 10
 let embed_color = 11393254
 
-let listRecentTldrs = (interaction: Interaction.t): P.t<Response.t> => {
+let listRecentTldrs = (interaction: Interaction.t) => {
    let tldrs = Tldrs.fetchRecent(tldrs_count)
 
    tldrs->P.map (tldrs => switch tldrs {
@@ -54,9 +51,8 @@ let listRecentTldrs = (interaction: Interaction.t): P.t<Response.t> => {
             embed->addField(tldr.message, value, Full)->ignore
          })
   
-         // prevent spam in other channels
-         let privacy: Response.privacy = 
-            if interaction.channel.id === "" { Public }
+         let privacy: Response.privacy =
+            if interaction.channel.id === Sjbha.Channels.shitpost { Public } 
             else { Private }
 
          Response.Embed (embed, privacy)
@@ -73,7 +69,7 @@ let listRecentTldrs = (interaction: Interaction.t): P.t<Response.t> => {
 }
 
 // Saves a new tldr into the db
-let saveNewTldr = (interaction: Interaction.t): P.t<Response.t> => {
+let saveNewTldr = interaction => {
    let note = interaction
       -> Interaction.getRequiredStringOption ("note")
 
