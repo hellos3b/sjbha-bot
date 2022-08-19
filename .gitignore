@@ -15,3 +15,4 @@ report*json
 .merlin
 lib
 .bsb.lock
+*.bs.js
