@@ -6,8 +6,6 @@ import { MeetupOptions } from './MeetupOptions';
 
 /**
  * Used in create & edit, this just formats
- * @param type 
- * @returns 
  */
 export function location (options: MeetupOptions) : db.Meetup['location'] {
   if (options.location) {
@@ -26,8 +24,6 @@ export function location (options: MeetupOptions) : db.Meetup['location'] {
 
 /**
  * Format the title that is used for the meetup thread
- * @param meetup 
- * @returns 
  */
 export function threadTitle (title: string, timestamp: string) : string {
   const dateShort = DateTime.fromISO (timestamp).toFormat ('MMM dd');

@@ -56,16 +56,16 @@ let italicizeReferences = str => {
 //
 let capLength = (str, len) => str->String.substrAtMost (~from=0, ~length=len)
 
-let removeButton = MessageButton.make()
-   -> MessageButton.setCustomId ("undefine")
-   -> MessageButton.setLabel ("Remove")
-   -> MessageButton.setStyle (#DANGER)
+let removeButton = Button.make()
+   -> Button.setCustomId ("undefine")
+   -> Button.setLabel ("Remove")
+   -> Button.setStyle (Danger)
 
-let expiredButton = MessageButton.make()
-   -> MessageButton.setCustomId ("undefine")
-   -> MessageButton.setLabel ("Remove (expired)")
-   -> MessageButton.setStyle (#DANGER)
-   -> MessageButton.setDisabled (true)
+let expiredButton = Button.make()
+   -> Button.setCustomId ("undefine")
+   -> Button.setLabel ("Remove (expired)")
+   -> Button.setStyle (Danger)
+   -> Button.setDisabled (true)
 
 type action =
    | Removable
@@ -93,8 +93,8 @@ let render = (definition, button) => {
    let embed = Embed.make()
       -> setColor (16201999)
       -> setAuthor (definition.word, icon)
-      -> addField("Definition", definitionText, Full)
-      -> addField("Examples", exampleText, Full)
+      -> addField ("Definition", definitionText, Full)
+      -> addField ("Examples", exampleText, Full)
       -> setFooter ("Definition was pulled from urbandictionary.com")
 
    Response.EmbedWithComponents (embed, [actions], Public)

@@ -1,4 +1,4 @@
-import { Message } from 'discord.js';
+import { ChannelType, Message } from 'discord.js';
 import { nanoid } from 'nanoid';
 import YAML from 'yaml';
 import { DateTime } from 'luxon';
@@ -23,7 +23,7 @@ export async function create (message: Message) : Promise<void> {
   message.delete ();
 
   // Guard for guild channels, lets us create threads
-  if (message.channel.type !== 'GUILD_TEXT')
+  if (message.channel.type !== ChannelType.GuildText)
     return;
 
   const messageOptions = (() : unknown | undefined => {

@@ -46,7 +46,7 @@ export async function onBoarding (message: DiscordJs.Message) : Promise<void> {
 
   message.author.send (onboarding.toString ());
 
-  if (message.channel.type !== 'DM') {
+  if (message.channel.type !== DiscordJs.ChannelType.DM) {
     message.reply ('Check your DMs for instructions on how to connect with strava');
   }
 }
