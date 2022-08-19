@@ -56,16 +56,22 @@ let italicizeReferences = str => {
 //
 let capLength = (str, len) => str->String.substrAtMost (~from=0, ~length=len)
 
-let removeButton = Button.make()
-   -> Button.setCustomId ("undefine")
-   -> Button.setLabel ("Remove")
-   -> Button.setStyle (Danger)
+let removeButton = {
+   open Components.Button
+   Components.Button.make()
+      -> setCustomId ("undefine")
+      -> setLabel ("Remove")
+      -> setStyle (Danger)
+}
 
-let expiredButton = Button.make()
-   -> Button.setCustomId ("undefine")
-   -> Button.setLabel ("Remove (expired)")
-   -> Button.setStyle (Danger)
-   -> Button.setDisabled (true)
+let expiredButton = {
+   open Components.Button
+   Components.Button.make()
+      -> setCustomId ("undefine")
+      -> setLabel ("Remove (expired)")
+      -> setStyle (Danger)
+      -> setDisabled (true)
+}
 
 type action =
    | Removable
@@ -85,19 +91,19 @@ let render = (definition, button) => {
       | Removable => removeButton
    }
    
-   let actions = MessageActionRow.make()
-      -> MessageActionRow.addComponents (button)
-      -> MessageActionRow.toComponents
+   let actions = Components.ActionRow.make()
+      -> Components.ActionRow.addComponents (button)
+      -> Components.ActionRow.toComponents
 
-   open Embed
-   let embed = Embed.make()
+   open Message.Embed
+   let embed = Message.Embed.make()
       -> setColor (16201999)
       -> setAuthor (definition.word, icon)
       -> addField ("Definition", definitionText, Full)
       -> addField ("Examples", exampleText, Full)
       -> setFooter ("Definition was pulled from urbandictionary.com")
 
-   Response.EmbedWithComponents (embed, [actions], Public)
+   Message.EmbedWithComponents (embed, [actions], Public)
 }
 
 //
@@ -120,12 +126,12 @@ let postDefinition = (interaction, definition) => {
    let removePost = collector =>
       interaction
          -> Interaction.deleteReply
-         -> Promise.map (_ => ComponentCollector.stop(collector))
+         -> Promise.map (_ => Components.Collector.stop(collector))
          -> Promise.ignoreError
 
    // only the one who posted the definition can remove it
    let warnInvalidOwner = it => it
-      -> Interaction.respond (Response.Error ("Definitions can only be removed by the one who posted it"))
+      -> Interaction.respond (Error ("Definitions can only be removed by the one who posted it"))
       -> Promise.ignoreError
 
    // validat 
@@ -133,7 +139,7 @@ let postDefinition = (interaction, definition) => {
       if it.user.id === interaction.user.id { Ok(it) }
       else { Error(#NO_PERMISSION) }
 
-   let handleClickRemove = (it: Interaction.t, collector: ComponentCollector.t) =>
+   let handleClickRemove = (it: Interaction.t, collector: Components.Collector.t) =>
       switch it->isOwner {
          | Ok(_) => removePost(collector)
          | Error(#NO_PERMISSION) => warnInvalidOwner(it)
@@ -141,13 +147,13 @@ let postDefinition = (interaction, definition) => {
 
    // Enable removing the definition, in case it's super NSFW or something
    message->Promise.map (message => {
-      let options = ComponentCollector.options(
+      let options = Components.Collector.options(
          ~time=remove_timeout,
          ())
 
-      let collector = message->Message.createCollector(options)
-      collector->ComponentCollector.onCollect (handleClickRemove(_, collector))
-      collector->ComponentCollector.onEnd (expire)
+      let collector = message->Components.Collector.make(options)
+      collector->Components.Collector.onCollect (handleClickRemove(_, collector))
+      collector->Components.Collector.onEnd (expire)
    })
 }
 
@@ -187,15 +193,15 @@ let command = SlashCommand.define(
             let response = switch error {
                | #NO_VALID_DEFINITIONS => {
                   let w = word->R.getWithDefault ("(error)")
-                  Response.Text (`Could not find a definition for '${w}'`, Private)
+                  Message.Text (`Could not find a definition for '${w}'`, Private)
                }
 
                | #API_FAILURE => {
-                  Response.Error ("Failed to fetch definition from UrbanDictionary")
+                  Message.Error ("Failed to fetch definition from UrbanDictionary")
                }
 
                | _ => {
-                  Response.Error ("Failed to get the definition, for unknown reasons")
+                  Message.Error ("Failed to get the definition, for unknown reasons")
                }
             }
 

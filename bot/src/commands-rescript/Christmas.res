@@ -31,15 +31,14 @@ let daysUntilChristmas = now => {
   christmas->Date.differenceInDays (now)
 }
 
-let daysLeft = message => {
+let daysLeft = (message: Message.t) => {
   let now = Date.make()
   let content = switch daysUntilChristmas(now) {
     | 0 => festivize("!!TODAY IS CHRISTMAS!!")
     | days => j`ONLY $days ${pluralize("DAY", days)} UNTIL CHRISTMAS!!`
   }
 
-  let remaining = Message.make(~content, ())
-  message.channel
-    -> Channel.send (remaining)
+  Message.make(~content, ())
+    -> Message.send (message.channel)
     -> ignore
 }

@@ -133,8 +133,8 @@ module Embed = {
   let make = (aqiById: Js.Dict.t<float>) => {
     let totalAqi = aqiById->Js.Dict.values->Aqi.average->Js.Math.round
 
-    open Embed
-    Embed.make()
+    open Message.Embed
+    Message.Embed.make()
       -> setTitle (j`Air Quality Index • $totalAqi average`)
       -> setColor (borderColor(totalAqi))
       -> setDescription (
@@ -149,16 +149,14 @@ module Embed = {
   }
 }
 
-let post = msg => {
+let post = (msg: Message.t) => {
   Source.items
     -> A.map(s => s.id)
     -> Sensor.fetch
     -> Promise.run (
       ~ok = aqiById => {
-        let embed = Message.make (~embeds=[Embed.make(aqiById)], ())
-        msg
-          -> Message.channel
-          -> Channel.send (embed)
+        Message.make (~embeds=[Embed.make(aqiById)], ())
+          -> Message.send (msg.channel)
           -> done
       },
       ~catch = ignore)

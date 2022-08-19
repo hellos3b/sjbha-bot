@@ -44,9 +44,9 @@ let listRecentTldrs = (interaction: Interaction.t) => {
 
    tldrs->Promise.map (tldrs => switch tldrs {
       | Ok(tldrs) => {
-         open Embed
+         open Message.Embed
 
-         let embed = Embed.make()
+         let embed = Message.Embed.make()
             -> setTitle (`💬 TLDR`)
             -> setColor (embed_color)
 
@@ -55,19 +55,19 @@ let listRecentTldrs = (interaction: Interaction.t) => {
             embed->addField(tldr.message, value, Full)->ignore
          })
   
-         let privacy: Response.privacy =
+         let privacy: Message.privacy =
             if interaction.channel.id === Sjbha.Channels.shitpost { Public } 
             else { Private }
 
-         Response.Embed (embed, privacy)
+         Message.Embed (embed, privacy)
       }
 
       | Error(#DATABASE_ERROR) => {
-         Response.Error("Problem loading tldrs from database")
+         Message.Error("Problem loading tldrs from database")
       }
 
       | _ => { 
-         Response.Error ("Something unexpected happened")
+         Message.Error ("Something unexpected happened")
       }
    })
 }
@@ -93,24 +93,24 @@ let saveNewTldr = interaction => {
       
    savedTldr->Promise.map (tldr => switch tldr {
       | Ok(tldr) => {
-         open Embed
-         let embed = Embed.make ()
+         open Message.Embed
+         let embed = Message.Embed.make ()
             -> setColor (embed_color)
             -> setDescription (`📖 ${tldr.message}`)
 
-         Response.Embed (embed, Public)
+         Message.Embed (embed, Public)
       }
 
       | Error(#DATABASE_ERROR) => {
-         Response.Error("Unable to save TLDR")
+         Message.Error("Unable to save TLDR")
       }
 
       | Error(#MISSING_OPTION(name)) => {
-         Response.Error(`Missing required option ${name}`)
+         Message.Error(`Missing required option ${name}`)
       }
 
       | _ => { 
-         Response.Error ("Unknown Reasons")
+         Message.Error ("Unknown Reasons")
       }
    })
 }
@@ -151,7 +151,7 @@ let command = SlashCommand.define (
       let response = switch subcommand {
          | Some("list") => interaction->listRecentTldrs
          | Some("save") => interaction->saveNewTldr
-         | _ => Response.Error("Invalid Command")->Promise.resolve
+         | _ => Message.Error("Invalid Command")->Promise.resolve
       }
 
       response->Promise.run (

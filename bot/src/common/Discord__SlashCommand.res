@@ -1,15 +1,44 @@
 open StdLib
-open Discord
+
+module StringOption = {
+  type t
+
+  @send external setName: (t, string) => t = "setName"
+  @send external setDescription: (t, string) => t = "setDescription"
+  @send external setRequired: (t, bool) => t = "setRequired"
+}
+
+// creating slash commands, along with some utils
+module SubCommandBuilder = {
+  type t
+
+  @send external addStringOption: (t, StringOption.t => StringOption.t) => t = "addStringOption"
+  @send external setName: (t, string) => t = "setName"
+  @send external setDescription: (t, string) => t = "setDescription"
+}
+
+module SlashCommandBuilder = {
+  type t
+
+  // bindings
+  @module("@discordjs/builders") @new external make: unit => t = "SlashCommandBuilder"
+  @send external addSubCommand: (t, SubCommandBuilder.t => SubCommandBuilder.t) => t = "addSubcommand"
+  @send external addStringOption: (t, StringOption.t => StringOption.t) => t = "addStringOption"
+  @send external setName: (t, string) => t = "setName"
+  @send external setDescription: (t, string) => t = "setDescription"
+}
+
+type interaction = Discord__Interaction.t
 
 type t = {
    command: SlashCommandBuilder.t,
-   interaction: Interaction.t => unit
+   interaction: interaction => unit
 }
 
 type subcommandFactory = SubCommandBuilder.t => SubCommandBuilder.t
 type stringOptionFactory = StringOption.t => StringOption.t
 
-let define = (~command: SlashCommandBuilder.t, ~interaction: Interaction.t => unit) => {
+let define = (~command: SlashCommandBuilder.t, ~interaction: interaction => unit) => {
    command: command,
    interaction: interaction
 }
@@ -51,9 +80,7 @@ let subcommand = (
          -> ignore
 
       options->A.forEach (builder =>
-         subcmd
-            -> SubCommandBuilder.addStringOption (builder)
-            -> ignore)
+         subcmd->SubCommandBuilder.addStringOption (builder)->ignore)
 
       subcmd
    }
