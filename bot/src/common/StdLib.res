@@ -21,6 +21,9 @@ module Date = {
    @module external setHours: (t, float) => t = "date-fns/setHours"
    @module external setMinutes: (t, float) => t = "date-fns/setMinutes"
 
+   @module external secondsToMilliseconds: int => int = "date-fns/secondsToMilliseconds"
+   @module external minutesToMilliseconds: int => int = "date-fns/minutesToMilliseconds"
+
    let fromNow = (t: t): string =>
       formatDistance(t, make())
 }
@@ -51,6 +54,18 @@ module R = {
          | Ok(value) => fn(value)
       }
    }
+
+   let ifError = (result, fn): unit =>
+      switch result {
+         | Error(e) => fn(e)->ignore
+         | Ok(_) => ignore()
+      }
+
+   let ifOk = (result, fn): unit =>
+      switch result {
+         | Ok(res) => fn(res)->ignore
+         | Error(_) => ignore()
+      }
 }
 
 // Futre is like 
@@ -63,7 +78,14 @@ module Promise = {
    let catch = (t, f) =>
       t->Promise.catch(exn => f(exn)->resolve)
 
+   let flatCatch = (t, f) =>
+      t->Promise.catch(exn => f(exn))
+
    let flatMap = Promise.then
+   let ignoreError = t => t->catch(ignore)
+
+   let catchResult = (t, f) =>
+      t->map(it => Ok(it))->catch(exn => Error(f(exn)))
 
    let run = (promise, ~ok, ~catch) =>
       promise
