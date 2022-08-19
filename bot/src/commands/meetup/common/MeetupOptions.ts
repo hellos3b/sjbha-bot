@@ -64,8 +64,6 @@ export function parse (opt: unknown) : ParseResult {
 
 /**
  * Used in create & edit, this just formats
- * @param type 
- * @returns 
  */
  export const toLocation = (options: MeetupOptions) : db.Meetup['location'] => {
   if (options.location) {

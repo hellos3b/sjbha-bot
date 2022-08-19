@@ -6,7 +6,6 @@ import * as Meetups from '../db/meetups';
 import * as Directory from './Directory';
 
 const now = DateTime.local (2021, 11, 15, 17, 0, 0, 0);
-const yesterday = now.minus ({ day: 1 });
 
 Settings.now = () => now.toMillis ();
 Settings.defaultZoneName = 'America/Los_Angeles';
@@ -82,10 +81,10 @@ afterAll (() => MongoMemoryServer.teardown ());
 
 describe ('meetup/Directory', () => {
   const directoryChannel = {
-    _embeds_: [] as Discord.MessageEmbed[],
+    _embeds_: [] as Discord.EmbedBuilder[],
 
     send: function (options: Discord.MessageOptions) {
-      const embeds = (options.embeds || []) as Discord.MessageEmbed[];
+      const embeds = (options.embeds || []) as Discord.EmbedBuilder[];
       this._embeds_ = this._embeds_.concat (embeds);
       return { id: 'any' };
     },
@@ -103,31 +102,31 @@ describe ('meetup/Directory', () => {
 
   it ('shows live meetups from today', () => {
     const post = directoryChannel._embeds_
-      .find (e => e.description?.includes ('today/live'));
+      .find (e => e.toJSON ().description?.includes ('today/live'));
     expect (post).toBeTruthy ();
   });
 
   it ('shoes upcoming meetups', () => {
     const post = directoryChannel._embeds_
-      .find (e => e.description?.includes ('tomorrow/live'));
+      .find (e => e.toJSON ().description?.includes ('tomorrow/live'));
     expect (post).toBeTruthy ();
   });
   
   it ('doesnt show meetups that have ended', () => {
     const post = directoryChannel._embeds_
-      .find (e => e.description?.includes ('yesterday/ended'));
+      .find (e => e.toJSON ().description?.includes ('yesterday/ended'));
     expect (post).toBeFalsy ();
   });
 
   it ('shows cancelled meetups if it was cancelled today', async () => {
     const post = directoryChannel._embeds_
-      .find (e => e.description?.includes ('today/cancelled'));
+      .find (e => e.toJSON ().description?.includes ('today/cancelled'));
     expect (post).toBeTruthy ();
   });
 
   it ('doesnt show meetups that were cancelled before today', () => {
     const post = directoryChannel._embeds_
-      .find (e => e.description?.includes ('yesterday/cancelled'));
+      .find (e => e.toJSON ().description?.includes ('yesterday/cancelled'));
     expect (post).toBeFalsy ();
   });
 });

@@ -1,4 +1,4 @@
-import { Message, MessageEmbed } from 'discord.js';
+import { Message, EmbedBuilder } from 'discord.js';
 import { DateTime, Interval } from 'luxon';
 import fromNow from 'fromnow';
 import { option } from 'ts-option';
@@ -23,18 +23,21 @@ export const render = async (message: Message) : Promise<void> => {
   const username = member.map (m => m.displayName).getOrElse (() => message.author.username);
   const displayColor = member.map (m => m.displayColor).getOrElse (() => 0xcccccc);
 
-  const embed = new MessageEmbed ();
+  const embed = new EmbedBuilder ();
   embed.setColor (displayColor);
-  embed.setAuthor (username, message.author.displayAvatarURL ());
+  embed.setAuthor ({
+    name:    username, 
+    iconURL: message.author.displayAvatarURL ()
+  });
 
   // User's current rank name
   const rank = Rank.fromScore (user.fitScore);
   const score = Math.floor (user.fitScore);
-  embed.addField ('Rank', `${rank} (${score})`, true);
+  embed.addFields ([
+    { name: 'Rank', value: `${rank} (${score})`, inline: true },
+    { name: 'Total EXP', value: Format.exp (user.xp), inline: true }
+  ]);
   
-  // Lifetime EXP gained
-  embed.addField ('Total EXP', Format.exp (user.xp), true);
-
   // All workouts in the last 30 days
   const lastThirtyDays = Interval.before (DateTime.local (), { days: 30 });
   const workouts = await Workout.find (Workout.during (lastThirtyDays));
@@ -47,7 +50,11 @@ export const render = async (message: Message) : Promise<void> => {
   
   // Collection of workouts that apply to this week's promotion
   const weekly = profileWorkouts.filter (w => w.timestamp >= weekStart.toISO ());
-  embed.addField ('Weekly EXP', Format.exp (Workout.exp (weekly)), true); 
+  embed.addFields ({
+    name:   'Weekly EXP', 
+    value:  Format.exp (Workout.exp (weekly)), 
+    inline: true
+  }); 
 
   // The user's most recently recorded workout
   const mostRecentWorkout = option (profileWorkouts)
@@ -59,7 +66,11 @@ export const render = async (message: Message) : Promise<void> => {
     const name = workout.activity_name;
     const timeAgo = fromNow (workout.timestamp, { suffix: true, max: 1 });
 
-    embed.addField ('Last Activity', `${emoji} ${name} • ${timeAgo}`, true);
+    embed.addFields ({
+      name:   'Last Activity', 
+      value:  `${emoji} ${name} • ${timeAgo}`, 
+      inline: true
+    });
   });
 
   message.channel.send ({ embeds: [embed] });

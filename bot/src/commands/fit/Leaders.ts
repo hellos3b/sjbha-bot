@@ -1,4 +1,4 @@
-import { Message, MessageEmbed } from 'discord.js';
+import { Message, EmbedBuilder } from 'discord.js';
 import { DateTime, Interval } from 'luxon';
 import * as R from 'ramda';
 
@@ -34,7 +34,7 @@ export async function leaderboard (message: Message) : Promise<void> {
     await MemberList.fetch (message.client, allWorkouts.discordIds);
 
   const embed = 
-    new MessageEmbed ({
+    new EmbedBuilder ({
       color:       0xffd700,
       title:       'Leaders',
       description: 'Top EXP Earners in the last 30 days, per activity',
@@ -62,7 +62,10 @@ export async function leaderboard (message: Message) : Promise<void> {
       leaders += `\n🥈 ${second.nickname} • **${second.workouts.exp.toFixed (1)}** exp (${second.workouts.count} workouts)`;
     }
 
-    embed.addField (activity, leaders);
+    embed.addFields ({
+      name:  activity, 
+      value: leaders
+    });
   }
 
   message.channel.send ({ embeds: [embed] });

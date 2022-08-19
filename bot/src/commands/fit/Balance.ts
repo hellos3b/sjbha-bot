@@ -1,4 +1,4 @@
-import { Message, MessageEmbed } from 'discord.js';
+import { Message, EmbedBuilder } from 'discord.js';
 import { DateTime, Interval } from 'luxon';
 import * as R from 'ramda';
 
@@ -115,7 +115,7 @@ export const render = async (message: Message) : Promise<void> => {
     anerobic.includes (balance) ? drawChart (0, offCenterNormalized) : 
     drawChart (0, 0);
 
-  const embed = new MessageEmbed ({
+  const embed = new EmbedBuilder ({
     color:       color[balance],
     title:       `${label[balance]} (${scoreText})`,
     description: format.inlineCode (chart),
