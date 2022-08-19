@@ -127,7 +127,7 @@ module Interaction = {
   }
 
   // bindings
-  @send external reply: (t, sendableMessage) => P.t<Message.t> = "reply"
+  @send external reply: (t, sendableMessage) => Promise.t<Message.t> = "reply"
   @send external getSubcommand: options => option<string> = "getSubcommand"
   @send external getString: (options, string) => option<string> = "getString"
   

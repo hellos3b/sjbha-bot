@@ -53,7 +53,7 @@ module R = {
 }
 
 // Futre is like 
-module P = {
+module Promise = {
    type t<'a> = Promise.t<'a>
 
    let resolve = Promise.resolve
@@ -63,7 +63,7 @@ module P = {
       t->Promise.catch(exn => f(exn)->resolve)
 
    let flatMap = Promise.then
-
+   
    let run = (promise, ~ok, ~catch) =>
       promise
          -> Promise.thenResolve (ok)

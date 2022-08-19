@@ -17,28 +17,32 @@ module Tldrs = {
 
    let fetchRecent = count =>
       Lazy.force (collection)
-         -> P.flatMap (collection => collection
+         -> Promise.flatMap (collection => collection
             -> findAll
             -> sort ({"timestamp": -1})
             -> limit (count)
             -> toArray)
-         -> P.map (any => any->unsafeCastTldrArray->Ok)
-         -> P.catch (_ => Error(#DATABASE_ERROR))
+         -> Promise.map (any => any->unsafeCastTldrArray->Ok)
+         -> Promise.catch (_ => Error(#DATABASE_ERROR))
 
    let insert = tldr => 
       Lazy.force (collection)
-         -> P.flatMap (insertOne(_, tldr))
-         -> P.map (_ => Ok(tldr))
-         -> P.catch (_ => Error(#DATABASE_ERROR))
+         -> Promise.flatMap (insertOne(_, tldr))
+         -> Promise.map (_ => Ok(tldr))
+         -> Promise.catch (_ => Error(#DATABASE_ERROR))
 }
 
 let tldrs_count = 10
 let embed_color = 11393254
 
+//
+// Displays an overview of the most recent TLDRs that have been saved
+// as well as who posted it and in which channel
+//
 let listRecentTldrs = (interaction: Interaction.t) => {
    let tldrs = Tldrs.fetchRecent(tldrs_count)
 
-   tldrs->P.map (tldrs => switch tldrs {
+   tldrs->Promise.map (tldrs => switch tldrs {
       | Ok(tldrs) => {
          open Embed
 
@@ -68,7 +72,9 @@ let listRecentTldrs = (interaction: Interaction.t) => {
    })
 }
 
-// Saves a new tldr into the db
+//
+// Lets a user save a new tldr into the db
+//
 let saveNewTldr = interaction => {
    let note = interaction
       -> Interaction.getRequiredStringOption ("note")
@@ -85,7 +91,7 @@ let saveNewTldr = interaction => {
       Tldrs.insert (tldr)
    })
       
-   savedTldr->P.map (tldr => switch tldr {
+   savedTldr->Promise.map (tldr => switch tldr {
       | Ok(tldr) => {
          open Embed
          let embed = Embed.make ()
@@ -138,10 +144,10 @@ let command = SlashCommand.define (
       let response = switch subcommand {
          | Some("list") => interaction->listRecentTldrs
          | Some("save") => interaction->saveNewTldr
-         | _ => Response.Error("Invalid Command")->P.resolve
+         | _ => Response.Error("Invalid Command")->Promise.resolve
       }
 
-      response->P.run (
+      response->Promise.run (
          ~ok = Interaction.respond (interaction),
          ~catch = Interaction.error (interaction))
    }
