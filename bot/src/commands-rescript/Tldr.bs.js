@@ -2,6 +2,7 @@
 'use strict';
 
 var Curry = require("rescript/lib/js/curry.js");
+var Sjbha = require("../common/Sjbha.bs.js");
 var StdLib = require("../common/StdLib.bs.js");
 var Discord = require("../common/Discord.bs.js");
 var MongoDb = require("../common/MongoDb.bs.js");
@@ -78,7 +79,7 @@ function listRecentTldrs(interaction) {
                         Discord.Embed.addField(embed, tldr.message, value, /* Full */1);
                         
                       }));
-                var privacy = interaction.channel.id === "" ? /* Public */0 : /* Private */1;
+                var privacy = interaction.channel.id === Sjbha.Channels.shitpost ? /* Public */0 : /* Private */1;
                 return {
                         TAG: /* Embed */1,
                         _0: embed,
