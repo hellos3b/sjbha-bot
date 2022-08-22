@@ -27,15 +27,8 @@ type t = {
 @send external reply: (t, payload) => Promise.t<unit> = "reply"
 @send external getSubcommand: options => option<string> = "getSubcommand"
 @send external getString: (options, string) => option<string> = "getString"
+@send external getUser: (options, string) => option<user> = "getUser"
 @send external showModal: (t, modal) => Promise.t<unit> = "showModal"
-
-// custom API
-let getStringOption = (t: t, option: string): option<string> =>
-   t.options->getString(option)
-
-let getRequiredStringOption = (t: t, option: string) =>
-   t->getStringOption(option)
-   -> R.fromOption(#MISSING_OPTION(option))
 
 let respond = (t: t, response: response) => {
    let message = response->Discord__Message.fromResponse

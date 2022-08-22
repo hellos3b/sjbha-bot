@@ -92,7 +92,7 @@ let fromResponse = response => make(
     },
   ())
   
-@send external channelSend_: (channel, payload) => t = "send"
+@send external channelSend_: (channel, payload) => Promise.t<t> = "send"
 let send = (payload, channel) => channel->channelSend_(payload)
 
 @send external reply: (t, payload) => t = "reply"

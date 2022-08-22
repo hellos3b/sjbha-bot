@@ -164,24 +164,24 @@ let postDefinition = (interaction, definition) => {
 // Most of the time the answers are dum, so it's kinda funny
 //
 let command = SlashCommand.define(
-   ~command = SlashCommand.make (
-      ~name = "define",
-      ~description = "Look up the definition of a word, according to the all knowing urban dictionary",
-      ~options = [
-         SlashCommand.stringOption (
-            ~name = "word",
-            ~description = "The word you want a definition for",
-            ~required = true,
-            ())
-      ],
-      ()),
+   ~command = {
+      open SlashCommand
+      SlashCommand.make ()
+         -> setName ("define")
+         -> setDescription ("Look up the definition of a word, according to the all knowing urban dictionary")
+         
+         -> addStringOption (option => option
+            -> StringOption.setName ("word")
+            -> StringOption.setDescription ("The word you want a definition for")
+            -> StringOption.setRequired (true))
+   },
 
    ~interaction = interaction => {
-      let word = interaction
-         -> Interaction.getRequiredStringOption ("word")
+      let word = interaction.options
+         -> Interaction.getString ("word")
+         -> O.getExn
 
-      let definition = word
-         -> R.flatMapAsync(fetchDefinitions)
+      let definition = fetchDefinitions(word)
          -> Promise.map (R.flatMap(_, findBestMatch))
 
       let _ = definition->Promise.flatMap (result => switch result {
@@ -192,8 +192,7 @@ let command = SlashCommand.define(
          | Error(error) => {
             let response = switch error {
                | #NO_VALID_DEFINITIONS => {
-                  let w = word->R.getWithDefault ("(error)")
-                  Message.Text (`Could not find a definition for '${w}'`, Private)
+                  Message.Text (`Could not find a definition for '${word}'`, Private)
                }
 
                | #API_FAILURE => {
