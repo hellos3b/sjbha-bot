@@ -75,22 +75,20 @@ let listRecentTldrs = (interaction: Interaction.t) => {
 //
 // Lets a user save a new tldr into the db
 //
-let saveNewTldr = interaction => {
-   let note = interaction
-      -> Interaction.getRequiredStringOption ("note")
+let saveNewTldr = (interaction: Interaction.t) => {
+   let note = interaction.options
+      -> Interaction.getString ("note")
+      -> O.getExn
 
-   let savedTldr = note->R.flatMapAsync(note => {
-      let tldr = {
-         message: note,
-         from: interaction.user.username,
-         timestamp: Date.make(),
-         channelID: interaction.channel.id,
-         channel: interaction.channel.name
-      }
+   let tldr = {
+      message: note,
+      from: interaction.user.username,
+      timestamp: Date.make(),
+      channelID: interaction.channel.id,
+      channel: interaction.channel.name
+   }
 
-      Tldrs.insert (tldr)
-   })
-      
+   let savedTldr = Tldrs.insert (tldr)
    savedTldr->Promise.map (tldr => switch tldr {
       | Ok(tldr) => {
          open Message.Embed
@@ -123,26 +121,24 @@ let saveNewTldr = interaction => {
 // to sort of catch up on what has happened while they were offline
 //
 let command = SlashCommand.define (
-   ~command = SlashCommand.make (
-      ~name = "tldr",
-      ~description = "Summarize things that happen on discord",
-      ~subcommands = [
-         SlashCommand.subcommand (
-            ~name = "list",
-            ~description = "Get a list of the most recent notes",
-            ()),
+   ~command = {
+      open SlashCommand
+      SlashCommand.make ()
+         -> setName ("tldr")
+         -> setDescription ("Summaraize thinsg that happen on discord")
 
-         SlashCommand.subcommand (
-            ~name = "save",
-            ~description = "Save a new note",
-            ~options = [
-               SlashCommand.stringOption (
-                  ~name = "note",
-                  ~description = "What do you want to save?",
-                  ~required = true,
-                  ())
-            ], ())
-      ], ()),
+         -> addSubCommand (cmd => cmd
+            -> SubCommand.setName ("list")
+            -> SubCommand.setDescription ("Get a list of the most recent tldrs"))
+         
+         -> addSubCommand (cmd => cmd
+            -> SubCommand.setName ("save")
+            -> SubCommand.setDescription ("Save a new TLDR into discord history")
+            -> SubCommand.addStringOption (option => option
+               -> StringOption.setName ("note")
+               -> StringOption.setDescription ("What do you want to save?")
+               -> StringOption.setRequired (true)))
+   },
 
    ~interaction = interaction => {
       let subcommand = interaction.options
