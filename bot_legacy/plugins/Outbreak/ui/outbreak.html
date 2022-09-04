@@ -1,0 +1,125 @@
+<html>
+    <head>
+        <title> SJBHA OUTBREAK </title>
+
+        <link href="https://fonts.googleapis.com/css?family=Inconsolata:400,700" rel="stylesheet">
+        <style type='text/css'>
+        body {
+            font-family: Inconsolata, 'Courier New', Courier, monospace;
+            color: #454545;
+        }
+        .timestamp {
+            color: #c25322;
+            display: inline-block;
+            width: 40px;
+            font-size: 0.75em;
+            font-weight: 800;
+        }
+        .spreadcount {
+            display: inline-block;
+            width: 20px;
+            font-size: 0.75em;
+            font-weight: 800;            
+        }
+        .container {
+            padding: 48px;
+        }
+        .title {
+            display: inline-block;
+        }
+        .message {
+            font-size: 0.85em;
+            margin-left: 49px;
+            background: #f5f5f5;
+            padding: 8px 4px;
+            margin-bottom: 12px;
+            margin-top: 6px;
+            font-style: italic;
+        }
+        .user {
+            font-weight: 600;
+            color: #000;
+        }
+        .infected {
+            color: #922828;
+        }
+        .vaccine {
+            color: #379f37;
+        }
+        .current-list {
+            display: flex;
+            margin-top: 48px;
+            border-top: 1px solid #aaa;
+        }
+        h2 {
+            font-weight: 400;
+            letter-spacing: 1px;
+        }
+        .infection {
+            margin-left: 24px;
+        }
+        .icon {
+            width: 16px;
+            vertical-align: text-bottom;
+        }
+        .group {
+            padding: 48px;
+        }
+        .muted, .timestamp.muted {
+            color: #aaa;
+            font-weight: 400;
+        }
+        </style>
+    </head>
+    <body>
+        <div class='container'>
+            <h1>OUTBREAK;</h1>
+            {{#hourly}}
+                <h2>>{{key}}</h2>
+                {{#value}}
+                    <div class='infection'>
+                        <div class='timestamp'>+{{timeDiff}}</div>
+                        <div class='title'>
+                            {{#isInfected}}
+                                <img class="icon" src="https://imgur.com/iFOmVt9.png">
+                            {{/isInfected}}
+                            {{^isInfected}}
+                                <img class="icon" src="https://imgur.com/vVYlqPE.png">
+                            {{/isInfected}}
+                            <span class='user'>{{user}}</span> 
+                            <span class='{{infection}}'>{{action}}</span> 
+                            {{infectedBy}}
+                        </div>
+                        <div class='message'>{{message}}</div>
+                    </div>
+                {{/value}}
+            {{/hourly}}
+            <div class='current-list'>
+                <div class='infected group'>
+                    <div class='header'>INFECTED ({{group.infected.length}})</div>
+                    {{#group.infected}}
+                    <div class='user'><span class='timestamp muted'>+{{timeDiff}}</span> {{user}}</div>
+                    {{/group.infected}}
+                </div>
+                <div class='vaccine group'>
+                        <div class='header'>IMMUNE ({{group.immune.length}})</div>
+                    {{#group.immune}}
+                        <div class='user'><span class='timestamp muted'>+{{timeDiff}}</span>  {{user}}</div>
+                    {{/group.immune}}
+                </div>
+                <div class='infected group'>
+                        <div class='header'>WORST INFECTORS</div>
+                        {{#leaders.infected}}
+                        <div class='user'><span class='spreadcount muted'>(+{{count}})</span> {{name}}</div>
+                        {{/leaders.infected}}
+                    </div>
+                    <div class='vaccine group'>
+                            <div class='header'>BEST PROTECTORS</div>
+                        {{#leaders.immune}}
+                            <div class='user'><span class='spreadcount muted'>(+{{count}})</span>  {{name}}</div>
+                        {{/leaders.immune}}
+                    </div>
+            </div>
+        </div>
+    </body>
+</html>

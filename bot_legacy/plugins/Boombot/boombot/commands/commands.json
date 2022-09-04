@@ -1,0 +1,88 @@
+{
+
+    "Help": {
+        "trigger": "!help",
+        "description": "Show this help"
+    },
+
+    "Ping": {
+        "trigger": "!ping",
+        "description": "Replies with a pong, just to test the bot is working"
+    },
+
+    "Rules": {
+        "trigger": "!rules",
+        "description": "Show the rules of the game"
+    },
+
+    "Leaderboard": {
+        "trigger": "!leaderboard",
+        "description": "Show who's in the lead with total amount of boom coins"
+    },
+
+    "NewGame": {
+        "trigger": "!new",
+        "description": "Initiate a new game"
+    },
+
+    "Cancel": {
+        "trigger": "!cancel",
+        "description": "Cancels a !new game initiate"
+    },
+
+    "Start": {
+        "trigger": "!start",
+        "description": "Start a game of Click Click Boom. Use !start {amount} to raise the stakes | Example: !start 50"
+    },
+
+    "Join": {
+        "trigger": "!join",
+        "description": "Join a game"
+    },
+
+    "Click": {
+        "trigger": "!click",
+        "description": "When it's your turn, click the bomb"
+    },
+
+    "Pass": {
+        "trigger": "!pass",
+        "description": "When it's your turn, pass the bomb at the cost of the pass"
+    },
+
+    "Reset": {
+        "trigger": "!reset",
+        "description": "If you run out of coins, you use this to reset back to 40"
+    },
+
+    "Pay": {
+        "trigger": "!pay",
+        "description": "Use !pay {amount} to pay back a portion of your debt"
+    },
+
+    "Stats": {
+        "trigger": "!stats",
+        "description": "See stats for yourself. use !info {person} to see stats for another player"
+    },
+
+    "History": {
+        "trigger": "!history",
+        "description": "See previous seasons rankings"
+    },
+
+    "Leave": {
+        "trigger": "!leave",
+        "description": "Leave a game you have !joined"
+    },
+
+    "Current": {
+        "trigger": "!current",
+        "description": "Get the current status of the game"
+    },
+
+    "Weekly": {
+        "trigger": "!weekly",
+        "description": "View current weekly leaderboard"
+    }
+
+}

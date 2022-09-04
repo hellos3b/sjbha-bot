@@ -13,6 +13,6 @@ report*json
 
 # rescript artifacts
 .merlin
-lib
+bot/lib
 .bsb.lock
 *.bs.js

@@ -1,0 +1,119 @@
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta property="og:title" content="Bored Human Olympics Teams" />
+    <meta property="og:type" content="website" />
+    <meta property="og:description" content="Current registered teams for the Bored Human Olympics, in August" />
+      
+    <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Oswald&display=swap" rel="stylesheet">
+
+    <style type='text/css'>
+    body {
+      padding: 0;
+      margin: 0;
+      background: rgb(2,0,36);
+background: linear-gradient(344deg, rgba(2,0,36,1) 0%, rgba(40,19,75,1) 100%);
+    }
+
+    h1 {
+      color: #fff;
+      font-family: Oswald;
+      font-weight: 300;
+      text-align: center;
+      letter-spacing: 1.5px;
+    }
+    h2 {
+      font-family: Roboto;
+      font-weight: 300;
+      text-align: center;
+      margin-top: -23px;
+      /* letter-spacing: .4px; */
+      color: #ccc;
+    }
+
+    .grid {
+      display: grid;
+      width: 100%;
+      /* height: 100%; */
+      grid-template-columns: repeat(4, minmax(250px, 1fr));
+      grid-template-rows: repeat(auto-fit, 1fr);
+      grid-gap: 12px;
+    }
+    @media(max-width:1024px){
+      .grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      }
+    }
+
+    .cell {
+      text-align: center;
+      padding: 24px;
+      background: rgba(0, 0, 0, 0.15);
+      box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.15);
+    }
+
+    .team-name {
+      font-family: Oswald;
+      color: #fff;
+      font-size: 36px;
+      letter-spacing: 1px;
+      margin-top: 16px;
+    }
+
+    .team-players {
+      font-family: Roboto;
+      font-weight: 300;
+      color: #a4aeff;
+      font-size: 16px;
+      letter-spacing: 0.4px;
+    }
+
+    .team-flag {
+      width: 75%;
+      margin: 0 auto;
+    }
+
+    .team-flag svg {
+      border: 3px solid #fff;
+    }
+
+    .empty {
+      color: #757575;
+      font-family: Roboto;
+      padding: 40px;
+      text-align: center;
+    }
+
+    .title {
+      background: #151515;
+      padding: 1px;
+      margin-bottom: 16px;
+    }
+
+    </style>
+  </head>
+  <body>
+    <div class='title'>
+      <h1>Bored Human Olympics</h1>
+      <h2>Current Teams</h2>
+    </div>
+
+    <div class='grid'>
+      {{#teams}}
+        <div class='cell'>
+          {{^empty}}
+            <div class='team-flag'>{{{flagHTML}}}</div>
+            <div class='team-name'>{{name}}</div>
+            <div class='team-players'>
+              {{players}}
+            </div>
+          {{/empty}}
+          {{#empty}}
+            <div class='empty'>Open Spot</div>
+          {{/empty}}
+        </div>
+      {{/teams}}
+    </div>
+  </body>
+</html>
