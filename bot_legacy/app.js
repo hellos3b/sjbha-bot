@@ -12,16 +12,14 @@ const channels = {
     "strava": "450913008323919872",
     "boombot": "432766496700235776",
     "stocks": "363123179696422916",
-    "dungeon": "497505757865050112",
-    "announcement": process.env.C_ANNOUNCEMENT,
-    "compact": process.env.C_COMPACT
+    "dungeon": "497505757865050112"
 }
 
 const bastion = Bastion({
     token: process.env.DISCORD_TOKEN,
     channels,
     serverId: process.env.SERVER_ID,
-    prefix: process.env.NODE_ENV === "production" ? "!" : (process.env.npm_config_symbol || "_")
+    prefix: "!" 
 })
 
 // Load modules

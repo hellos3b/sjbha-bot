@@ -5,10 +5,7 @@
   "main": "app.js",
   "author": "sebby",
   "scripts": {
-    "start": "node --trace-warnings -r babel-core/register app.js",
-    "dev": "NODE_ENV=development node -r babel-core/register app.js --trace-warnings",
-    "web": "NODE_ENV=web node -r babel-core/register app.js",
-    "admin": "NODE_ENV=admin node -r babel-core/register app.js",
+    "start": "tsx app.js",
     "deploy": "git push dokku legacy:master"
   },
   "dependencies": {
@@ -20,6 +17,7 @@
     "chalk": "^2.4.1",
     "chrono": "^1.0.5",
     "chrono-node": "^1.3.5",
+    "cjopus": "^0.0.4",
     "deepmerge": "^2.1.1",
     "dotenv": "^5.0.1",
     "express": "^4.16.3",
@@ -33,14 +31,14 @@
     "node-fetch": "^2.6.1",
     "require-text": "0.0.1",
     "sillyid": "^0.2.2",
+    "tweetnacl": "^0.14.0",
     "vanilla-js-calendar": "^1.0.10",
     "winston": "^2.4.1",
     "wretch": "^1.7.1",
-    "ws": "^1.1.0",
-    "cjopus": "^0.0.4",
-    "tweetnacl": "^0.14.0"
+    "ws": "^1.1.0"
   },
   "devDependencies": {
-    "@types/node": "^10.12.18"
+    "@types/node": "^10.12.18",
+    "tsx": "^3.9.0"
   }
 }

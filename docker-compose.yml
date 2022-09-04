@@ -1,0 +1,25 @@
+version: '3.4'
+
+services:
+  bored_bot:
+    container_name: bored_bot
+    build:
+      context: ./bot
+      target: production
+    env_file: .env.prod
+    ports:
+      - "5000:5000"
+    environment:
+      NODE_ENV: production
+      HOSTNAME: https://www.s3bby.com/bored-bot
+      HTTP_PORT: 5000
+    restart: always
+
+  bored_bot_legacy:
+    container_name: bb_legacy
+    build: ./bot_legacy
+    env_file: .env.prod
+    environment:
+      NODE_ENV: production
+      MONGO_URL: mongodb://mongo:27017/sjbha
+    restart: always

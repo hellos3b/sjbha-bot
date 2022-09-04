@@ -1,4 +1,4 @@
 node_modules
 dist
 jest.config.js
-.bs.js
+*.bs.js

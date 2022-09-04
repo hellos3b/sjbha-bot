@@ -4,7 +4,6 @@ import { Routes } from 'discord-api-types/v9';
 import * as Env from '@sjbha/app/env';
 import { Log } from './app';
 
-import { Command } from './common/SlashCommand';
 
 import * as ManifestRescript from './ManifestRescript.bs';
 import { SlashCommandBuilder } from '@discordjs/builders';
@@ -16,9 +15,6 @@ type recommand = {
 }
 
 const log = Log.make ('manifest');
-const commands: Command[] = [
-  // Tldr
-];
 
 const recommands: recommand[] = 
   ManifestRescript.commandList;
@@ -27,16 +23,11 @@ export async function createSlashCommands(): Promise<Map<string, execute>> {
   const rest = new REST ({ version: '9' }).setToken (Env.DISCORD_TOKEN);
 
   const commandMap = new Map<string, execute> ();
-  for (const command of commands)
-    commandMap.set (command.name, i => command.execute (i));
 
   for (const command of recommands)
     commandMap.set (command.command.name, command.interaction)
 
-  const body = [
-    ...commands.map (it => it.toJson ()),
-    ...recommands.map (it => it.command.toJSON ())
-  ];
+  const body = recommands.map (it => it.command.toJSON ());
 
   log.debug ('slash command list', { 
     commands: [...commandMap.keys ()]

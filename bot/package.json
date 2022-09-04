@@ -6,10 +6,10 @@
     "node": ">= 16"
   },
   "scripts": {
-    "start": "ts-node-dev src/Main.ts",
-    "start:prod": "node build/Main.js",
-    "dev": "ts-node-dev --transpile-only src/Main.ts ",
+    "start": "tsx src/Main.ts",
+    "dev": "tsx watch src/Main.ts ",
     "build:ts": "tsc",
+    "build": "rescript build",
     "rescript": "rescript build -w",
     "db": "docker compose -f docker-compose.db.yml up",
     "test": "jest",
@@ -70,6 +70,7 @@
     "nodemon": "^2.0.19",
     "ts-jest": "^27.0.7",
     "ts-node-dev": "^2.0.0",
+    "tsx": "^3.9.0",
     "typescript": "^4.7.4"
   }
 }

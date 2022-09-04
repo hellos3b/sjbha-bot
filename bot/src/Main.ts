@@ -1,7 +1,3 @@
-import 'dotenv/config';
-import moduleAlias from 'module-alias';
-moduleAlias.addAlias ('@sjbha', __dirname);
-
 import { Settings } from 'luxon';
 import Hapi from '@hapi/hapi';
 
@@ -16,6 +12,7 @@ import * as CommandsNowSlashed from './commands/CommandsNowSlashed';
 
 import * as Manifest from './Manifest';
 import * as MainRescript from './MainRescript.bs';
+import { ChannelType } from 'discord.js';
 
 Settings.defaultZoneName = 'America/Los_Angeles';
 const log = Log.make ('main');
@@ -70,7 +67,7 @@ void async function main() {
 
       if (env.IS_PRODUCTION) {
         const channel = await client.channels.fetch (channels.bot_admin);
-        channel?.isText () && channel.send (`🤖 BoredBot Online! v${env.VERSION}`);
+        channel?.type === ChannelType.GuildText && channel.send (`🤖 BoredBot Online! v${env.VERSION}`);
       }
 
       onStartup.forEach (loader => loader (client));

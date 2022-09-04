@@ -1,20 +1,18 @@
 # Builder
 FROM node:16 as builder
 
-WORKDIR /app
+WORKDIR /app/bot
 
 RUN npm install --global pnpm@6
 COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --production
+RUN pnpm install
 
-# Copy files required to build
+COPY tsconfig.json bsconfig.json ./
+COPY src/ ./src/
+CMD pnpm build
 
-# ADD package*.json bsconfig.json tsconfig.json ./ 
-# ADD src/ ./src/
+FROM builder as development
+ENTRYPOINT pnpx rescript build -w & pnpm start
 
-COPY build/ ./build/
-
-# RUN pnpm build:re
-# RUN pnpm build:ts
-
-ENTRYPOINT pnpm start:prod
+FROM builder as production
+ENTRYPOINT pnpm start

@@ -12,9 +12,7 @@
     "baseUrl": "src",
     "allowJs": true,
     "paths": {
-      "@sjbha/*": [
-        "./*"
-      ]
+      "@sjbha/*": ["./*"]
     }
   },
   "include": [

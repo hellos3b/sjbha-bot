@@ -7,5 +7,5 @@ let command = SlashCommand.define (
       -> SlashCommand.setDescription ("Bot!! Are you alive??"),
       
    ~interaction = int =>
-      int->Interaction.respond (Text("Pong? From Rescript!", Public))->done
+      int->Interaction.respond (Text("Ping?", Public))->done
 )
