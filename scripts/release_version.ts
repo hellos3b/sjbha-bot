@@ -52,6 +52,7 @@ function main() {
    setPackageVersion(package_bot, nextVersion);
 
    console.log(`Pushing changes to github ${nextVersion}`);
+   child_process.execSync(`git tag -a v${nextVersion} -m "v${nextVersion}"`);
    child_process.execSync(`git add .`);
    child_process.execSync(`git commit -m "v${nextVersion}"`);
    child_process.execSync(`git push origin master tag v${nextVersion}`);
