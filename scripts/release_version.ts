@@ -26,8 +26,8 @@ const currentVersion = (): string => {
 }
 
 const setPackageVersion = (packagePath: string, version: string) => {
-   const root_package = fs.readFileSync(package_root, "utf8");
-   const package_json = JSON.parse(root_package);
+   const package_content = fs.readFileSync(packagePath, "utf8");
+   const package_json = JSON.parse(package_content);
    const copy = {...package_json};
    copy["version"] = version;
    fs.writeFileSync(packagePath, JSON.stringify(copy, null, 2));
