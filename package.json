@@ -1,0 +1,12 @@
+{
+  "name": "@hellos3b/bored-bot",
+  "version": "2.2.3",
+  "private": true,
+  "scripts": {
+    "uptick": "tsx ./scripts/release_version.ts"
+  },
+  "devDependencies": {
+    "semver": "^7.3.7",
+    "tsx": "^3.9.0"
+  }
+}
