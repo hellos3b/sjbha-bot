@@ -1,3 +1,6 @@
+import moduleAlias from 'module-alias';
+moduleAlias.addAlias ('@sjbha', __dirname);
+
 import { Settings } from 'luxon';
 import Hapi from '@hapi/hapi';
 

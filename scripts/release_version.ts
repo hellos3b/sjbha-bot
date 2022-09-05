@@ -4,6 +4,7 @@
 
 import path from "path";
 import fs from "fs";
+// @ts-ignore
 import semver from "semver";
 import child_process from "child_process";
 

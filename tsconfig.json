@@ -1,0 +1,18 @@
+{
+   "compilerOptions": {
+     "strict": true,
+     "module": "commonjs",
+     "moduleResolution": "node",
+     "resolveJsonModule": true,
+     "esModuleInterop": true,
+     "skipLibCheck": true,
+     "forceConsistentCasingInFileNames": true,
+     "target": "ESNext",
+     "outDir": "build",
+     "baseUrl": "src",
+     "allowJs": true,
+     "paths": {
+       "@sjbha/*": ["./*"]
+     }
+   }
+ }

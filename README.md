@@ -1,12 +1,13 @@
 # @hellos3b/sjbha
 
-## Prerequisites
+## Requirements
 
-This bot runs inside a docker container, so make sure to have [Docker installed](https://www.docker.com/)
+1. [pnpm](https://pnpm.io/), an improved version of npm
+1. [Docker](https://www.docker.com/), used for a local database
 
 ## Development
 
-Copy `.env.example` to a new file `.env` and fill out the necessary variables. Then, run:
+Need to fill out a `.env` file. You can use the `.env.example` as an example
 
 ```sh
 pnpm dev
@@ -14,8 +15,15 @@ pnpm dev
 
 The first time you run it may take some time to download all the packages, but afterwards the layer should be cached.
 
+## Contributing
+
+I'm totally open to pull requests! I have a dev server setup and can provide a `.env` so you can get the bot running locally.
+
+PR's should come with an update to [CHANGELOG.md](./CHANGELOG.md)
 
 ## Publishing
+
+When ready to update the bot, run thes commands
 
 ```sh
 # 1. Uptick the version numbers
@@ -32,9 +40,6 @@ Then head to the [Releases page](https://github.com/hellos3b/sjbha-bot/releases)
 
 Create a new tag with the same version name, click "Auto-generate Release notes" and Publish Release!
 
-## Deploying
-
-```
 
 ## Legacy Branch
 

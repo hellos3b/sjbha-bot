@@ -6,3 +6,4 @@ let commandList = [
   Tldr.command,
   Version.command
 ]
+
