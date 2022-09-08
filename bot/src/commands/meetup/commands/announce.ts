@@ -4,7 +4,7 @@ import * as db from '../db/meetups';
 
 const log = Log.make ('meetup:announce');
 
-const PINGS_PER_MENTION = 30;
+const PINGS_PER_MENTION = 80;
 
 // Notify all RSVPs about details of the meetup
 export async function announce (message: Message) : Promise<void> {

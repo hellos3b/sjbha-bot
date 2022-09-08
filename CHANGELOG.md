@@ -7,6 +7,7 @@
 
 ### 🐛 Bug Fix
    * Using `/tldr` outside of shitpost will display tldrs privately
+   * Increased the amount of mentions in a meetup announcement to 80 to fit more users on one line ([#172](https://github.com/hellos3b/sjbha-bot/issues/172))
 
 ### 🏠 Internal
    * Migrated to Discord library v14, which includes support for modals
