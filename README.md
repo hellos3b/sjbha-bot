@@ -36,11 +36,6 @@ $env:DOCKER_CONTEXT="s3bby"
 pnpm deploy
 ```
 
-Then head to the [Releases page](https://github.com/hellos3b/sjbha-bot/releases) 
-
-Create a new tag with the same version name, click "Auto-generate Release notes" and Publish Release!
-
-
 ## Legacy Branch
 
 The bot has been around for a while, and yes there are two versions of it running. The original version was created in javascript, and because of that it's kind of a pain to work in it.
