@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "uptick": "tsx ./scripts/release_version.ts",
-    "deploy": "docker compose -f docker-compose.yml build && docker compose -f docker-compose.yml up -d",
+    "deploy": "docker compose -f docker-compose.yml up --build -d",
     "dev:bot": "tsx scripts/run_dev.ts",
     "dev:db": "docker compose -f docker-compose.db.yml up",
     "dev": "npm-run-all --parallel dev:bot dev:db"

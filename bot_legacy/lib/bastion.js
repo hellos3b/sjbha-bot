@@ -95,6 +95,11 @@ export class Bastion extends EventEmitter {
                 console.log("-- Reconnecting --")
                 bot.connect()
             }
+            else {
+                // yeah, no idea why we disconnected,
+                //  force exit the bot which will tricker a docker restart (IQ 9000)
+                process.exit(1);
+            }
         });
 
 
@@ -124,8 +129,6 @@ export class Bastion extends EventEmitter {
 
                 this.send(context.channelID, helpers.code(err, 'diff'))
             }
-        } else {
-            console.log('   ', chalk.gray(`Command '${cmd}' not found, ignoring`))
         }
     }
 
