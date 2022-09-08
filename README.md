@@ -27,7 +27,7 @@ When ready to update the bot, run thes commands
 
 ```sh
 # 1. Uptick the version numbers
-pnpm release
+pnpm uptick <major|minor|patch>
 
 # 2. Set docker context to the host you want to deploy to
 $env:DOCKER_CONTEXT="s3bby"
