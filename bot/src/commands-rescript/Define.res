@@ -12,6 +12,7 @@ type definition = {
 type udResponse = {
    list: array<definition>
 }
+
 // How long should a definition be removable - prevent memory leak from long running
 let remove_timeout = Date.minutesToMilliseconds (10)
 // The length
@@ -106,6 +107,15 @@ let render = (definition, button) => {
    Message.EmbedWithComponents (embed, [actions], Public)
 }
 
+let removedDefinition = () => {
+   open Message.Embed
+   let embed = Message.Embed.make()
+      -> setColor (16201999)
+      -> setDescription (`*This definition has been removed*`)
+
+   Message.Embed (embed, Public)
+}
+
 //
 // Posts the definition along with examples.
 // Provides a "Remove" button in case there is some NSFW content in the embed 
@@ -118,15 +128,15 @@ let postDefinition = (interaction, definition) => {
       -> Promise.flatMap (_ => Interaction.fetchReply(interaction))
       
    // disables the remove button when it's been up long enough
-   let expire = _ => interaction
+   let expire = () => interaction
       -> Interaction.editResponse (render(definition, Expired))
       -> Promise.catchResult (_ => #EDIT_FAIL)
 
    // removes the post (if it's NSFW)
-   let removePost = collector =>
+   let removePost = collector => 
       interaction
-         -> Interaction.deleteReply
-         -> Promise.map (_ => Components.Collector.stop(collector))
+         -> Interaction.editResponse (removedDefinition())
+         -> Promise.map (_ => Components.Collector.dispose(collector))
          -> Promise.ignoreError
 
    // only the one who posted the definition can remove it
@@ -141,7 +151,7 @@ let postDefinition = (interaction, definition) => {
 
    let handleClickRemove = (it: Interaction.t, collector: Components.Collector.t) =>
       switch it->isOwner {
-         | Ok(_) => removePost(collector)
+         | Ok(_) => collector->removePost
          | Error(#NO_PERMISSION) => warnInvalidOwner(it)
       }
 
@@ -153,7 +163,7 @@ let postDefinition = (interaction, definition) => {
 
       let collector = message->Components.Collector.make(options)
       collector->Components.Collector.onCollect (handleClickRemove(_, collector))
-      collector->Components.Collector.onEnd (expire)
+      collector->Components.Collector.onEnd (_ => expire())
    })
 }
 

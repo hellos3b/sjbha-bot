@@ -1,7 +1,6 @@
 import * as Discord from 'discord.js';
 
-// Commands that have been migrated to use a `/command` instead of a `!command`
-// we'll let 
+// Commands that have been migrated to use a `/command` instead of a `!command` 
 const slashified = [
   'define',
   'pong',

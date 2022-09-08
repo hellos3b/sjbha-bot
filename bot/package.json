@@ -7,7 +7,9 @@
   },
   "scripts": {
     "start": "tsx src/Main.ts",
-    "dev": "ts-node-dev --transpile-only ./src/Main.ts",
+    "dev:re": "rescript build -w",
+    "dev:ts": "ts-node-dev --transpile-only ./src/Main.ts",
+    "dev": "npm-run-all --parallel dev:re dev:ts",
     "build": "rescript build",
     "rescript": "rescript build -w",
     "test": "jest",
@@ -38,6 +40,7 @@
     "nanoid": "^3.1.31",
     "node-cache": "^5.1.2",
     "node-schedule": "^2.0.0",
+    "npm-run-all": "^4.1.5",
     "ramda": "^0.27.1",
     "rescript": "^9.1.4",
     "superagent": "^7.1.3",

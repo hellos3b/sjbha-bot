@@ -11,7 +11,7 @@ import * as Fit from './commands/fit/Fit';
 import * as Meetup from './commands/meetup/RegisterMeetup';
 import * as RPS from './commands/throw/Throw';
 import * as Subscribe from './commands/subscribe/Subscribe';
-import * as CommandsNowSlashed from './commands/CommandsNowSlashed';
+import * as CommandsNowSlashed from './CommandsNowSlashed';
 
 import * as Manifest from './Manifest';
 import * as MainRescript from './MainRescript.bs';

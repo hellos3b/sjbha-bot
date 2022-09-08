@@ -17,6 +17,7 @@ module Collector = {
    @send external make: (message, options) => t = "createMessageComponentCollector"
 
    @send external stop: t => unit = "stop"
+   @send external dispose: t => unit = "dispose"
    @send external on: (t, string, 'a => 'b) => unit = "on"
    let onCollect = (t, fn: interaction => 'b) => t->on("collect", fn)
    let onEnd = (t, fn: t => 'b) => t->on("end", fn)
