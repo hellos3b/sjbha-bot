@@ -6,8 +6,9 @@
    * Migrated `!define` command to a slash command with a remove button.
 
 ### 🐛 Bug Fix
-   * Using `/tldr` outside of shitpost will display tldrs privately
-   * Increased the amount of mentions in a meetup announcement to 80 to fit more users on one line ([#172](https://github.com/hellos3b/sjbha-bot/issues/172))
+   * tldr: Using `/tldr` outside of shitpost will display tldrs privately
+   * meetup: Increased the amount of mentions in a meetup announcement to 80 to fit more users on one line ([#172](https://github.com/hellos3b/sjbha-bot/issues/172))
+   * meetup: Fix issue where names aren't rendering on meetups when over 100 people RSVP ([#173](https://github.com/hellos3b/sjbha-bot/issues/173))
 
 ### 🏠 Internal
    * Migrated to Discord library v14, which includes support for modals

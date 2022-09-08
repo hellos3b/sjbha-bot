@@ -3,6 +3,7 @@ import { Option, option } from 'ts-option';
 import { env, Log } from '@sjbha/app';
 
 const log = Log.make ('utils:member-list');
+const MAX_FETCHABLE = 100;
 
 /**
  * Fetches members from an array of IDs, 
@@ -27,7 +28,13 @@ export class MemberList {
   static fetch = async (client: Discord.Client, discordIds: string[]) : Promise<MemberList> => {
     try {
       const guild = await client.guilds.fetch (env.SERVER_ID);
-      const members = await guild.members.fetch ({ user: discordIds });
+      let members = new Discord.Collection<string, Discord.GuildMember> ();
+
+      for (let i = 0; i < discordIds.length; i += MAX_FETCHABLE) {
+        const ids = discordIds.slice (i, MAX_FETCHABLE);
+        const page = await guild.members.fetch ({ user: ids });
+        members = members.concat (page);
+      }
       
       return new MemberList (members);
     }
