@@ -21,5 +21,4 @@ services:
     env_file: .env.prod
     environment:
       NODE_ENV: production
-      MONGO_URL: mongodb://mongo:27017/sjbha
     restart: always
