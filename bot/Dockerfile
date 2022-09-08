@@ -8,9 +8,7 @@ RUN pnpm install
 
 
 FROM builder as development
-COPY demo.js .
 COPY tsconfig.json bsconfig.json ./
-# ENTRYPOINT node demo.js
 ENTRYPOINT pnpm rescript & pnpm dev
 
 
