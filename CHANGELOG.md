@@ -1,4 +1,4 @@
-# Unreleased
+# 2.2.7
 
 ### 🚀 Features
    * Added command `/modnote` for logging notes on users 
