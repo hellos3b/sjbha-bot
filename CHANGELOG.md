@@ -1,3 +1,8 @@
+# Unreleased
+
+### 🐛 Bug Fix
+   * meetup: bot stuck in crash loop when too many people RSVP for a meetup
+
 # 2.2.7
 
 ### 🚀 Features

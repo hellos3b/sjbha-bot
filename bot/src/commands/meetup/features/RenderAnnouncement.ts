@@ -15,6 +15,8 @@ import * as Format from '@sjbha/utils/Format';
 import * as Env from '@sjbha/app/env';
 import * as db from '../db/meetups';
 
+const max_name_count = 80;
+
 const RsvpButton = new ButtonBuilder ()
   .setCustomId ('rsvp')
   .setLabel ('Going!')
@@ -68,6 +70,11 @@ const mapsLink = (query: string): string => {
 //   return `https://calendar.google.com/calendar/render?${query}`;
 // }
 
+const capArray = (arr: string[], count: number) => 
+  (arr.length <= count)
+    ? arr
+    : arr.slice (0, count).concat ([`*(+ ${arr.length - count} more)*`]);
+
 /**
  * This is the Announcement embed
  */
@@ -113,7 +120,7 @@ function Announcement(meetup: db.Meetup, rsvps?: string[], maybes?: string[]): E
   rsvps && embed.addFields ({
     name:  `✅ Attending ${withCount (rsvps.length)}`,
     value: (rsvps.length)
-      ? rsvps.map (name => `> ${name}`).join ('\n')
+      ? capArray (rsvps, max_name_count).map (name => `> ${name}`).join ('\n')
       : '-',
     inline: true
   });
@@ -121,7 +128,7 @@ function Announcement(meetup: db.Meetup, rsvps?: string[], maybes?: string[]): E
   maybes && embed.addFields ({
     name:  `🤔 Interested ${withCount (maybes.length)}`,
     value: (maybes.length)
-      ? maybes.map (name => `> ${name}`).join ('\n')
+      ? capArray (maybes, max_name_count).map (name => `> ${name}`).join ('\n')
       : '-',
     inline: true
   });
