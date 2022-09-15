@@ -63,7 +63,7 @@ export default bastion => ([
     }),
     Music,
     Olympics,
-    UrbanDictionary,
+    // UrbanDictionary,
     Trading,
     AskDiscussion,
     Yelling,

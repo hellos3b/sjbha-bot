@@ -1,3 +1,8 @@
+# Unreleased
+
+### 🐛 Bug Fix
+   * define: disabled the old `!define` command from the legacy bot
+
 # 2.2.8
 
 ### 🐛 Bug Fix
