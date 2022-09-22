@@ -1,6 +1,6 @@
 {
   "name": "@hellos3b/bored-bot",
-  "version": "2.2.8",
+  "version": "2.2.9",
   "private": true,
   "scripts": {
     "uptick": "tsx ./scripts/release_version.ts",
