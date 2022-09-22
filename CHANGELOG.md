@@ -1,4 +1,4 @@
-# Unreleased
+# 2.2.9
 
 ### 🚀 Features
    * meetup: Add short description to meetups-directory and include RSVP count
