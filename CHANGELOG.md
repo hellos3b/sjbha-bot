@@ -1,5 +1,8 @@
 # Unreleased
 
+### 🚀 Features
+   * meetup: Add short description to meetups-directory and include RSVP count
+
 ### 🐛 Bug Fix
    * define: disabled the old `!define` command from the legacy bot
    * meetup: Reinitialize #meetups-directory messages if ids in db become corrupt

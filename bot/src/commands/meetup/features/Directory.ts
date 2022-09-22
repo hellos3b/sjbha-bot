@@ -9,11 +9,22 @@ import * as db from '../db/meetups';
 
 const log = Log.make ('meetup:directory');
 const settingsKey = 'meetup/directory-ids';
+const max_description_length = 120;
 
 const intro = `
 **Welcome to <#${channels.meetups_directory}>!**
 
-Meetups are created by members, and are open to all for joining! Click on the links to see full descriptions, location information, and always remember to RSVP!
+This channel lists a short overview of all the upcoming meetups. 
+Full descriptions and meetup discussions occur inside of threads, just click on a link below to get taken to that meetup's thread.
+
+**Who runs meetups?**
+Meetups on this server are community driven and can be created by any member. We just provide a way to help organize.
+
+**How do I join a meetup?**
+Head over to the meetup thread and click the RSVP button
+
+**How do I create a meetup?**
+Head over to <#${channels.meetups}> and run the \`!meetup\` command, and you will be given a link to a form to fill out. 
 `;
 
 const getDirectoryChannel = async (client: Discord.Client) => {
@@ -45,6 +56,16 @@ const deleteMessage = async (client: Discord.Client, messageId: string) => {
   const message = await channel.messages.fetch (messageId);
   return message.delete ();
 }
+
+const truncate = (str: string, len: number) =>
+  (str.length > len)
+    ? str.substring (0, len) + '...'
+    : str;
+
+const plural = (count: number, single: string, plural: string) =>
+  (count === 1) 
+    ? `1 ${single}`
+    : `${count} ${plural}`;
 
 // Creates the individual embeds that are used in the directory channel
 function DirectoryEmbed(meetup: db.Meetup): Discord.EmbedBuilder {
@@ -89,12 +110,15 @@ function DirectoryEmbed(meetup: db.Meetup): Discord.EmbedBuilder {
       }[meetup.category] || '🗓️';
 
       const description = [
-        `**${emoji} ${meetup.title}**\n${fullTime} (${relativeTime})`,
-        meetup.description.substring (0, 120),
-        `[Click here to view details and to RSVP](${link})`
+        `**${emoji} ${meetup.title}**`,
+        ' ',
+        truncate (meetup.description, max_description_length),
+        ' ',
+        `🙋 Organized by <@${meetup.organizerID}>`,
+        `✅ ${plural (meetup.rsvps.length, 'person is', 'people are')} attending`,
+        `🕑 ${fullTime} (${relativeTime})`,
+        `📨 [Click here for full details and to RSVP](${link})`
       ].join ('\n');
-
-      console.log ('Description', description);
       
       const embed = new Discord.EmbedBuilder ({
         'color':       (isNew) ? 0xe04007 : 0xeeeeee,
