@@ -88,9 +88,17 @@ function DirectoryEmbed(meetup: db.Meetup): Discord.EmbedBuilder {
         pet:       '🐕'
       }[meetup.category] || '🗓️';
 
+      const description = [
+        `**${emoji} ${meetup.title}**\n${fullTime} (${relativeTime})`,
+        meetup.description.substring (0, 120),
+        `[Click here to view details and to RSVP](${link})`
+      ].join ('\n');
+
+      console.log ('Description', description);
+      
       const embed = new Discord.EmbedBuilder ({
         'color':       (isNew) ? 0xe04007 : 0xeeeeee,
-        'description': `**${emoji} ${meetup.title}**\n${fullTime} (${relativeTime})\n[Click here to view details and to RSVP](${link})`
+        'description': description
       });
 
       isNew && embed.setThumbnail ('https://imgur.com/aeovsXo.png');
@@ -126,6 +134,31 @@ const findDirectoryMeetups = (): Promise<db.Meetup[]> => {
   });
 }
 
+const refreshFromScratch = async (client: Discord.Client) => {
+  log.debug ('There may be an issue with the message IDs stored, so we are going to reinitialize the directory channel');
+  const messageIds = await Settings.get<string[]> (settingsKey, []);
+  const channel = await getDirectoryChannel (client);
+
+  const deleted = messageIds.map (id => 
+    channel.messages.fetch (id)
+      .then (msg => msg.delete ())
+      .catch (_ => null)
+  );
+
+  try {
+    await Promise.all (deleted);
+    await Settings
+      .save (settingsKey, [])
+      .catch (_ => { throw new Error ('Failed to save'); });
+
+    return refresh (client);
+  }
+  catch (err) {
+    const message = (err instanceof Error) ? err.message : 'Unknown';
+    throw new Error (`Failed to reset meetup directory, abandoning. Check the message ids in settings. Error: ${message}`);
+  }
+}
+
 // fetch all meetups from the DB
 // and update the directory channel in chronological order
 export const refresh = async (client: Discord.Client, repost = false): Promise<void> => {
@@ -135,45 +168,55 @@ export const refresh = async (client: Discord.Client, repost = false): Promise<v
 
   log.debug ('Meetups in directory', { count: meetups.length });
 
-  // Post introduction message
-  const introId = await postOrEdit (
-    client,
-    { content: intro, embeds: [] },
-    messageIds.shift ()
-  );
+  try {
+    // Post introduction message
+    const introId = await postOrEdit (
+      client,
+      { content: intro, embeds: [] },
+      messageIds.shift ()
+    ).catch (_ => null);
 
-  usedIds.push (introId);
-
-
-  // Take down the existing messages and repost
-  // so that people get notified of a new update on discord
-  if (repost) {
-    log.debug ('Deleting old messages to repost');
-    const channel = await getDirectoryChannel (client);
-
-    while (messageIds.length) {
-      const id = messageIds.shift ();
-      id && await channel.messages.fetch (id).then (msg => msg.delete ());
+    if (!introId) {
+      throw new Error ('Failed to edit introduction message');
     }
+
+    usedIds.push (introId);
+
+
+    // Take down the existing messages and repost
+    // so that people get notified of a new update on discord
+    if (repost) {
+      log.debug ('Deleting old messages to repost');
+      const channel = await getDirectoryChannel (client);
+
+      while (messageIds.length) {
+        const id = messageIds.shift ();
+        id && await channel.messages.fetch (id).then (msg => msg.delete ());
+      }
+    }
+
+    // Post 10 directory postings per message until all are used up
+    const embeds = meetups
+      .sort ((a, b) => a.timestamp > b.timestamp ? 1 : -1)
+      .map (DirectoryEmbed);
+
+    while (embeds.length) {
+      const group = embeds.splice (0, 10);
+      const id = await postOrEdit (client, { embeds: group }, messageIds.shift ());
+      usedIds.push (id);
+    }
+
+    // Get rid of any ones we haven't used yet
+    await Promise.all (
+      messageIds.map (leftover => deleteMessage (client, leftover))
+    );
+
+    await Settings.save (settingsKey, usedIds);
   }
-
-  // Post 10 directory postings per message until all are used up
-  const embeds = meetups
-    .sort ((a, b) => a.timestamp > b.timestamp ? 1 : -1)
-    .map (DirectoryEmbed);
-
-  while (embeds.length) {
-    const group = embeds.splice (0, 10);
-    const id = await postOrEdit (client, { embeds: group }, messageIds.shift ());
-    usedIds.push (id);
+ catch (err) {
+    log.error ('Ran into an issue while refreshing meetups redirectory, will atempt to recreate from scratch');
+    return refreshFromScratch (client);
   }
-
-  // Get rid of any ones we haven't used yet
-  await Promise.all (
-    messageIds.map (leftover => deleteMessage (client, leftover))
-  );
-
-  await Settings.save (settingsKey, usedIds);
 }
 
 // Meant to be called when booting up

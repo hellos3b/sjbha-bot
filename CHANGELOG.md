@@ -2,6 +2,7 @@
 
 ### 🐛 Bug Fix
    * define: disabled the old `!define` command from the legacy bot
+   * meetup: Reinitialize #meetups-directory messages if ids in db become corrupt
 
 # 2.2.8
 
