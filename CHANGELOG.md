@@ -6,6 +6,7 @@
 ### 🐛 Bug Fix
    * define: disabled the old `!define` command from the legacy bot
    * meetup: Reinitialize #meetups-directory messages if ids in db become corrupt
+   * internal: Require kick permissions for `/mod` commands
 
 # 2.2.8
 
