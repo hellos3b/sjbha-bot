@@ -2,6 +2,7 @@
 
 ### 🚀 Features
    * meetup: Add short description to meetups-directory and include RSVP count
+   * mod: Display command result publicly in admin channel
 
 ### 🐛 Bug Fix
    * define: disabled the old `!define` command from the legacy bot

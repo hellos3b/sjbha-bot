@@ -28,6 +28,11 @@ module Notes = {
          -> Promise.map (any => any->unsafeCastNoteArray)
 }
 
+// make it public in the admin channel so we can share
+let modPrivacy = (interaction: Interaction.t) =>
+   if interaction.channel.id === Sjbha.Channels.admin { Message.Public }
+   else { Message.Private }
+
 //
 // Logs a note about a user that can be later looked up
 // to see a history
@@ -58,7 +63,7 @@ let saveNote = (interaction: Interaction.t) => {
          -> setColor (0xedd711)
          -> setDescription (`🔑 Note logged for ${user.username}`)
    
-      Message.Embed(embed, Private)
+      Message.Embed(embed, modPrivacy(interaction))
    })
 }
 
@@ -93,7 +98,7 @@ let lookupNotes = (interaction: Interaction.t) => {
          -> setTitle (`🔑 Notes for @${user.username}`)
          -> setDescription (description)
 
-      Message.Embed (embed, Private)
+      Message.Embed (embed, modPrivacy(interaction))
    })
 }
 
@@ -108,7 +113,7 @@ let echo = (interaction: Interaction.t) => {
          let confirmation = Message.Embed.make()
             -> Message.Embed.setDescription (`📣 Sent`)
       
-         Message.Embed (confirmation, Private)
+         Message.Embed (confirmation, modPrivacy(interaction))
       })
       -> Promise.catch (_ => Message.Error ("Could not send message (Do I have permissions here?)"))
 }
