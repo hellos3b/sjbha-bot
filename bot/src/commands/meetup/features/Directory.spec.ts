@@ -1,4 +1,4 @@
-import * as MongoMemoryServer from '@sjbha/__test__/MongoMemoryServer';
+import * as MongoMemoryServer from '../../../__test__/MongoMemoryServer';
 import * as Discord from 'discord.js';
 import { DateTime, Settings } from 'luxon';
 

@@ -1,4 +1,4 @@
-import { env } from '@sjbha/app';
+import { env } from '../app';
 
 const production = {
   // Fitness related emojis

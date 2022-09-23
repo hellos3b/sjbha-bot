@@ -1,6 +1,6 @@
 import { Message } from 'discord.js';
 import * as Subscription from './Subscription';
-import * as Format from '@sjbha/utils/Format';
+import * as Format from '../../utils/Format';
 
 const withReply = (content: string, message: Message) : void => {
   message.reply (content);

@@ -1,4 +1,4 @@
-import { MongoDb } from '@sjbha/app';
+import { MongoDb } from '../../app';
 import { FilterQuery } from 'mongodb';
 import { nanoid } from 'nanoid';
 import type { emojiSet } from './EmojiSet';

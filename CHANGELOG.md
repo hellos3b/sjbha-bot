@@ -7,8 +7,12 @@
 ### 🐛 Bug Fix
    * define: disabled the old `!define` command from the legacy bot
    * meetup: Reinitialize #meetups-directory messages if ids in db become corrupt
-   * internal: Require kick permissions for `/mod` commands
+   * mod: Require kick permissions for `/mod` commands
 
+### 🏠 Internal
+   * Removed any module alias imports using `@sjbha` and switched to relative directory
+   * Switch to esbuild for building and use the bundle for docker file
+   
 # 2.2.8
 
 ### 🐛 Bug Fix

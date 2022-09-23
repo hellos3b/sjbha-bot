@@ -6,12 +6,13 @@
     "node": ">= 16"
   },
   "scripts": {
-    "start": "tsx src/Main.ts",
+    "start": "node dist/bot.js",
     "dev:re": "rescript build -w",
     "dev:ts": "ts-node-dev --transpile-only ./src/Main.ts",
     "dev": "npm-run-all --parallel dev:re dev:ts",
-    "build": "rescript build",
-    "rescript": "rescript build -w",
+    "build": "npm run rescript & npm run bundle",
+    "bundle": "npx esbuild ./src/Main.ts --bundle --outfile=dist/bot.js --platform=node",
+    "rescript": "rescript build",
     "test": "jest",
     "test:watch": "jest --watch"
   },
@@ -65,6 +66,7 @@
     "@typescript-eslint/eslint-plugin": "^4.25.0",
     "@typescript-eslint/parser": "^4.25.0",
     "concurrently": "^7.3.0",
+    "esbuild": "^0.15.9",
     "eslint": "^7.27.0",
     "jest": "^27.3.1",
     "mongodb-memory-server": "^8.0.2",

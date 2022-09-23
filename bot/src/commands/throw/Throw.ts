@@ -1,5 +1,5 @@
-import { channels } from '@sjbha/server';
-import * as Command from '@sjbha/Command';
+import { channels } from '../../server';
+import * as Command from '../../Command';
 import { match, __ } from 'ts-pattern';
 
 import * as Profile from './Profile';

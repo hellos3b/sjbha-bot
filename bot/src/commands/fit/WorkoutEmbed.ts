@@ -2,9 +2,9 @@ import { DateTime } from 'luxon';
 import { match, __ } from 'ts-pattern';
 import * as DiscordJs from 'discord.js';
 
-import { Log } from '@sjbha/app';
-import { channels } from '@sjbha/server';
-import * as Guild from '@sjbha/Guild';
+import { Log } from '../../app';
+import { channels } from '../../server';
+import * as Guild from '../../Guild';
 
 import * as Activity from './Activity';
 import * as StravaAPI from './StravaAPI';

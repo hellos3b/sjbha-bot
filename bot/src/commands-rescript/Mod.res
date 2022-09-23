@@ -127,7 +127,7 @@ let command = SlashCommand.define (
       SlashCommand.make()
          -> setName ("mod")
          -> setDescription ("Make a note on a specific user")
-         -> setDefaultMemberPermissions (permissions.kick)
+         -> setDefaultMemberPermissions (0)
          
          -> addSubCommand (option => option
             -> SubCommand.setName ("note")

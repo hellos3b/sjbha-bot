@@ -1,6 +1,6 @@
 import * as Discord from 'discord.js';
 import { Option, option } from 'ts-option';
-import { env, Log } from '@sjbha/app';
+import { env, Log } from '../app';
 
 const log = Log.make ('utils:member-list');
 const MAX_FETCHABLE = 99;

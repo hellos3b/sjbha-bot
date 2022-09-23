@@ -1,9 +1,9 @@
 import * as Discord from 'discord.js';
 import { DateTime } from 'luxon';
 
-import { env, Settings, Log } from '@sjbha/app';
-import { channels } from '@sjbha/server';
-import * as Format from '@sjbha/utils/Format';
+import { env, Settings, Log } from '../../../app';
+import { channels } from '../../../server';
+import * as Format from '../../../utils/Format';
 
 import * as db from '../db/meetups';
 

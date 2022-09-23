@@ -2,7 +2,7 @@ import { ChannelType, Message } from 'discord.js';
 import { nanoid } from 'nanoid';
 import YAML from 'yaml';
 import { DateTime } from 'luxon';
-import { Log } from '@sjbha/app';
+import { Log } from '../../../app';
 
 import * as db from '../db/meetups';
 import * as M from '../common/Meetup';

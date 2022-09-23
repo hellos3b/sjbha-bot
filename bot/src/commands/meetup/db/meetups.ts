@@ -1,6 +1,6 @@
 import { FilterQuery } from 'mongodb';
 import { createNanoEvents } from 'nanoevents';
-import { MongoDb, Log } from '@sjbha/app';
+import { MongoDb, Log } from '../../../app';
 
 const log = Log.make ('fit:meetups');
 

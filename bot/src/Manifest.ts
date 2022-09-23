@@ -1,7 +1,7 @@
 import { type CommandInteraction, CacheType } from 'discord.js';
 import { REST } from '@discordjs/rest';
 import { Routes } from 'discord-api-types/v9';
-import * as Env from '@sjbha/app/env';
+import * as Env from './app/env';
 import { Log } from './app';
 
 

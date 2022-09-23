@@ -1,6 +1,6 @@
 import schedule from 'node-schedule';
 import * as Discord from 'discord.js';
-import { Log } from '@sjbha/app';
+import { Log } from '../../../app';
 
 import * as db from '../db/meetups';
 

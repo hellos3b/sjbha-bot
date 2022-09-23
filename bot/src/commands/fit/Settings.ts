@@ -2,8 +2,8 @@ import { match } from 'ts-pattern';
 import * as yup from 'yup';
 import { Message } from 'discord.js';
 
-import MultiChoice from '@sjbha/utils/MultiChoice';
-import { MessageBuilder, inlineCode } from '@sjbha/utils/Format';
+import MultiChoice from '../../utils/MultiChoice';
+import { MessageBuilder, inlineCode } from '../../utils/Format';
 
 import * as User from './User';
 

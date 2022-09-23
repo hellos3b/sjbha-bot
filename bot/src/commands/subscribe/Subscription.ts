@@ -1,4 +1,4 @@
-import { MongoDb } from '@sjbha/app';
+import { MongoDb } from '../../app';
 import { Collection } from 'mongodb';
 
 export type subscription = {

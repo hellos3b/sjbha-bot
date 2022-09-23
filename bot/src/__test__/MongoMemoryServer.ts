@@ -1,5 +1,5 @@
 import { MongoMemoryServer } from 'mongodb-memory-server';
-import { MongoDb, Log } from '@sjbha/app';
+import { MongoDb, Log } from '../app';
 
 const log = Log.make ('mock:mongo-memory-server');
 let mongod: MongoMemoryServer | undefined = undefined;

@@ -1,9 +1,8 @@
-import * as Discord from 'discord.js';
 import { match, __ } from 'ts-pattern';
-import { DiscordClient } from '@sjbha/app';
-import * as Command from '@sjbha/Command';
-import { startsWith, inChannel } from '@sjbha/CommandFilter';
-import { channels } from '@sjbha/server';
+import { DiscordClient } from '../../app';
+import * as Command from '../../Command';
+import { startsWith, inChannel } from '../../CommandFilter';
+import { channels } from '../../server';
 
 import { create } from './commands/create';
 import { cancel } from './commands/cancel';
@@ -21,64 +20,64 @@ import * as KeepThreadsOpen from './features/KeepThreadsOpen';
 import { getMeetup } from './routes/get-meetup';
 import { redirectGoogleCalendar } from './routes/gcal';
 
-const client = DiscordClient.getInstance();
+const client = DiscordClient.getInstance ();
 
-const meetupGlobal = Command.filtered({
+const meetupGlobal = Command.filtered ({
   filters: [
-    startsWith('!meetup'),
-    inChannel(channels.meetups)
+    startsWith ('!meetup'),
+    inChannel (channels.meetups)
   ],
 
   callback: message =>
-    match(Command.route(message))
-      .with('create', () => create(message))
-      .with('help', () => help(message))
-      .with('edit', () => message.reply('Editing a meetup is now done inside the Meetup thread'))
-      .with('cancel', () => message.reply('Canceling a meetup is now done inside the Meetup thread'))
-      .with('mention', () => message.reply('Mentioning a meetup is now done inside the Meetup thread'))
-      .with(__.nullish, () => message.reply('Click here to create a meetup: https://hellos3b.github.io/sjbha-bot/meetup'))
-      .otherwise(() => message.reply('Click here to create a meetup: https://hellos3b.github.io/sjbha-bot/meetup'))
+    match (Command.route (message))
+      .with ('create', () => create (message))
+      .with ('help', () => help (message))
+      .with ('edit', () => message.reply ('Editing a meetup is now done inside the Meetup thread'))
+      .with ('cancel', () => message.reply ('Canceling a meetup is now done inside the Meetup thread'))
+      .with ('mention', () => message.reply ('Mentioning a meetup is now done inside the Meetup thread'))
+      .with (__.nullish, () => message.reply ('Click here to create a meetup: https://hellos3b.github.io/sjbha-bot/meetup'))
+      .otherwise (() => message.reply ('Click here to create a meetup: https://hellos3b.github.io/sjbha-bot/meetup'))
 });
 
-const meetupWrongChannel = Command.filtered({
+const meetupWrongChannel = Command.filtered ({
   filters: [
-    startsWith('!meetup'),
-    message => !message.channel.isThread(),
-    message => !inChannel(channels.meetups)(message)
+    startsWith ('!meetup'),
+    message => !message.channel.isThread (),
+    message => !inChannel (channels.meetups) (message)
   ],
 
-  callback: message => message.reply(`!meetup command is now restricted to <#${channels.meetups}>`)
+  callback: message => message.reply (`!meetup command is now restricted to <#${channels.meetups}>`)
 });
 
-const meetupManage = Command.filtered({
+const meetupManage = Command.filtered ({
   filters: [
-    startsWith('!meetup'),
-    message => message.channel.isThread()
+    startsWith ('!meetup'),
+    message => message.channel.isThread ()
   ],
 
   callback: message =>
-    match(Command.route(message))
-      .with('edit', () => edit(message))
-      .with('cancel', () => cancel(message))
-      .with('announce', () => announce(message))
-      .with('help', () => help(message))
-      .with('mention', () => message.reply('Mentioning a meetup has been changed to `!meetup announce`'))
-      .otherwise(() => { /** ignore */ })
+    match (Command.route (message))
+      .with ('edit', () => edit (message))
+      .with ('cancel', () => cancel (message))
+      .with ('announce', () => announce (message))
+      .with ('help', () => help (message))
+      .with ('mention', () => message.reply ('Mentioning a meetup has been changed to `!meetup announce`'))
+      .otherwise (() => { /** ignore */ })
 })
 
-const admin = Command.filtered({
+const admin = Command.filtered ({
   filters: [
-    startsWith('$meetup'),
-    inChannel(channels.bot_admin)
+    startsWith ('$meetup'),
+    inChannel (channels.bot_admin)
   ],
 
   callback: message =>
-    match(Command.route(message))
-      .with('refresh', () => refresh(message))
-      .otherwise(() => { /** ignore */ })
+    match (Command.route (message))
+      .with ('refresh', () => refresh (message))
+      .otherwise (() => { /** ignore */ })
 });
 
-export const command = Command.combine(
+export const command = Command.combine (
   meetupWrongChannel,
   meetupGlobal,
   meetupManage,
@@ -87,30 +86,30 @@ export const command = Command.combine(
 
 export const startup = (): void => {
   // Keeps the announcement Embed up to date
-  Render.init(client);
+  Render.init (client);
 
   // Listen to RSVP buttons and update meetup
-  UpdateRsvps.startWatching(client);
+  UpdateRsvps.startWatching (client);
 
   // Keeps a compact view in #meetups-directory up to date
-  Directory.startListening(client);
+  Directory.startListening (client);
 
   // Auto end meetups after a certain period
-  EndMeetups.init(client);
+  EndMeetups.init (client);
 
   // Keeps threads open while a meetup is live
-  KeepThreadsOpen.startSchedule(client);
+  KeepThreadsOpen.startSchedule (client);
 }
 
 export const routes = [
   {
-    method: 'GET',
-    path: '/meetup/{id}/gcal',
+    method:  'GET',
+    path:    '/meetup/{id}/gcal',
     handler: redirectGoogleCalendar
   },
   {
-    method: 'GET',
-    path: '/meetup/{id}',
+    method:  'GET',
+    path:    '/meetup/{id}',
     handler: getMeetup
   }
 ];

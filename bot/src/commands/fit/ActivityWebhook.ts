@@ -1,7 +1,7 @@
 import Hapi from '@hapi/hapi';
 import * as Discord from 'discord.js';
-import { Log } from '@sjbha/app';
-import { wait } from '@sjbha/utils/wait';
+import { Log } from '../../app';
+import { wait } from '../../utils/wait';
 
 import * as WorkoutEmbed from './WorkoutEmbed';
 

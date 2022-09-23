@@ -1,6 +1,6 @@
 import * as Discord from 'discord.js';
 import * as Streak from './Streak';
-import { MemberList } from '@sjbha/utils/MemberList';
+import { MemberList } from '../../utils/MemberList';
 
 export async function leaderboard(message: Discord.Message) : Promise<void> {
   const streaks = (await Streak.fetchAll ())

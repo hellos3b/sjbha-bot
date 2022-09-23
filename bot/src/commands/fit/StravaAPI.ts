@@ -1,5 +1,5 @@
 import Superagent from 'superagent';
-import { env } from '@sjbha/app';
+import { env } from '../../app';
 import * as Activity from './Activity';
 
 type authResponse = {

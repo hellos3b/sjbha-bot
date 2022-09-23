@@ -1,8 +1,8 @@
 import * as DiscordJs from 'discord.js';
 import Hapi from '@hapi/hapi';
 import { assert, defaulted, string, type } from 'superstruct';
-import { env } from '@sjbha/app';
-import * as format from '@sjbha/utils/Format';
+import { env } from '../../app';
+import * as format from '../../utils/Format';
 
 import * as User from './User';
 import * as StravaAPI from './StravaAPI';

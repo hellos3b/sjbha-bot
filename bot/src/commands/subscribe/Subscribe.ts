@@ -1,6 +1,6 @@
-import * as Command from '@sjbha/Command';
+import * as Command from '../../Command';
 import { match, __ } from 'ts-pattern';
-import { channels } from '@sjbha/server';
+import { channels } from '../../server';
 
 import * as Commands from './Commands';
 import * as Admin from './Admin';

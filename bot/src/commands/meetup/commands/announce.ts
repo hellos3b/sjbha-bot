@@ -1,5 +1,5 @@
 import { Message } from 'discord.js';
-import { Log } from '@sjbha/app';
+import { Log } from '../../../app';
 import * as db from '../db/meetups';
 
 const log = Log.make ('meetup:announce');

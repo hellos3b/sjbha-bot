@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import { MongoDb } from '@sjbha/app';
+import { MongoDb } from '../../app';
 import { DateTime, Interval } from 'luxon';
 import { FilterQuery, FindOneOptions } from 'mongodb';
 import * as Activity from './Activity';

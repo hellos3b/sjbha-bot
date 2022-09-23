@@ -2,7 +2,7 @@ import { Message, EmbedBuilder } from 'discord.js';
 import { DateTime, Interval } from 'luxon';
 import * as R from 'ramda';
 
-import * as format from '@sjbha/utils/Format';
+import * as format from '../../utils/Format';
 
 import * as Exp from './Exp';
 import * as User from './User';

@@ -3,9 +3,9 @@ import * as Discord from 'discord.js';
 import { DateTime } from 'luxon';
 import schedule from 'node-schedule';
 
-import { channels, roles } from '@sjbha/server';
-import { Log } from '@sjbha/app';
-import { MemberList } from '@sjbha/utils/MemberList';
+import { channels, roles } from '../../server';
+import { Log } from '../../app';
+import { MemberList } from '../../utils/MemberList';
 
 import * as Workout from './Workout';
 import * as User from './User';

@@ -31,7 +31,7 @@ type t
 @send external addUserOption: (t, UserOption.t => UserOption.t) => t = "addUserOption"
 @send external setName: (t, string) => t = "setName"
 @send external setDescription: (t, string) => t = "setDescription"
-@send external setDefaultMemberPermissions: (t, float) => t = "setDefaultMemberPermissions"
+@send external setDefaultMemberPermissions: (t, int) => t = "setDefaultMemberPermissions"
 
 type interaction = Discord__Interaction.t
 
@@ -41,10 +41,3 @@ type config = {
 }
 
 @obj external define: (~command: t, ~interaction: interaction => unit) => config = ""
-
-type permissions = {
-  @as("KickMembers") kick: float,
-  @as("BanMembers") ban: float,
-}
-
-@module("discord.js") @val external permissions: permissions = "PermissionFlagsBits"

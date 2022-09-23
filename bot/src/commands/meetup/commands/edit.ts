@@ -1,7 +1,7 @@
 import { Message, EmbedBuilder } from 'discord.js';
 import YAML from 'yaml';
 import { DateTime } from 'luxon';
-import { env, Log } from '@sjbha/app';
+import { env, Log } from '../../../app';
 
 import * as db from '../db/meetups';
 import * as M from '../common/Meetup';

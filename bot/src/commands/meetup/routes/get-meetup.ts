@@ -2,7 +2,7 @@ import Boom from '@hapi/boom';
 import Hapi from '@hapi/hapi';
 
 import * as db from '../db/meetups';
-import { pick } from '@sjbha/utils/object';
+import { pick } from '../../../utils/object';
 
 export const getMeetup = async (req: Hapi.Request) : Promise<unknown> => {
   const id = req.params.id;

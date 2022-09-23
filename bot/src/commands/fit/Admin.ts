@@ -1,9 +1,9 @@
 import * as DiscordJs from 'discord.js';
 import { table } from 'table';
-import * as format from '@sjbha/utils/Format';
-import { env, Log } from '@sjbha/app';
+import * as format from '../../utils/Format';
+import { env, Log } from '../../app';
+import * as Member from '../../Guild';
 
-import * as Member from '@sjbha/Guild';
 import * as WorkoutEmbed from './WorkoutEmbed';
 import * as Exp from './Exp';
 import * as Workout from './Workout';

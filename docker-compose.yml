@@ -3,9 +3,7 @@ version: '3.4'
 services:
   bored_bot:
     container_name: bored_bot
-    build:
-      context: ./bot
-      target: production
+    build: ./bot
     env_file: .env.prod
     ports:
       - "5000:5000"

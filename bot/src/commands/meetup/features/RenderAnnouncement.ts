@@ -10,9 +10,9 @@ import {
 } from 'discord.js';
 import { DateTime } from 'luxon';
 
-import { MemberList } from '@sjbha/utils/MemberList';
-import * as Format from '@sjbha/utils/Format';
-import * as Env from '@sjbha/app/env';
+import { MemberList } from '../../../utils/MemberList';
+import * as Format from '../../../utils/Format';
+import * as Env from '../../../app/env';
 import * as db from '../db/meetups';
 
 const max_name_count = 80;

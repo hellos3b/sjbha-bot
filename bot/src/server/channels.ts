@@ -1,4 +1,4 @@
-import { env } from '@sjbha/app';
+import { env } from '../app';
 
 const production = {
   strava:            '450913008323919872',

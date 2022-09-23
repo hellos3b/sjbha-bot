@@ -1,6 +1,6 @@
 import { Message } from 'discord.js';
 import { DateTime } from 'luxon';
-import { Log } from '@sjbha/app';
+import { Log } from '../../../app';
 import * as db from '../db/meetups';
 
 const log = Log.make ('meetup:cancel');
