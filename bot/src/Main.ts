@@ -14,6 +14,7 @@ import { christmas } from "./interactions/christmas";
 import { pong } from "./interactions/pong";
 import { tldr } from "./interactions/tldr";
 import { version } from "./interactions/version";
+import { define } from "./interactions/define";
 
 const log = logger ("main");
 
@@ -22,6 +23,18 @@ const interactions = (): interactionConfig[] => [
       name: "christmas",
       description: "How many days are there left until christmas?",
       type: commandType.slash
+   },
+
+   {
+      name: "define",
+      description: "Look up the definition of a word, according to the all knowing urban dictionary",
+      type: commandType.slash,
+      options: [{
+         type: optionType.string,
+         name: "word",
+         description: "The definition to look up",
+         required: true
+      }]
    },
 
    {
@@ -136,6 +149,10 @@ const handleCommandInteraction = (interaction: Discord.ChatInputCommandInteracti
    switch (interaction.commandName) {
       case "christmas":
          christmas (interaction);
+         break;
+
+      case "define":
+         define (interaction);
          break;
          
       case "pong":

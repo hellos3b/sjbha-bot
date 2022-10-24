@@ -1,6 +1,6 @@
 import { differenceInDays } from "date-fns";
 import { ChatInputCommandInteraction, InteractionReplyOptions } from "discord.js";
-import { interactionFailed } from "errors";
+import { interactionFailed } from "../errors";
 
 const festivize = (message: string) => `🎄☃️☃️🎄🎁 ${message} 🎁🎄☃️☃️🎄`;
 

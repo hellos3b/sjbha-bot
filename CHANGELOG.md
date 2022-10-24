@@ -1,3 +1,9 @@
+# 2.2.10
+
+### ⭐ Enhancements
+   * define: Remove button expire time bumped up to an hour instead of 10 minutes
+   * define: Remove button now disappears when a post is no longer removable instead of disabling
+
 # 2.2.9
 
 ### 🚀 Features

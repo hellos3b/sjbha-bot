@@ -9,7 +9,6 @@
     "forceConsistentCasingInFileNames": true,
     "target": "ESNext",
     "outDir": "build",
-    "baseUrl": "src",
     "allowJs": true
   },
   "include": [
