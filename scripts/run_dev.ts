@@ -51,12 +51,12 @@ function main() {
       color: "#3ACADF"
    });
 
-   run({
-      cwd: path_legacy,
-      command: "npm start",
-      label: "legacy",
-      color: "#8A64D6" 
-   });
+   // run({
+   //    cwd: path_legacy,
+   //    command: "npm start",
+   //    label: "legacy",
+   //    color: "#8A64D6" 
+   // });
 }
 
 try {

@@ -10,10 +10,7 @@
     "target": "ESNext",
     "outDir": "build",
     "baseUrl": "src",
-    "allowJs": true,
-    "paths": {
-      "@sjbha/*": ["./*"]
-    }
+    "allowJs": true
   },
   "include": [
     "src"
