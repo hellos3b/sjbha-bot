@@ -73,7 +73,7 @@ const list = (interaction: ChatInputCommandInteraction, world: World): void => {
       .then (_ => interaction.reply (_), interactionFailed);
 };
 
-export const routeSubCommand = (interaction: ChatInputCommandInteraction, world: World): void => {
+export const tldr = (interaction: ChatInputCommandInteraction, world: World): void => {
    switch (interaction.options.getSubcommand ()) {
       case "list":
          list (interaction, world);

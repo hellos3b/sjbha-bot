@@ -10,13 +10,20 @@ import { logger } from "./logger";
 import { tap } from "./util";
 import { interactionConfig, commandType, optionType } from "./command_config";
 
-import * as pong from "./interactions/pong";
-import * as tldr from "./interactions/tldr";
-import * as version from "./interactions/version";
+import { christmas } from "./interactions/christmas";
+import { pong } from "./interactions/pong";
+import { tldr } from "./interactions/tldr";
+import { version } from "./interactions/version";
 
 const log = logger ("main");
 
 const interactions = (): interactionConfig[] => [
+   {
+      name: "christmas",
+      description: "How many days are there left until christmas?",
+      type: commandType.slash
+   },
+
    {
       name: "pong",
       description: "Check if the v2 bot is alive",
@@ -103,6 +110,10 @@ const createWorld = async(): Promise<World> => {
 const handleMessage = (message: Discord.Message) => {
    const [command] = message.content.split (" ");
    switch (command) {
+      case "!christmas":
+         message.reply ("The !define command has been turned into a slash command, check it out by using /christmas!");
+         break;
+
       case "!define": 
          message.reply ("The !define command has been turned into a slash command, check it out by using /define!");
          break;
@@ -123,16 +134,20 @@ const handleMessage = (message: Discord.Message) => {
 
 const handleCommandInteraction = (interaction: Discord.ChatInputCommandInteraction, world: World) => {
    switch (interaction.commandName) {
+      case "christmas":
+         christmas (interaction);
+         break;
+         
       case "pong":
-         pong.reply (interaction);
+         pong (interaction);
          break;
 
       case "tldr":
-         tldr.routeSubCommand (interaction, world);
+         tldr (interaction, world);
          break;
 
       case "version":
-         version.reply (interaction);
+         version (interaction);
          break;
    }
 };
