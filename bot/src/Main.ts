@@ -1,5 +1,6 @@
 import { Settings } from "luxon";
 import * as Discord from "discord.js";
+import Hapi from "@hapi/hapi";
 import { REST } from "@discordjs/rest";
 import { Routes } from "discord-api-types/v9";
 import { MongoClient } from "mongodb";
@@ -7,9 +8,13 @@ import { MongoClient } from "mongodb";
 import * as environment from "./environment";
 import { type World } from "./common/world";
 import { logger } from "./logger";
-import { tap } from "./common/util_fn";
+import { just, tap } from "./common/util_fn";
 import { interactionConfig, commandType, optionType, permissions } from "./command_config";
 
+// legacy commands
+import * as legacy from "./legacy_instance";
+
+// slash commands
 import { aqi } from "./interactions/aqi";
 import { christmas } from "./interactions/christmas";
 import { define } from "./interactions/define";
@@ -17,6 +22,7 @@ import { pong } from "./interactions/pong";
 import { tldr } from "./interactions/tldr";
 import { version } from "./interactions/version";
 import { mod } from "./interactions/mod";
+import { subscribe } from "./commands/subscribe/Subscribe";
 
 const log = logger ("main");
 
@@ -172,10 +178,29 @@ const createWorld = async(): Promise<World> => {
       .connect (process.env.MONGO_URL, { useUnifiedTopology: true })
       .then (tap (_ => { log.info ("MongoDB is connected"); }));
 
+   const hapiServer = Hapi.server ({
+      port:   process.env.HTTP_PORT,
+      host:   "0.0.0.0",
+      routes: { cors: true }
+   });
+
+   const hapi = hapiServer
+      .start ()
+      .then (just (hapiServer))
+      .then (tap (_ => { log.info (`Hapi is now listening on port ${process.env.HTTP_PORT}`); })); 
+
    return Promise
-      .all ([discord, mongodb])
-      .then (([discord, mongodb]): World => ({ discord, mongodb: mongodb.db () }));
+      .all ([discord, mongodb, hapi])
+      .then (([discord, mongodb, hapi]): World => ({ 
+         discord, 
+         mongodb: mongodb.db (),
+         hapi 
+      }));
 };
+
+const legacy_message_commands = [
+   subscribe
+];
 
 const handleMessage = (message: Discord.Message) => {
    const [command] = message.content.split (" ");
@@ -188,6 +213,9 @@ const handleMessage = (message: Discord.Message) => {
       case "!version":
          message.reply (`The ${command} command has been turned into a slash command, check it out by using /${command.slice (1)}`);
          break;
+
+      default:
+         legacy_message_commands.forEach (f => f (message));
    }
 };
 
@@ -232,6 +260,7 @@ void async function main() {
 
    registerSlashCommands ();
    const world = await createWorld ();
+   legacy.initialize (world);
 
    world.discord.on (Discord.Events.MessageCreate, message => { 
       if (!message.author.bot) handleMessage (message); 

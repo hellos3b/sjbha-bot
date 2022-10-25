@@ -1,9 +1,11 @@
 import * as Discord from "discord.js";
 import * as Mongo from "mongodb";
+import * as Hapi from "@hapi/hapi";
 
 export interface World {
    discord: Discord.Client;
    mongodb: Mongo.Db;
+   hapi: Hapi.Server;
 }
 
 export const broadcast = async(

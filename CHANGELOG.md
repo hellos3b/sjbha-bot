@@ -7,7 +7,11 @@
 ### 🚀 Features
    * aqi: Is now located at `/aqi`
    * mod: Notes now tell everyone when a note is made in a new bot log channel
-   
+
+### 🏠 Internal
+   * Moving away from rescript to focus onto one language
+   * Simplified command handling to aid in making strong module boundaries
+    
 # 2.2.9
 
 ### 🚀 Features

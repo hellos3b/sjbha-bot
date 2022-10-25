@@ -1,6 +1,6 @@
-import * as Command from "../../Command";
 import { match, __ } from "ts-pattern";
-import { channels } from "../../server";
+
+import * as Command from "../../Command";
 
 import * as Commands from "./Commands";
 import * as Admin from "./Admin";
@@ -21,7 +21,7 @@ const unsub = Command.filtered ({
 const admin = Command.filtered ({
    filter: Command.Filter.and (
       Command.Filter.startsWith ("$subscribe"),
-      Command.Filter.inChannel (channels.bot_admin)
+      Command.Filter.inChannel (process.env.CHANNEL_BOT_ADMIN)
    ),
 
    callback: message => 
@@ -31,4 +31,4 @@ const admin = Command.filtered ({
          .otherwise (() => Admin.help (message))
 });
 
-export const command = Command.combine (sub, unsub, admin);
+export const subscribe = Command.combine (sub, unsub, admin);
