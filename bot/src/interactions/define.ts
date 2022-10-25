@@ -2,7 +2,7 @@ import { hoursToMilliseconds } from "date-fns";
 import { ButtonComponentData, ButtonStyle, ChatInputCommandInteraction, ComponentType, InteractionReplyOptions } from "discord.js";
 import superagent from "superagent";
 import { interactionFailed } from "../errors";
-import { assertDefined } from "../util";
+import { assertDefined } from "../common/util_fn";
 
 // comes from urban dictionary
 interface definition {

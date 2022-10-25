@@ -1,6 +1,7 @@
-import { assertDefined, just } from "../util";
 import { ChatInputCommandInteraction, InteractionReplyOptions } from "discord.js";
 import { formatDistance } from "date-fns";
+
+import { assertDefined, just } from "../common/util_fn";
 import { World } from "../common/world";
 import { interactionFailed, makeUnexpectedReply } from "../errors";
 
@@ -38,7 +39,7 @@ const save = (interaction: ChatInputCommandInteraction, world: World): void => {
    };
 
    const saved = world.mongodb
-      .collection (collection_name)
+      .collection<tldr> (collection_name)
       .insertOne (tldr)
       .then (just (tldr));
 
@@ -62,7 +63,7 @@ const makeListReply = (tldrs: tldr[], channelId: string, currentDate: Date): Int
 
 const list = (interaction: ChatInputCommandInteraction, world: World): void => {
    const items = world.mongodb
-      .collection (collection_name)
+      .collection<tldr> (collection_name)
       .find ()
       .limit (tldrs_count)
       .toArray ();

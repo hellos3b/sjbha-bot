@@ -3,9 +3,9 @@ import { ChatInputCommandInteraction, InteractionReplyOptions } from "discord.js
 import superagent from "superagent";
 import { Result, Option } from "@swan-io/boxed";
 import { interactionFailed } from "../errors";
-import { just } from "../util";
-import { mean } from "../util_math";
-import { unique } from "../util_array";
+import { just } from "../common/util_fn";
+import { mean } from "../common/util_math";
+import { unique } from "../common/util_array";
 
 type source = [sensorId: string, location: string];
 

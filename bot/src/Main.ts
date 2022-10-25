@@ -7,7 +7,7 @@ import { MongoClient } from "mongodb";
 import * as environment from "./environment";
 import { type World } from "./common/world";
 import { logger } from "./logger";
-import { tap } from "./util";
+import { tap } from "./common/util_fn";
 import { interactionConfig, commandType, optionType, permissions } from "./command_config";
 
 import { aqi } from "./interactions/aqi";

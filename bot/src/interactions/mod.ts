@@ -1,7 +1,7 @@
 import { formatDistance } from "date-fns";
 import { ChatInputCommandInteraction, InteractionReplyOptions, MessageOptions } from "discord.js";
-import { interactionFailed, makeUnexpectedReply } from "../errors";
-import { assertDefined } from "../util";
+import { interactionFailed } from "../errors";
+import { assertDefined } from "../common/util_fn";
 import { broadcast, World } from "../common/world";
 
 interface note {
@@ -12,11 +12,6 @@ interface note {
 }
 
 const collection_name = "mod-notes";
-
-const commandFailedReply = (): InteractionReplyOptions => ({
-   content: "💀 Something unexpected happened",
-   ephemeral: true
-});
 
 interface noteReplyProps {
    userId: string;
@@ -75,7 +70,7 @@ const logNote = (interaction: ChatInputCommandInteraction, world: World) => {
    };
 
    const document = world.mongodb
-      .collection (collection_name)
+      .collection<note> (collection_name)
       .insertOne (note);
 
    const response = document
@@ -124,7 +119,7 @@ const lookup = (interaction: ChatInputCommandInteraction, world: World) => {
    assertDefined (user, "'user' is a required field");
 
    const notes = world.mongodb
-      .collection (collection_name)
+      .collection<note> (collection_name)
       .find ({ userId: user.id })
       .toArray ();
 
@@ -154,6 +149,5 @@ export const mod = (interaction: ChatInputCommandInteraction, world: World): voi
 
       default:
          throw new Error (`Unrecognized subcommand '${interaction.options.getSubcommand ()}`);
-
    }
 };

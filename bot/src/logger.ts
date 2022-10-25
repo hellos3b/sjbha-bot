@@ -25,9 +25,9 @@ interface LogData {
 const prettified = ({ level, message, module, data } : LogData) => {
    const color =
       (level === "info") ? chalk.cyan :
-      (level === "debug") ? chalk.hex ("#ffa500") :
-      (level === "error") ? chalk.redBright :
-      chalk.white;
+         (level === "debug") ? chalk.hex ("#ffa500") :
+            (level === "error") ? chalk.redBright :
+               chalk.white;
 
    console.log (
       "[" + color (level.toUpperCase ()) + "]",
@@ -38,7 +38,7 @@ const prettified = ({ level, message, module, data } : LogData) => {
 
    for (const key of Object.keys (data)) 
       console.log ("    ", key+":", chalk.greenBright (JSON.stringify (data[key])));
-}
+};
 
 const formatted = ({ level, module, message, data }: LogData) => {
    const trace = traceContext.getStore () ?? "";
@@ -50,14 +50,14 @@ const formatted = ({ level, module, message, data }: LogData) => {
       trace, 
       ...data 
    }));
-}
+};
 
 const log = (data: LogData) => {
    if (process.env.NODE_ENVIRONMENT === "production")
       formatted (data);
    else
       prettified (data);
-}
+};
 
 /**
  * Info should just be called for entries/events
@@ -103,7 +103,7 @@ const uniqueId = () => {
    }
 
    return id;
-}
+};
 
 /**
  * Generates a trace ID that gets added to any logging inside of `callback`
