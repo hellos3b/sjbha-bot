@@ -26,6 +26,7 @@
     "arrow-spacing": ["warn", { "before": true, "after": true }],
     "no-var": "warn",
     "semi": ["warn", "always"],
+    "indent": ["warn", 3, {"SwitchCase": 1}],
     "prefer-const": "warn",
     "key-spacing": ["warn", { "mode": "minimum" }],
     "quotes": ["warn", "double"],

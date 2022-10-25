@@ -4,6 +4,9 @@
    * define: Remove button expire time bumped up to an hour instead of 10 minutes
    * define: Remove button now disappears when a post is no longer removable instead of disabling
 
+### 🚀 Features
+   * aqi: Is now located at `/aqi`
+   
 # 2.2.9
 
 ### 🚀 Features

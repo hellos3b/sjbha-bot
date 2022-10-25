@@ -10,15 +10,22 @@ import { logger } from "./logger";
 import { tap } from "./util";
 import { interactionConfig, commandType, optionType } from "./command_config";
 
+import { aqi } from "./interactions/aqi";
 import { christmas } from "./interactions/christmas";
+import { define } from "./interactions/define";
 import { pong } from "./interactions/pong";
 import { tldr } from "./interactions/tldr";
 import { version } from "./interactions/version";
-import { define } from "./interactions/define";
 
 const log = logger ("main");
 
 const interactions = (): interactionConfig[] => [
+   {
+      name: "aqi",
+      description: "Show the current AQI reading from over the south bay",
+      type: commandType.slash
+   },
+
    {
       name: "christmas",
       description: "How many days are there left until christmas?",
@@ -123,30 +130,23 @@ const createWorld = async(): Promise<World> => {
 const handleMessage = (message: Discord.Message) => {
    const [command] = message.content.split (" ");
    switch (command) {
+      case "!aqi":
       case "!christmas":
-         message.reply ("The !define command has been turned into a slash command, check it out by using /christmas!");
-         break;
-
-      case "!define": 
-         message.reply ("The !define command has been turned into a slash command, check it out by using /define!");
-         break;
-
-      case "!pong": 
-         message.reply ("The !pong command has been turned into a slash command, check it out by using /pong!");
-         break;
-
-      case "!tldr": 
-         message.reply ("The !tldr command has been turned into a slash command, check it out by using /tldr!");
-         break;
-
-      case "!version": 
-         message.reply ("The !version command has been turned into a slash command, check it out by using /version!");
+      case "!define":
+      case "!pong":
+      case "!tldr":
+      case "!version":
+         message.reply (`The ${command} command has been turned into a slash command, check it out by using /${command.slice (1)}`);
          break;
    }
 };
 
 const handleCommandInteraction = (interaction: Discord.ChatInputCommandInteraction, world: World) => {
    switch (interaction.commandName) {
+      case "aqi":
+         aqi (interaction);
+         break;
+
       case "christmas":
          christmas (interaction);
          break;
@@ -166,6 +166,9 @@ const handleCommandInteraction = (interaction: Discord.ChatInputCommandInteracti
       case "version":
          version (interaction);
          break;
+
+      default:
+         log.error (`Missing interaction case '${interaction.commandName}'`);
    }
 };
 
