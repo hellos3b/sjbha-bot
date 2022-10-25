@@ -5,7 +5,7 @@ import { Routes } from "discord-api-types/v9";
 import { MongoClient } from "mongodb";
 
 import * as environment from "./environment";
-import { type World } from "./world";
+import { type World } from "./common/world";
 import { logger } from "./logger";
 import { tap } from "./util";
 import { interactionConfig, commandType, optionType, permissions } from "./command_config";

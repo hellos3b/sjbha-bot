@@ -1,7 +1,7 @@
 import { assertDefined, just } from "../util";
 import { ChatInputCommandInteraction, InteractionReplyOptions } from "discord.js";
 import { formatDistance } from "date-fns";
-import { World } from "../world";
+import { World } from "../common/world";
 import { interactionFailed, makeUnexpectedReply } from "../errors";
 
 interface tldr {
