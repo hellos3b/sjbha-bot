@@ -20,7 +20,7 @@ const log = Log.make ("main");
 const commands = Command.combine (
    Fit.command,
    Meetup.command,
-   RPS.command,
+   RPS.throw_rps,
    Subscribe.subscribe,
    CommandsNowSlashed.warn
 );

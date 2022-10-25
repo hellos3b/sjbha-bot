@@ -13,6 +13,8 @@ import { interactionConfig, commandType, optionType, permissions } from "./comma
 
 // legacy commands
 import * as legacy from "./legacy_instance";
+import { subscribe } from "./commands/subscribe/Subscribe";
+import { throw_rps } from "./commands/throw/Throw";
 
 // slash commands
 import { aqi } from "./interactions/aqi";
@@ -22,7 +24,6 @@ import { pong } from "./interactions/pong";
 import { tldr } from "./interactions/tldr";
 import { version } from "./interactions/version";
 import { mod } from "./interactions/mod";
-import { subscribe } from "./commands/subscribe/Subscribe";
 
 const log = logger ("main");
 
@@ -199,7 +200,8 @@ const createWorld = async(): Promise<World> => {
 };
 
 const legacy_message_commands = [
-   subscribe
+   subscribe,
+   throw_rps
 ];
 
 const handleMessage = (message: Discord.Message) => {
