@@ -2,7 +2,9 @@ import * as z from "zod";
 
 const env = z.object ({
    npm_package_version: z.string (),
+   CHANNEL_ADMIN: z.string (),
    CHANNEL_SHITPOST: z.string (),
+   CHANNEL_BOT_LOG: z.string (),
    DISCORD_TOKEN: z.string (),
    DISCORD_CLIENT_ID: z.string (),
    MONGO_URL: z.string (),

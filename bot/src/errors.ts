@@ -5,7 +5,7 @@ const log = logger ("errors");
 
 // todo: 
 export const makeUnexpectedReply = (): InteractionReplyOptions => ({
-   content: "💀 Failed"  
+   content: "💀 Something unexpected broke the bot"  
 });
 
 // todo: print output to bot admin?

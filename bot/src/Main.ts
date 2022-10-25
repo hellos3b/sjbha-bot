@@ -8,7 +8,7 @@ import * as environment from "./environment";
 import { type World } from "./world";
 import { logger } from "./logger";
 import { tap } from "./util";
-import { interactionConfig, commandType, optionType } from "./command_config";
+import { interactionConfig, commandType, optionType, permissions } from "./command_config";
 
 import { aqi } from "./interactions/aqi";
 import { christmas } from "./interactions/christmas";
@@ -16,6 +16,7 @@ import { define } from "./interactions/define";
 import { pong } from "./interactions/pong";
 import { tldr } from "./interactions/tldr";
 import { version } from "./interactions/version";
+import { mod } from "./interactions/mod";
 
 const log = logger ("main");
 
@@ -48,6 +49,55 @@ const interactions = (): interactionConfig[] => [
       name: "pong",
       description: "Check if the v2 bot is alive",
       type: commandType.slash
+   },
+
+   {
+      name: "mod",
+      description: "Commands meant to help make modding easier",
+      type: commandType.slash,
+      default_member_permissions: permissions.kick,
+      options: [
+         {
+            type: optionType.sub_command,
+            name: "log",
+            description: "Log a note about a specific user",
+            options: [{
+               type: optionType.user,
+               name: "user",
+               description: "The user this note is about",
+               required: true
+            }, {
+               type: optionType.string,
+               name: "note",
+               description: "The note you want to save for this user",
+               required: true
+            }]
+         },
+
+         {
+            type: optionType.sub_command,
+            name: "echo",
+            description: "Play simon says with bored bot (hey, dont abuse this!)",
+            options: [{
+               type: optionType.string,
+               name: "text",
+               description: "The text that bored bot will repeat",
+               required: true
+            }]
+         },
+
+         {
+            type: optionType.sub_command,
+            name: "lookup",
+            description: "Look up notes that have been saved for a user",
+            options: [{
+               type: optionType.user,
+               name: "user",
+               description: "The user to lookup",
+               required: true
+            }]
+         }
+      ]
    },
 
    {
@@ -153,6 +203,10 @@ const handleCommandInteraction = (interaction: Discord.ChatInputCommandInteracti
 
       case "define":
          define (interaction);
+         break;
+
+      case "mod":
+         mod (interaction, world);
          break;
          
       case "pong":

@@ -6,6 +6,7 @@
 
 ### 🚀 Features
    * aqi: Is now located at `/aqi`
+   * mod: Notes now tell everyone when a note is made in a new bot log channel
    
 # 2.2.9
 

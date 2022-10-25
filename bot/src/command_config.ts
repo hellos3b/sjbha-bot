@@ -16,6 +16,10 @@ export const optionType = {
    attachment: 11
 };
 
+export const permissions = {
+   kick: 2
+};
+
 export type choice = {
    name: string;
    value: string | number;
