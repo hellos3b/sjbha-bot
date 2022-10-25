@@ -1,23 +1,23 @@
-import { FilterQuery } from 'mongodb';
-import { createNanoEvents } from 'nanoevents';
-import { MongoDb, Log } from '../../../app';
+import { FilterQuery } from "mongodb";
+import { createNanoEvents } from "nanoevents";
+import { logger } from "../../../logger";
+import { getCollection as getMongoCollection } from "../../../legacy_instance";
 
-const log = Log.make ('fit:meetups');
+const log = logger ("fit:meetups");
 
-const getCollection = () =>
-  MongoDb.getCollection<Schema> ('meetups-labs');
+const getCollection = () => getMongoCollection<Schema> ("meetups-labs");
 
 export const events = createNanoEvents<{
-  'add': (meetup: Meetup) => void;
-  'update': (meetup: Meetup) => void;
+  "add": (meetup: Meetup) => void;
+  "update": (meetup: Meetup) => void;
 }>();
 
-events.on ('add', meetup => {
-  log.debug ('Inserting meetup', { id: meetup.id, title: meetup.title });
+events.on ("add", meetup => {
+   log.debug ("Inserting meetup", { id: meetup.id, title: meetup.title });
 });
 
-events.on ('update', meetup => {
-  log.debug ('Meetup was updated', { id: meetup.id, title: meetup.title });
+events.on ("update", meetup => {
+   log.debug ("Meetup was updated", { id: meetup.id, title: meetup.title });
 });
 
 export type Schema = {
@@ -67,13 +67,13 @@ export type Schema = {
 
   /** Meetup lifecycle */
   state: 
-    | { type: 'Live' }
-    | { type: 'Ended' }
-    | { type: 'Cancelled', reason: string, timestamp: string };
+    | { type: "Live" }
+    | { type: "Ended" }
+    | { type: "Cancelled", reason: string, timestamp: string };
 }
 
 // __version is used internally for in case the model changes
-export type Meetup = Omit<Schema, '__version'>;
+export type Meetup = Omit<Schema, "__version">;
 export const Meetup = (meetup: Meetup) : Meetup => ({ ...meetup });
 
 const stripVersion = ({ __version, ...schema }: Schema) : Meetup => schema;
@@ -81,11 +81,11 @@ const stripVersion = ({ __version, ...schema }: Schema) : Meetup => schema;
 const addCurentVersion = (meetup: Meetup) : Schema => ({ __version: 1, ...meetup });
 
 export async function insert(meetup: Meetup) : Promise<Meetup> {
-  const collection = await getCollection ();
-  await collection.insertOne (addCurentVersion (meetup));
-  events.emit ('add', meetup);
+   const collection = await getCollection ();
+   await collection.insertOne (addCurentVersion (meetup));
+   events.emit ("add", meetup);
 
-  return meetup;
+   return meetup;
 }
 
 /**
@@ -94,27 +94,27 @@ export async function insert(meetup: Meetup) : Promise<Meetup> {
  * @param silent Whether or not to emit the update event
  */
 export async function update(meetup: Meetup, silent = false) : Promise<Meetup> {
-  const collection = await getCollection ();
-  await collection.replaceOne ({ id: meetup.id }, addCurentVersion (meetup));
-  !silent && events.emit ('update', meetup);
+   const collection = await getCollection ();
+   await collection.replaceOne ({ id: meetup.id }, addCurentVersion (meetup));
+   !silent && events.emit ("update", meetup);
   
-  return meetup;
+   return meetup;
 }
 
 export const find = async (q: FilterQuery<Schema> = {}) : Promise<Meetup[]> => {
-  const collection = await getCollection ();
-  return collection
-    .find (q, { projection: { _id: 0 } })
-    .toArray ()
-    .then (meetups => meetups.map (stripVersion));
-}
+   const collection = await getCollection ();
+   return collection
+      .find (q, { projection: { _id: 0 } })
+      .toArray ()
+      .then (meetups => meetups.map (stripVersion));
+};
 
 export const findOne = async (q: FilterQuery<Schema> = {}) : Promise<Meetup | null> => {
-  const collection = await getCollection ();
-  const result = await collection.findOne (q, { projection: { _id: 0 } });
+   const collection = await getCollection ();
+   const result = await collection.findOne (q, { projection: { _id: 0 } });
 
-  if (!result)
-    return null;
+   if (!result)
+      return null;
 
-  return stripVersion (result);
-}
+   return stripVersion (result);
+};

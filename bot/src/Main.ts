@@ -15,6 +15,7 @@ import { interactionConfig, commandType, optionType, permissions } from "./comma
 import * as legacy from "./legacy_instance";
 import { subscribe } from "./commands/subscribe/Subscribe";
 import { throw_rps } from "./commands/throw/Throw";
+import * as meetup from "./commands/meetup/RegisterMeetup";
 
 // slash commands
 import { aqi } from "./interactions/aqi";
@@ -185,10 +186,14 @@ const createWorld = async(): Promise<World> => {
       routes: { cors: true }
    });
 
+   hapiServer.route ([
+      ...meetup.routes
+   ]);
+
    const hapi = hapiServer
       .start ()
       .then (just (hapiServer))
-      .then (tap (_ => { log.info (`Hapi is now listening on port ${process.env.HTTP_PORT}`); })); 
+      .then (tap (_ => { log.info ("Hapi has started", { port: process.env.HTTP_PORT }); })); 
 
    return Promise
       .all ([discord, mongodb, hapi])
@@ -201,7 +206,8 @@ const createWorld = async(): Promise<World> => {
 
 const legacy_message_commands = [
    subscribe,
-   throw_rps
+   throw_rps,
+   meetup.command
 ];
 
 const handleMessage = (message: Discord.Message) => {
@@ -262,7 +268,10 @@ void async function main() {
 
    registerSlashCommands ();
    const world = await createWorld ();
+   
+   // legacy initialization
    legacy.initialize (world);
+   meetup.startup (world.discord);
 
    world.discord.on (Discord.Events.MessageCreate, message => { 
       if (!message.author.bot) handleMessage (message); 

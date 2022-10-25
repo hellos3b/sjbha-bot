@@ -110,6 +110,6 @@ const uniqueId = () => {
  * 
  * Can be used to trace a reqeust's lifetime
  */
-export function runWithContext<T>(callback: () => T) : T {
+export function runWithLoggingContext<T>(callback: () => T) : T {
    return traceContext.run (uniqueId (), callback);
 }

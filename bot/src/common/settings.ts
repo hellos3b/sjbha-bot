@@ -1,12 +1,11 @@
-import * as MongoDb from "./MongoDb";
+import { getCollection as getMongoCollection } from "../legacy_instance";
 
 type Setting = { 
   key: string; 
   data: unknown; 
 }
 
-const getCollection = async () => 
-   MongoDb.getCollection <Setting> ("settings");
+const getCollection = async () => getMongoCollection <Setting> ("settings");
 
 export const get = async <T>(key: string, defaults: T): Promise<T> => {
    const settings = await getCollection ();
