@@ -1,4 +1,4 @@
-import { getCollection as getMongoCollection } from "../../legacy_instance";
+import { getCollection as getMongoCollection } from "../../deprecating/legacy_instance";
 import { Collection } from "mongodb";
 
 export type result =

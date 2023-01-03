@@ -1,8 +1,15 @@
 import { interactionFailed } from "../errors";
-import { CommandInteraction } from "discord.js";
+import * as Interaction from "../interaction";
 
-export const pong = (interaction: CommandInteraction): void => {
-   interaction
-      .reply ("Ping?")
-      .catch (interactionFailed);
-};
+export const pong = Interaction.make ({
+   config: [{
+      name: "pong",
+      description: "Check if the v2 bot is alive",
+      type: Interaction.commandType.slash
+   }],
+
+   handle: interaction =>
+      interaction
+         .reply ("Ping?")
+         .catch (interactionFailed)
+});

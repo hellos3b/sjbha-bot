@@ -1,4 +1,4 @@
-import { getCollection } from "../../legacy_instance";
+import { getCollection } from "../../deprecating/legacy_instance";
 import { Collection } from "mongodb";
 
 export type subscription = {

@@ -6,6 +6,7 @@ import { logger } from "../../../logger";
 import * as db from "../db/meetups";
 import * as M from "../common/Meetup";
 import { parse } from "../common/MeetupOptions";
+import { env } from "../../../environment";
 
 const log = logger ("edit");
 
@@ -107,7 +108,7 @@ async function updateMeetup(message: Message, meetup: db.Meetup) {
 // Asks the user to pick a meetup from a list,
 // and then generates a link that will preload data into the UI
 async function getEditLink(message: Message, meetup: db.Meetup) {
-   const editUrl = process.env.UI_HOSTNAME + "/meetup#" + meetup.id;
+   const editUrl = env.UI_HOSTNAME + "/meetup#" + meetup.id;
 
    message.channel.send ({
       embeds: [

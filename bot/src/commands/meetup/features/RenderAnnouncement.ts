@@ -10,9 +10,10 @@ import {
 } from "discord.js";
 import { DateTime } from "luxon";
 
-import { MemberList } from "../../../utils/MemberList";
-import * as Format from "../../../utils/Format";
+import { MemberList } from "../../../deprecating/MemberList";
+import * as Format from "../../../deprecating/Format";
 import * as db from "../db/meetups";
+import { env } from "../../../environment";
 
 const max_name_count = 80;
 
@@ -109,7 +110,7 @@ function Announcement(meetup: db.Meetup, rsvps?: string[], maybes?: string[]): E
       name:  "Links", 
       value: [
          ...meetup.links.map (l => linkify (l.url, l.label)),
-         linkify (`${process.env.UI_HOSTNAME}/meetup/${meetup.id}/gcal`, "Add to Google Calendar"),
+         linkify (`${env.UI_HOSTNAME}/meetup/${meetup.id}/gcal`, "Add to Google Calendar"),
       ].join ("\n")
    });
 

@@ -1,9 +1,10 @@
 import { match, __ } from "ts-pattern";
 
-import * as Command from "../../Command";
+import * as Command from "../../deprecating/Command";
 
 import * as Commands from "./Commands";
 import * as Admin from "./Admin";
+import { env } from "../../environment";
 
 const sub = Command.filtered ({
    filter:   Command.Filter.startsWith ("!subscribe"),
@@ -21,7 +22,7 @@ const unsub = Command.filtered ({
 const admin = Command.filtered ({
    filter: Command.Filter.and (
       Command.Filter.startsWith ("$subscribe"),
-      Command.Filter.inChannel (process.env.CHANNEL_BOT_ADMIN)
+      Command.Filter.inChannel (env.CHANNEL_BOT_ADMIN)
    ),
 
    callback: message => 

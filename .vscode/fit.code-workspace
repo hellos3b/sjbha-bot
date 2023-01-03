@@ -1,0 +1,19 @@
+{
+   "folders": [
+      {
+         "name": "bot",
+         "path": "../bot"
+      },
+      {
+         "path": ".."
+      }
+   ],
+   "settings": {
+      "editor.codeActionsOnSave": {
+         "source.fixAll.eslint": true
+      },
+      "editor.formatOnSave": false,
+      "typescript.implementationsCodeLens.enabled": true,
+      "typescript.referencesCodeLens.enabled": true
+   }
+}

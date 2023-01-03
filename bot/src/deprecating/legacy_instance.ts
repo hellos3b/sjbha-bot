@@ -1,6 +1,6 @@
 /* eslint-disable init-declarations */
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-import { World } from "./common/world";
+import { World } from "../world";
 
 let world: World;
 

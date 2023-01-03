@@ -1,11 +1,9 @@
 import * as Discord from "discord.js";
 import { DateTime } from "luxon";
-
-// import { env, Settings, Log } from "../../../app";
-// import { channels } from "../../../server";
-import * as Settings from "../../../common/settings";
+import * as Settings from "../../../deprecating/settings";
+import { env } from "../../../environment";
 import { logger, runWithLoggingContext } from "../../../logger";
-import * as Format from "../../../utils/Format";
+import * as Format from "../../../deprecating/Format";
 
 import * as db from "../db/meetups";
 
@@ -14,7 +12,7 @@ const settingsKey = "meetup/directory-ids";
 const max_description_length = 120;
 
 const intro = `
-**Welcome to <#${process.env.CHANNEL_MEETUPS_DIR}>!**
+**Welcome to <#${env.CHANNEL_MEETUPS_DIR}>!**
 
 This channel lists a short overview of all the upcoming meetups. 
 Full descriptions and meetup discussions occur inside of threads, just click on a link below to get taken to that meetup's thread.
@@ -26,11 +24,11 @@ Meetups on this server are community driven and can be created by any member. We
 Head over to the meetup thread and click the RSVP button
 
 **How do I create a meetup?**
-Head over to <#${process.env.CHANNEL_MEETUPS}> and run the \`!meetup\` command, and you will be given a link to a form to fill out. 
+Head over to <#${env.CHANNEL_MEETUPS}> and run the \`!meetup\` command, and you will be given a link to a form to fill out. 
 `;
 
 const getDirectoryChannel = async (client: Discord.Client) => {
-   const channel = await client.channels.fetch (process.env.CHANNEL_MEETUPS_DIR);
+   const channel = await client.channels.fetch (env.CHANNEL_MEETUPS_DIR);
 
    if (channel?.type !== Discord.ChannelType.GuildText) {
       throw new Error ("Could not fetch meetups_directory channel");
@@ -71,7 +69,7 @@ const plural = (count: number, single: string, plural: string) =>
 
 // Creates the individual embeds that are used in the directory channel
 function DirectoryEmbed(meetup: db.Meetup): Discord.EmbedBuilder {
-   const link = `https://discord.com/channels/${process.env.SERVER_ID}/${meetup.threadID}/${meetup.announcementID}`;
+   const link = `https://discord.com/channels/${env.SERVER_ID}/${meetup.threadID}/${meetup.announcementID}`;
 
    switch (meetup.state.type) {
       case "Cancelled":

@@ -1,11 +1,10 @@
 import { convert } from "@shootismoke/convert";
-import { ChatInputCommandInteraction, InteractionReplyOptions } from "discord.js";
+import { InteractionReplyOptions } from "discord.js";
 import superagent from "superagent";
 import { Result, Option } from "@swan-io/boxed";
+import * as Interaction from "../interaction";
 import { interactionFailed } from "../errors";
-import { just } from "../common/util_fn";
-import { mean } from "../common/util_math";
-import { unique } from "../common/util_array";
+import { just, mean } from "../prelude";
 
 type source = [sensorId: string, location: string];
 
@@ -147,11 +146,19 @@ const fetchSensors = (ids: string[]): Promise<apiSensor[]> =>
       .query ({ show: ids.join ("|") })
       .then (it => (<apiResponse>it.body).results);
 
-export const aqi = (interaction: ChatInputCommandInteraction): void => {
-   const ids = sources.map (sourceId);
-   const reply = fetchSensors (ids)
-      .then (makeAqiReply)
-      .catch (just (apiFailedReply));
+export const aqi = Interaction.make ({
+   config: [{
+      name: "aqi",
+      description: "Show the current AQI reading from over the south bay",
+      type: Interaction.commandType.slash
+   }],
 
-   reply.then (_ => interaction.reply (_), interactionFailed);
-};
+   handle: interaction => {
+      const ids = sources.map (sourceId);
+      const reply = fetchSensors (ids)
+         .then (makeAqiReply)
+         .catch (just (apiFailedReply));
+
+      reply.then (_ => interaction.reply (_), interactionFailed);
+   }
+});

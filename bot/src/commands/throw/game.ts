@@ -2,7 +2,7 @@ import { match } from "ts-pattern";
 import * as Discord from "discord.js";
 import { DateTime } from "luxon";
 
-import * as Format from "../../utils/Format";
+import * as Format from "../../deprecating/Format";
 import * as Streak from "./Streak";
 
 const COOLDOWN_MINUTES = 60;

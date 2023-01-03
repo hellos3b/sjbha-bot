@@ -2,7 +2,15 @@ import Boom from "@hapi/boom";
 import Hapi from "@hapi/hapi";
 
 import * as db from "../db/meetups";
-import { pick } from "../../../utils/object";
+
+function pick<T, K extends keyof T>(obj: T, ...keys: K[]): Pick<T, K> {
+   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   const ret: any = {};
+   keys.forEach (key => {
+      ret[key] = obj[key];
+   });
+   return ret;
+}
 
 export const getMeetup = async (req: Hapi.Request) : Promise<unknown> => {
    const id = req.params.id;

@@ -1,5 +1,6 @@
 import * as Discord from "discord.js";
 import { Option, option } from "ts-option";
+import { env } from "../environment";
 import { logger } from "../logger";
 
 const log = logger ("utils:member-list");
@@ -27,7 +28,7 @@ export class MemberList {
 
   static fetch = async (client: Discord.Client, discordIds: string[]) : Promise<MemberList> => {
      try {
-        const guild = await client.guilds.fetch (process.env.SERVER_ID);
+        const guild = await client.guilds.fetch (env.SERVER_ID);
         let members = new Discord.Collection<string, Discord.GuildMember> ();
 
         for (let i = 0; i < discordIds.length; i += MAX_FETCHABLE) {

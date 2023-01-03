@@ -1,7 +1,7 @@
 import { match, __ } from "ts-pattern";
 import * as Discord from "discord.js";
-import * as Command from "../../Command";
-import { startsWith, inChannel } from "../../CommandFilter";
+import * as Command from "../../deprecating/Command";
+import { startsWith, inChannel } from "../../deprecating/CommandFilter";
 
 import { create } from "./commands/create";
 import { cancel } from "./commands/cancel";
@@ -18,11 +18,12 @@ import * as KeepThreadsOpen from "./features/KeepThreadsOpen";
 
 import { getMeetup } from "./routes/get-meetup";
 import { redirectGoogleCalendar } from "./routes/gcal";
+import { env } from "../../environment";
 
 const meetupGlobal = Command.filtered ({
    filters: [
       startsWith ("!meetup"),
-      inChannel (process.env.CHANNEL_MEETUPS)
+      inChannel (env.CHANNEL_MEETUPS)
    ],
 
    callback: message =>
@@ -40,10 +41,10 @@ const meetupWrongChannel = Command.filtered ({
    filters: [
       startsWith ("!meetup"),
       message => !message.channel.isThread (),
-      message => !inChannel (process.env.CHANNEL_MEETUPS) (message)
+      message => !inChannel (env.CHANNEL_MEETUPS) (message)
    ],
 
-   callback: message => message.reply (`!meetup command is now restricted to <#${process.env.CHANNEL_MEETUPS}>`)
+   callback: message => message.reply (`!meetup command is now restricted to <#${env.CHANNEL_MEETUPS}>`)
 });
 
 const meetupManage = Command.filtered ({
@@ -65,7 +66,7 @@ const meetupManage = Command.filtered ({
 const admin = Command.filtered ({
    filters: [
       startsWith ("$meetup"),
-      inChannel (process.env.CHANNEL_BOT_ADMIN)
+      inChannel (env.CHANNEL_BOT_ADMIN)
    ],
 
    callback: message =>

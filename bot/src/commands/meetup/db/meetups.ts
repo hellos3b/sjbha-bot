@@ -1,7 +1,7 @@
 import { FilterQuery } from "mongodb";
 import { createNanoEvents } from "nanoevents";
 import { logger } from "../../../logger";
-import { getCollection as getMongoCollection } from "../../../legacy_instance";
+import { getCollection as getMongoCollection } from "../../../deprecating/legacy_instance";
 
 const log = logger ("fit:meetups");
 

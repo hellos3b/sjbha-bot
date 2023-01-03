@@ -1,5 +1,6 @@
 import { differenceInDays } from "date-fns";
-import { ChatInputCommandInteraction, InteractionReplyOptions } from "discord.js";
+import { InteractionReplyOptions } from "discord.js";
+import * as Interaction from "../interaction";
 import { interactionFailed } from "../errors";
 
 const festivize = (message: string) => `🎄☃️☃️🎄🎁 ${message} 🎁🎄☃️☃️🎄`;
@@ -29,10 +30,18 @@ const makeReply = (days: number): InteractionReplyOptions => ({
       : `ONLY ${days} ${pluralize ("DAY", days)} UNTIL CHRISTMAS!!`
 });
 
-export const christmas = (interaction: ChatInputCommandInteraction): void => {
-   const daysUntil = daysUntilChristmas (new Date ());
+export const christmas = Interaction.make ({
+   config: [{
+      name: "christmas",
+      description: "How many days are there left until christmas?",
+      type: Interaction.commandType.slash
+   }],
+   
+   handle: interaction => {
+      const daysUntil = daysUntilChristmas (new Date ());
 
-   interaction
-      .reply (makeReply (daysUntil))
-      .catch (interactionFailed);
-};
+      interaction
+         .reply (makeReply (daysUntil))
+         .catch (interactionFailed);
+   }
+});

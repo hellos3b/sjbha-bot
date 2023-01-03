@@ -1,3 +1,6 @@
+import * as Discord from "discord.js";
+import { World } from "./world";
+
 export const commandType = {
    slash: 1
 };
@@ -41,3 +44,10 @@ export interface interactionConfig {
    options?: option[];
    default_member_permissions?: number;
 }
+
+export interface interaction {
+   config: interactionConfig[],
+   handle: (interaction: Discord.ChatInputCommandInteraction, world: World) => unknown;
+}
+
+export const make = (config: interaction): interaction => config;

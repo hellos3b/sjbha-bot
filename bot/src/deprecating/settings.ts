@@ -1,4 +1,4 @@
-import { getCollection as getMongoCollection } from "../legacy_instance";
+import { getCollection as getMongoCollection } from "./legacy_instance";
 
 type Setting = { 
   key: string; 

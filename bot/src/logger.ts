@@ -4,6 +4,7 @@ import chalk from "chalk";
 import logfmt from "logfmt";
 import { AsyncLocalStorage } from "async_hooks";
 import * as DiscordJs from "discord.js";
+import { env } from "./environment";
 
 // Used to track logs over a request
 const traceContext = new AsyncLocalStorage ();
@@ -53,7 +54,7 @@ const formatted = ({ level, module, message, data }: LogData) => {
 };
 
 const log = (data: LogData) => {
-   if (process.env.NODE_ENVIRONMENT === "production")
+   if (env.NODE_ENV === "production")
       formatted (data);
    else
       prettified (data);

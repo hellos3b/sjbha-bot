@@ -1,8 +1,10 @@
 import { formatDistance } from "date-fns";
 import { ChatInputCommandInteraction, InteractionReplyOptions, MessageOptions } from "discord.js";
+import * as Interaction from "../interaction";
 import { interactionFailed } from "../errors";
-import { assertDefined } from "../common/util_fn";
-import { broadcast, World } from "../common/world";
+import { assertDefined } from "../prelude";
+import { broadcast, World } from "../world";
+import { env } from "../environment";
 
 interface note {
    moderator: string;
@@ -77,7 +79,7 @@ const logNote = (interaction: ChatInputCommandInteraction, world: World) => {
       .then (_ => makeSavedNoteReply ({
          note: note.note,
          userId: user.id, 
-         ephemeral: interaction.channelId !== process.env.CHANNEL_ADMIN
+         ephemeral: interaction.channelId !== env.CHANNEL_ADMIN
       }));
 
    const announcement = response.then (_ => makeNoteSavedAnnouncement ({
@@ -88,7 +90,7 @@ const logNote = (interaction: ChatInputCommandInteraction, world: World) => {
    
    Promise
       .all ([response, announcement])
-      .then (([r, a]) => interaction.reply (r).then (_ => broadcast (world, process.env.CHANNEL_BOT_LOG, a)))
+      .then (([r, a]) => interaction.reply (r).then (_ => broadcast (world, env.CHANNEL_BOT_LOG, a)))
       .catch (interactionFailed);
 };
 
@@ -128,26 +130,78 @@ const lookup = (interaction: ChatInputCommandInteraction, world: World) => {
          username: user.username,
          notes,
          now: new Date (),
-         ephemeral: interaction.channelId !== process.env.CHANNEL_ADMIN
+         ephemeral: interaction.channelId !== env.CHANNEL_ADMIN
       }))
       .then (_ => interaction.reply (_), interactionFailed);
 };
 
-export const mod = (interaction: ChatInputCommandInteraction, world: World): void => {
-   switch (interaction.options.getSubcommand ()) {
-      case "log": 
-         logNote (interaction, world);
-         break;
+const { commandType, permissions, optionType } = Interaction;
+export const mod = Interaction.make ({
+   config: [{
+      name: "mod",
+      description: "Commands meant to help make modding easier",
+      type: commandType.slash,
+      default_member_permissions: permissions.kick,
+      options: [
+         {
+            type: optionType.sub_command,
+            name: "log",
+            description: "Log a note about a specific user",
+            options: [{
+               type: optionType.user,
+               name: "user",
+               description: "The user this note is about",
+               required: true
+            }, {
+               type: optionType.string,
+               name: "note",
+               description: "The note you want to save for this user",
+               required: true
+            }]
+         },
 
-      case "echo":
-         echo (interaction);
-         break;   
+         {
+            type: optionType.sub_command,
+            name: "echo",
+            description: "Play simon says with bored bot (hey, dont abuse this!)",
+            options: [{
+               type: optionType.string,
+               name: "text",
+               description: "The text that bored bot will repeat",
+               required: true
+            }]
+         },
 
-      case "lookup":
-         lookup (interaction, world);
-         break;
+         {
+            type: optionType.sub_command,
+            name: "lookup",
+            description: "Look up notes that have been saved for a user",
+            options: [{
+               type: optionType.user,
+               name: "user",
+               description: "The user to lookup",
+               required: true
+            }]
+         }
+      ]
+   }],
 
-      default:
-         throw new Error (`Unrecognized subcommand '${interaction.options.getSubcommand ()}`);
+   handle: (interaction, world) => {
+      switch (interaction.options.getSubcommand ()) {
+         case "log": 
+            logNote (interaction, world);
+            break;
+
+         case "echo":
+            echo (interaction);
+            break;   
+
+         case "lookup":
+            lookup (interaction, world);
+            break;
+
+         default:
+            throw new Error (`Unrecognized subcommand '${interaction.options.getSubcommand ()}`);
+      }
    }
-};
+});
