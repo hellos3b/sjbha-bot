@@ -13,7 +13,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "luxon": "^2.0.1",
+    "luxon": "^2.5.2",
     "material-design-icons": "^3.0.1",
     "prelude-ts": "^1.0.3",
     "svelte": "^3.49.0",
