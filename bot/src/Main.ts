@@ -18,6 +18,7 @@ import * as Legacy from "./deprecating/legacy_instance";
 import { subscribe } from "./commands/subscribe/Subscribe";
 import { throw_rps } from "./commands/throw/Throw";
 import * as Meetup from "./commands/meetup/RegisterMeetup";
+import * as Fit from "./commands/fit/Fit";
 
 // slash commands
 import { aqi } from "./interactions/aqi";
@@ -39,6 +40,13 @@ const interactions: interaction[] = [
    tldr,
    version,
    mod
+];
+
+const legacy_message_commands = [
+   subscribe,
+   throw_rps,
+   Meetup.command,
+   Fit.command
 ];
 
 const registerSlashCommands = async() => {
@@ -89,7 +97,8 @@ const createWorld = async(): Promise<World> => {
    });
 
    hapiServer.route ([
-      ...Meetup.routes
+      ...Meetup.routes,
+      ...Fit.routes
    ]);
 
    const hapi = hapiServer
@@ -105,12 +114,6 @@ const createWorld = async(): Promise<World> => {
          hapi 
       }));
 };
-
-const legacy_message_commands = [
-   subscribe,
-   throw_rps,
-   Meetup.command
-];
 
 const handleMessage = (message: Discord.Message) => {
    const [command] = message.content.split (" ");
@@ -146,6 +149,7 @@ void async function main() {
    // legacy initialization
    Legacy.initialize (world);
    Meetup.startup (world.discord);
+   Fit.startup (world.discord);
 
    world.discord.on (Discord.Events.MessageCreate, message => { 
       if (!message.author.bot) handleMessage (message); 
