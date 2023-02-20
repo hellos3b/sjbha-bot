@@ -159,12 +159,12 @@ void async function main() {
       if (interaction.isChatInputCommand ()) handleCommandInteraction (interaction, world);
    });
 
-   const admin = await 
-   world.discord.channels
-      .fetch (env.CHANNEL_BOT_ADMIN);
+   if (env.NODE_ENV === "production") {
+      const admin = await world.discord.channels.fetch (env.CHANNEL_BOT_ADMIN);
 
-   if (admin?.isTextBased ()) {
-      admin.send (`Boredbot Online v${process.env.npm_package_version}`);
+      if (admin?.isTextBased ()) {
+         admin.send (`Boredbot Online v${process.env.npm_package_version}`);
+      }
    }
 } ();
 

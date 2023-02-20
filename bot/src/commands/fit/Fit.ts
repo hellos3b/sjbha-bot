@@ -12,6 +12,7 @@ import * as UserProfile from "./UserProfile";
 import * as ActivityWebhook from "./ActivityWebhook";
 import * as Promotions from "./Promotions";
 import * as Leaders from "./Leaders";
+import { env } from "../../environment";
 
 const { Filter } = Command;
 
@@ -32,7 +33,7 @@ const help = Format.help ({
 const fit = Command.filtered ({
    filter: Filter.and (
       Filter.startsWith ("!fit"),
-      Filter.inChannel (channels.strava)
+      Filter.inChannel (env.CHANNEL_STRAVA)
    ),
 
    callback: message =>

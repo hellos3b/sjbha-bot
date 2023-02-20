@@ -6,6 +6,7 @@ const envSchema = z.object ({
    CHANNEL_MEETUPS: z.string (),
    CHANNEL_MEETUPS_DIR: z.string (),
    CHANNEL_SHITPOST: z.string (),
+   CHANNEL_STRAVA: z.string (),
    CHANNEL_THROWDOWN: z.string (),
    CHANNEL_BOT_LOG: z.string (),
    DISCORD_TOKEN: z.string (),
