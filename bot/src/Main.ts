@@ -96,11 +96,6 @@ const createWorld = async(): Promise<World> => {
       routes: { cors: true }
    });
 
-   hapiServer.route ([
-      ...Meetup.routes,
-      ...Fit.routes
-   ]);
-
    const hapi = hapiServer
       .start ()
       .then (just (hapiServer))
@@ -145,6 +140,11 @@ void async function main() {
 
    registerSlashCommands ();
    const world = await createWorld ();
+
+   world.hapi.route ([
+      ...Meetup.routes,
+      ...Fit.routes (world.discord)
+   ]);
    
    // legacy initialization
    Legacy.initialize (world);

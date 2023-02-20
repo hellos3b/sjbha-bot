@@ -1,6 +1,5 @@
 import * as Discord from "discord.js";
 import { match, __ } from "ts-pattern";
-import { DiscordClient } from "../../app";
 import { channels } from "../../deprecating/channels";
 import * as Command from "../../deprecating/Command";
 import * as Format from "../../deprecating/Format";
@@ -15,7 +14,6 @@ import * as Promotions from "./Promotions";
 import * as Leaders from "./Leaders";
 
 const { Filter } = Command;
-const client = DiscordClient.getInstance ();
 
 // todo: Update the README guide
 // preface: 'Read this for an explanation on how the bot works with strava:\n<https://github.com/hellos3b/sjbha-bot/blob/ts-fit/src/plugins/fit/README.md>',
@@ -91,7 +89,7 @@ const admin = Command.filtered ({
 export const command = Command.combine (fit, settings, admin);
 
 // Web API
-export const routes = [
+export const routes = (client: Discord.Client) => [
    {
       method:  "GET",
       path:    "/fit/accept",

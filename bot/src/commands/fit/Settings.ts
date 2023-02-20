@@ -2,7 +2,7 @@ import { match } from "ts-pattern";
 import * as yup from "yup";
 import { Message } from "discord.js";
 
-import MultiChoice from "../../utils/MultiChoice";
+import MultiChoice from "../../deprecating/MultiChoice";
 import { MessageBuilder, inlineCode } from "../../deprecating/Format";
 
 import * as User from "./User";

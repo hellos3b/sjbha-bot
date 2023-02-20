@@ -7,6 +7,7 @@ import { channels } from "../../deprecating/channels";
 import { roles } from "../../deprecating/roles";
 import { logger } from "../../logger";
 import { MemberList } from "../../deprecating/MemberList";
+import { runWithContext } from "../../deprecating/log";
 
 import * as Workout from "./Workout";
 import * as User from "./User";
@@ -171,18 +172,18 @@ export const runPromotions = async (client: Discord.Client) : Promise<void> => {
    // 20 is just a random number that fits under the limit
    const chunkSize = 20;
 
-   const embeds : Discord.MessageEmbed[] = [];
+   const embeds : Discord.APIEmbed[] = [];
 
    for (let i = 0; i < rows.length; i += chunkSize) {
       embeds.push (
-         new Discord.MessageEmbed ({
+         new Discord.EmbedBuilder ({
             color:  0xffd700,
             footer: { text: lastWeek.toFormat ("MMM dd") },
             fields: [{
                name:  "Promotions",
                value: rows.slice (i, i + chunkSize).join ("\n")
             }]
-         })
+         }).toJSON ()
       );
    }
 
@@ -203,7 +204,7 @@ export const startSchedule = (client: Discord.Client) : void => {
       minute:    weekly_post_time.minute,
       second:    weekly_post_time.second
    }, () => { 
-      Log.runWithContext (() => {
+      runWithContext (() => {
          log.info ("Begin promoting on schedule");
          runPromotions (client); 
       });

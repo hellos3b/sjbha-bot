@@ -1,5 +1,7 @@
-# Unreleased
+# 2.2.11
 
+### 🐛 Bug Fix
+   * fit: Fix bug in promotion where discord API changed in the new version, so promotions weren't running
 ### 🏠 Internal
    * House keeping all unwanted modules into a `deprecating` folder to make clear which direction I want to go in
 

@@ -1,5 +1,5 @@
-import type * as User from './User';
-import { nanoid } from 'nanoid';
+import type * as User from "./User";
+import { nanoid } from "nanoid";
 
 type Schema__V0 = {
   discordId:    string;
@@ -15,23 +15,23 @@ type Schema__V0 = {
 export type legacy = Schema__V0;
 
 const v0 = (model: Schema__V0) : User.authorized => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { password, ...user } = model;
+   // eslint-disable-next-line @typescript-eslint/no-unused-vars
+   const { password, ...user } = model;
 
-  return {
-    ...user,
-    __version: 1,
-    authToken: nanoid (),
-    emojis:    model.gender === 'M'
-      ? 'people-default'
-      : 'people-female',
-  };
+   return {
+      ...user,
+      __version: 1,
+      authToken: nanoid (),
+      emojis:    model.gender === "M"
+         ? "people-default"
+         : "people-female",
+   };
 };
 
 export const migrate = (model: User.user | legacy) : User.user => {
-  if (!('__version' in model)) {
-    return v0 (model);
-  }
+   if (!("__version" in model)) {
+      return v0 (model);
+   }
 
-  return model;
-}
+   return model;
+};
