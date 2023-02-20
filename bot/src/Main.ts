@@ -158,5 +158,13 @@ void async function main() {
    world.discord.on (Discord.Events.InteractionCreate, interaction => {
       if (interaction.isChatInputCommand ()) handleCommandInteraction (interaction, world);
    });
+
+   const admin = await 
+   world.discord.channels
+      .fetch (env.CHANNEL_BOT_ADMIN);
+
+   if (admin?.isTextBased ()) {
+      admin.send (`Boredbot Online v${process.env.npm_package_version}`);
+   }
 } ();
 
