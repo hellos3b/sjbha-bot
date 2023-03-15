@@ -1,4 +1,4 @@
-lockfileVersion: 5.3
+lockfileVersion: 5.4
 
 specifiers:
   '@types/dotenv': ^8.2.0
@@ -7,10 +7,6 @@ specifiers:
   npm-run-all: ^4.1.5
   semver: ^7.3.7
   tsx: ^3.9.0
-  zod: ^3.19.1
-
-dependencies:
-  zod: 3.19.1
 
 devDependencies:
   '@types/dotenv': 8.2.0
@@ -883,7 +879,3 @@ packages:
   /yallist/4.0.0:
     resolution: {integrity: sha512-3wdGidZyq5PB084XLES5TpOSRA3wjXAlIWMhum2kRcv/41Sn2emQ0dycQW4uZXLejwKvg6EsvbdlVL+FYEct7A==}
     dev: true
-
-  /zod/3.19.1:
-    resolution: {integrity: sha512-LYjZsEDhCdYET9ikFu6dVPGp2YH9DegXjdJToSzD9rO6fy4qiRYFoyEYwps88OseJlPyl2NOe2iJuhEhL7IpEA==}
-    dev: false
