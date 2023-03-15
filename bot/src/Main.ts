@@ -163,7 +163,7 @@ void async function main() {
       const admin = await world.discord.channels.fetch (env.CHANNEL_BOT_ADMIN);
 
       if (admin?.isTextBased ()) {
-         admin.send (`Boredbot Online (change 1) v${process.env.npm_package_version}`);
+         admin.send (`Boredbot Online (change 2) v${process.env.npm_package_version}`);
       }
    }
 } ();
