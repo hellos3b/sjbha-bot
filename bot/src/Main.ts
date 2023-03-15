@@ -7,6 +7,8 @@ import Hapi from "@hapi/hapi";
 import { REST } from "@discordjs/rest";
 import { Routes } from "discord-api-types/v9";
 import { MongoClient } from "mongodb";
+import fs from "fs";
+import path from "path";
 
 import { env } from "./environment";
 import { type World } from "./world";
@@ -119,6 +121,7 @@ const handleMessage = (message: Discord.Message) => {
       case "!pong":
       case "!tldr":
       case "!version":
+         throw new Error("something is wrong");
          message.reply (`The ${command} command has been turned into a slash command, check it out by using /${command.slice (1)}`);
          break;
 
@@ -134,6 +137,21 @@ const handleCommandInteraction = (interaction: Discord.ChatInputCommandInteracti
 
    handlers.forEach (f => f (interaction, world));
 };
+
+// error handling
+
+const error_log_file = path.join(__dirname, "..", "error.log");
+
+process
+   .on("unhandledRejection", (reason, p) => {
+      console.log(reason, "Unhandled rejection at promise", p);
+   })
+   .on("uncaughtException", (err) => {
+      console.error(err, "uncaught exception thrown");
+      const message = (err instanceof Error && err.stack) ? err.stack : "Unknown"
+      fs.writeFileSync(error_log_file, message, "utf8");
+      process.exit(1);
+   })
 
 void async function main() {
    Settings.defaultZoneName = "America/Los_Angeles"; 
@@ -163,7 +181,17 @@ void async function main() {
       const admin = await world.discord.channels.fetch (env.CHANNEL_BOT_ADMIN);
 
       if (admin?.isTextBased ()) {
-         admin.send (`🤖 Boredbot Online`);
+         let greeting = `🤖 Boredbot Online`;
+
+         if (fs.existsSync(error_log_file)) {
+            const report = fs.readFileSync(error_log_file, "utf8");
+            fs.rmSync(error_log_file)
+            
+            greeting = `💀 Boredbot Online, recovered from a crash\n`;
+            greeting += "```\n" + report + "```";
+         }
+
+         admin.send(greeting)
       }
    }
 } ();
