@@ -6,7 +6,7 @@
     "node": ">= 16"
   },
   "scripts": {
-    "start": "node dist/bot.js",
+    "start": "NODE_ENV=production node dist/bot.js",
     "dev": "ts-node-dev ./src/main.ts",
     "build": "npx esbuild ./src/Main.ts --bundle --outfile=dist/bot.js --platform=node",
     "test": "jest",
