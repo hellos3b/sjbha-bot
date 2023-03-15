@@ -121,7 +121,6 @@ const handleMessage = (message: Discord.Message) => {
       case "!pong":
       case "!tldr":
       case "!version":
-         throw new Error("something is wrong");
          message.reply (`The ${command} command has been turned into a slash command, check it out by using /${command.slice (1)}`);
          break;
 
@@ -186,7 +185,7 @@ void async function main() {
          if (fs.existsSync(error_log_file)) {
             const report = fs.readFileSync(error_log_file, "utf8");
             fs.rmSync(error_log_file)
-            
+
             greeting = `💀 Boredbot Online, recovered from a crash\n`;
             greeting += "```\n" + report + "```";
          }
