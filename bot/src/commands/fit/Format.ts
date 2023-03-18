@@ -8,12 +8,12 @@ export const power = (watts: number) : string => Math.floor (watts).toString ();
 export const duration = (seconds: number) : string => {
    const d = Duration.fromObject ({ seconds });
   
-   if (d.as ("hours") > 1) 
-      return d.toFormat ("h'h' mm'm'");
+   if (d.as ("hours") >= 1) 
+      return d.toFormat ("hh:mm:ss");
    else if (d.as ("minutes") > 0) 
-      return d.toFormat ("m'm' ss's'");
+      return d.toFormat ("mm:ss");
    else
-      return d.toFormat ("s's'");
+      return d.toFormat ("s") + " seconds";
 };
 
 export const pace = (ms: number) : string => {

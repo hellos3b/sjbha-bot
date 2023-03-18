@@ -1,5 +1,4 @@
 import { DateTime } from "luxon";
-import { match, __ } from "ts-pattern";
 import * as DiscordJs from "discord.js";
 
 import { logger } from "../../logger";
@@ -12,7 +11,6 @@ import * as User from "./User";
 import * as Workout from "./Workout";
 import * as Week from "./Week";
 import * as Exp from "./Exp";
-import * as EmojiSet from "./EmojiSet";
 import * as Format from "./Format";
 
 const log = logger ("fit:workout-embed");
@@ -29,7 +27,7 @@ const getStravaChannel = async (client: DiscordJs.Client): Promise<DiscordJs.Tex
 // A simple way to represent moderate vs vigorous exp data
 const gained = ({ exp }: Workout.workout) => {
    const total = Exp.total (exp);
-   let str = `Gained ${Format.exp (total)} exp`;
+   let str = `gained ${Format.exp (total)} exp`;
 
    if (exp.type === "hr")
       str += `(${Format.exp (exp.moderate)}+ ${Format.exp (exp.vigorous)}++)`;
@@ -37,71 +35,93 @@ const gained = ({ exp }: Workout.workout) => {
    return str;
 };
 
-// Formats the part in the title with "just did xx"
-const justDid = (activityType: string): string => {
-   const { type } = Activity;
-   const did = {
-      [type.Ride]:     "just went for a ride",
-      [type.Run]:      "just went for a run",
-      [type.Yoga]:     "just did some yoga",
-      [type.Hike]:     "just went on a hike",
-      [type.Walk]:     "just went on a walk",
-      [type.Crossfit]: "just did crossfit",
-
-      [type.VirtualRide]:    "just went for an indoor ride",
-      [type.RockClimbing]:   "just went rock climbing",
-      [type.WeightTraining]: "just lifted some weights"
-   };
-
-   return did[activityType] ?? "just recorded a " + activityType;
+const heartstats = (activity: Activity.activity) => {
+   const hr = Activity.heartRate (activity);
+   return (hr)
+      ? `hr max ${hr.max} | avg ${hr.average} | `
+      : "";
 };
 
 // Different activities have different activity stats that are worth showing.
 // We'll figure out which ones to show here, otherwise default to heartrate stats (if available)
-const activityStats = (activity: Activity.activity): DiscordJs.EmbedField[] => {
+const activityText = (activity: Activity.activity): string => {
    const { type } = Activity;
-   const field = (name: string, value: string) =>
-      ({ name, value, inline: true });
 
-   const hr = Activity.heartRate (activity);
    const power = Activity.power (activity);
    const workoutType = Activity.workoutType (activity);
 
    // data fields
-   const elapsed = field ("Elapsed", Format.duration (activity.elapsed_time));
-   const maxHr = hr && field ("Max HR", Format.hr (hr.max));
-   const avgHr = hr && field ("Avg HR", Format.hr (hr.average));
-   const distance = (activity.distance > 0) && field ("Distance", Format.miles (activity.distance));
-   const elevation = (activity.total_elevation_gain > 0) && field ("Elevation", Format.feet (activity.total_elevation_gain));
-   const pace = field ("Pace", Format.pace (activity.average_speed));
-   const avgWatts = power && field ("Avg Watts", Format.power (power.average));
-
+   const elapsed = Format.duration (activity.elapsed_time);
+   const distance = activity.distance > 0 ? Format.miles (activity.distance) + "mi" : ""; // (activity.distance > 0) && field ("Distance", Format.miles (activity.distance));
+   const elevation = activity.total_elevation_gain > 0 ? Format.feet (activity.total_elevation_gain) + "ft" : ""; // (activity.total_elevation_gain > 0) && field ("Elevation", Format.feet (activity.total_elevation_gain));
+   const pace = Format.pace (activity.average_speed) + "/mi"; // field ("Pace", Format.pace (activity.average_speed));
+   const avgWatts = power ? Format.power (power.average) + "w" : ""; // power && field ("Avg Watts", Format.power (power.average));
    // fields customized by activity
    // falsy fields get filtered
-   const fields =
-    match (activity.type)
-       .with (type.Ride, _ =>
-          (workoutType === "workout")
-             ? [elapsed, maxHr, avgHr]
-             : [elapsed, distance ?? maxHr, avgWatts ?? elevation ?? avgHr])
+   switch (activity.type) {
+      case type.Ride:
+         if (workoutType === "workout") {
+            if (avgWatts)
+               return `did a bike workout averaging ${avgWatts} for ${elapsed}`;
+            
+            return `did a bike workout for ${elapsed}`;
+         }
 
-       .with (type.Run, _ =>
-          (workoutType === "workout")
-             ? [elapsed, maxHr, avgHr]
-             : [elapsed, distance ?? maxHr, pace ?? avgHr])
+         if (distance) {
+            const msg = `rode their bike ${distance} in ${elapsed}`;
+            if (avgWatts)
+               return msg + ` and averaged ${avgWatts}`;
+            if (elevation)
+               return msg + `, climbing ${elevation}`;
+            return msg;
+         }
 
-       .with (type.Hike, _ =>
-          [elapsed, distance ?? maxHr, elevation ?? avgHr])
+         return `rode their bike for ${elapsed}`;
 
-       .with (type.VirtualRide, _ =>
-          [elapsed, distance ?? avgHr, avgWatts ?? maxHr])
+      case type.Run:
+         if (workoutType === "workout") {
+            return `did a ${elapsed} running working`;
+         }
 
-       .with (type.Walk, _ =>
-          [elapsed, distance, avgHr])
+         if (distance && pace)
+            return `ran ${distance} in ${elapsed} (avg pace ${pace})`;
+         if (distance)
+            return `ran ${distance} in ${elapsed}`;
 
-       .otherwise (() => [elapsed, avgHr, maxHr]);
+         return `ran for ${elapsed}`;
 
-   return fields.filter ((i): i is DiscordJs.EmbedField => !!i);
+      case type.Hike:
+         if (distance && elevation)
+            return `hiked ${distance} up ${elevation} in ${elapsed}`;
+         if (distance)
+            return `hiked ${distance} in ${elapsed}`;
+
+         return `hiked for ${elapsed}`;
+
+      case type.VirtualRide:
+         return `did a virtual ride for ${elapsed}`;
+         
+      case type.Walk:
+         if (distance)
+            return `walked ${distance} in ${elapsed}`;
+
+         return `walked for ${elapsed}`;
+
+      case type.WeightTraining:
+         return `lifted weights for ${elapsed}`;
+
+      case type.Yoga:
+         return `did yoga for ${elapsed}`;
+
+      case type.Crossfit:
+         return `did crossfit for ${elapsed}`;
+
+      case type.RockClimbing:
+         return `went rock climbing for ${elapsed}`;
+
+      default:
+         return `worked out for ${elapsed}`;
+   }
 };
 
 export const expSoFar = (workout: Workout.workout, workouts: Workout.workout[]): number => {
@@ -190,17 +210,13 @@ export const post = async (
    const content = {
       embeds: [new DiscordJs.EmbedBuilder ({
          color:       member.displayColor,
-         title:       activity.name,
-         description: activity.description,
-         fields:      activityStats (activity),
-         author:      {
-            name: `${EmojiSet.get (activity.type, workout.exp, user.emojis)} ${member.displayName} ${justDid (activity.type)}`
-         },
-         thumbnail: {
-            url: member?.user?.displayAvatarURL () ?? defaultAvatar
+         author: {
+            icon_url: member?.user?.displayAvatarURL () ?? defaultAvatar,
+            name: `${member.displayName} ${activityText (activity)}`
+            // `${EmojiSet.get (activity.type, workout.exp, user.emojis)} ${member.displayName} ${justDid (activity.type)}`
          },
          footer: {
-            text: gained (workout) + " | " + Format.exp (expThisWeek) + " exp this week"
+            text: heartstats (activity) + gained (workout) + " | " + Format.exp (expThisWeek) + " exp this week"
          }
       })]
    };
