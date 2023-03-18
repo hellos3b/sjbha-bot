@@ -1,5 +1,6 @@
 import Hapi from "@hapi/hapi";
 import * as Discord from "discord.js";
+import { env } from "../../environment";
 import { logger } from "../../logger";
 
 import * as WorkoutEmbed from "./WorkoutEmbed";
@@ -61,7 +62,7 @@ export const handleEvent = (client: Discord.Client) => async (req: Hapi.Request)
       return "";
    }
 
-   const delay = (params.aspect_type === "create") ? 60 * 1000 : 0;
+   const delay = (env.NODE_ENV === "production" && params.aspect_type === "create") ? 60 * 1000 : 0;
    post (client, params.owner_id, params.object_id, delay);
 
    return "Done!";

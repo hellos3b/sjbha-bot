@@ -27,18 +27,16 @@ const getStravaChannel = async (client: DiscordJs.Client): Promise<DiscordJs.Tex
 // A simple way to represent moderate vs vigorous exp data
 const gained = ({ exp }: Workout.workout) => {
    const total = Exp.total (exp);
-   let str = `gained ${Format.exp (total)} exp`;
-
    if (exp.type === "hr")
-      str += `(${Format.exp (exp.moderate)}+ ${Format.exp (exp.vigorous)}++)`;
-
-   return str;
+      return `${Format.exp (exp.moderate)}+ ${Format.exp (exp.vigorous)}++`;
+   else
+      return `${Format.exp (total)}+`;
 };
 
 const heartstats = (activity: Activity.activity) => {
    const hr = Activity.heartRate (activity);
    return (hr)
-      ? `hr max ${hr.max} | avg ${hr.average} | `
+      ? `hr ${hr.max} max ${hr.average} avg | `
       : "";
 };
 
@@ -216,7 +214,7 @@ export const post = async (
             // `${EmojiSet.get (activity.type, workout.exp, user.emojis)} ${member.displayName} ${justDid (activity.type)}`
          },
          footer: {
-            text: heartstats (activity) + gained (workout) + " | " + Format.exp (expThisWeek) + " exp this week"
+            text: heartstats (activity) + gained (workout) + " | " + Format.exp (expThisWeek) + " this week"
          }
       })]
    };
