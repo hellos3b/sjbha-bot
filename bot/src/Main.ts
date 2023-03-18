@@ -28,6 +28,7 @@ import { changelog, getLogEmbed } from "./interactions/changelog";
 import { christmas } from "./interactions/christmas";
 import { define } from "./interactions/define";
 import { pong } from "./interactions/pong";
+import * as sanjose from "./interactions/reddit-sanjose";
 import { tldr } from "./interactions/tldr";
 import { version } from "./interactions/version";
 import { mod } from "./interactions/mod";
@@ -164,7 +165,8 @@ void async function main() {
 
    world.hapi.route ([
       ...Meetup.routes,
-      ...Fit.routes (world.discord)
+      ...Fit.routes (world.discord),
+      sanjose.webhook (world.discord)
    ]);
    
    // legacy initialization

@@ -15,6 +15,7 @@ const envSchema = z.object ({
    HTTP_PORT: z.string (),
    MONGO_URL: z.string (),
    NODE_ENV: z.string ().default ("development"),
+   REDDIT_SECRET: z.string (),
    SERVER_ID: z.string (),
    STRAVA_CLIENT_ID: z.string ().optional (),
    STRAVA_CLIENT_SECRET: z.string ().optional (),
