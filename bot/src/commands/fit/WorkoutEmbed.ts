@@ -50,21 +50,18 @@ const activityText = (activity: Activity.activity): string => {
 
    // data fields
    const elapsed = Format.duration (activity.elapsed_time);
-   const distance = activity.distance > 0 ? Format.miles (activity.distance) + "mi" : ""; // (activity.distance > 0) && field ("Distance", Format.miles (activity.distance));
-   const elevation = activity.total_elevation_gain > 0 ? Format.feet (activity.total_elevation_gain) + "ft" : ""; // (activity.total_elevation_gain > 0) && field ("Elevation", Format.feet (activity.total_elevation_gain));
-   const pace = Format.pace (activity.average_speed) + "/mi"; // field ("Pace", Format.pace (activity.average_speed));
-   const avgWatts = power ? Format.power (power.average) + "w" : ""; // power && field ("Avg Watts", Format.power (power.average));
-   // fields customized by activity
-   // falsy fields get filtered
+   const distance = activity.distance > 0 ? Format.miles (activity.distance) : ""; 
+   const elevation = activity.total_elevation_gain > 0 ? Format.feet (activity.total_elevation_gain) : "";
+   const pace = Format.pace (activity.average_speed) + "/mi"; 
+   const avgWatts = power ? Format.power (power.average) : "";
+
    switch (activity.type) {
       case type.Ride:
          if (workoutType === "workout") {
             if (avgWatts)
                return `did a bike workout averaging ${avgWatts} for ${elapsed}`;
-            
             return `did a bike workout for ${elapsed}`;
          }
-
          if (distance) {
             const msg = `rode their bike ${distance} in ${elapsed}`;
             if (avgWatts)
@@ -73,19 +70,16 @@ const activityText = (activity: Activity.activity): string => {
                return msg + `, climbing ${elevation}`;
             return msg;
          }
-
          return `rode their bike for ${elapsed}`;
 
       case type.Run:
          if (workoutType === "workout") {
             return `did a ${elapsed} running working`;
          }
-
          if (distance && pace)
             return `ran ${distance} in ${elapsed} (avg pace ${pace})`;
          if (distance)
             return `ran ${distance} in ${elapsed}`;
-
          return `ran for ${elapsed}`;
 
       case type.Hike:
@@ -93,17 +87,15 @@ const activityText = (activity: Activity.activity): string => {
             return `hiked ${distance} up ${elevation} in ${elapsed}`;
          if (distance)
             return `hiked ${distance} in ${elapsed}`;
-
          return `hiked for ${elapsed}`;
 
       case type.VirtualRide:
          return `did a virtual ride for ${elapsed}`;
          
       case type.Walk:
-         if (distance)
-            return `walked ${distance} in ${elapsed}`;
-
-         return `walked for ${elapsed}`;
+         return (distance)
+            ? `walked ${distance} in ${elapsed}`
+            : `walked for ${elapsed}`;
 
       case type.WeightTraining:
          return `lifted weights for ${elapsed}`;

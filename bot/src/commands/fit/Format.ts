@@ -3,7 +3,7 @@ import { Duration } from "luxon";
 export const hr = (bpm: number) : string => Math.floor (bpm).toString ();
 export const miles = (meters: number) : string => (meters * 0.000621371192).toFixed (2) + "mi";
 export const feet = (meters: number) : string => (meters * 3.2808399).toFixed (0) + "ft";
-export const power = (watts: number) : string => Math.floor (watts).toString ();
+export const power = (watts: number) : string => Math.floor (watts).toString () + "w";
   
 export const duration = (seconds: number) : string => {
    const d = Duration.fromObject ({ seconds });
