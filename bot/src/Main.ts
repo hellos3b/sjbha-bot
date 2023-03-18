@@ -24,6 +24,7 @@ import * as Fit from "./commands/fit/Fit";
 
 // slash commands
 import { aqi } from "./interactions/aqi";
+import { changelog, getLogEmbed } from "./interactions/changelog";
 import { christmas } from "./interactions/christmas";
 import { define } from "./interactions/define";
 import { pong } from "./interactions/pong";
@@ -36,6 +37,7 @@ const log = logger ("main");
 
 const interactions: interaction[] = [
    aqi,
+   changelog,
    christmas,
    define,
    pong,
@@ -139,18 +141,20 @@ const handleCommandInteraction = (interaction: Discord.ChatInputCommandInteracti
 
 // error handling
 
-const error_log_file = path.join(__dirname, "..", "error.log");
+const error_log_file = path.join (__dirname, "..", "error.log");
 
 process
-   .on("unhandledRejection", (reason, p) => {
-      console.log(reason, "Unhandled rejection at promise", p);
+   .on ("unhandledRejection", (reason, p) => {
+      // eslint-disable-next-line no-console
+      console.log (reason, "Unhandled rejection at promise", p);
    })
-   .on("uncaughtException", (err) => {
-      console.error(err, "uncaught exception thrown");
-      const message = (err instanceof Error && err.stack) ? err.stack : "Unknown"
-      fs.writeFileSync(error_log_file, message, "utf8");
-      process.exit(1);
-   })
+   .on ("uncaughtException", (err) => {
+      // eslint-disable-next-line no-console
+      console.error (err, "uncaught exception thrown");
+      const message = (err instanceof Error && err.stack) ? err.stack : "Unknown";
+      fs.writeFileSync (error_log_file, message, "utf8");
+      process.exit (1);
+   });
 
 void async function main() {
    Settings.defaultZoneName = "America/Los_Angeles"; 
@@ -180,18 +184,14 @@ void async function main() {
       const admin = await world.discord.channels.fetch (env.CHANNEL_BOT_ADMIN);
 
       if (admin?.isTextBased ()) {
-         let greeting = `🤖 Boredbot Online`;
+         const changelog = await getLogEmbed ();
 
-         if (fs.existsSync(error_log_file)) {
-            const report = fs.readFileSync(error_log_file, "utf8");
-            fs.rmSync(error_log_file)
-
-            greeting = `💀 Boredbot Online, recovered from a crash\n`;
-            greeting += "```\n" + report + "```";
-         }
-
-         admin.send(greeting)
+         admin.send ({
+            content: "<:bankbot:613855784996044826> Boredbot Online",
+            embeds: [changelog]
+         });
       }
    }
+
 } ();
 
