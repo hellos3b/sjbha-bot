@@ -62,7 +62,7 @@ export const handleEvent = (client: Discord.Client) => async (req: Hapi.Request)
    }
 
    const delay = (params.aspect_type === "create") ? 60 * 1000 : 0;
-   post (client, params.owner_id, params.object_id, 0);
+   post (client, params.owner_id, params.object_id, delay);
 
    return "Done!";
 };
