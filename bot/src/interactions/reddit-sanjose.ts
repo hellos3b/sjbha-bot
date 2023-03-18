@@ -20,7 +20,7 @@ const render = (s: schema): D.MessageOptions => ({
       color: 0xff4500,
       author: {
          icon_url: reddit_icon,
-         name: s.author,
+         name: s.title,
          url: s.url
       }
    }]
