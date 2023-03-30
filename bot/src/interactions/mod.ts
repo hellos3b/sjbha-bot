@@ -1,5 +1,5 @@
 import { formatDistance } from "date-fns";
-import { ChatInputCommandInteraction, InteractionReplyOptions, MessageOptions } from "discord.js";
+import { ChatInputCommandInteraction, InteractionReplyOptions, MessageReplyOptions } from "discord.js";
 import * as Interaction from "../interaction";
 import { interactionFailed } from "../errors";
 import { assertDefined } from "../prelude";
@@ -38,7 +38,7 @@ interface noteAnnouncementProps {
    note: string;
 }
 
-const makeNoteSavedAnnouncement = ({ userId, note, modname }: noteAnnouncementProps): MessageOptions => ({
+const makeNoteSavedAnnouncement = ({ userId, note, modname }: noteAnnouncementProps): MessageReplyOptions => ({
    embeds: [{
       title: `📝 ${modname} logged a note`,
       fields: [
@@ -53,7 +53,9 @@ const echo = (interaction: ChatInputCommandInteraction) => {
    assertDefined (text, "'text' is a required option");
    
    interaction.reply ({ content: "sending echo 🤫", ephemeral: true })
-      .then (_ => interaction.channel?.send ({ content: text }))
+      .then (async _ => {
+         await interaction.channel?.send ({ content: text });
+      })
       .catch (interactionFailed);
 };
 

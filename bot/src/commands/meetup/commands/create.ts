@@ -26,18 +26,18 @@ export async function create (message: Message) : Promise<void> {
    if (message.channel.type !== ChannelType.GuildText)
       return;
 
-   const messageOptions = (() : unknown | undefined => {
+   const MessageReplyOptions = (() : unknown | undefined => {
       try { return YAML.parse (inputText); }
       catch (e) { return undefined; }
    }) ();
 
-   if (!messageOptions) {
+   if (!MessageReplyOptions) {
       log.debug ("Meetup options are malformed");
       message.channel.send (`${mention} - Hm the meetup options are in an invalid format. Make sure you're copy and pasting the whole command correctly.`);
       return;
    }
 
-   const options = parse (messageOptions);
+   const options = parse (MessageReplyOptions);
   
    if (options.failed) {
       log.debug ("Unable to parse meetup options", { reason: options.message });

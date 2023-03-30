@@ -37,16 +37,16 @@ const getDirectoryChannel = async (client: Discord.Client) => {
    return channel;
 };
 
-const postOrEdit = async (client: Discord.Client, messageOptions: Discord.MessageOptions, messageId?: string) => {
+const postOrEdit = async (client: Discord.Client, MessageReplyOptions: Discord.MessageReplyOptions, messageId?: string) => {
    const channel = await getDirectoryChannel (client);
 
    if (messageId) {
       const message = await channel.messages.fetch (messageId);
-      await message.edit (messageOptions as Discord.MessageEditOptions);
+      await message.edit (MessageReplyOptions as Discord.MessageEditOptions);
       return messageId;
    }
    else {
-      const message = await channel.send (messageOptions);
+      const message = await channel.send (MessageReplyOptions);
       return message.id;
    }
 };

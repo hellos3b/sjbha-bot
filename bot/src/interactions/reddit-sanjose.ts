@@ -15,7 +15,7 @@ const reqSchema = z.object ({
 
 type schema = z.infer<typeof reqSchema>
 
-const render = (s: schema): D.MessageOptions => ({
+const render = (s: schema): D.MessageReplyOptions => ({
    embeds: [{
       color: 0xff4500,
       author: {

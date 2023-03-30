@@ -217,7 +217,8 @@ export const post = async (
       // This lets people fix the title / activity type even after the workout has been posted
       const channel = await getStravaChannel (client);
       const message = (previouslyRecorded?.message_id)
-         ? await channel.messages.fetch (previouslyRecorded.message_id).then (msg => msg.edit (content))
+         ? await channel.messages.fetch (previouslyRecorded.message_id)
+            .then ((msg) => msg.edit (content) as Promise<DiscordJs.Message<never>>)
          : await channel.send (content);
 
       await Workout.save ({

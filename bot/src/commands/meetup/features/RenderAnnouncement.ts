@@ -4,7 +4,7 @@ import {
    ButtonBuilder, 
    ButtonStyle, 
    EmbedBuilder, 
-   MessageOptions, 
+   MessageReplyOptions, 
    Client, 
    MessageEditOptions 
 } from "discord.js";
@@ -138,7 +138,7 @@ function Announcement(meetup: db.Meetup, rsvps?: string[], maybes?: string[]): E
 
 
 export const render = async (client: Client, meetup: db.Meetup): Promise<Message> => {
-   const announcement = await (async (): Promise<MessageOptions> => {
+   const announcement = await (async (): Promise<MessageReplyOptions> => {
       switch (meetup.state.type) {
          case "Live": {
             const members =
