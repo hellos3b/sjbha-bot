@@ -18,7 +18,7 @@
     "prelude-ts": "^1.0.3",
     "svelte": "^3.49.0",
     "variant": "^2.1.0",
-    "yaml": "^1.10.2"
+    "yaml": "^2.2.2"
   },
   "devDependencies": {
     "@babel/core": "^7.15.0",
