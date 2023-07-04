@@ -4,5 +4,9 @@
   },
   "editor.formatOnSave": false,
   "typescript.implementationsCodeLens.enabled": true,
-  "typescript.referencesCodeLens.enabled": true
+  "typescript.referencesCodeLens.enabled": true,
+  "[rescript]": {
+    "editor.formatOnSave": true,
+    "editor.tabSize": 2
+  }
  }

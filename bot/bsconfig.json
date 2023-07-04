@@ -1,5 +1,5 @@
 {
-  "name": "@sebby/golf",
+  "name": "sjbha-bot",
   "sources": [
     {
       "dir": "src",
@@ -16,6 +16,9 @@
   
   "suffix": ".bs.js",
   "bs-dependencies": [
-    "@ryyppy/rescript-promise"
+    "@rescript/core"
+  ],
+  "bsc-flags": [
+    "-open RescriptCore"
   ]
 }

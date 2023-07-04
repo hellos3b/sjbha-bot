@@ -33,6 +33,7 @@ import { tldr } from "./interactions/tldr";
 import { version } from "./interactions/version";
 import { mod } from "./interactions/mod";
 import { interaction } from "./interaction";
+import * as RescriptApp from "./App.bs";
 
 const log = logger ("main");
 
@@ -61,7 +62,7 @@ const registerSlashCommands = async() => {
 
    return rest.put (
       Routes.applicationGuildCommands (DISCORD_CLIENT_ID, SERVER_ID),
-      { body: interactions.flatMap (it => it.config) }
+      { body: interactions.flatMap (it => it.config).concat (RescriptApp.configs) }
    ).then (_ => { log.debug ("Slash Commands Registered"); });
 };
 
@@ -174,12 +175,17 @@ void async function main() {
    Meetup.startup (world.discord);
    Fit.startup (world.discord);
 
+
    world.discord.on (Discord.Events.MessageCreate, message => { 
       if (!message.author.bot) handleMessage (message); 
    });
 
+   const handleRescriptInteraction = RescriptApp.init (world.mongodb);
    world.discord.on (Discord.Events.InteractionCreate, interaction => {
-      if (interaction.isChatInputCommand ()) handleCommandInteraction (interaction, world);
+      handleRescriptInteraction (interaction);
+      if (interaction.isChatInputCommand ()) {
+         handleCommandInteraction (interaction, world);
+      }
    });
 
    if (env.NODE_ENV === "production") {
