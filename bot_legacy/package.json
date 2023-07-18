@@ -24,7 +24,7 @@
     "lodash": "^4.17.19",
     "moment": "^2.22.0",
     "moment-timezone": "^0.5.26",
-    "mongoose": "^5.7.5",
+    "mongoose": "^5.13.20",
     "mustache": "^2.3.0",
     "node-cron": "^1.2.1",
     "node-fetch": "^2.6.1",
