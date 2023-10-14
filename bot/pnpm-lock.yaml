@@ -99,8 +99,8 @@ dependencies:
     specifier: ^0.32.9
     version: 0.32.11
   zod:
-    specifier: ^3.19.1
-    version: 3.19.1
+    specifier: ^3.22.3
+    version: 3.22.3
 
 devDependencies:
   '@types/hapi__hapi':
@@ -4006,6 +4006,7 @@ packages:
 
   /memory-pager@1.5.0:
     resolution: {integrity: sha512-ZS4Bp4r/Zoeq6+NLJpP+0Zzm0pR8whtGPf1XExKLJBAczGMnSi3It14OiNCStjQjM6NU1okjQGSxgEZN8eBYKg==}
+    requiresBuild: true
     optional: true
 
   /memorystream@0.3.1:
@@ -4830,6 +4831,7 @@ packages:
 
   /sparse-bitfield@3.0.3:
     resolution: {integrity: sha1-/0rm5oZWBWuks+eSqzM004JzyhE=}
+    requiresBuild: true
     dependencies:
       memory-pager: 1.5.0
     optional: true
@@ -5637,6 +5639,6 @@ packages:
       toposort: 2.0.2
     dev: false
 
-  /zod@3.19.1:
-    resolution: {integrity: sha512-LYjZsEDhCdYET9ikFu6dVPGp2YH9DegXjdJToSzD9rO6fy4qiRYFoyEYwps88OseJlPyl2NOe2iJuhEhL7IpEA==}
+  /zod@3.22.3:
+    resolution: {integrity: sha512-EjIevzuJRiRPbVH4mGc8nApb/lVLKVpmUhAaR5R5doKGfAnGJ6Gr3CViAVjP+4FWSxCsybeWQdcgCtbX+7oZug==}
     dev: false
