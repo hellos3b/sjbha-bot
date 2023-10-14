@@ -12,6 +12,7 @@ import * as UserProfile from "./UserProfile";
 import * as ActivityWebhook from "./ActivityWebhook";
 import * as Promotions from "./Promotions";
 import * as Leaders from "./Leaders";
+import * as LastActive from "./LastActive";
 import { env } from "../../environment";
 
 const { Filter } = Command;
@@ -111,5 +112,6 @@ export const routes = (client: Discord.Client) => [
 ];
 
 export const startup = (client: Discord.Client) : void => {
+   LastActive.beginFlush (client);
    Promotions.startSchedule (client);
 };

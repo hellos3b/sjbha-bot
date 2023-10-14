@@ -25,6 +25,7 @@ export type authorized = {
   maxRecordedHR?: number;
   xp:           number;
   fitScore:     number;
+  lastActive?:  string;
 }
 
 export type user = 

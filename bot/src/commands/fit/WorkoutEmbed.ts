@@ -12,6 +12,7 @@ import * as Workout from "./Workout";
 import * as Week from "./Week";
 import * as Exp from "./Exp";
 import * as Format from "./Format";
+import { isAfter, subDays } from "date-fns";
 
 const log = logger ("fit:workout-embed");
 const defaultAvatar = "https://discordapp.com/assets/322c936a8c8be1b803cd94861bdfa868.png";
@@ -123,6 +124,17 @@ export const expSoFar = (workout: Workout.workout, workouts: Workout.workout[]):
    return Exp.sum (previousExp) + Exp.total (workout.exp);
 };
 
+// We won't post workouts from users who have gone inactive.
+const inactive = (user: User.authorized) => {
+   // starting this, we'll filter out feedback after x days
+   const featStart = new Date("2023-10-21T00:04:53.555Z");
+   if (!isAfter(new Date(), featStart)) return false;
+
+   const lastActive = new Date(user.lastActive || 0);
+   const limit = subDays(new Date(), 14);
+   return isAfter(lastActive, limit);
+}
+
 // When a new workout gets recorded we post it to the #strava channel with these steps:
 //
 // 1. Calculate the amount of EXP gained from the activity
@@ -141,6 +153,11 @@ export const post = async (
    if (!User.isAuthorized (user)) {
       log.debug ("User is not authorized with the bot", { stravaId });
       return new Error ("Could not post workout: User is not authorized (strava ID: " + stravaId + ")");
+   }
+
+   if (inactive(user)) {
+      log.debug("User has not posted in a while", { lastActive: user.lastActive });
+      return new Error ("User has not posted recently");
    }
 
    const member = await Guild.member (user.discordId, client);
