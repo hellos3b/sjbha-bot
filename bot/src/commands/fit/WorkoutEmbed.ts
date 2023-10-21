@@ -126,14 +126,10 @@ export const expSoFar = (workout: Workout.workout, workouts: Workout.workout[]):
 
 // We won't post workouts from users who have gone inactive.
 const inactive = (user: User.authorized) => {
-   // starting this, we'll filter out feedback after x days
-   const featStart = new Date("2023-10-21T00:04:53.555Z");
-   if (!isAfter(new Date(), featStart)) return false;
-
-   const lastActive = new Date(user.lastActive || 0);
-   const limit = subDays(new Date(), 14);
-   return isAfter(lastActive, limit);
-}
+   const lastActive = new Date (user.lastActive || 0);
+   const limit = subDays (new Date (), 14);
+   return isAfter (lastActive, limit);
+};
 
 // When a new workout gets recorded we post it to the #strava channel with these steps:
 //
@@ -155,10 +151,11 @@ export const post = async (
       return new Error ("Could not post workout: User is not authorized (strava ID: " + stravaId + ")");
    }
 
-   if (inactive(user)) {
-      log.debug("User has not posted in a while", { lastActive: user.lastActive });
-      return new Error ("User has not posted recently");
-   }
+   // todo: enable after a week or so
+   // if (inactive (user)) {
+   //    log.debug ("User has not posted in a while", { lastActive: user.lastActive });
+   //    return new Error ("User has not posted recently");
+   // }
 
    const member = await Guild.member (user.discordId, client);
    if (!member) {
