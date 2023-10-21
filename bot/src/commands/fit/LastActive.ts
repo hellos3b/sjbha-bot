@@ -5,7 +5,7 @@ import * as User from "./User";
 const activity = new Map<string, string> ();
 
 export const updateActivity = (msg: Message): void => {
-   activity.set (msg.author.id, Date.toString ());
+   activity.set (msg.author.id, new Date ().toString ());
 };
 
 const flush = async () => {
