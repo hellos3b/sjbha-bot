@@ -152,10 +152,10 @@ export const post = async (
    }
 
    // todo: enable after a week or so
-   // if (inactive (user)) {
-   //    log.debug ("User has not posted in a while", { lastActive: user.lastActive });
-   //    return new Error ("User has not posted recently");
-   // }
+   if (inactive (user)) {
+      log.debug ("User has not posted in a while", { lastActive: user.lastActive });
+      return new Error ("User has not posted recently");
+   }
 
    const member = await Guild.member (user.discordId, client);
    if (!member) {
