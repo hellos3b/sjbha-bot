@@ -46,7 +46,7 @@ export interface interactionConfig {
 }
 
 export interface interaction {
-   config: interactionConfig | interactionConfig[],
+   config: interactionConfig[],
    handle: (interaction: Discord.ChatInputCommandInteraction, world: World) => unknown;
 }
 

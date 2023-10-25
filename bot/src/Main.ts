@@ -27,8 +27,7 @@ import { aqi } from "./interactions/aqi";
 import { changelog, getLogEmbed } from "./interactions/changelog";
 import { christmas } from "./interactions/christmas";
 import { define } from "./interactions/define";
-// import { pong } from "./interactions/pong";
-import * as Pong from "./interactions/Pong.bs";
+import { pong } from "./interactions/pong";
 import * as sanjose from "./interactions/reddit-sanjose";
 import { tldr } from "./interactions/tldr";
 import { version } from "./interactions/version";
@@ -36,6 +35,35 @@ import { mod } from "./interactions/mod";
 import { interaction } from "./interaction";
 
 const log = logger ("main");
+
+const interactions: interaction[] = [
+   aqi,
+   changelog,
+   christmas,
+   define,
+   pong,
+   tldr,
+   version,
+   mod
+];
+
+const legacy_message_commands = [
+   subscribe,
+   throw_rps,
+   Meetup.command,
+   Fit.command
+];
+
+const registerSlashCommands = async() => {
+   const { DISCORD_TOKEN, DISCORD_CLIENT_ID, SERVER_ID } = env;
+
+   const rest = new REST ({ version: "9" }).setToken (DISCORD_TOKEN);
+
+   return rest.put (
+      Routes.applicationGuildCommands (DISCORD_CLIENT_ID, SERVER_ID),
+      { body: interactions.flatMap (it => it.config) }
+   ).then (_ => { log.debug ("Slash Commands Registered"); });
+};
 
 const makeDiscordClient = () => new Discord.Client ({
    intents: [
@@ -53,51 +81,38 @@ const makeDiscordClient = () => new Discord.Client ({
    ]
 });
 
-const createMongoClient = () => 
-   MongoClient
-      .connect (env.MONGO_URL, { useUnifiedTopology: true })
-      .then (tap (_ => { log.info ("MongoDB is connected"); }))
-      .then (m => m.db ());
-
-const createDiscordClient = () => 
-   new Promise<Discord.Client> ((resolve, reject) => {
-      const token = env.DISCORD_TOKEN;
-      const client = makeDiscordClient ();
-      
+const createWorld = async(): Promise<World> => {
+   const token = env.DISCORD_TOKEN;
+   const client = makeDiscordClient ();
+   const discord = new Promise<Discord.Client> ((resolve, reject) => {
       client.on ("ready", () => resolve (client));
       client.login (token)
          .then (tap (_ => { log.info ("Logged in", { tag: client.user?.tag, version: process.env.npm_package_version ?? "" }); }))
          .catch (reject);
    });
 
-const createHapiServer = async () => {
+   const mongodb = MongoClient
+      .connect (env.MONGO_URL, { useUnifiedTopology: true })
+      .then (tap (_ => { log.info ("MongoDB is connected"); }));
+
    const hapiServer = Hapi.server ({
       port:   env.HTTP_PORT,
       host:   "0.0.0.0",
       routes: { cors: true }
    });
 
-   await hapiServer
+   const hapi = hapiServer
       .start ()
+      .then (just (hapiServer))
       .then (tap (_ => { log.info ("Hapi has started", { port: env.HTTP_PORT }); })); 
 
-   return hapiServer;
-};
-
-const legacy_message_commands = [
-   subscribe,
-   throw_rps,
-   Meetup.command,
-   Fit.command
-];
-
-const registerSlashCommands = async(interactions: interaction[]) => {
-   const { DISCORD_TOKEN, DISCORD_CLIENT_ID, SERVER_ID } = env;
-   const rest = new REST ({ version: "9" }).setToken (DISCORD_TOKEN);
-   return rest.put (
-      Routes.applicationGuildCommands (DISCORD_CLIENT_ID, SERVER_ID),
-      { body: interactions.flatMap (it => it.config) }
-   ).then (_ => { log.debug ("Slash Commands Registered"); });
+   return Promise
+      .all ([discord, mongodb, hapi])
+      .then (([discord, mongodb, hapi]): World => ({ 
+         discord, 
+         mongodb: mongodb.db (),
+         hapi 
+      }));
 };
 
 const handleMessage = (message: Discord.Message) => {
@@ -117,19 +132,13 @@ const handleMessage = (message: Discord.Message) => {
    }
 };
 
-const matchesCommand = (commandName: string) => (interaction: interaction) => {
-   const listeners = Array.isArray (interaction.config)
-      ? interaction.config.map (x => x.name)
-      : [interaction.config.name];
-   return listeners.some (c => c === commandName);
+const handleCommandInteraction = (interaction: Discord.ChatInputCommandInteraction, world: World) => {
+   const handlers = interactions
+      .filter (it => it.config.some (c => c.name === interaction.commandName))
+      .map (it => it.handle);
+
+   handlers.forEach (f => f (interaction, world));
 };
-   
-const handleCommandInteraction =
-   (interactions: interaction[]) =>
-      (interaction: Discord.ChatInputCommandInteraction, world: World) => 
-         interactions
-            .filter (matchesCommand (interaction.commandName))
-            .forEach (it => it.handle (interaction, world));
 
 // error handling
 
@@ -151,44 +160,30 @@ process
 void async function main() {
    Settings.defaultZoneName = "America/Los_Angeles"; 
 
-   const [discord, mongodb, hapi] = await Promise
-      .all ([createDiscordClient (), createMongoClient (), createHapiServer ()]);
+   registerSlashCommands ();
+   const world = await createWorld ();
 
-   const interactions: interaction[] = [
-      aqi,
-      changelog,
-      christmas,
-      define,
-      Pong.make (),
-      tldr,
-      version,
-      mod
-   ];
-
-   registerSlashCommands (interactions);
-
-   hapi.route ([
+   world.hapi.route ([
       ...Meetup.routes,
-      ...Fit.routes (discord),
-      sanjose.webhook (discord)
+      ...Fit.routes (world.discord),
+      sanjose.webhook (world.discord)
    ]);
    
    // legacy initialization
-   Legacy.initialize ({ discord, hapi, mongodb });
-   Meetup.startup (discord);
-   Fit.startup (discord);
+   Legacy.initialize (world);
+   Meetup.startup (world.discord);
+   Fit.startup (world.discord);
 
-   discord.on (Discord.Events.MessageCreate, message => { 
+   world.discord.on (Discord.Events.MessageCreate, message => { 
       if (!message.author.bot) handleMessage (message); 
    });
 
-   const handle = handleCommandInteraction (interactions);
-   discord.on (Discord.Events.InteractionCreate, interaction => {
-      if (interaction.isChatInputCommand ()) handle (interaction, { discord, hapi, mongodb });
+   world.discord.on (Discord.Events.InteractionCreate, interaction => {
+      if (interaction.isChatInputCommand ()) handleCommandInteraction (interaction, world);
    });
 
    if (env.NODE_ENV === "production") {
-      const admin = await discord.channels.fetch (env.CHANNEL_BOT_ADMIN);
+      const admin = await world.discord.channels.fetch (env.CHANNEL_BOT_ADMIN);
 
       if (admin?.isTextBased ()) {
          const changelog = await getLogEmbed ();
