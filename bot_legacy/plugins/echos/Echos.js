@@ -38,7 +38,7 @@ export default function(bastion, config={}) {
 
         {
             command: "boba",
-            resolve: "\:cup_with_straw: \:regional_indicator_b: \:regional_indicator_o: \:regional_indicator_b: \:regional_indicator_a: \:alarm_clock: \:regional_indicator_t: \:regional_indicator_i: \:regional_indicator_m: \:regional_indicator_e: \:confetti_ball:"
+            resolve: "\:bubble_tea: \:regional_indicator_b: \:regional_indicator_o: \:regional_indicator_b: \:regional_indicator_a: \:alarm_clock: \:regional_indicator_t: \:regional_indicator_i: \:regional_indicator_m: \:regional_indicator_e: \:confetti_ball:"
         },
 
         {
