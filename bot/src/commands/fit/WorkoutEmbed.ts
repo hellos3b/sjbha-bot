@@ -110,6 +110,15 @@ const activityText = (activity: Activity.activity): string => {
       case type.RockClimbing:
          return `went rock climbing for ${elapsed}`;
 
+      case type.Golf:
+         return `walked ${distance} while playing golf`;
+
+      case type.Swim:
+         return `swam ${distance} in ${elapsed}`;
+
+      case type.Pickleball:
+         return `played pickleball for ${elapsed}`;
+
       default:
          return `worked out for ${elapsed}`;
    }

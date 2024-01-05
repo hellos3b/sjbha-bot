@@ -60,7 +60,10 @@ export const type = {
    Crossfit:       "Crossfit",
    VirtualRide:    "VirtualRide",
    RockClimbing:   "RockClimbing",
-   WeightTraining: "WeightTraining"
+   WeightTraining: "WeightTraining",
+   Pickleball: "Pickleball",
+   Golf: "Golf",
+   Swim: "Swim"
 };
 
 export const heartRate = (a: activity) : heartRate | null =>
