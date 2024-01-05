@@ -55,7 +55,7 @@ const activityText = (activity: Activity.activity): string => {
    const elevation = activity.total_elevation_gain > 0 ? Format.feet (activity.total_elevation_gain) : "";
    const pace = Format.pace (activity.average_speed) + "/mi"; 
    const avgWatts = power ? Format.power (power.average) : "";
-
+   
    switch (activity.type) {
       case type.Ride:
          if (workoutType === "workout") {
@@ -114,14 +114,17 @@ const activityText = (activity: Activity.activity): string => {
          return `walked ${distance} while playing golf`;
 
       case type.Swim:
-         return `swam ${distance} in ${elapsed}`;
-
-      case type.Pickleball:
-         return `played pickleball for ${elapsed}`;
-
-      default:
-         return `worked out for ${elapsed}`;
+         return `swam ${distance} for ${elapsed}`;
+   
+      case type.Workout: {
+         switch (activity.sport_type) {
+            case "Pickleball":
+               return `played pickleball for ${elapsed}`;
+         }
+      }
    }
+
+   return `worked out for ${elapsed}`;
 };
 
 export const expSoFar = (workout: Workout.workout, workouts: Workout.workout[]): number => {
@@ -161,10 +164,10 @@ export const post = async (
    }
 
    // todo: enable after a week or so
-   // if (inactive (user)) {
-   //    log.debug ("User has not posted in a while", { lastActive: user.lastActive });
-   //    return new Error ("User has not posted recently");
-   // }
+   if (inactive (user)) {
+      log.debug ("User has not posted in a while", { lastActive: user.lastActive });
+      return new Error ("User has not posted recently");
+   }
 
    const member = await Guild.member (user.discordId, client);
    if (!member) {

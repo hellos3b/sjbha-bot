@@ -17,6 +17,7 @@ export type activity = {
   manual: boolean;
   private: boolean;
   visibility: "everyone" | "followers_only" | "only_me";
+  sport_type?: "Pickleball";
 
   has_heartrate: boolean;
   average_heartrate?: number;
@@ -61,7 +62,6 @@ export const type = {
    VirtualRide:    "VirtualRide",
    RockClimbing:   "RockClimbing",
    WeightTraining: "WeightTraining",
-   Pickleball: "Pickleball",
    Golf: "Golf",
    Swim: "Swim"
 };
