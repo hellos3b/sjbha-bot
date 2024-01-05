@@ -13,6 +13,7 @@ import * as Week from "./Week";
 import * as Exp from "./Exp";
 import * as Format from "./Format";
 import { isAfter, subDays } from "date-fns";
+import { last } from "ramda";
 
 const log = logger ("fit:workout-embed");
 const defaultAvatar = "https://discordapp.com/assets/322c936a8c8be1b803cd94861bdfa868.png";
@@ -140,7 +141,7 @@ export const expSoFar = (workout: Workout.workout, workouts: Workout.workout[]):
 const inactive = (user: User.authorized) => {
    const lastActive = new Date (user.lastActive || 0);
    const limit = subDays (new Date (), 14);
-   return isAfter (lastActive, limit);
+   return isAfter (limit, lastActive);
 };
 
 // When a new workout gets recorded we post it to the #strava channel with these steps:
