@@ -220,6 +220,12 @@ const isInactive = (user) => {
   return isAfter(limit, lastActive);
 };
 
+const isTooOld = (activity) => {
+  const started = new Date(activity.start_date);
+  const age = differenceInHours(new Date(), started);
+  return age > 48;
+};
+
 // -- strava api
 
 const fetchToken = (refreshToken) =>
@@ -283,13 +289,11 @@ const postWorkout = (discord, db) => async (stravaId, activityId) => {
   }
 
   const [activity, streams] = data;
-  const started = new Date(activity.start_date);
-  const age = differenceInHours(new Date(), started);
-  // if (age > 48) {
-  //   return new Error(
-  //     `Activity is too old (${age} hours). It was started ${started.toLocaleDateString()} and today is ${new Date().toLocaleDateString()}`
-  //   );
-  // }
+  if (isTooOld(activity)) {
+    return new Error(
+      `Activity is too old. It was started ${started.toLocaleDateString()} and today is ${new Date().toLocaleDateString()}`
+    );
+  }
 
   const workouts = loggedWorkoutCollection(db);
   const workout = workoutFromActivity(user, activity, streams);
