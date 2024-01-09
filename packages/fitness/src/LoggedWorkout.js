@@ -29,15 +29,14 @@ const expFromStreams = (maxHR, streams) => {
 
   if (!hrs || !ts) return null;
 
+  const min = maxHR * 0.5;
+  const max = maxHR * 0.9;
+
   let exp = 0;
   for (let i = 0; i < hrs.length; i++) {
-    const bpm = hrs[i];
+    const scale = Math.min(1, Math.max(0, (hrs[i] - min) / (max - min)));
     const t = ts[i + 1] ? (ts[i + 1] - ts[i]) / 60 : 0;
-    if (bpm >= maxHR * 0.8) exp += t * 7.5;
-    else if (bpm >= maxHR * 0.7) exp += t * 5;
-    else if (bpm >= maxHR * 0.6) exp += t * 2.5;
-    else if (bpm >= maxHR * 0.5) exp += t;
-    else exp += t * 0.5;
+    exp += t * (scale * 9 + 1);
   }
 
   return exp;
@@ -46,7 +45,7 @@ const expFromStreams = (maxHR, streams) => {
 const expFromTime = (duration) => duration / 60;
 
 const effortScore = (xp, score = 1) => {
-  const needs = score * 2.5;
+  const needs = score * 5;
   return xp > needs ? effortScore(xp - needs, score + 1) : score + xp / needs;
 };
 
@@ -286,11 +285,11 @@ const postWorkout = (discord, db) => async (stravaId, activityId) => {
   const [activity, streams] = data;
   const started = new Date(activity.start_date);
   const age = differenceInHours(new Date(), started);
-  if (age > 48) {
-    return new Error(
-      `Activity is too old (${age} hours). It was started ${started.toLocaleDateString()} and today is ${new Date().toLocaleDateString()}`
-    );
-  }
+  // if (age > 48) {
+  //   return new Error(
+  //     `Activity is too old (${age} hours). It was started ${started.toLocaleDateString()} and today is ${new Date().toLocaleDateString()}`
+  //   );
+  // }
 
   const workouts = loggedWorkoutCollection(db);
   const workout = workoutFromActivity(user, activity, streams);
