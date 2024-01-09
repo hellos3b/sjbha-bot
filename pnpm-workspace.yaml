@@ -1,0 +1,4 @@
+packages:
+  - bot
+  - bot_legacy
+  - 'packages/*'

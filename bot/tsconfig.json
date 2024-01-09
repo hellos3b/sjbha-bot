@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "strict": true,
+    "noImplicitAny": false,
     "module": "commonjs",
     "moduleResolution": "node",
     "resolveJsonModule": true,

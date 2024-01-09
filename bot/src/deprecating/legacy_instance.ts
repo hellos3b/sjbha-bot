@@ -9,5 +9,7 @@ export const initialize = (value: World) => {
    world = value;
 };
 
+export const getInstance = () => world;
+
 /** @deprecated */
 export const getCollection = <T>(name: string) => Promise.resolve (world.mongodb.collection<T> (name));

@@ -16,3 +16,4 @@ report*json
 bot/lib
 .bsb.lock
 *.bs.js
+packages/*/lib

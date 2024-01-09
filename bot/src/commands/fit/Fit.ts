@@ -9,11 +9,16 @@ import * as Settings from "./Settings";
 import * as Admin from "./Admin";
 import * as UserAuth from "./UserAuth";
 import * as UserProfile from "./UserProfile";
-import * as ActivityWebhook from "./ActivityWebhook";
+// import * as ActivityWebhook from "./ActivityWebhook";
 import * as Promotions from "./Promotions";
 import * as Leaders from "./Leaders";
 import * as LastActive from "./LastActive";
+
+// @ts-ignore
+import * as Fit2 from "@bored-bot/fitness";
+
 import { env } from "../../environment";
+import { getInstance } from "../../deprecating/legacy_instance";
 
 const { Filter } = Command;
 
@@ -46,7 +51,7 @@ const fit = Command.filtered ({
          .with ("help", () => message.channel.send (help))
          .with ("settings", () => message.reply ("Settings menu is available only in DMs"))
          .with (__.nullish, () => message.channel.send (help))
-         .run ()
+         .otherwise (() => message.reply ("Unrecognized command"))
 });
 
 const settings = Command.filtered ({
@@ -107,7 +112,7 @@ export const routes = (client: Discord.Client) => [
    {
       method:  "POST",
       path:    "/fit/api/webhook",
-      handler: ActivityWebhook.handleEvent (client)
+      handler: req => Fit2.stravaWebhookHandler (client, getInstance ().mongodb) (req)
    }
 ];
 

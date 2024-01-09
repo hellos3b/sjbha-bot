@@ -1,0 +1,1 @@
+export { stravaWebhookHandler } from "./LoggedWorkout";
