@@ -2,7 +2,9 @@
  * @typedef {Object} UnauthorizedUser
  * @prop {String} discordId
  * @prop {String} authToken
- *
+ */
+
+/**
  * @typedef {Object} User
  * @prop {String} discordId
  * @prop {String} authToken

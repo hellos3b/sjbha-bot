@@ -11,6 +11,7 @@
      "outDir": "build",
      "baseUrl": "src",
      "allowJs": true,
+     "checkJs": false,
      "paths": {
        "@sjbha/*": ["./*"]
      }
