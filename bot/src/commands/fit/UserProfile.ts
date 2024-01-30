@@ -37,41 +37,6 @@ export const render = async (message: Message) : Promise<void> => {
       { name: "Rank", value: `${rank} (${score})`, inline: true },
       { name: "Total EXP", value: Format.exp (user.xp), inline: true }
    ]);
-  
-   // All workouts in the last 30 days
-   const lastThirtyDays = Interval.before (DateTime.local (), { days: 30 });
-   const workouts = await Workout.find (Workout.during (lastThirtyDays));
-
-   // User's workouts in the last 30 days
-   const profileWorkouts = workouts.filter (w => w.discord_id === user.discordId);
-
-   // The start of the week, used for EXP promotion calculation
-   const weekStart = Week.current ().start.toUTC ();
-  
-   // Collection of workouts that apply to this week's promotion
-   const weekly = profileWorkouts.filter (w => w.timestamp >= weekStart.toISO ());
-   embed.addFields ({
-      name:   "Weekly EXP", 
-      value:  Format.exp (Workout.exp (weekly)), 
-      inline: true
-   }); 
-
-   // The user's most recently recorded workout
-   const mostRecentWorkout = option (profileWorkouts)
-      .map (list => list.sort ((a, b) => a.timestamp > b.timestamp ? -1 : 1))
-      .flatMap (list => option (list[0]));
-
-   mostRecentWorkout.map (workout => {
-      const emoji = EmojiSet.get (workout.activity_type, workout.exp, user.emojis);
-      const name = workout.activity_name;
-      const timeAgo = fromNow (workout.timestamp, { suffix: true, max: 1 });
-
-      embed.addFields ({
-         name:   "Last Activity", 
-         value:  `${emoji} ${name} • ${timeAgo}`, 
-         inline: true
-      });
-   });
 
    message.channel.send ({ embeds: [embed] });
 };

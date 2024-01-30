@@ -11,7 +11,6 @@ import * as UserAuth from "./UserAuth";
 import * as UserProfile from "./UserProfile";
 // import * as ActivityWebhook from "./ActivityWebhook";
 import * as Promotions from "./Promotions";
-import * as Leaders from "./Leaders";
 import * as LastActive from "./LastActive";
 
 // @ts-ignore
@@ -30,9 +29,7 @@ const help = Format.help ({
    usage:       "!fit <command>",
    commands:    {
       "auth":    "Set up your strava account with the bot",
-      "profile": "View your progress and stats",
-      "leaders": "View the top 2 exp earners for each activity type",
-      "balance": "Check how balanced your XP"
+      "profile": "View your progress and stats"
    }
 });
 
@@ -45,9 +42,9 @@ const fit = Command.filtered ({
    callback: message =>
       match (Command.route (message))
          .with ("auth", () => UserAuth.onBoarding (message))
-         .with ("profile", () => UserProfile.render (message))
-         .with ("balance", () => Balance.render (message))
-         .with ("leaders", () => Leaders.leaderboard (message))
+         .with ("profile", () => UserProfile.render(message))
+         .with ("balance", () => message.reply("Balance will no longer work"))
+         .with ("leaders", () => message.reply("Leaderboard is out of date with new scoring, will be updated"))
          .with ("help", () => message.channel.send (help))
          .with ("settings", () => message.reply ("Settings menu is available only in DMs"))
          .with (__.nullish, () => message.channel.send (help))
@@ -118,5 +115,4 @@ export const routes = (client: Discord.Client) => [
 
 export const startup = (client: Discord.Client) : void => {
    LastActive.beginFlush (client);
-   Promotions.startSchedule (client);
 };
