@@ -1,4 +1,4 @@
-export { stravaWebhookHandler } from "./LoggedWorkout";
+export { stravaWebhookHandler } from "./PostWorkout";
 export { schedulePost } from "./MondayRecap";
 
 import { PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
