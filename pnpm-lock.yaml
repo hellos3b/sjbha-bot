@@ -295,6 +295,9 @@ importers:
       discord.js:
         specifier: ^14.10.2
         version: 14.10.2
+      node-schedule:
+        specifier: ^2.0.0
+        version: 2.0.0
       superagent:
         specifier: ^7.1.3
         version: 7.1.3

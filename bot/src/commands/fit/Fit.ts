@@ -4,17 +4,17 @@ import { channels } from "../../deprecating/channels";
 import * as Command from "../../deprecating/Command";
 import * as Format from "../../deprecating/Format";
 
-import * as Balance from "./Balance";
 import * as Settings from "./Settings";
 import * as Admin from "./Admin";
 import * as UserAuth from "./UserAuth";
 import * as UserProfile from "./UserProfile";
-// import * as ActivityWebhook from "./ActivityWebhook";
-import * as Promotions from "./Promotions";
 import * as LastActive from "./LastActive";
 
 // @ts-ignore
-import * as Fit2 from "@bored-bot/fitness";
+import {
+   stravaWebhookHandler,
+   schedulePost
+} from "@bored-bot/fitness";
 
 import { env } from "../../environment";
 import { getInstance } from "../../deprecating/legacy_instance";
@@ -39,7 +39,7 @@ const fit = Command.filtered ({
       Filter.inChannel (env.CHANNEL_STRAVA)
    ),
 
-   callback: message =>
+   callback: message => 
       match (Command.route (message))
          .with ("auth", () => UserAuth.onBoarding (message))
          .with ("profile", () => UserProfile.render(message))
@@ -109,10 +109,11 @@ export const routes = (client: Discord.Client) => [
    {
       method:  "POST",
       path:    "/fit/api/webhook",
-      handler: req => Fit2.stravaWebhookHandler (client, getInstance ().mongodb) (req)
+      handler: req => stravaWebhookHandler (client, getInstance ().mongodb) (req)
    }
 ];
 
 export const startup = (client: Discord.Client) : void => {
    LastActive.beginFlush (client);
+   schedulePost(client, getInstance().mongodb);
 };

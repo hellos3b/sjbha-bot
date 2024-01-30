@@ -21,6 +21,7 @@ import { subscribe } from "./commands/subscribe/Subscribe";
 import { throw_rps } from "./commands/throw/Throw";
 import * as Meetup from "./commands/meetup/RegisterMeetup";
 import * as Fit from "./commands/fit/Fit";
+import { fitSlashConfig, fitInteractionHandler } from "@bored-bot/fitness";
 
 // slash commands
 import { aqi } from "./interactions/aqi";
@@ -58,10 +59,15 @@ const registerSlashCommands = async() => {
    const { DISCORD_TOKEN, DISCORD_CLIENT_ID, SERVER_ID } = env;
 
    const rest = new REST ({ version: "9" }).setToken (DISCORD_TOKEN);
+   
+   const interactionConfigs = [
+      fitSlashConfig.toJSON()
+   ]   
 
    return rest.put (
       Routes.applicationGuildCommands (DISCORD_CLIENT_ID, SERVER_ID),
-      { body: interactions.flatMap (it => it.config) }
+      // @ts-ignore
+      { body: interactions.flatMap (it => it.config).concat(interactionConfigs) }
    ).then (_ => { log.debug ("Slash Commands Registered"); });
 };
 
@@ -135,7 +141,8 @@ const handleMessage = (message: Discord.Message) => {
 const handleCommandInteraction = (interaction: Discord.ChatInputCommandInteraction, world: World) => {
    const handlers = interactions
       .filter (it => it.config.some (c => c.name === interaction.commandName))
-      .map (it => it.handle);
+      .map (it => it.handle)
+      .concat([fitInteractionHandler (world.mongodb)]);
 
    handlers.forEach (f => f (interaction, world));
 };

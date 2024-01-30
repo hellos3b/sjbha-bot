@@ -9,6 +9,7 @@ import {
 
 import { userCollection } from "./User";
 import { loggedWorkoutCollection } from "./LoggedWorkout";
+import { effortScore } from "./EffortScore";
 
 const log = console.log.bind(console, "[fit/PostWorkout]");
 
@@ -35,11 +36,6 @@ const expFromStreams = (maxHR, streams) => {
 };
 
 const expFromTime = (duration) => duration / 60;
-
-const effortScore = (xp, score = 1) => {
-   const needs = score * 5;
-   return xp > needs ? effortScore(xp - needs, score + 1) : score + xp / needs;
-};
 
 const workoutFromActivity = (user, activity, streams) => {
    const exp = user.maxHR ? expFromStreams(user.maxHR, streams) : null;
