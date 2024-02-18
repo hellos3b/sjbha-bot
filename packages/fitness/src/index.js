@@ -19,12 +19,11 @@ export const fitInteractionHandler = (db) => async (interaction) => {
       const sub = interaction.options.getSubcommand();
 
       if ("monday" === sub) {
-         interaction.deferReply();
+         interaction.deferReply({ ephemeral: true });
          const embed = await createRecap(interaction.client, db)();
          interaction.editReply({
             content: "Here is a preview of the upcoming monday recap",
             embeds: [embed],
-            ephemeral: true,
          });
       }
    }
