@@ -42,8 +42,10 @@ const workoutFromActivity = (user, activity, streams) => {
 
    return {
       discordId: user.discordId,
-      activityId: activity.id,
       insertedDate: new Date().toISOString(),
+      activityId: activity.id,
+      type: activity.type,
+      duration: activity.moving_time,
       name: activity.name,
       exp: exp ?? expFromTime(activity.moving_time),
       expFromHR: Boolean(exp),
