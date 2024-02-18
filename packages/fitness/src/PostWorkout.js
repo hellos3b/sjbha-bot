@@ -35,7 +35,7 @@ const expFromStreams = (maxHR, streams) => {
    return exp;
 };
 
-const expFromTime = (duration) => duration / 60;
+const expFromTime = (duration) => (duration / 60) * 3;
 
 const workoutFromActivity = (user, activity, streams) => {
    const exp = user.maxHR ? expFromStreams(user.maxHR, streams) : null;
