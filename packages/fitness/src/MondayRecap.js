@@ -1,4 +1,4 @@
-import { startOfWeek } from "date-fns";
+import { startOfWeek, subDays } from "date-fns";
 import { EmbedBuilder } from "discord.js";
 import schedule from "node-schedule";
 import { loggedWorkoutCollection } from "./LoggedWorkout";
@@ -13,10 +13,16 @@ const notNull = (x) => !!x;
  */
 export const createRecap = (discord, db) => async () => {
    const workouts = loggedWorkoutCollection(db);
-   const monday = startOfWeek(new Date(), { weekStartsOn: 1 });
+   const thisMonday = startOfWeek(new Date(), { weekStartsOn: 1 });
+   const lastMonday = subDays(thisMonday, 7);
 
    const workoutsThisWeek = await workouts
-      .find({ insertedDate: { $gt: monday.toISOString() } })
+      .find({
+         insertedDate: {
+            $gt: lastMonday.toISOString(),
+            $lt: thisMonday.toISOString(),
+         },
+      })
       .toArray();
 
    const discordIds = unique(workoutsThisWeek.map((x) => x.discordId));
