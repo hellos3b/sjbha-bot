@@ -116,7 +116,7 @@ export const createRecap = (discord, db) => async () => {
       .filter(notNull)
       .sort((a, b) => (a.score > b.score ? -1 : 1))
       .map((x) => {
-         return `**${x.username}**🔹${x.score.toFixed(1)} (${x.count}) ${streakToString(x.streak)}`;
+         return `${streakToString(x.streak) || "🔹"} ${x.username} [\`${x.score.toFixed(1)}\`]`;
       });
 
    return new EmbedBuilder({
@@ -129,7 +129,7 @@ export const createRecap = (discord, db) => async () => {
          "Here's everyone's total score from the previous week!\n\n" +
          "💦💦💦\n\n",
       fields: [
-         { name: "Top 10 🏆", value: leaderboard.slice(0, 10).join("\n") },
+         { name: "Top 10", value: leaderboard.slice(0, 10).join("\n") },
          ...(leaderboard.length > 10
             ? [{ name: "Scores", value: leaderboard.slice(10).join("\n") }]
             : []),
