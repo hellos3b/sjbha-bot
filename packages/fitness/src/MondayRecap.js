@@ -10,6 +10,16 @@ const add = (a, b) => a + b;
 const average = (nums) =>
    nums.length === 0 ? 0 : nums.reduce(add, 0) / nums.length;
 
+// calculates an average in a way that smoothens out high or low numbers
+const smoothAverage = (nums) => {
+   const sets = [];
+   for (let i = 0; i < nums.length - 2; i++) {
+      const thisSet = nums.slice(i).slice(0, 3);
+      sets.push(average(thisSet));
+   }
+   return average(sets);
+};
+
 // Returns how much a user gets per week on average.
 // returns -1 if not enough data
 const expByWeek = (workouts) =>
@@ -44,7 +54,7 @@ const getStreak = (weeklyExp, exp) => {
    if (!weeklyExp.length) return Streak.NOOB;
    if (weeklyExp.length < 3) return Streak.CONSISTENT;
 
-   const avg = average(weeklyExp);
+   const avg = smoothAverage(weeklyExp);
    if (exp < avg * 0.6) return Streak.COLD;
    if (exp > avg * 1.4) return Streak.HOT;
    return Streak.CONSISTENT;
@@ -106,6 +116,10 @@ export const createRecap = (discord, db) => async () => {
                      (x) => x.discordId === member.id,
                   ),
                );
+
+               console.log(member.user.username);
+               console.log("EXP", exp);
+               console.log(prevWeekExps);
 
                return {
                   username: member.nickname ?? member.user.username,
