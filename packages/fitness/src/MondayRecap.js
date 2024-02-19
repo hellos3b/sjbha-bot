@@ -45,8 +45,8 @@ const getStreak = (weeklyExp, exp) => {
    if (weeklyExp.length < 3) return Streak.CONSISTENT;
 
    const avg = average(weeklyExp);
-   if (exp < avg * 0.8) return Streak.COLD;
-   if (exp > avg * 1.2) return Streak.HOT;
+   if (exp < avg * 0.6) return Streak.COLD;
+   if (exp > avg * 1.4) return Streak.HOT;
    return Streak.CONSISTENT;
 };
 
