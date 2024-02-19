@@ -55,8 +55,8 @@ const getStreak = (weeklyExp, exp) => {
    if (weeklyExp.length < 3) return Streak.CONSISTENT;
 
    const avg = smoothAverage(weeklyExp);
-   if (exp < avg * 0.6) return Streak.COLD;
-   if (exp > avg * 1.4) return Streak.HOT;
+   if (exp < avg * 0.4) return Streak.COLD;
+   if (exp > avg * 1.6) return Streak.HOT;
    return Streak.CONSISTENT;
 };
 
@@ -94,6 +94,31 @@ export const createRecap = (discord, db) => async () => {
    const members = await guild.members.fetch(discordIds);
    await guild.members.fetch(discordIds);
 
+   const leaderboard = members
+      .filter((m) => workoutsThisWeek.some((x) => x.discordId === m.id))
+      .map((member) => {
+         const workouts = workoutsThisWeek.filter(
+            (x) => x.discordId === member.id,
+         );
+
+         const exp = workouts.reduce((sum, a) => sum + a.exp, 0);
+         const prevWeekExps = expByWeek(
+            workoutsBeforeThisWeek.filter((x) => x.discordId === member.id),
+         );
+
+         return {
+            username: member.nickname ?? member.user.username,
+            count: workouts.length,
+            score: effortScore(exp),
+            streak: getStreak(prevWeekExps, exp),
+         };
+      })
+      .filter(notNull)
+      .sort((a, b) => (a.score > b.score ? -1 : 1))
+      .map((x) => {
+         return `**${x.username}**🔹${x.score.toFixed(1)} (${x.count}) ${streakToString(x.streak)}`;
+      });
+
    return new EmbedBuilder({
       color: 0x4287f5,
       author: {
@@ -102,38 +127,13 @@ export const createRecap = (discord, db) => async () => {
       },
       description:
          "Here's everyone's total score from the previous week!\n\n" +
-         "💦💦💦\n\n" +
-         members
-            .filter((m) => workoutsThisWeek.some((x) => x.discordId === m.id))
-            .map((member) => {
-               const workouts = workoutsThisWeek.filter(
-                  (x) => x.discordId === member.id,
-               );
-
-               const exp = workouts.reduce((sum, a) => sum + a.exp, 0);
-               const prevWeekExps = expByWeek(
-                  workoutsBeforeThisWeek.filter(
-                     (x) => x.discordId === member.id,
-                  ),
-               );
-
-               console.log(member.user.username);
-               console.log("EXP", exp);
-               console.log(prevWeekExps);
-
-               return {
-                  username: member.nickname ?? member.user.username,
-                  count: workouts.length,
-                  score: effortScore(exp),
-                  streak: getStreak(prevWeekExps, exp),
-               };
-            })
-            .filter(notNull)
-            .sort((a, b) => (a.score > b.score ? -1 : 1))
-            .map((x) => {
-               return `**${x.username}**🔹${x.score.toFixed(1)} (${x.count}) ${streakToString(x.streak)}`;
-            })
-            .join("\n"),
+         "💦💦💦\n\n",
+      fields: [
+         { name: "Top 10 🏆", value: leaderboard.slice(0, 10).join("\n") },
+         ...(leaderboard.length > 10
+            ? [{ name: "Scores", value: leaderboard.slice(10).join("\n") }]
+            : []),
+      ],
    });
 };
 
