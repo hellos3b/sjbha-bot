@@ -69,6 +69,7 @@ const ActivityType = {
 
 const SportType = {
    PICKLEBALL: "Pickleball",
+   TRAIL_RUN: "TrailRun",
 };
 
 // workout type of user is inputed
@@ -136,6 +137,8 @@ const activityText = (activity) => {
       case ActivityType.RUN:
          if (activity.workout_type === WorkoutType.RUN_WORKOUT)
             return `did a ${elapsed} running working`;
+         else if (activity.sport_type === SportType.TRAIL_RUN)
+            return `ran ${distance} up ${elevation} in ${elapsed} (avg pace ${pace})`;
          else if (distance && pace)
             return `ran ${distance} in ${elapsed} (avg pace ${pace})`;
          else if (distance) return `ran ${distance} in ${elapsed}`;
@@ -301,8 +304,8 @@ const postWorkout = (discord, db) => async (stravaId, activityId) => {
    const channel = await discord.channels.fetch(process.env.CHANNEL_STRAVA);
    const message = existing?.messageId
       ? await channel.messages
-           .fetch(existing.messageId)
-           .then((x) => x.edit({ embeds: [embed] }))
+         .fetch(existing.messageId)
+         .then((x) => x.edit({ embeds: [embed] }))
       : await channel.send({ embeds: [embed] });
 
    await loggedWorkoutCollection(db).updateOne(
